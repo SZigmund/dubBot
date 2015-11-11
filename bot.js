@@ -1,4 +1,4 @@
-/* Mady by Doc_Z Version 1.01.0001 */
+/* Mady by Doc_Z Version 1.01.0002 */
 
 var API = {
     main : {
@@ -13,7 +13,7 @@ var API = {
             
 			//OnSongUpdate Events
 			$('.currentSong').bind("DOMSubtreeModified", API.on.ADVANCE);
-			
+			API.chatLog("Bot Version 1.01.0002 Online");
 			
   			// [...]
   		},
@@ -45,7 +45,7 @@ var API = {
 			//If "loading..." do nothing
 			if (songName == "loading...") return;
 			API.sendChat(djName + " - " + songName);
-			API.sendChat("[:thumbsup: " dubCount + " :thumbsdown: " + mehCount);
+			API.sendChat("[:thumbsup: " + dubCount + " :thumbsdown: " + mehCount);
 			//"[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"
 		}
 	}
