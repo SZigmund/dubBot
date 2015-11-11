@@ -1,4 +1,4 @@
-/* Mady by 3ijtKwijt */
+/* Mady by Doc_Z Version 1.01.0001 */
 
 var API = {
     main : {
@@ -38,10 +38,15 @@ var API = {
 			// UPDATE ON SONG UPDATE
 			//Get Current song name
 			var songName = $(".currentSong").text();
+			var djName = $(".currentDJSong").text();
+			var dubCount = $(".dubup.dub-counter").text();
+			var mehCount = $(".dubdown.dub-counter").text();
 				
 			//If "loading..." do nothing
 			if (songName == "loading...") return;
-			API.sendChat(songName);
+			API.sendChat(djName + " - " + songName);
+			API.sendChat("[:thumbsup: " dubCount + " :thumbsdown: " + mehCount);
+			//"[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"
 		}
 	}
 };
