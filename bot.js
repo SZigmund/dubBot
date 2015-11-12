@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
-var dubBot = {
+var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00012",
+  version: "Version 1.01.1.00013",
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -10,7 +10,50 @@ var dubBot = {
     currentSong: "",
     currentDj: ""
   },
-  botName: "Larry The Law"
+  botName: "Larry The Law",
+  chatHistoryList: []
+};
+var dubBot = {
+  itemProcessed: function(itemID, itemCount) {
+    return false;
+  },
+  processChat: function(liItem) {
+    try{
+      if (typeof liItem === "undefined") return;  // ignore empty items
+      console.log("processing liItem");
+      console.log("Item ID: " + liItem.id);
+      var chatItems = liItem.getElementsByTagName("p");
+      console.log("chatItems count: " + chatItems.length);
+      //todoer botVar.chatHistoryList.push(new botVar.chatHistoryList(chatID, chatCount));
+
+      /*
+      var streamItems = document.getElementsByClassName("stream-item-content");
+      console.log("streamItems count: " + streamItems.length);
+      for (var i = 0; i < streamItems.length; i++) {
+        var chatItems = streamItems[i].getElementsByTagName("p");
+        console.log("chatItems count: " + chatItems.length);
+        var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
+        console.log("User: " + username);
+        for (var j = 0; j < chatItems.length; j++) {
+          var node = chatItems[j];
+          var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
+          chatMsg = chatMsg.replace(username, "");
+          console.log("Chat: " + chatMsg);
+        }
+      }
+      */
+      } catch (err) {
+        //todoer basicBot.roomUtilities.logException("getWaitListPosition: " + err.message);
+        console.log("EVENT_NEW_CHAT: " + err.message);
+      }
+    }
+};
+var UTIL = {
+  logException: function(exceptionMessage) {
+    console.log(exceptionMessage);
+  },
+  }
+  }
 };
 var API = {
   main: {
@@ -26,7 +69,7 @@ var API = {
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
-      API.chatLog(dubBot.botName + " " + dubBot.version + " Online");
+      API.chatLog(botVar.botName + " " + botVar.version + " Online");
 
       // [...]
     },
@@ -70,23 +113,11 @@ var API = {
         //get all comments: getElementsByTagName("p");
         var LiItems = mainChat[0].getElementsByTagName("li");
         console.log("LiItems count: " + LiItems.length);
-        var streamItems = document.getElementsByClassName("stream-item-content");
-        console.log("streamItems count: " + streamItems.length);
-        for (var i = 0; i < streamItems.length; i++) {
-          var chatItems = streamItems[i].getElementsByTagName("p");
-          console.log("chatItems count: " + chatItems.length);
-          var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-          console.log("User: " + username);
-          for (var j = 0; j < chatItems.length; j++) {
-            var node = chatItems[j];
-            var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
-            chatMsg = chatMsg.replace(username, "");
-            console.log("Chat: " + chatMsg);
-          }
+        for (var i = 0; i < LiItems.length; i++) {
+          dubBot.processChat(LiItems[i]);
         }
       } catch (err) {
-        //todoer basicBot.roomUtilities.logException("getWaitListPosition: " + err.message);
-        console.log("EVENT_NEW_CHAT: " + err.message);
+        UTIL.logException("getWaitListPosition: " + err.message);
       }
     }
   }
