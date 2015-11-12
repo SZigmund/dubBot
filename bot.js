@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00014",
+  version: "Version 1.01.1.00015",
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -11,19 +11,34 @@ var botVar = {
     currentDj: ""
   },
   botName: "Larry The Law",
-  chatHistoryList: []
+  chatHistoryList: [],
+  chatHistory: function (id, count) {
+      this.chatId = id;
+      this.chatCount = count;
+  }
 };
 var dubBot = {
-  itemProcessed: function(itemID, itemCount) {
-    return false;
+  findChatItem: function(itemID) {
+    for (var i = 0; i < botVar.chatHistoryList.length; i++) {
+        if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
+            return botVar.chatHistoryList[i];
+        }
+    }
+    botVar.chatHistoryList.push(new chatHistory(itemID, 0));
+    return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
   },
   processChat: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;  // ignore empty items
-      console.log("processing liItem");
       console.log("Item ID: " + liItem.id);
+      if (liItem.id.length < 10) return;
+      var itemHistory = dubBot.findChatItem(liItem.id);
+      console.log("Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
-      console.log("chatItems count: " + chatItems.length);
+      console.log("chat Items count: " + chatItems.length);
+      if (chatItems.length <= itemHistory.chatCount) return;
+      //todoer Process any unprocessed messages:
+      itemHistory.chatCount = chatItems.length;
       //todoer botVar.chatHistoryList.push(new botVar.chatHistoryList(chatID, chatCount));
 
       /*
@@ -106,16 +121,12 @@ var API = {
       try {
         var mainChat = document.getElementsByClassName("chat-main");
         console.log("mainChat count: " + mainChat.length);
-        //get all getElementsByTagName("stream-item-content");
-        //get user: getElementsByTagName("username");
-        //get all comments: getElementsByTagName("p");
         var LiItems = mainChat[0].getElementsByTagName("li");
-        console.log("LiItems count: " + LiItems.length);
         for (var i = 0; i < LiItems.length; i++) {
           dubBot.processChat(LiItems[i]);
         }
       } catch (err) {
-        UTIL.logException("getWaitListPosition: " + err.message);
+        UTIL.logException("EVENT_NEW_CHAT: " + err.message);
       }
     }
   }
