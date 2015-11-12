@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var dubBot = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00005",
+  version: "Version 1.01.1.00006",
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -63,11 +63,11 @@ var API = {
     },
     EVENT_NEW_CHAT: function() {
       try {
-        var mainChat = document.getElementById("chat-main");
+        var mainChat = document.getElementsByClassName("chat-main");
         //get all getElementsByTagName("stream-item-content");
         //get user: getElementsByTagName("username");
         //get all comments: getElementsByTagName("p");
-        var streamItems = mainChat.getElementsByTagName("stream-item-content");
+        var streamItems = mainChat.getElementsByClassName("stream-item-content");
         console.log("streamItems count: " + streamItems.length);
         for (var i = 0; i < streamItems.length; i++) {
           var chatItems = streamItems[i].getElementsByTagName("p");
