@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00015",
+  version: "Version 1.01.1.00016",
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -17,26 +17,41 @@ var botVar = {
       this.chatCount = count;
   }
 };
-var dubBot = {
+var botChat = {
   findChatItem: function(itemID) {
-    for (var i = 0; i < botVar.chatHistoryList.length; i++) {
-        if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
-            return botVar.chatHistoryList[i];
-        }
-    }
-    botVar.chatHistoryList.push(new chatHistory(itemID, 0));
-    return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
-  },
-  processChat: function(liItem) {
     try{
-      if (typeof liItem === "undefined") return;  // ignore empty items
+      for (var i = 0; i < botVar.chatHistoryList.length; i++) {
+          if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
+              return botVar.chatHistoryList[i];
+          }
+      }
+      botVar.chatHistoryList.push(new botVar.chatHistory(itemID, 0));
+      return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
+      } catch (err) { UTIL.logException("processChatItem: " + err.message); }
+  },
+  processChatItem: function(username, chat) {
+    try{
+      colsole.log(username + ": " + chat);
+      } catch (err) { UTIL.logException("findChatItem: " + err.message); }
+  },
+  processChatItems: function(liItem) {
+    try{
+      if (typeof liItem === "undefined") return;                // ignore empty items
       console.log("Item ID: " + liItem.id);
-      if (liItem.id.length < 10) return;
-      var itemHistory = dubBot.findChatItem(liItem.id);
+      if (liItem.id.length < 10) return;                        // ignore chat without IDs
+      var itemHistory = botChat.findChatItem(liItem.id);
       console.log("Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
       console.log("chat Items count: " + chatItems.length);
-      if (chatItems.length <= itemHistory.chatCount) return;
+      if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
+      var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
+      console.log("User: " + username);
+      for (var i = chatItems.length -1; i >= itemHistory.chatCount; i--) {
+          var node = chatItems[i];
+          var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
+          chatMsg = chatMsg.replace(username, "");
+          console.log("Chat: " + chatMsg);
+      }
       //todoer Process any unprocessed messages:
       itemHistory.chatCount = chatItems.length;
       //todoer botVar.chatHistoryList.push(new botVar.chatHistoryList(chatID, chatCount));
@@ -58,14 +73,13 @@ var dubBot = {
       }
       */
       } catch (err) {
-        //todoer basicBot.roomUtilities.logException("getWaitListPosition: " + err.message);
-        console.log("EVENT_NEW_CHAT: " + err.message);
+        UTIL.logException("processChatItems: " + err.message);
       }
     }
 };
 var UTIL = {
   logException: function(exceptionMessage) {
-    console.log(exceptionMessage);
+    console.log("[EXCEPTION]: " + exceptionMessage);
   }
 };
 var API = {
@@ -120,10 +134,9 @@ var API = {
     EVENT_NEW_CHAT: function() {
       try {
         var mainChat = document.getElementsByClassName("chat-main");
-        console.log("mainChat count: " + mainChat.length);
         var LiItems = mainChat[0].getElementsByTagName("li");
         for (var i = 0; i < LiItems.length; i++) {
-          dubBot.processChat(LiItems[i]);
+          botChat.processChatItems(LiItems[i]);
         }
       } catch (err) {
         UTIL.logException("EVENT_NEW_CHAT: " + err.message);
