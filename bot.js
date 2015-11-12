@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var dubBot = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00003",
+  version: "Version 1.01.1.00004",
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -84,7 +84,7 @@ var API = {
         console.log("EVENT_NEW_CHAT: " + err.message);
       }
     }
-  };
+  }
 };
 
 if (!window.APIisRunning) {
