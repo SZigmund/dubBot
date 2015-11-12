@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var dubBot = {
         /*ZZZ: Updated Version*/
-        version: "Version 1.01.1.00001",
+        version: "Version 1.01.1.00002",
 	songStats: {
             mehCount: 0,
             dubCount: 0,
@@ -24,9 +24,8 @@ var API = {
 			
             
 			//OnSongUpdate Events
-			$('.currentSong').bind("DOMSubtreeModified", API.on.ADVANCE);
-			$('.chat-main').bind("DOMSubtreeModified", API.on.NEWCHATMAIN);
-			$('.chat-messages ps-container').bind("DOMSubtreeModified", API.on.NEWCHATX);
+			$('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
+			$('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_CHAT);
 			API.chatLog(dubBot.botName + " " + dubBot.version + " Online");
 			
   			// [...]
@@ -48,7 +47,7 @@ var API = {
 	},
 	
 	on : {
-		ADVANCE : function(){
+		EVENT_SONG_ADVANCE : function(){
 			// UPDATE ON SONG UPDATE
 			//Get Current song name
 			var songName = $(".currentSong").text();
@@ -62,11 +61,28 @@ var API = {
 			API.sendChat("[ :thumbsup: " + dubCount + " :thumbsdown: " + mehCount + " ]");
 			//"[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"
 		},
-		NEWCHATMAIN : function(){
-			API.sendChat("NEW CHAT MAIN");
-		},
-		NEWCHATX : function(){
-			API.sendChat("NEW CHATX");
+		EVENT_NEW_CHAT : function(){
+			try{
+			var mainChat = document.getElementById("chat-main");
+			// get all getElementsByTagName("stream-item-content");
+			//get user: getElementsByTagName("username");
+			//get all comments: getElementsByTagName("p");
+			var streamItems = mainChat.getElementsByTagName("stream-item-content");
+			console.log("streamItems count: " + streamItems.length);
+      for(var i = 0; i < streamItems.length; i++){
+      	var chatItems = streamItems[i].getElementsByTagName("p");
+			  console.log("chatItems count: " + chatItems.length);
+      	var chatItems = streamItems[i].active-row.text.getElementsByTagName("p");
+			  console.log("chatItems count: " + chatItems.length);
+        for(var j = 0; j < chatItems.length; j++){
+        	var username = chatItems.getElementById("demo")
+				  console.log("User: " + username);
+        }
+      }
+			}
+      catch(err) {
+        //todoer basicBot.roomUtilities.logException("getWaitListPosition: " + err.message);
+        console.log("EVENT_NEW_CHAT: " + err.message);
 		}
 	}
 };
