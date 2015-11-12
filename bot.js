@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00013",
+  version: "Version 1.01.1.00014",
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -51,8 +51,6 @@ var dubBot = {
 var UTIL = {
   logException: function(exceptionMessage) {
     console.log(exceptionMessage);
-  },
-  }
   }
 };
 var API = {
