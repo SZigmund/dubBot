@@ -1,7 +1,7 @@
-/* Written by Doc_Z */
+/* Mady by Doc_Z */
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00017",
+  version: "Version 1.01.1.00018",
   debugHighLevel: true,
   debugLowLevel: false,
   songStats: {
@@ -27,7 +27,7 @@ var botDebug = {
   }
 };
 var botChat = {
-    subChat = function (chat, obj) {
+    subChat: function (chat, obj) {
         try {
             if (typeof chat === "undefined") {
                 API.chatLog("There is a chat text missing.");
