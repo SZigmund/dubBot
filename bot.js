@@ -1,7 +1,7 @@
 /* Mady by Doc_Z */
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00018",
+  version: "Version 1.01.1.00019",
   debugHighLevel: true,
   debugLowLevel: false,
   songStats: {
@@ -52,13 +52,13 @@ var botChat = {
       }
       botVar.chatHistoryList.push(new botVar.chatHistory(itemID, 0));
       return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
-      } catch (err) { UTIL.logException("processChatItem: " + err.message); }
+      } catch (err) { UTIL.logException("findChatItem: " + err.message); }
   },
   processChatItem: function(username, chat) {
     try{
       botDebug.debugMessage(username + ": " + chat, false);
-	  AI.LarryAI(username, chat);
-      } catch (err) { UTIL.logException("findChatItem: " + err.message); }
+	  AI.larryAI(username, chat);
+      } catch (err) { UTIL.logException("processChatItem: " + err.message); }
   },
   processChatItems: function(liItem) {
     try{
@@ -135,29 +135,6 @@ var AI = {
     chatmsg = chatmsg.replace(/IAM/g, "IM");
     botDebug.debugMessage("Larry AI chatmsg: " + chatmsg, true);
 
-  /*
-  People suffocate in your mother's vomit
-  what the hell was that i can eat a bowl of alphabet soup and shit out a smarter insult than that
-  Well I could agree with you, but then we'd both be wrong.
-  I love it when someone insults me. That means I don’t have to be nice anymore.
-  Two wrongs don't make a right, take your parents as an example.
-  The last time I saw a face like yours I fed it a banana.
-  Your birth certificate is an apology letter from the condom factory.
-  Is your ass jealous of the amount of shit that just came out of your mouth?
-  You bring everyone a lot of joy, when you leave the room.
-  You must have been born on a highway because that's where most accidents happen.
-  I bet your brain feels as good as new, seeing that you never use it.
-  If laughter is the best medicine, your face must be curing the world.
-  I could eat a bowl of alphabet soup and shit out a smarter statement than that.
-  I may love to shop but I'm not buying your bullshit.
-  If you're gonna be a smartass, first you have to be smart. Otherwise you're just an ass.
-  I'd slap you, but shit stains.
-  Your family tree must be a cactus because everybody on it is a prick.
-  You shouldn't play hide and seek, no one would look for you.
-  If I were to slap you, it would be considered animal abuse!
-  You didn't fall out of the stupid tree. You were dragged through dumbass forest.
-  You're so fat, you could sell shade.
-  */
     if (chatmsg.indexOf("USUCKLARRY") > -1) fuComment = "You're still sore about the other night %%FU%% :kiss:";
     if (chatmsg.indexOf("DUCKULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("DUMBASSLARRY") > -1) fuComment = "I'd slap you, but shit stains. %%FU%%";
@@ -515,6 +492,26 @@ var CONST = {
                 "Do you kiss your mother with that mouth %%FU%%.",
                 "%%FU%%, You daydreaming again, sweetheart?",
                 "Get in the queue %%FU%%.",
+                "What the hell was that i can eat a bowl of alphabet soup and shit out a smarter insult than that %%FU%%",
+                "Well I could agree with you, but then we'd both be wrong %%FU%%.",
+                "I love it when someone insults me %%FU%%. That means I don’t have to be nice anymore.",
+                "Two wrongs don't make a right %%FU%%, take your parents as an example.",
+                "The last time I saw a face like yours %%FU%%, I fed it a banana.",
+                "%%FU%%, your birth certificate is an apology letter from the condom factory.",
+                "Is your ass jealous of the amount of shit that just came out of your mouth %%FU%%?",
+                "%%FU%%, you bring everyone lots of joy....when you leave the room.",
+                "%%FU%%, you must have been born on a highway because that's where most accidents happen.",
+                "%%FU%%, I bet your brain feels as good as new, seeing that you never use it.",
+                "If laughter is the best medicine, your face must be curing the world %%FU%%.",
+                "I could eat a bowl of alphabet soup and shit out a smarter statement than that %%FU%%.",
+                "I may love to shop but I'm not buying your bullshit %%FU%%.",
+                "If you're gonna be a smartass %%FU%%, first you have to be smart. Otherwise you're just an ass.",
+                "I'd slap you %%FU%%, but shit stains.",
+                "Your family tree must be a cactus because everybody on it is a prick %%FU%%.",
+                "%%FU%%, you shouldn't play hide and seek, no one would look for you.",
+                "%%FU%%, If I were to slap you, it would be considered animal abuse!",
+                "You didn't fall out of the stupid tree. You were dragged through dumbass forest %%FU%%.",
+                "You're so fat, you could sell shade %%FU%%.",
                 "Baby please! Manners! You gotta ask me out for dinner first %%FU%%.",
                 "%%FU%% that'll cost you 9.2 zillion dollars plus tax. In cash. Tender exact change please.",
                 "%%FU%% feeling lonely again?",
