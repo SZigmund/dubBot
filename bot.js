@@ -1,5 +1,17 @@
-/* Mady by Doc_Z Version 1.01.0002 */
-
+/* Mady by Doc_Z */
+var dubBot = {
+        /*ZZZ: Updated Version*/
+        version: "Version 1.01.1.00001",
+	songStats: {
+            mehCount: 0,
+            dubCount: 0,
+            snagCount: 0,
+            tastyCount: 0,
+            currentSong: "",
+            currentDj: ""
+        },
+        botName: "Larry The Law"
+};
 var API = {
     main : {
   		init : function(){
@@ -13,7 +25,9 @@ var API = {
             
 			//OnSongUpdate Events
 			$('.currentSong').bind("DOMSubtreeModified", API.on.ADVANCE);
-			API.chatLog("Bot Version 1.01.0002 Online");
+			$('.chat-main').bind("DOMSubtreeModified", API.on.NEWCHATMAIN);
+			$('.chat-messages ps-container').bind("DOMSubtreeModified", API.on.NEWCHATX);
+			API.chatLog(dubBot.botName + " " + dubBot.version + " Online");
 			
   			// [...]
   		},
@@ -45,8 +59,14 @@ var API = {
 			//If "loading..." do nothing
 			if (songName == "loading...") return;
 			API.sendChat(djName + " - " + songName);
-			API.sendChat("[:thumbsup: " + dubCount + " :thumbsdown: " + mehCount);
+			API.sendChat("[ :thumbsup: " + dubCount + " :thumbsdown: " + mehCount + " ]");
 			//"[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"
+		},
+		NEWCHATMAIN : function(){
+			API.sendChat("NEW CHAT MAIN");
+		},
+		NEWCHATX : function(){
+			API.sendChat("NEW CHATX");
 		}
 	}
 };
