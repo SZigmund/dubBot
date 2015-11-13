@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00033",
+  version: "Version 1.01.1.00034",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -506,7 +506,35 @@ var botChat = {
 		'gringo', 'fuder', 'foder', 'hua', 'ahue', 'modafuka', 'modafoka', 'mudafuka', 'mudafoka', 'ooooooooooooooo', 'foda'],
   curses: ['nigger', 'faggot', 'nigga', 'niqqa', 'motherfucker', 'modafocka'],
   chatMessages: null,
-  loadChat: function (chat, obj) {
+  loadChat: function (cb) {
+        if (!cb) cb = function () {
+        };
+        $.get("https://rawgit.com/SZigmund/dubBot/master/lang/langIndex.json", function (json) {
+            var link = CONST.chatMessagesLink;
+            if (json !== null && typeof json !== "undefined") {
+                langIndex = json;
+                link = langIndex[SETTINGS.settings.language.toLowerCase()];
+                $.get(link, function (json) {
+                    if (json !== null && typeof json !== "undefined") {
+                        if (typeof json === "string") json = JSON.parse(json);
+                        botChat.chatMessages = json;
+                        cb();
+                    }
+                });
+            }
+            else {
+                $.get(CONST.chatMessagesLink, function (json) {
+                    if (json !== null && typeof json !== "undefined") {
+                        if (typeof json === "string") json = JSON.parse(json);
+                        botChat.chatMessages = json;
+                        cb();
+                    }
+                });
+            }
+        });
+    },
+
+  loadChatX: function (chat, obj) {
 	$.get(CONST.chatMessagesLink, function (json) {
 		if (json !== null && typeof json !== "undefined") {
 			if (typeof json === "string") json = JSON.parse(json);
@@ -566,43 +594,6 @@ var botChat = {
 		}
 		return false;
 	},
-
-// Old loadchat
-//  loadChat: function (cb) {
-//        if (!cb) cb = function () {
-//        };
-//        $.get("https://rawgit.com/SZigmund/dubBot/master/lang/langIndex.json", function (json) {
-//            var link = CONST.chatMessagesLink;
-//            if (json !== null && typeof json !== "undefined") {
-//                langIndex = json;
-//                link = langIndex[dubBot.settings.language.toLowerCase()];
-//                if (dubBot.settings.chatLink !== CONST.chatMessagesLink) {
-//                    link = dubBot.settings.chatLink;
-//                }
-//                else {
-//                    if (typeof link === "undefined") {
-//                        link = CONST.chatMessagesLink;
-//                    }
-//                }
-//                $.get(link, function (json) {
-//                    if (json !== null && typeof json !== "undefined") {
-//                        if (typeof json === "string") json = JSON.parse(json);
-//                        botChat.chatMessages = json;
-//                        cb();
-//                    }
-//                });
-//            }
-//            else {
-//                $.get(CONST.chatMessagesLink, function (json) {
-//                    if (json !== null && typeof json !== "undefined") {
-//                        if (typeof json === "string") json = JSON.parse(json);
-//                        botChat.chatMessages = json;
-//                        cb();
-//                    }
-//                });
-//            }
-//        });
-//    },
 
     subChat: function (chat, obj) {
         try {
@@ -5453,6 +5444,3 @@ if (!window.APIisRunning) {
 } else {
   setTimeout(API.main.initbot, 1000);
 }
-// basicBot.chat -> botChat.chatMessages
-// dubBot.room. cBot.room.
-// rollCommand, 8ball, random comments, tasty comments, user stats, song stat, ban list, time limit
