@@ -2,7 +2,7 @@
 //SECTION Var: All global variables:
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00023",
+  version: "Version 1.01.1.00024",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -694,6 +694,7 @@ var AFK = {
 				}
 			}
 		}
+	}
 	}
 	catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
