@@ -2,7 +2,7 @@
 //SECTION Var: All global variables:
 var runningBot = false;
 var botVar = {
-  version: "Version 1.01.1.00027",
+  version: "Version 1.01.1.00028",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -48,6 +48,24 @@ var botVar = {
       this.chatId = id;
       this.chatCount = count;
   }
+};
+
+String.prototype.splitBetween = function (a, b) {
+	var self = this;
+	self = this.split(a);
+	for (var i = 0; i < self.length; i++) {
+		self[i] = self[i].split(b);
+	}
+	var arr = [];
+	for (var i = 0; i < self.length; i++) {
+		if (Array.isArray(self[i])) {
+			for (var j = 0; j < self[i].length; j++) {
+				arr.push(self[i][j]);
+			}
+		}
+		else arr.push(self[i]);
+	}
+	return arr;
 };
 
 //SECTION USERS: All User data
@@ -722,8 +740,8 @@ var RANDOMCOMMENTS = {
   randomInterval: null,
   settings: {
 	randomComments: true,
-	randomCommentMin: 60,
-	randomCommentMax: 180,
+	randomCommentMin: 1, 	//  60
+	randomCommentMax: 4,	// 180
 	nextRandomComment: Date.now(),
   },
   randomCommentSelect: function()  {  //Added 02/19/2015 Zig
@@ -774,6 +792,7 @@ var RANDOMCOMMENTS = {
 	  myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
 	  nextTime.setTime(nextTime.getTime() + myTimeSpan);
 	  RANDOMCOMMENTS.settings.nextRandomComment = nextTime;
+	  botDebug.debugMessage("Next Random Comment: " + nextTime, true);
 	}  
 	catch(err) {
 	  UTIL.logException("randomCommentSetTimer: " + err.message);
@@ -1398,7 +1417,8 @@ var API = {
       RANDOMCOMMENTS.randomCommentSetTimer();
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
 
-      AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
+	  //todoer AFK DJ CHECK:
+      //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
       API.chatLog(botVar.botName + " " + botVar.version + " Online");
       botVar.botStatus = true;
