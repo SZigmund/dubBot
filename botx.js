@@ -31,7 +31,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00040",
+  version: "Version 1.01.1.00041",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -103,21 +103,25 @@ String.prototype.splitBetween = function (a, b) {
 var USERS = {
   users: [],
   getLastActivity: function (user) {
-	  return user.lastActivity;
+	  //todoer
+	  //return user.lastActivity;
   },
   setUserName: function (userId, userName) {
 	var user = USERS.lookupUser(userId);
-	if (user.username !== userName) user.username = userName;
+	//todoer
+	//if (user.username !== userName) user.username = userName;
   },
   setLastActivityID: function (userId, dispMsg) {
 	var user = USERS.lookupUser(userId);
-	USERS.setLastActivity(user, dispMsg);
+	//todoer
+	//USERS.setLastActivity(user, dispMsg);
   },
   setLastActivity: function (user, dispMsg) {
-	user.lastActivity = Date.now();
-	if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
-	user.afkWarningCount = 0;
-	clearTimeout(user.afkCountdown);
+	//todoer
+	//user.lastActivity = Date.now();
+	//if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
+	//user.afkWarningCount = 0;
+	//clearTimeout(user.afkCountdown);
   },
   lookupUserName: function (name) {
 	for (var i = 0; i < USERS.users.length; i++) {
@@ -368,15 +372,21 @@ var COMMANDS = {
 	checkCommands: function (chat) {
 		try {
 			//if (!botVar.botRunning) return;
+			botDebug.debugMessage("STEP 001", true);
 			chat.message = UTIL.linkFixer(chat.message);
+			botDebug.debugMessage("STEP 002", true);
 			chat.message = chat.message.trim();
 			//todoer afk activity
 			//USERS.setLastActivityID(chat.uid, true);
 			//todoer afk activity
 			//USERS.setUserName(chat.uid, chat.un);
+			botDebug.debugMessage("STEP 003", true);
 			if (botChat.chatFilter(chat)) return void (0);
-			if (!COMMANDS.commandCheck(chat))
-				botChat.action(chat);
+			botDebug.debugMessage("STEP 004", true);
+			if (COMMANDS.commandCheck(chat)) return;
+			botDebug.debugMessage("STEP 005", true);
+			botChat.action(chat);  //user
+			botDebug.debugMessage("STEP 006", true);
 		}
 		catch(err) { UTIL.logException("checkCommands: " + err.message); }
 	},
@@ -385,6 +395,7 @@ var COMMANDS = {
 	//chat.uid chat.message chat.cid chat.un
 		try {
 			var cmd;
+		botDebug.debugMessage("STEP 201", true);
 			if (chat.message.substring(0,1) === CONST.commandLiteral) {
 				var space = chat.message.indexOf(' ');
 				if (space === -1) {
@@ -393,11 +404,13 @@ var COMMANDS = {
 				else cmd = chat.message.substring(0, space).toLowerCase();
 			}
 			else return false;
+		botDebug.debugMessage("STEP 202", true);
 			var userPerm = API.getPermission(chat.uid);
 			if (chat.message.toLowerCase() !== ".join" && chat.message.toLowerCase() !== ".leave" && (!TASTY.bopCommand(cmd))) {
 				if (userPerm === 0 && !botVar.room.usercommand) return void (0);
 				if (!botVar.room.allcommand) return void (0);
 			}
+		botDebug.debugMessage("STEP 203", true);
 			
 			//if (chat.message.toLowerCase() === '.eta' && botVar.room.etaRestriction) {
 			//	if (userPerm < 2) {
@@ -411,6 +424,7 @@ var COMMANDS = {
 			//}
 
 			var executed = false;
+		botDebug.debugMessage("STEP 204", true);
 
 			for (var comm in BOTCOMMANDS.commands) {
 				var cmdCall = BOTCOMMANDS.commands[comm].command;
@@ -426,15 +440,18 @@ var COMMANDS = {
 				}
 			}
 
+		botDebug.debugMessage("STEP 205", true);
 			if (executed && userPerm === 0) {
 				botVar.room.usercommand = false;
 				setTimeout(function () { botVar.room.usercommand = true; }, botVar.room.commandCooldown * 1000);
 			}
+		botDebug.debugMessage("STEP 206", true);
 			if (executed) {
 				if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
 				botVar.room.allcommand = false;
 				setTimeout(function () { botVar.room.allcommand = true; }, 5 * 1000);
 			}
+		botDebug.debugMessage("STEP 207", true);
 			return executed;
 		}
 		catch(err) { UTIL.logException("commandCheck: " + err.message); }
@@ -453,14 +470,20 @@ var botChat = {
 		sound: "mention"
   },
   action: function (chat) {
+		botDebug.debugMessage("STEP 101", true);
 		if (chat.type === 'message' || chat.type === 'emote')  {
+			botDebug.debugMessage("STEP 102", true);
 			USERS.setLastActivityID(chat.uid, true);
+			botDebug.debugMessage("STEP 103", true);
 		}
 		else if (chat.type !== 'log')  {
 		  botDebug.debugMessage("CHAT.TYPE: " + chat.type, true);
 		}
+		botDebug.debugMessage("STEP 104", true);
 		AI.larryAI(chat.message, chat.un);
+		botDebug.debugMessage("STEP 105", true);
 		botVar.room.roomstats.chatmessagescnt++;
+		botDebug.debugMessage("STEP 106", true);
   },
   chatcleaner: function (chat) {
 	if (!botVar.room.filterChat) return false;
