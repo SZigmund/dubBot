@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00046",
+  version: "Version 1.01.1.00047",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -2272,6 +2272,7 @@ var API = {
 	  botDebug.debugMessage("djName: " + djName.trim());
 	  return djName.trim();
 	}
+	catch(err) { UTIL.logException("currentDjName: " + err.message); }
   },
   logInfo: function(msg) {  // Log info to console
 	try {
