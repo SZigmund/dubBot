@@ -1,7 +1,8 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
+var runningBot = false;
 var botVar = {
-  version: "Version 1.01.1.00026",
+  version: "Version 1.01.1.00027",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -115,7 +116,7 @@ var COMMANDS = {
     },
 	checkCommands: function (chat) {
 		try {
-			if (!runningBot) return;
+			//if (!runningBot) return;
 			chat.message = UTIL.linkFixer(chat.message);
 			chat.message = chat.message.trim();
 			USERS.setLastActivityID(chat.uid, true);
@@ -1495,8 +1496,24 @@ var API = {
   sendChat: function(txt) {
     Dubtrack.room.chat._messageInputEl.val(txt);
     Dubtrack.room.chat.sendMessage();
+
+	//todoer Delete this after we re-enable the bot kill on room change code.
+	//if(basicBot.settings.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
+	//if (basicBot.botMuted === true) 
+	//	API.logInfo(msg);
+	//else if (runningBot) 
+	//	API.sendChat(msg);
+	//else 
+	//	API.chatLog(msg);
+	
   },
 
+  logInfo: function(msg) {  // Log info to console
+	try {
+	   console.log("INFO: " + msg);
+	}
+	catch(err) { basicBot.roomUtilities.logException("logInfo: " + err.message); }
+  },
   showPopup: function(title, message) {
     Dubtrack.helpers.displayError(title, message);
   },
@@ -2725,7 +2742,7 @@ var BOTCOMMANDS = {
                                 API.sendChat(botChat.subChat(botChat.chatMessages.usedlockskip, {name: chat.un}));
                                 basicBot.roomUtilities.booth.lockBooth();
                                 setTimeout(function (id) {
-                                    basicBot.roomUtilities.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
+                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
                                     API.moderateForceSkip();
                                     basicBot.room.skippable = false;
                                     setTimeout(function () {
@@ -2755,7 +2772,7 @@ var BOTCOMMANDS = {
                                 API.sendChat(botChat.subChat(botChat.chatMessages.usedlockskip, {name: chat.un}));
                                 basicBot.roomUtilities.booth.lockBooth();
                                 setTimeout(function (id) {
-                                    basicBot.roomUtilities.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
+                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
                                     API.moderateForceSkip();
                                     basicBot.room.skippable = false;
                                     API.sendChat(msgSend);
@@ -3099,7 +3116,7 @@ var BOTCOMMANDS = {
                             if (typeof user !== 'boolean') {
                                 AFK.resetDC(user);
                                 if (API.getDJ().id === user.id) {
-                                    basicBot.roomUtilities.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
+                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
                                     API.moderateForceSkip();
                                     setTimeout(function () {
                                         API.moderateRemoveDJ(user.id);
@@ -3187,7 +3204,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        basicBot.roomUtilities.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
+                        API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
                         API.moderateForceSkip();
                         basicBot.room.skippable = false;
                         setTimeout(function () {
@@ -3210,7 +3227,7 @@ var BOTCOMMANDS = {
                         try {
                             var dj = API.getDJ();
                             var msgSend = '@' + dj.username + ': this song has been blocked in the US. please find another version.';
-                            basicBot.roomUtilities.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Blocked");
+                            API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Blocked");
                             API.moderateForceSkip();
                             basicBot.room.skippable = false;
                             setTimeout(function () {
@@ -3260,7 +3277,7 @@ var BOTCOMMANDS = {
                         if (basicBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(basicBot.room.newBlacklist);
                         if (basicBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(basicBot.room.newBlacklistIDs);
                         API.sendChat(msgToSend);
-                        basicBot.roomUtilities.logInfo(msgToSend);
+                        API.logInfo(msgToSend);
                     }
                     catch (err) { UTIL.logException("banremove: " + err.message); }
                 }
@@ -3309,7 +3326,7 @@ var BOTCOMMANDS = {
                                 banCount++;
                             }
                         }
-                        basicBot.roomUtilities.logInfo("Banned " + banCount + " out of " + songCount + " songs");
+                        API.logInfo("Banned " + banCount + " out of " + songCount + " songs");
                     }
                     catch (err) { UTIL.logException("banallhistorysongs: " + err.message); }
                 }
@@ -3363,7 +3380,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        basicBot.roomUtilities.logInfo(JSON.stringify(basicBot.room.newBlacklistIDs));
+                        API.logInfo(JSON.stringify(basicBot.room.newBlacklistIDs));
                     }
                     catch (err) { UTIL.logException("banlistidjson: " + err.message); }
                 }
@@ -3376,7 +3393,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        basicBot.roomUtilities.logInfo(JSON.stringify(basicBot.room.newBlacklist));
+                        API.logInfo(JSON.stringify(basicBot.room.newBlacklist));
                     }
                     catch (err) { UTIL.logException("banlistjson: " + err.message); }
                 }
@@ -3389,7 +3406,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        basicBot.roomUtilities.logInfo(JSON.stringify(USERS.users));
+                        API.logInfo(JSON.stringify(USERS.users));
                     }
                     catch (err) { UTIL.logException("userlistjson: " + err.message); }
                 }
@@ -3416,7 +3433,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
                         var msg = chat.message;
-                        if (msg.length === cmd.length) return basicBot.roomUtilities.logInfo(botChat.subChat(botChat.chatMessages.nouserspecified, {name: chat.un}));
+                        if (msg.length === cmd.length) return API.logInfo(botChat.subChat(botChat.chatMessages.nouserspecified, {name: chat.un}));
                         var name = msg.substr(cmd.length + 2);
                         var user = USERS.lookupUserName(name);
                         var msg = "";
@@ -3429,7 +3446,7 @@ var BOTCOMMANDS = {
                             basicBot.userUtilities.resetDailyRolledStats(user);
                             msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(user);
                         }
-                        basicBot.roomUtilities.logInfo(msg);
+                        API.logInfo(msg);
 
                         var newuser = USERS.lookupUserNameImport(name);
                         if (newuser === false) {
@@ -3441,7 +3458,7 @@ var BOTCOMMANDS = {
                             basicBot.userUtilities.resetDailyRolledStats(newuser);
                             msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(newuser);
                         }
-                        setTimeout(function () { basicBot.roomUtilities.logInfo(msg); }, 1 * 1000);
+                        setTimeout(function () { API.logInfo(msg); }, 1 * 1000);
                     }
                     catch (err) { UTIL.logException("userliststats: " + err.message); }
                 }
@@ -3454,9 +3471,9 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        basicBot.roomUtilities.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         setTimeout(function () {
-                            basicBot.roomUtilities.logInfo("I've got " + USERS.users.length + " users in the old list.")
+                            API.logInfo("I've got " + USERS.users.length + " users in the old list.")
                         }, 1 * 1000);
                     }
                     catch (err) { UTIL.logException("userlistcount: " + err.message); }
@@ -3471,9 +3488,9 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
                         basicBot.roomUtilities.importUserList();
-                        basicBot.roomUtilities.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
-                        if (DocZ === false) return basicBot.roomUtilities.logInfo(botChat.subChat(botChat.chatMessages.invaliduserspecified, {name: chat.un}));
+                        if (DocZ === false) return API.logInfo(botChat.subChat(botChat.chatMessages.invaliduserspecified, {name: chat.un}));
                         var msg = botChat.subChat(botChat.chatMessages.mystats, {name: DocZ.username, 
                                                                      songs: DocZ.votes.songs,
                                                                      woot: DocZ.votes.woot, 
@@ -3482,7 +3499,7 @@ var BOTCOMMANDS = {
                                                                      tasty: DocZ.votes.tasty});
                         basicBot.userUtilities.resetDailyRolledStats(DocZ);
                         msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(DocZ);
-                        basicBot.roomUtilities.logInfo(msg);
+                        API.logInfo(msg);
                     }
                     catch (err) { UTIL.logException("userlistimport: " + err.message); }
                 }
@@ -3587,7 +3604,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         basicBot.botMuted = (!basicBot.botMuted);
-                        basicBot.roomUtilities.logInfo("Bot Muted = " + basicBot.botMuted);
+                        API.logInfo("Bot Muted = " + basicBot.botMuted);
                     }
                     catch (err) { UTIL.logException("botmutedCommand: " + err.message); }
                 }
@@ -4058,7 +4075,7 @@ var BOTCOMMANDS = {
                     if (msg.length === cmd.length) return;
                     var msgContent = msg.substring(cmd.length + 1);
                     msgContent = msgContent.replace(/&#39;/g, "'");
-                    basicBot.roomUtilities.logInfo(chat.un + " used echo: " + msgContent);
+                    API.logInfo(chat.un + " used echo: " + msgContent);
                     return API.sendChat(msgContent);
                     }
                 catch(err) {
@@ -4197,7 +4214,7 @@ var BOTCOMMANDS = {
                     if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.chatMessages.nouserspecified, {name: chat.un}));
                     var bootid = msg.substr(cmd.length + 1);
                     if (isNaN(bootid)) return API.sendChat("Invalid ID");
-                    basicBot.roomUtilities.logInfo("Boot ID: " + bootid);
+                    API.logInfo("Boot ID: " + bootid);
                     API.moderateBanUser(bootid, 1, API.BAN.PERMA);
                 }
             },
@@ -4772,7 +4789,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         basicBot.room.debug = (!basicBot.room.debug);
-                        basicBot.roomUtilities.logInfo("Debug = " + basicBot.room.debug);
+                        API.logInfo("Debug = " + basicBot.room.debug);
                     }
                     catch(err) { UTIL.logException("debugCommand: " + err.message); }
                 }
@@ -4786,7 +4803,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         basicBot.settings.gifEnabled = (!basicBot.settings.gifEnabled);
-                        basicBot.roomUtilities.logInfo("GifEnabled = " + basicBot.room.debug);
+                        API.logInfo("GifEnabled = " + basicBot.room.debug);
                     }
                     catch(err) { UTIL.logException("gifenabledCommand: " + err.message); }
                 }
