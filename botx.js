@@ -1,13 +1,44 @@
 // Written by Doc_Z
+
+var dubBot = {
+  room: {
+	users: [],
+	usersImport: [],
+	debug: true,
+	afkList: [],
+	mutedUsers: [],
+	bannedUsers: [],
+	skippable: true,
+	usercommand: true,
+	allcommand: true,
+	blacklistInterval: null,
+	queueing: 0,
+	queueable: true,
+	currentDJID: null,
+	currentMediaCid: 999,
+	currentMediaStart: 999,
+	historyList: [],
+	cycleTimer: setTimeout(function () {
+	}, 1),
+	queue: {
+		id: [],
+		position: []
+	},
+	newBlacklist: [],
+	newBlacklistIDs: [],
+	blacklistLoaded: false,
+  }
+};
 //SECTION Var: All global variables:
-var runningBot = false;
 var botVar = {
-  version: "Version 1.01.1.00028",
+  version: "Version 1.01.1.00029",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
   debugLowLevel: false,
   botStatus: false, 
+  botMuted: false,
+  botRunning: false,
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -24,9 +55,9 @@ var botVar = {
 	mutedUsers: [],
 	voteSkipEnabled: true,
 	voteSkipLimit: 4,
-   etaRestriction: false,
-   filterChat: true,
-	lockdownEnabled: false,
+    etaRestriction: false,
+    filterChat: true,
+	botRoomUrl: "",
 	roomstats: {
 		accountName: null,
 		totalWoots: 0,
@@ -106,14 +137,158 @@ var USERS = {
 		//return false;
 	},
 };
+
+//SECTION COMMANDS: All bot commands:
+var SETTINGS = {
+	settings: {
+		autoWootBot: false,
+		autoHopUp: true,
+		autoHopUpCount: 1,
+		autoHopDownCount: 4,
+		botRoomUrl: "",
+		hoppingDownNow: false,
+		botName: "Larry the LAW",
+		language: "english",
+		chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
+		bouncerPlus: true,
+		blacklistEnabled: true,
+		gifEnabled: true,
+		lockdownEnabled: false,
+		maximumLocktime: 10,
+		cycleGuard: true,
+		maximumCycletime: 10,
+		voteSkipEnabled: true,
+		voteSkipLimit: 4,
+		welcomeForeignerMsg: false,
+		timeGuard: true,
+		maximumSongLength: 8,
+		skipSound5Days: false,
+		skipSound7Days: false,
+		skipSoundStart: 7,
+		skipSoundEnd: 15,
+		skipSoundRange: "Monday-Friday between 7AM and 3PM EST",
+		roulette5Days: true,
+		roulette7Days: false,
+		rouletteStart: 9,
+		rouletteEnd: 17,
+		randomRoulette: false,
+		autodisable: false,
+		commandCooldown: 30,
+		usercommandsEnabled: true,
+		lockskipPosition: 3,
+		lockskipReasons: [
+			["theme", "This song does not fit the room theme. "],
+			["op", "This song is on the OP list. "],
+			["history", "This song is in the history. "],
+			["mix", "You played a mix, which is against the rules. "],
+			["sound", "The song you played had bad sound quality or no sound. "],
+			["nsfw", "The song you contained was NSFW (image or sound). "],
+			["unavailable", "The song you played was not available for some users. "]
+		],
+		motdEnabled: false,
+		motdInterval: 5,
+		motd: "Temporary Message of the Day",
+		etaRestriction: false,
+		welcome: true,
+		opLink: null,
+		rulesLink: null,
+		themeLink: null,
+		fbLink: null,
+		youtubeLink: null,
+		website: null,
+		intervalMessages: [],
+		messageInterval: 5,
+		songstats: true,
+		suppressSongStats: false,
+		commandLiteral: "."
+	},
+
+    retrieveSettings: function () {
+        var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
+        if (settings !== null) {
+            for (var prop in settings) {
+                SETTINGS.settings[prop] = settings[prop];
+            }
+        }
+    },
+
+    var retrieveFromStorage: function () {
+        try {
+        var info = localStorage.getItem("dubBotStorageInfo");
+        if (info === null) API.chatLog(botChat.chatMessages.nodatafound);
+        else {
+            var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
+            var room = JSON.parse(localStorage.getItem("dubBotRoom"));
+            botDebug.debugMessage("room.users.length: " + room.users.length, true);
+            if (localStorage.getItem("BLACKLIST") !== null) {
+              var myBLList = localStorage["BLACKLIST"];
+              var myBLIDs = localStorage["BLACKLISTIDS"];
+              API.logInfo(JSON.parse(localStorage["BLACKLIST"]));
+              API.logInfo(JSON.parse(localStorage["BLACKLISTIDS"]));
+              API.logInfo("LEN (" + myBLList.length + ") " + myBLList);
+              API.logInfo("LEN (" + myBLIDs.length + ") " + myBLIDs);
+
+              dubBot.room.newBlacklist = JSON.parse(localStorage["BLACKLIST"]);
+              dubBot.room.newBlacklistIDs = JSON.parse(localStorage["BLACKLISTIDS"]);
+              
+              botDebug.debugMessage("BL LOAD:   BL Count: " + dubBot.room.newBlacklist.length, true);
+              botDebug.debugMessage("BL LOAD: BLID Count: " + dubBot.room.newBlacklistIDs.length, true);
+            }
+            dubBot.room.blacklistLoaded = true;
+            botDebug.debugMessage("BL LOADED: TRUE", true);
+            var elapsed = Date.now() - JSON.parse(info).time;
+            dubBot.room.users = room.users;
+            dubBot.room.historyList = room.historyList;
+            botDebug.debugMessage("dubBot.room.users.length: " + dubBot.room.users.length + " TIME: " + JSON.parse(info).time, true);
+            if ((elapsed < 1 * 60 * 60 * 1000)) {
+                API.chatLog(botChat.chatMessages.retrievingdata);
+                for (var prop in settings) {
+                    SETTINGS.settings[prop] = settings[prop];
+                }
+                dubBot.room.afkList = room.afkList;
+                dubBot.room.mutedUsers = room.mutedUsers;
+                dubBot.room.autoskip = room.autoskip;
+                dubBot.room.roomstats = room.roomstats;
+                dubBot.room.queue = room.queue;
+                //dubBot.room.newBlacklist = room.newBlacklist;
+                API.chatLog(botChat.chatMessages.datarestored);
+            }
+        }
+        }
+        catch(err) {
+           UTIL.logException("retrieveFromStorage: " + err.message);
+        }
+
+    },
+    var storeToStorage = function () {
+        try {
+        botDebug.debugMessage("START: storeToStorage", true);
+        localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
+        localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
+        botDebug.debugMessage("STORED DATA: " + JSON.stringify(dubBot.room), true);
+        var dubBotStorageInfo = {
+            time: Date.now(),
+            stored: true,
+            version: botVar.version
+        };
+        botDebug.debugMessage("DONE: storeToStorage - UserCnt: " + dubBot.room.users.length + " TIME: " + dubBotStorageInfo.time, true);
+        localStorage.setItem("dubBotStorageInfo", JSON.stringify(dubBotStorageInfo));
+        }
+        catch(err) {
+           UTIL.logException("storeToStorage: " + err.message);
+        }
+    }
+
+	
+};
 //SECTION COMMANDS: All bot commands:
 var COMMANDS = {
 	botChatcommand: function (command) {
         // This is triggered when a chat starting with a '/' character is entered
             try {
                 if (command === "/bot") {
-                    runningBot = (!runningBot);
-                    API.chatLog("Running Bot: " + runningBot);
+                    botVar.botRunning = (!botVar.botRunning);
+                    API.chatLog("Running Bot: " + botVar.botRunning);
                     return;
                 }
                 //if (command === "/whois") return;  // Handled by Origem
@@ -134,11 +309,13 @@ var COMMANDS = {
     },
 	checkCommands: function (chat) {
 		try {
-			//if (!runningBot) return;
+			//if (!botVar.botRunning) return;
 			chat.message = UTIL.linkFixer(chat.message);
 			chat.message = chat.message.trim();
-			USERS.setLastActivityID(chat.uid, true);
-			USERS.setUserName(chat.uid, chat.un);
+			//todoer afk activity
+			//USERS.setLastActivityID(chat.uid, true);
+			//todoer afk activity
+			//USERS.setUserName(chat.uid, chat.un);
 			if (botChat.chatMessages.chatfilter(chat)) return void (0);
 			if (!COMMANDS.commandCheck(chat))
 				botChat.action(chat);
@@ -292,7 +469,7 @@ var botChat = {
 			API.moderateDeleteChat(chat.cid);
 			return true;
 		}
-		if (botVar.room.lockdownEnabled) {
+		if (SETTINGS.settings.lockdownEnabled) {
 			if (perm === 0) {
 				API.moderateDeleteChat(chat.cid);
 				return true;
@@ -455,8 +632,181 @@ var botChat = {
       }
     }
 };
+
+//SECTION EIGHTBALL: Core 8 ball functionality:
+var EIGHTBALL = {
+	EightBallArray: [
+	"As I See It Yes", 
+	"Ask Again Later", 
+	"Better Not Tell You Now", 
+	"Cannot Predict Now", 
+	"Concentrate and Ask Again", 
+	"Don't Count On It", 
+	"It Is Certain", 
+	"It Is Decidedly So", 
+	"Most Likely", 
+	"My Reply Is No", 
+	"My Sources Say No", 
+	"Outlook Good", 
+	"Outlook Not So Good", 
+	"Reply Hazy Try Again", 
+	"Signs Point to Yes", 
+	"Very Doubtful", 
+	"Without A Doubt", 
+	"Yes", 
+	"Yes - Definitely", 
+	"You May Rely On It",
+	"Absolutely", 
+	"Answer Unclear Ask Later", 
+	"Cannot Foretell Now", 
+	"Can't Say Now", 
+	"Chances Aren't Good", 
+	"Consult Me Later", 
+	"Don't Bet On It", 
+	"Focus And Ask Again", 
+	"Indications Say Yes", 
+	"Looks Like Yes", 
+	"No", 
+	"No Doubt About It", 
+	"Positively", 
+	"Prospect Good", 
+	"So It Shall Be", 
+	"The Stars Say No", 
+	"Unlikely", 
+	"Very Likely", 
+	"You Can Count On It",
+	"As If",
+	"Ask Me If I Care",
+	"Dumb Question Ask Another",
+	"Forget About It",
+	"Get A Clue",
+	"In Your Dreams",
+	"Not A Chance",
+	"Obviously",
+	"Oh Please",
+	"Sure",
+	"That's Ridiculous",
+	"Well Maybe",
+	"What Do You Think?",
+	"Whatever",
+	"Who Cares?",
+	"Yeah And I'm The Pope",
+	"Yeah Right",
+	"You Wish",
+	"You've Got To Be Kidding",
+	"You Look Marvelous", 
+	"Your Breath Is So Minty", 
+	"You're 100% Fun!", 
+	"You're A Winner",
+	"At Least I Love You",
+	"Have You Lost Weight?",
+	"Go flip a quarter",
+	"Never gonna happen",
+	"Smells like a Yes",
+	"Si Amigo, like cheese on nachos",
+	"When pigs fly!",
+	"No, but I still love you",
+	"Give me a dollar, then I'll answer",
+	"I got yes written on my forehead",
+	"Sorry, but no way",
+	"I know, but I'm not telling",
+	"I guess so, maybe",
+	"Yes! Hooray, Yippee!",
+	"Ha Ha Ha, no!",
+	"Of course silly",
+	"My dog thinks so",
+	"Um.. Ok, sure, why not?",
+	"Will the sun rise tomorrow?",
+	"Yep, like a bird has feathers",
+	"You can bet your ass on it",
+	"Hell No",
+	"Are you stupid?",
+	"Hell Yes",
+	"Give it up",
+	"Maybe if you weren't so lazy",
+	"Make it happen",
+	"No way, sucka!",
+	"Wow, you are an idiot!",
+	"Yes, now stop asking!",
+	"Ha Ha Ha! Nope!",
+	"Don't you have something better to do?",
+	"Of course, shit head",
+	"5 letters, LOL NO!",
+	"Go ask your mama",
+	"Just a wild guess, but yes",
+	"I really don't care",
+	"Damn Right",
+	"Boring! Ask something exciting",
+	"Swear on my 8 balls it's true",
+	"Shit Happens",
+	"F*ck Yeah",
+	"F*ck No",
+	"What the F*ck?",
+	"Hell F*cking Yes",
+	"Hell F*cking No",
+	"You F*cking Crazy?",
+	"Of course F*cker",
+	"No way F*cker",
+	"Who F*cking cares",
+	"God Damn F*cking Right!",
+	"Not a F*cking chance",
+	"I don't F*cking know",
+	"No F*cking doubt",
+	"No F*cking way",
+	"Seriously F*cker?",
+	"F*ck, why not.",
+	"Don't F*cking count on it",
+	"It could F*cking happen",
+	"You must be out of your F*cking mind",
+	"Sure F*cking thing",
+	"F*cking Right",
+	"Signs point to F*cking Yes",
+	"It is F*cking certain"
+	],
+
+  eightBallSelect: function()  {  //Added 04/01/2015 Zig
+	try  {
+		var arrayCount = EIGHTBALL.EightBallArray.length;
+		var arrayID = Math.floor(Math.random() * arrayCount);
+		return EIGHTBALL.EightBallArray[arrayID];
+	}
+	catch(err) {
+	  UTIL.logException("eightBallSelect: " + err.message);
+	}
+  }
+};
+
 //SECTION UTIL: Core functionality:
 var UTIL = {
+	numberToIcon: function(intValue) {
+		switch (intValue) {
+			case 0: return ":zero:";
+			case 1: return ":one:";
+			case 2: return ":two:";
+			case 3: return ":three:";
+			case 4: return ":four:";
+			case 5: return ":five:";
+			case 6: return ":six:";
+			case 7: return ":seven:";
+			case 8: return ":eight:";
+			case 9: return ":nine:";
+			case 10: return ":keycap_ten:";
+		}
+		return intValue;
+	},
+	formatPercentage: function(a, b) {
+		if (a === 0) return "0%";
+		if (b === 0) return "100%";
+		return (((a / b).toFixed(2)) * 100).toFixed(0) + "%";
+	},
+	getDOY: function() {
+	  var now = new Date();
+	  var start = new Date(now.getFullYear(), 0, 0);
+	  var diff = now - start;
+	  var oneDay = 1000 * 60 * 60 * 24;
+	  var day = Math.floor(diff / oneDay);
+	  return day;
+	},
   killbot: function () {
         clearInterval(AFK.afkInterval);
 		clearInterval(RANDOMCOMMENTS.randomInterval);
@@ -558,7 +908,84 @@ var UTIL = {
   }
 };
 //SECTION TASTY: All Tasty functionality:
+//SECTION ROLL: All Roll functionality
 var TASTY = {
+	resetDailyRolledStats: function (roomUser) {
+		try {
+		var DOY = UTIL.getDOY();
+		if (roomUser.rollStats.DOY !== DOY) {
+			roomUser.rollStats.DOY = DOY;
+			roomUser.rollStats.dayWoot = 0;
+			roomUser.rollStats.dayTotal = 0;
+		}
+	  }
+		catch(err) {
+		  UTIL.logException("resetDailyRolledStats: " + err.message);
+		  return "";
+		}
+	},
+	getRolledStats: function (roomUser) {
+		try {
+		   var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
+		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
+		   rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
+		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
+		   return rollStats;
+		}
+		catch(err) {
+		  UTIL.logException("getRolledStats: " + err.message);
+		  return "";
+		}
+	},
+	updateRolledStats: function (username, wooting) {
+		try {
+		var roomUser = USERS.lookupUserName(username);
+		TASTY.resetDailyRolledStats(roomUser);
+		if (wooting) {
+			roomUser.rollStats.lifeWoot++;
+			roomUser.rollStats.dayWoot++;
+		}
+		roomUser.rollStats.lifeTotal++;
+		roomUser.rollStats.dayTotal++;
+		return TASTY.getRolledStats(roomUser);
+	  }
+		catch(err) {
+		  UTIL.logException("updateRolledStats: " + err.message);
+		  return "";
+		}
+	},
+	setRolled: function (username, value, wooting) {
+		var user = USERS.lookupUserName(username);
+		user.rolled = value;
+	},
+	getRolled: function (username) {
+		var user = USERS.lookupUserName(username);
+		return user.rolled;
+	},
+	tastyVote: function (userId, cmd) {
+		try {
+		var user = USERS.lookupUser(userId);
+		if (user.tastyVote) return;
+		var dj = API.getDJ();
+		if (typeof dj === 'undefined') return;
+		if (dj.id === userId) 
+		{
+		   API.sendChat("I'm glad you find your own play tasty @" + user.username);
+		   return;
+		}
+		var tastyComment = TASTY.tastyComment(cmd);
+		user.tastyVote = true;
+		//API.sendChat(subChat(botChat.chatMessages.tastyvote, {name: cmd.username}));
+		setTimeout(function () { API.sendChat(subChat(tastyComment, {pointfrom: cmd.username})); }, 1000);
+	
+		botVar.songStats.tastyCount += 1;
+		var currdj = USERS.lookupUser(dj.id);
+		currdj.votes.tasty += 1;
+		}
+		catch(err) {
+		  UTIL.logException("userUtilities.tastyVote: " + err.message);
+		}
+	},
 	bopCommand: function (cmd) {
 		try {
 			//TODO: menorah xmas dreidel plus many other holiday commands  (Only work if the month is 12)
@@ -1422,6 +1849,7 @@ var API = {
 
       API.chatLog(botVar.botName + " " + botVar.version + " Online");
       botVar.botStatus = true;
+	  botVar.botRunning = true;
 
       // [...]
     },
@@ -1441,6 +1869,23 @@ var API = {
 	}
 	   catch(err) {
 	   UTIL.logException("getWaitListPosition: " + err.message);
+	}
+  },
+  mehThisSong: function ()
+	try  {
+         $('.dubdown').click();
+		//$("#meh").click();
+	}  
+	catch(err) {
+	  UTIL.logException("mehThisSong: " + err.message);
+	}
+  },
+  wootThisSong: function () {
+	try  {
+         $('.dubup').click();
+	}  
+	catch(err) {
+	  UTIL.logException("wootThisSong: " + err.message);
 	}
   },
 
@@ -1513,18 +1958,17 @@ var API = {
     b.$el.text(txt).appendTo(Dubtrack.room.chat._messagesEl);
   },
 
-  sendChat: function(txt) {
-    Dubtrack.room.chat._messageInputEl.val(txt);
-    Dubtrack.room.chat.sendMessage();
-
+  sendChat: function(message) {
 	//todoer Delete this after we re-enable the bot kill on room change code.
-	//if(basicBot.settings.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
-	//if (basicBot.botMuted === true) 
-	//	API.logInfo(msg);
-	//else if (runningBot) 
-	//	API.sendChat(msg);
-	//else 
-	//	API.chatLog(msg);
+	//if(botVar.room.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
+	if (botVar.botMuted === true) 
+		API.logInfo(message);
+	else if (botVar.botRunning) {
+		Dubtrack.room.chat._messageInputEl.val(message);
+		Dubtrack.room.chat.sendMessage();
+	}
+	else 
+		API.chatLog(message);
 	
   },
 
@@ -1532,16 +1976,16 @@ var API = {
 	try {
 	   console.log("INFO: " + msg);
 	}
-	catch(err) { basicBot.roomUtilities.logException("logInfo: " + err.message); }
+	catch(err) { UTIL.logException("logInfo: " + err.message); }
   },
   showPopup: function(title, message) {
     Dubtrack.helpers.displayError(title, message);
   },
 
   on: {
-    EVENT_SONG_ADVANCE: function() {
+    EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
-      //Get Current song name
+      //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
       var songName = $(".currentSong").text();
       var djName = $(".currentDJSong").text();
       var dubCount = $(".dubup.dub-counter").text();
@@ -1895,6 +2339,262 @@ var BOTCOMMANDS = {
              //                   }
              //           }
              //   },
+
+            tastyCommand: {
+                command: ['tasty', 'rock', 'props', 'woot', 'groot', 'groovy', 'jam','nice','bop','cowbell','sax','ukulele','tango','samba','disco','waltz','metal',
+                          'bob','boogie','cavort','conga','flit','foxtrot','frolic','gambol','hop','hustle','jig','jitter','jitterbug','jive','jump','leap','prance','promenade','rhumba',
+                          'shimmy','strut','sway','swing','great','hail','good','acceptable','bad','excellent','exceptional','favorable','marvelous','positive','satisfactory','satisfying',
+                          'superb','valuable','wonderful','ace','boss','bully','capital','choice','crack','pleasing','prime','rad','sound','spanking','sterling','super','superior',
+                          'welcome','worthy','admirable','agreeable','commendable','congenial','deluxe','first-class','first-rate','gnarly','gratifying','honorable','neat','precious',
+                          'recherché','reputable','select','shipshape','splendid','stupendous','keen','nifty','swell','sensational','fine','cool','perfect','wicked','fab','heavy',
+                          'incredible','outstanding','phenomenal','remarkable','special','terrific','unique','aces','capital','dandy','enjoyable','exquisite',
+                          'fashionable','lovely','love','solid','striking','top-notch','slick','pillar','exemplary','alarming','astonishing','awe-inspiring',
+                          'beautiful','breathtaking','fearsome','formidable','frightening','winner','impressive','intimidating','facinating','prodigious',
+                          'magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand',
+                          'creamy','easy','effortless','fluid','gentle','glossy','peaceful','polished','serene','sleek','soft','tranquil','velvety','soothing','fluent','frictionless',
+                          'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
+                          'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
+                          'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
+                          'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
+                          'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','epic','blues','heart','feels','dope','makeitrain','wumbo',
+                          'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
+                          'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
+                          'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
+                          'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','tits','hooters',
+                          'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
+                          'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
+                          '133t','roofus','rufus','schway','shiz','shiznak','shiznik','shiznip','shiznit','shiznot','shizot','shwanky','shway',
+                          'sic','sicc','skippy','slammin','slamming','slinkster','smack','smashing','smashingly','snizzo','spiffylicious','superfly',
+                          'swass','tender','thrill','tight','tits','tizight','todiefor','to die for','trill','tuff','vicious','whizz-bang','wick',
+                          'wow','omg','A-1','ace','aces','aight','allthatandabagofchips','all that and a bag of chips','alrighty','alvo','amped',
+                          'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
+                          'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
+                          'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
+                          'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','classic','clutch',
+                          'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
+                          'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
+                          'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
+                          'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
+                          'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
+                          'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
+                          'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
+                          'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
+                          'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
+                          'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
+                          '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
+                          ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
+                          'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
+                          'ooga-chaka'],
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        TASTY.tastyVote(chat.uid, cmd);
+                    }
+                    catch(err) {
+                        UTIL.logException("tastyCommand: " + err.message);
+                    }
+                }
+            },
+
+            eightballCommand: {   //Added 04/01/2015 Zig
+                command: ['8ball', 'eightball', 'larry'],
+                rank: 'user',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var msg = chat.message;
+                        var magicResponse = EIGHTBALL.eightBallSelect();
+                        if (msg.length === cmd.length)  return API.sendChat(botChat.subChat(botChat.chatMessages.eightballresponse2, {name: chat.un, response: magicResponse }));
+                        var myQuestion = msg.substring(cmd.length + 1);
+                        API.sendChat(botChat.subChat(botChat.chatMessages.eightballquestion, {name: chat.un, question: myQuestion}));
+                        setTimeout(function () {
+                            API.sendChat(botChat.subChat(botChat.chatMessages.eightballresponse1, {response: magicResponse}));
+                        }, 500);
+                    }
+                    catch(err) {
+                        UTIL.logException("eightballCommand: " + err.message);
+                    }
+                }
+            },
+            rollCommand: {   //Added 03/30/2015 Zig
+                command: 'roll',
+                rank: 'user',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        if (API.getDJ().id !== chat.uid) return API.sendChat(botChat.subChat(botChat.chatMessages.notcurrentdj, {name: chat.un}));
+                        if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.chatMessages.doubleroll, {name: chat.un}));
+                        var msg = chat.message;
+                        var dicesides = 6;
+                        if (msg.length > cmd.length){
+                            var dice = msg.substr(cmd.length + 1);
+                            if (!isNaN(dice)) dicesides = dice;
+                            if (dicesides < 4) dicesides = 4;
+                        }
+                        var rollResults = Math.floor(Math.random() * dicesides) + 1;
+                        TASTY.setRolled(chat.un, true);
+                        var resultsMsg = "";
+                        var wooting = true;
+                        rollResults = 6;
+                        if (rollResults >= (dicesides * 0.5)) {
+                            //Pick a random word for the tasty command
+                            setTimeout(function () { TASTY.tastyVote(API.getCurrentDubUser().id,TASTY.bopCommand("")); }, 1000);
+                            setTimeout(function () { API.wootThisSong(); }, 1500);
+                            resultsMsg = botChat.subChat(botChat.chatMessages.rollresultsgood, {name: chat.un, roll: UTIL.numberToIcon(rollResults)});
+                        }
+                        else {
+                            setTimeout(function () { API.mehThisSong(); }, 1000);
+                            resultsMsg = botChat.subChat(botChat.chatMessages.rollresultsbad, {name: chat.un, roll: UTIL.numberToIcon(rollResults)});
+                            wooting = false;
+                        }
+                        API.sendChat(resultsMsg + TASTY.updateRolledStats(chat.un, wooting));
+                        //if (rollResults >= (dicesides * 0.8))
+                        //    setTimeout(function () { TASTY.tastyVote(API.getCurrentDubUser().id, "winner"); }, 1000);
+                        //else if (rollResults <= (dicesides * 0.2))
+                        //    setTimeout(function () { API.mehThisSong(); }, 1000);
+                    }
+                    catch(err) {
+                        UTIL.logException("rollCommand: " + err.message);
+                    }
+                }
+            },			
+            wootCommand: {  //todoer DELETE THIS COMMAND:
+                command: 'wootthissong',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        API.wootThisSong();
+                    }
+                }
+            },
+            mehCommand: {
+                command: 'mehthissong',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd)                 {
+                  try  {
+				    API.mehThisSong();
+                  }  
+                catch(err) {
+                  UTIL.logException("mehCommand: " + err.message);
+                }
+              }
+            },
+            exrouletteCommand: {
+                command: ['exroulette','roulette?'],
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Explain ROULETTE: Managers type .roulette to start the game.  Type .join to join the game. The winner gets moved to a random place in line. It is a Russian roulette in that the new position is random. So, when you win you may get moved back in line.");
+                    }
+                    catch(err) {
+                        UTIL.logException("exroulettecommand: " + err.message);
+                    }
+                }
+            },
+            extastyCommand: {
+                command: ['extasty','tasty?'],
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Explain TASTY POINTS: This is another way to let your fellow DJs know you enjoy their play.  Since most of us run auto-woot extentions it is just a nice way to let others know when they play an extra tasty selection.");
+                    }
+                    catch(err) {
+                        UTIL.logException("extastycommand: " + err.message);
+                    }
+                }
+            },
+            exmeetingCommand: {
+                command: ['exmeeting', 'exlunch', 'exbeerrun','meeting?', 'lunch?', 'beerrun?'],
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Explain MEETING: If you have to go afk type, .meeting or .lunch and Larry will remove you from line. When you return hop back in line and Larry will restore your position in line. If you leave the room for over 10 mins you'll lose your spot.");
+                    }
+                    catch(err) {
+                        UTIL.logException("exmeeting: " + err.message);
+                    }
+                }
+            },
+            exmehCommand: {
+                command: ['exmeh','meh?'],
+                rank: 'residentdj',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        if(chat.message.length === cmd.length) return API.sendChat('/me No user specified.');
+                        var name = chat.message.substring(cmd.length + 2);
+                        var roomUser = USERS.lookupUserName(name);
+                        if(typeof roomUser === 'boolean') return API.sendChat('/me Invalid user specified.');
+                        var msgSend = "@" + roomUser.username + ": If you find yourself Meh-ing most songs, this isn't the room for you. Serial Meh'ers will be banned. If you don't like the music find a different room please.";
+                        API.sendChat(msgSend);
+                    }
+                    catch(err) {
+                        UTIL.logException("exmeh: " + err.message);
+                    }
+                }
+            },
+            versionCommand: {  //Added 01/27/2015 Zig
+                command: 'version',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd)                 {
+                    API.sendChat(botChat.subChat(botChat.chatMessages.online, {botname: botVar.botName, version: botVar.version}));
+                }
+            },
+            zigaCommand: {
+                command: 'ziga',
+                rank: 'cohost',
+                type: 'exact',
+                functionality: function (chat, cmd)  {
+                    try { 
+						var userInfo = document.getElementsByClassName("user-info");
+						botDebug.debugMessage("userInfo count: " + userInfo.length, true);
+						var spans = userInfo.getElementsByTagName("span");
+						botDebug.debugMessage("userInfo: " + spans[0].innerHTML, true);
+                    }
+                    catch(err) {
+                        UTIL.logException("zigaCommand: " + err.message);
+                    }
+                }
+            },
+            zigbCommand: {
+                command: 'zigb',
+                rank: 'cohost',
+                type: 'exact',
+                functionality: function (chat, cmd)  {
+                    try { 
+					//#player-controller > div.left > ul > li.infoContainer.display-block > div
+					// //*[@id="player-controller"]/div[2]/ul/li[3]/div<div class=""><div class="progressBg" style="width: 19.991%;"></div><span class="currentDJSong">whitewidow is playing</span><span class="currentSong">Anthrax and Public Enemy - Bring The Noise (1987)</span><div class="currentTime" style="display: block;"><span class="min">02</span>:<span class="sec">48</span></div></div>
+						var userInfo = document.getElementsByClassName("infoContainerInner");
+						botDebug.debugMessage("userInfo count: " + userInfo.length, true);
+						var spans = userInfo.getElementsByClassName("currentDJSong");
+						botDebug.debugMessage("currentDJSong: " + spans[0].innerHTML, true);
+                    }
+                    catch(err) {
+                        UTIL.logException("zigbCommand: " + err.message);
+                    }
+                }
+            }
 
             /*
             activeCommand: {
@@ -2375,8 +3075,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (typeof basicBot.settings.fbLink === "string")
-                            API.sendChat(botChat.subChat(botChat.chatMessages.facebook, {link: basicBot.settings.fbLink}));
+                        if (typeof SETTINGS.settings.fbLink === "string")
+                            API.sendChat(botChat.subChat(botChat.chatMessages.facebook, {link: SETTINGS.settings.fbLink}));
                     }
                 }
             },
@@ -2430,7 +3130,7 @@ var BOTCOMMANDS = {
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!basicBot.settings.gifEnabled) return void (0);
+                    if (!SETTINGS.settings.gifEnabled) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         var msg = chat.message;
@@ -2529,9 +3229,9 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        basicBot.settings.hoppingDownNow = true;
+                        SETTINGS.settings.hoppingDownNow = true;
                         setTimeout(function () {
-                            basicBot.settings.hoppingDownNow = false;
+                            SETTINGS.settings.hoppingDownNow = false;
                             }, 2000);
                         API.botHopDown();
                     }
@@ -2575,8 +3275,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.room.roulette.rouletteStatus && basicBot.room.roulette.participants.indexOf(chat.uid) < 0) {
-                            basicBot.room.roulette.participants.push(chat.uid);
+                        if (dubBot.room.roulette.rouletteStatus && dubBot.room.roulette.participants.indexOf(chat.uid) < 0) {
+                            dubBot.room.roulette.participants.push(chat.uid);
                             API.sendChat(botChat.subChat(botChat.chatMessages.roulettejoin, {name: chat.un}));
                         }
                     }
@@ -2673,9 +3373,9 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        var ind = basicBot.room.roulette.participants.indexOf(chat.uid);
+                        var ind = dubBot.room.roulette.participants.indexOf(chat.uid);
                         if (ind > -1) {
-                            basicBot.room.roulette.participants.splice(ind, 1);
+                            dubBot.room.roulette.participants.splice(ind, 1);
                             API.sendChat(botChat.subChat(botChat.chatMessages.rouletteleave, {name: chat.un}));
                         }
                     }
@@ -2733,9 +3433,9 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        var temp = botVar.room.lockdownEnabled;
-                        botVar.room.lockdownEnabled = !temp;
-                        if (botVar.room.lockdownEnabled) {
+                        var temp = SETTINGS.settings.lockdownEnabled;
+                        SETTINGS.settings.lockdownEnabled = !temp;
+                        if (SETTINGS.settings.lockdownEnabled) {
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.lockdown}));
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.lockdown}));
@@ -2751,12 +3451,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.room.skippable) {
+                        if (dubBot.room.skippable) {
                             var dj = API.getDJ();
                             var id = dj.id;
                             var name = dj.username;
                             var msgSend = '@' + name + ': ';
-                            basicBot.room.queueable = false;
+                            dubBot.room.queueable = false;
 
                             if (chat.message.length === cmd.length) {
                                 API.sendChat(botChat.subChat(botChat.chatMessages.usedlockskip, {name: chat.un}));
@@ -2764,13 +3464,13 @@ var BOTCOMMANDS = {
                                 setTimeout(function (id) {
                                     API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
                                     API.moderateForceSkip();
-                                    basicBot.room.skippable = false;
+                                    dubBot.room.skippable = false;
                                     setTimeout(function () {
-                                        basicBot.room.skippable = true
+                                        dubBot.room.skippable = true
                                     }, 5 * 1000);
                                     setTimeout(function (id) {
-                                        basicBot.userUtilities.moveUser(id, basicBot.settings.lockskipPosition, false);
-                                        basicBot.room.queueable = true;
+                                        basicBot.userUtilities.moveUser(id, SETTINGS.settings.lockskipPosition, false);
+                                        dubBot.room.queueable = true;
                                         setTimeout(function () {
                                             basicBot.roomUtilities.booth.unlockBooth();
                                         }, 1000);
@@ -2781,11 +3481,11 @@ var BOTCOMMANDS = {
                             var validReason = false;
                             var msg = chat.message;
                             var reason = msg.substring(cmd.length + 1);
-                            for (var i = 0; i < basicBot.settings.lockskipReasons.length; i++) {
-                                var r = basicBot.settings.lockskipReasons[i][0];
+                            for (var i = 0; i < SETTINGS.settings.lockskipReasons.length; i++) {
+                                var r = SETTINGS.settings.lockskipReasons[i][0];
                                 if (reason.indexOf(r) !== -1) {
                                     validReason = true;
-                                    msgSend += basicBot.settings.lockskipReasons[i][1];
+                                    msgSend += SETTINGS.settings.lockskipReasons[i][1];
                                 }
                             }
                             if (validReason) {
@@ -2794,14 +3494,14 @@ var BOTCOMMANDS = {
                                 setTimeout(function (id) {
                                     API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
                                     API.moderateForceSkip();
-                                    basicBot.room.skippable = false;
+                                    dubBot.room.skippable = false;
                                     API.sendChat(msgSend);
                                     setTimeout(function () {
-                                        basicBot.room.skippable = true
+                                        dubBot.room.skippable = true
                                     }, 5 * 1000);
                                     setTimeout(function (id) {
-                                        basicBot.userUtilities.moveUser(id, basicBot.settings.lockskipPosition, false);
-                                        basicBot.room.queueable = true;
+                                        basicBot.userUtilities.moveUser(id, SETTINGS.settings.lockskipPosition, false);
+                                        dubBot.room.queueable = true;
                                         setTimeout(function () {
                                             basicBot.roomUtilities.booth.unlockBooth();
                                         }, 1000);
@@ -2825,8 +3525,8 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         var pos = msg.substring(cmd.length + 1);
                         if (!isNaN(pos)) {
-                            basicBot.settings.lockskipPosition = pos;
-                            return API.sendChat(botChat.subChat(botChat.chatMessages.lockskippos, {name: chat.un, position: basicBot.settings.lockskipPosition}));
+                            SETTINGS.settings.lockskipPosition = pos;
+                            return API.sendChat(botChat.subChat(botChat.chatMessages.lockskippos, {name: chat.un, position: SETTINGS.settings.lockskipPosition}));
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.invalidpositionspecified, {name: chat.un}));
                     }
@@ -2844,8 +3544,8 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         var maxTime = msg.substring(cmd.length + 1);
                         if (!isNaN(maxTime)) {
-                            basicBot.settings.repeatSongTime = maxTime;
-                            return API.sendChat(botChat.subChat(botChat.chatMessages.repeatSongLimit, {name: chat.un, time: basicBot.settings.repeatSongTime}));
+                            SETTINGS.settings.repeatSongTime = maxTime;
+                            return API.sendChat(botChat.subChat(botChat.chatMessages.repeatSongLimit, {name: chat.un, time: SETTINGS.settings.repeatSongTime}));
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.invalidtime, {name: chat.un}));
                     }
@@ -2877,8 +3577,8 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         var maxTime = msg.substring(cmd.length + 1);
                         if (!isNaN(maxTime)) {
-                            basicBot.settings.maximumSongLength = maxTime;
-                            return API.sendChat(botChat.subChat(botChat.chatMessages.maxlengthtime, {name: chat.un, time: basicBot.settings.maximumSongLength}));
+                            SETTINGS.settings.maximumSongLength = maxTime;
+                            return API.sendChat(botChat.subChat(botChat.chatMessages.maxlengthtime, {name: chat.un, time: SETTINGS.settings.maximumSongLength}));
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.invalidtime, {name: chat.un}));
                     }
@@ -2894,16 +3594,16 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         var msg = chat.message;
-                        if (msg.length <= cmd.length + 1) return API.sendChat('/me MotD: ' + basicBot.settings.motd);
+                        if (msg.length <= cmd.length + 1) return API.sendChat('/me MotD: ' + SETTINGS.settings.motd);
                         var argument = msg.substring(cmd.length + 1);
-                        if (!basicBot.settings.motdEnabled) basicBot.settings.motdEnabled = !basicBot.settings.motdEnabled;
+                        if (!SETTINGS.settings.motdEnabled) SETTINGS.settings.motdEnabled = !SETTINGS.settings.motdEnabled;
                         if (isNaN(argument)) {
-                            basicBot.settings.motd = argument;
-                            API.sendChat(botChat.subChat(botChat.chatMessages.motdset, {msg: basicBot.settings.motd}));
+                            SETTINGS.settings.motd = argument;
+                            API.sendChat(botChat.subChat(botChat.chatMessages.motdset, {msg: SETTINGS.settings.motd}));
                         }
                         else {
-                            basicBot.settings.motdInterval = argument;
-                            API.sendChat(botChat.subChat(botChat.chatMessages.motdintervalset, {interval: basicBot.settings.motdInterval}));
+                            SETTINGS.settings.motdInterval = argument;
+                            API.sendChat(botChat.subChat(botChat.chatMessages.motdintervalset, {interval: SETTINGS.settings.motdInterval}));
                         }
                     }
                 }
@@ -3038,8 +3738,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (typeof basicBot.settings.opLink === "string")
-                            return API.sendChat(botChat.subChat(botChat.chatMessages.oplist, {link: basicBot.settings.opLink}));
+                        if (typeof SETTINGS.settings.opLink === "string")
+                            return API.sendChat(botChat.subChat(botChat.chatMessages.oplist, {link: SETTINGS.settings.opLink}));
                     }
                 }
             },
@@ -3157,12 +3857,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.etaRestriction) {
-                            basicBot.settings.etaRestriction = !basicBot.settings.etaRestriction;
+                        if (SETTINGS.settings.etaRestriction) {
+                            SETTINGS.settings.etaRestriction = !SETTINGS.settings.etaRestriction;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.etarestriction}));
                         }
                         else {
-                            basicBot.settings.etaRestriction = !basicBot.settings.etaRestriction;
+                            SETTINGS.settings.etaRestriction = !SETTINGS.settings.etaRestriction;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.etarestriction}));
                         }
                     }
@@ -3175,12 +3875,12 @@ var BOTCOMMANDS = {
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    if (basicBot.room.roulette.rouletteStatus) return void (0);
+                    if (dubBot.room.roulette.rouletteStatus) return void (0);
                     if (basicBot.roomUtilities.rouletteTimeRange()) {
                         API.sendChat("The LAW runs the Roulette weekdays 9AM-5PM EST");
                         return void (0);
                     }
-                    basicBot.room.roulette.startRoulette();
+                    dubBot.room.roulette.startRoulette();
                 }
             },
 
@@ -3192,8 +3892,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (typeof basicBot.settings.rulesLink === "string")
-                            return API.sendChat(botChat.subChat(botChat.chatMessages.roomrules, {link: basicBot.settings.rulesLink}));
+                        if (typeof SETTINGS.settings.rulesLink === "string")
+                            return API.sendChat(botChat.subChat(botChat.chatMessages.roomrules, {link: SETTINGS.settings.rulesLink}));
                     }
                 }
             },
@@ -3207,9 +3907,9 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         var from = chat.un;
-                        var woots = basicBot.room.roomstats.totalWoots;
-                        var mehs = basicBot.room.roomstats.totalMehs;
-                        var grabs = basicBot.room.roomstats.totalCurates;
+                        var woots = dubBot.room.roomstats.totalWoots;
+                        var mehs = dubBot.room.roomstats.totalMehs;
+                        var grabs = dubBot.room.roomstats.totalCurates;
                         API.sendChat(botChat.subChat(botChat.chatMessages.sessionstats, {name: from, woots: woots, mehs: mehs, grabs: grabs}));
                     }
                 }
@@ -3226,9 +3926,9 @@ var BOTCOMMANDS = {
                     else {
                         API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
                         API.moderateForceSkip();
-                        basicBot.room.skippable = false;
+                        dubBot.room.skippable = false;
                         setTimeout(function () {
-                            basicBot.room.skippable = true
+                            dubBot.room.skippable = true
                         }, 5 * 1000);
 
                     }
@@ -3249,9 +3949,9 @@ var BOTCOMMANDS = {
                             var msgSend = '@' + dj.username + ': this song has been blocked in the US. please find another version.';
                             API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Blocked");
                             API.moderateForceSkip();
-                            basicBot.room.skippable = false;
+                            dubBot.room.skippable = false;
                             setTimeout(function () {
-                                basicBot.room.skippable = true
+                                dubBot.room.skippable = true
                             }, 5 * 1000);
                             API.sendChat(msgSend);
                         }
@@ -3287,15 +3987,15 @@ var BOTCOMMANDS = {
                         if (msg.length === cmd.length) return API.sendChat("Missing mid to remove...");
                         var midToRemove = msg.substring(cmd.length + 1);
                         botDebug.debugMessage("Keyword: " + midToRemove, true);
-                        var idxToRemove = basicBot.room.newBlacklistIDs.indexOf(midToRemove);
+                        var idxToRemove = dubBot.room.newBlacklistIDs.indexOf(midToRemove);
                         if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
-                        if (basicBot.room.newBlacklist.length !== basicBot.room.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
-                        var track = basicBot.room.newBlacklist[idxToRemove];
+                        if (dubBot.room.newBlacklist.length !== dubBot.room.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
+                        var track = dubBot.room.newBlacklist[idxToRemove];
                         var msgToSend = chat.un + " removed [" + track.author + " - " + track.title + "] from the banned song list.";
-                        basicBot.room.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
-                        basicBot.room.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
-                        if (basicBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(basicBot.room.newBlacklist);
-                        if (basicBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(basicBot.room.newBlacklistIDs);
+                        dubBot.room.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
+                        dubBot.room.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
+                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(dubBot.room.newBlacklist);
+                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(dubBot.room.newBlacklistIDs);
                         API.sendChat(msgToSend);
                         API.logInfo(msgToSend);
                     }
@@ -3310,11 +4010,11 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if (basicBot.room.newBlacklist.length !== basicBot.room.newBlacklistIDs.length) API.sendChat("Could not remove song ban, corrupt song list info.");
-                        basicBot.room.newBlacklist.splice(0, basicBot.room.newBlacklist.length);  // Remove all items from list
-                        basicBot.room.newBlacklistIDs.splice(0, basicBot.room.newBlacklistIDs.length);  // Remove all items from list
-                        if (basicBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(basicBot.room.newBlacklist);
-                        if (basicBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(basicBot.room.newBlacklistIDs);
+                        if (dubBot.room.newBlacklist.length !== dubBot.room.newBlacklistIDs.length) API.sendChat("Could not remove song ban, corrupt song list info.");
+                        dubBot.room.newBlacklist.splice(0, dubBot.room.newBlacklist.length);  // Remove all items from list
+                        dubBot.room.newBlacklistIDs.splice(0, dubBot.room.newBlacklistIDs.length);  // Remove all items from list
+                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(dubBot.room.newBlacklist);
+                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(dubBot.room.newBlacklistIDs);
                     }
                     catch (err) { UTIL.logException("banremoveallsongs: " + err.message); }
                 }
@@ -3335,7 +4035,7 @@ var BOTCOMMANDS = {
                             songCount++;
                             //if (i === 0) basicBot.roomUtilities.logObject(song, "SONG");
                             var songMid = song.media.format + ':' + song.media.cid;
-                            if (basicBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
+                            if (dubBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
                             //var media = API.getMedia();
                                 var track = {
                                     author: song.media.author,
@@ -3377,7 +4077,7 @@ var BOTCOMMANDS = {
                             return;
                         }
                         var songMid = song.media.format + ':' + song.media.cid;
-                        if (basicBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
+                        if (dubBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
                             var track = {
                                 author: song.media.author,
                                 title: song.media.title,
@@ -3400,7 +4100,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.logInfo(JSON.stringify(basicBot.room.newBlacklistIDs));
+                        API.logInfo(JSON.stringify(dubBot.room.newBlacklistIDs));
                     }
                     catch (err) { UTIL.logException("banlistidjson: " + err.message); }
                 }
@@ -3413,7 +4113,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.logInfo(JSON.stringify(basicBot.room.newBlacklist));
+                        API.logInfo(JSON.stringify(dubBot.room.newBlacklist));
                     }
                     catch (err) { UTIL.logException("banlistjson: " + err.message); }
                 }
@@ -3464,7 +4164,7 @@ var BOTCOMMANDS = {
                             msg = botChat.subChat(botChat.chatMessages.mystats, {name: user.username, songs: user.votes.songs, woot: user.votes.woot, 
                                                               mehs: user.votes.meh, grabs: user.votes.curate, tasty: user.votes.tasty});
                             basicBot.userUtilities.resetDailyRolledStats(user);
-                            msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(user);
+                            msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         }
                         API.logInfo(msg);
 
@@ -3476,7 +4176,7 @@ var BOTCOMMANDS = {
                             msg = botChat.subChat(botChat.chatMessages.mystats, {name: newuser.username, songs: newuser.votes.songs,  woot: newuser.votes.woot, 
                                                                   mehs: newuser.votes.meh, grabs: newuser.votes.curate, tasty: newuser.votes.tasty});
                             basicBot.userUtilities.resetDailyRolledStats(newuser);
-                            msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(newuser);
+                            msg += " Roll Stats: " + TASTY.getRolledStats(newuser);
                         }
                         setTimeout(function () { API.logInfo(msg); }, 1 * 1000);
                     }
@@ -3518,7 +4218,7 @@ var BOTCOMMANDS = {
                                                                      grabs: DocZ.votes.curate, 
                                                                      tasty: DocZ.votes.tasty});
                         basicBot.userUtilities.resetDailyRolledStats(DocZ);
-                        msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(DocZ);
+                        msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
                         API.logInfo(msg);
                     }
                     catch (err) { UTIL.logException("userlistimport: " + err.message); }
@@ -3546,7 +4246,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("I've got " + basicBot.room.newBlacklist.length + " songs on the ban list " + chat.un + ".");
+                        API.sendChat("I've got " + dubBot.room.newBlacklist.length + " songs on the ban list " + chat.un + ".");
                     }
                     catch (err) { UTIL.logException("banlistcount: " + err.message); }
                 }
@@ -3568,8 +4268,8 @@ var BOTCOMMANDS = {
                         if (msg.length > cmd.length) keyword = msg.substring(cmd.length + 1).toUpperCase();
                         botDebug.debugMessage("Keyword: " + keyword, true);
                         var dispMsgs = [];
-                        for (var i = 0; i < basicBot.room.newBlacklist.length; i++) {
-                            var track = basicBot.room.newBlacklist[i];
+                        for (var i = 0; i < dubBot.room.newBlacklist.length; i++) {
+                            var track = dubBot.room.newBlacklist[i];
                             var trackinfo = track.title.toUpperCase() + track.author.toUpperCase();
                             if (trackinfo.indexOf(keyword) > -1) {
                                 var dispMsg = "[" + track.author + " - " + track.title + "] -> " + track.mid;
@@ -3637,12 +4337,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.songstats) {
-                            basicBot.settings.songstats = !basicBot.settings.songstats;
+                        if (SETTINGS.settings.songstats) {
+                            SETTINGS.settings.songstats = !SETTINGS.settings.songstats;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.songstats}));
                         }
                         else {
-                            basicBot.settings.songstats = !basicBot.settings.songstats;
+                            SETTINGS.settings.songstats = !SETTINGS.settings.songstats;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.songstats}));
                         }
                     }
@@ -3684,7 +4384,7 @@ var BOTCOMMANDS = {
                         if (botVar.room.repeatSongs) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
-                        msg += botChat.chatMessages.repeatSongLimit + ': ' + basicBot.settings.repeatSongTime + '. ';
+                        msg += botChat.chatMessages.repeatSongLimit + ': ' + SETTINGS.settings.repeatSongTime + '. ';
 
                         msg +=  'Random Comments' + ': ';
                         if (RANDOMCOMMENTS.settings.randomComments) msg += 'ON';
@@ -3692,12 +4392,12 @@ var BOTCOMMANDS = {
                         msg += '. ';
                                                 
                         msg += botChat.chatMessages.blacklist + ': ';
-                        if (basicBot.settings.blacklistEnabled) msg += 'ON';
+                        if (SETTINGS.settings.blacklistEnabled) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
 
                         msg += botChat.chatMessages.timeguard + ': ';
-                        if (basicBot.settings.timeGuard) msg += 'ON';
+                        if (SETTINGS.settings.timeGuard) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
 
@@ -3711,7 +4411,7 @@ var BOTCOMMANDS = {
                         else msg2 += 'OFF';
                         msg2 += '. ';
 
-                        var launchT = basicBot.room.roomstats.launchTime;
+                        var launchT = dubBot.room.roomstats.launchTime;
                         var durationOnline = Date.now() - launchT;
                         var since = UTIL.msToStr(durationOnline);
                         msg2 += botChat.subChat(botChat.chatMessages.activefor, {time: since});
@@ -3768,8 +4468,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (typeof basicBot.settings.themeLink === "string")
-                            API.sendChat(botChat.subChat(botChat.chatMessages.genres, {link: basicBot.settings.themeLink}));
+                        if (typeof SETTINGS.settings.themeLink === "string")
+                            API.sendChat(botChat.subChat(botChat.chatMessages.genres, {link: SETTINGS.settings.themeLink}));
                     }
                 }
             },
@@ -3782,12 +4482,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.timeGuard) {
-                            basicBot.settings.timeGuard = !basicBot.settings.timeGuard;
+                        if (SETTINGS.settings.timeGuard) {
+                            SETTINGS.settings.timeGuard = !SETTINGS.settings.timeGuard;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.timeguard}));
                         }
                         else {
-                            basicBot.settings.timeGuard = !basicBot.settings.timeGuard;
+                            SETTINGS.settings.timeGuard = !SETTINGS.settings.timeGuard;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.timeguard}));
                         }
 
@@ -3803,9 +4503,9 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        var temp = basicBot.settings.blacklistEnabled;
-                        basicBot.settings.blacklistEnabled = !temp;
-                        if (basicBot.settings.blacklistEnabled) {
+                        var temp = SETTINGS.settings.blacklistEnabled;
+                        SETTINGS.settings.blacklistEnabled = !temp;
+                        if (SETTINGS.settings.blacklistEnabled) {
                           return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.blacklist}));
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.blacklist}));
@@ -3821,12 +4521,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.motdEnabled) {
-                            basicBot.settings.motdEnabled = !basicBot.settings.motdEnabled;
+                        if (SETTINGS.settings.motdEnabled) {
+                            SETTINGS.settings.motdEnabled = !SETTINGS.settings.motdEnabled;
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.motd}));
                         }
                         else {
-                            basicBot.settings.motdEnabled = !basicBot.settings.motdEnabled;
+                            SETTINGS.settings.motdEnabled = !SETTINGS.settings.motdEnabled;
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.motd}));
                         }
                     }
@@ -3946,8 +4646,8 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         var cd = msg.substring(cmd.length + 1);
                         if (!isNaN(cd)) {
-                            basicBot.settings.commandCooldown = cd;
-                            return API.sendChat(botChat.subChat(botChat.chatMessages.commandscd, {name: chat.un, time: basicBot.settings.commandCooldown}));
+                            SETTINGS.settings.commandCooldown = cd;
+                            return API.sendChat(botChat.subChat(botChat.chatMessages.commandscd, {name: chat.un, time: SETTINGS.settings.commandCooldown}));
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.invalidtime, {name: chat.un}));
                     }
@@ -3962,13 +4662,13 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.usercommandsEnabled) {
+                        if (SETTINGS.settings.usercommandsEnabled) {
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.usercommands}));
-                            basicBot.settings.usercommandsEnabled = !basicBot.settings.usercommandsEnabled;
+                            SETTINGS.settings.usercommandsEnabled = !SETTINGS.settings.usercommandsEnabled;
                         }
                         else {
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.usercommands}));
-                            basicBot.settings.usercommandsEnabled = !basicBot.settings.usercommandsEnabled;
+                            SETTINGS.settings.usercommandsEnabled = !SETTINGS.settings.usercommandsEnabled;
                         }
                     }
                 }
@@ -3995,7 +4695,7 @@ var BOTCOMMANDS = {
                                                                      grabs: user.votes.curate, 
                                                                      tasty: user.votes.tasty});
                         basicBot.userUtilities.resetDailyRolledStats(user);
-                        msg += " Roll Stats: " + basicBot.userUtilities.getRolledStats(user);
+                        msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         var byusername = " [ executed by " + chat.un + " ]";
                         if (chat.un !== name) msg += byusername;
                         API.sendChat(msg);
@@ -4062,24 +4762,15 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.welcome) {
-                            basicBot.settings.welcome = !basicBot.settings.welcome;
+                        if (SETTINGS.settings.welcome) {
+                            SETTINGS.settings.welcome = !SETTINGS.settings.welcome;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.welcomemsg}));
                         }
                         else {
-                            basicBot.settings.welcome = !basicBot.settings.welcome;
+                            SETTINGS.settings.welcome = !SETTINGS.settings.welcome;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.welcomemsg}));
                         }
                     }
-                }
-            },
-
-             versionCommand: {  //Added 01/27/2015 Zig
-                command: 'version',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd)                 {
-                    API.sendChat(botChat.subChat(botChat.chatMessages.online, {botname: botVar.botName, version: basicBot.version}));
                 }
             },
 
@@ -4141,24 +4832,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (typeof basicBot.settings.website === "string")
-                            API.sendChat(botChat.subChat(botChat.chatMessages.website, {link: basicBot.settings.website}));
+                        if (typeof SETTINGS.settings.website === "string")
+                            API.sendChat(botChat.subChat(botChat.chatMessages.website, {link: SETTINGS.settings.website}));
                     }
                 }
             },
 
-            //wootCommand: {   //Added 02/18/2015 Zig
-            //    command: 'woot',
-            //    rank: 'user',
-            //    type: 'exact',
-            //    functionality: function (chat, cmd) {
-            //        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-            //        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-            //        else {
-            //            basicBot.roomUtilities.wootThisSong();
-            //        }
-            //    }
-            //},
             origemCommand: {
                 command: 'origem',
                 rank: 'user',
@@ -4170,19 +4849,6 @@ var BOTCOMMANDS = {
                         API.sendChat(botChat.chatMessages.origem);
                     }
                 }
-            },
-            mehCommand: {  //Added 02/14/2015 Zig
-                command: 'meh',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd)                 {
-                  try  {
-                    $("#meh").click();
-                  }  
-                catch(err) {
-                  UTIL.logException("mehCommand: " + err.message);
-                }
-              }
             },
             englishCommand: {
                 command: 'english',
@@ -4277,50 +4943,6 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-            rollCommand: {   //Added 03/30/2015 Zig
-                command: 'roll',
-                rank: 'user',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if (API.getDJ().id !== chat.uid) return API.sendChat(botChat.subChat(botChat.chatMessages.notcurrentdj, {name: chat.un}));
-                        if (basicBot.userUtilities.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.chatMessages.doubleroll, {name: chat.un}));
-                        var msg = chat.message;
-                        var dicesides = 6;
-                        if (msg.length > cmd.length){
-                            var dice = msg.substr(cmd.length + 1);
-                            if (!isNaN(dice)) dicesides = dice;
-                            if (dicesides < 4) dicesides = 4;
-                        }
-                        var rollResults = Math.floor(Math.random() * dicesides) + 1;
-                        basicBot.userUtilities.setRolled(chat.un, true);
-                        var resultsMsg = "";
-                        var wooting = true;
-                        rollResults = 6;
-                        if (rollResults >= (dicesides * 0.5)) {
-                            //Pick a random word for the tasty command
-                            setTimeout(function () { basicBot.userUtilities.tastyVote(API.getCurrentDubUser().id,basicBot.roomUtilities.bopCommand("")); }, 1000);
-                            setTimeout(function () { basicBot.roomUtilities.wootThisSong(); }, 1500);
-                            resultsMsg = botChat.subChat(botChat.chatMessages.rollresultsgood, {name: chat.un, roll: basicBot.roomUtilities.numberToIcon(rollResults)});
-                        }
-                        else {
-                            setTimeout(function () { basicBot.roomUtilities.mehThisSong(); }, 1000);
-                            resultsMsg = botChat.subChat(botChat.chatMessages.rollresultsbad, {name: chat.un, roll: basicBot.roomUtilities.numberToIcon(rollResults)});
-                            wooting = false;
-                        }
-                        API.sendChat(resultsMsg + basicBot.userUtilities.updateRolledStats(chat.un, wooting));
-                        //if (rollResults >= (dicesides * 0.8))
-                        //    setTimeout(function () { basicBot.userUtilities.tastyVote(API.getCurrentDubUser().id, "winner"); }, 1000);
-                        //else if (rollResults <= (dicesides * 0.2))
-                        //    setTimeout(function () { basicBot.roomUtilities.mehThisSong(); }, 1000);
-                    }
-                    catch(err) {
-                        UTIL.logException("rollCommand: " + err.message);
-                    }
-                }
-            },
             meetingCommand: {   //Added 03/28/2015 Zig
                 command: ['meeting', 'lunch', 'beerrun'],
                 rank: 'user',
@@ -4367,62 +4989,6 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-            tastyCommand: {
-                command: ['tasty', 'rock', 'props', 'woot', 'groot', 'groovy', 'jam','nice','bop','cowbell','sax','ukulele','tango','samba','disco','waltz','metal',
-                          'bob','boogie','cavort','conga','flit','foxtrot','frolic','gambol','hop','hustle','jig','jitter','jitterbug','jive','jump','leap','prance','promenade','rhumba',
-                          'shimmy','strut','sway','swing','great','hail','good','acceptable','bad','excellent','exceptional','favorable','marvelous','positive','satisfactory','satisfying',
-                          'superb','valuable','wonderful','ace','boss','bully','capital','choice','crack','pleasing','prime','rad','sound','spanking','sterling','super','superior',
-                          'welcome','worthy','admirable','agreeable','commendable','congenial','deluxe','first-class','first-rate','gnarly','gratifying','honorable','neat','precious',
-                          'recherché','reputable','select','shipshape','splendid','stupendous','keen','nifty','swell','sensational','fine','cool','perfect','wicked','fab','heavy',
-                          'incredible','outstanding','phenomenal','remarkable','special','terrific','unique','aces','capital','dandy','enjoyable','exquisite',
-                          'fashionable','lovely','love','solid','striking','top-notch','slick','pillar','exemplary','alarming','astonishing','awe-inspiring',
-                          'beautiful','breathtaking','fearsome','formidable','frightening','winner','impressive','intimidating','facinating','prodigious',
-                          'magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand',
-                          'creamy','easy','effortless','fluid','gentle','glossy','peaceful','polished','serene','sleek','soft','tranquil','velvety','soothing','fluent','frictionless',
-                          'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
-                          'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
-                          'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
-                          'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
-                          'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','epic','blues','heart','feels','dope','makeitrain','wumbo',
-                          'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
-                          'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
-                          'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
-                          'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','tits','hooters',
-                          'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
-                          'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
-                          '133t','roofus','rufus','schway','shiz','shiznak','shiznik','shiznip','shiznit','shiznot','shizot','shwanky','shway',
-                          'sic','sicc','skippy','slammin','slamming','slinkster','smack','smashing','smashingly','snizzo','spiffylicious','superfly',
-                          'swass','tender','thrill','tight','tits','tizight','todiefor','to die for','trill','tuff','vicious','whizz-bang','wick',
-                          'wow','omg','A-1','ace','aces','aight','allthatandabagofchips','all that and a bag of chips','alrighty','alvo','amped',
-                          'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
-                          'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
-                          'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
-                          'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','classic','clutch',
-                          'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
-                          'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
-                          'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
-                          'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
-                          'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
-                          'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
-                          'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
-                          'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
-                          'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
-                          'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
-                          '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
-                          ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
-                          'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka'],
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        basicBot.userUtilities.tastyVote(chat.uid, cmd);
-                    }
-                    catch(err) {
-                        UTIL.logException("tastyCommand: " + err.message);
-                    }
-                }
-            },
             lastplayedCommand: {
                 command: 'lastplayed',
                 rank: 'user',
@@ -4435,71 +5001,6 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("lastplayed: " + err.message);
-                    }
-                }
-            },
-            exrouletteCommand: {
-                command: ['exroulette','roulette?'],
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("Explain ROULETTE: Managers type .roulette to start the game.  Type .join to join the game. The winner gets moved to a random place in line. It is a Russian roulette in that the new position is random. So, when you win you may get moved back in line.");
-                    }
-                    catch(err) {
-                        UTIL.logException("exroulettecommand: " + err.message);
-                    }
-                }
-            },
-            extastyCommand: {
-                command: ['extasty','tasty?'],
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("Explain TASTY POINTS: This is another way to let your fellow DJs know you enjoy their play.  Since most of us run auto-woot extentions it is just a nice way to let others know when they play an extra tasty selection.");
-                    }
-                    catch(err) {
-                        UTIL.logException("extastycommand: " + err.message);
-                    }
-                }
-            },
-            exmeetingCommand: {
-                command: ['exmeeting', 'exlunch', 'exbeerrun','meeting?', 'lunch?', 'beerrun?'],
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("Explain MEETING: If you have to go afk type, .meeting or .lunch and Larry will remove you from line. When you return hop back in line and Larry will restore your position in line. If you leave the room for over 10 mins you'll lose your spot.");
-                    }
-                    catch(err) {
-                        UTIL.logException("exmeeting: " + err.message);
-                    }
-                }
-            },
-            exmehCommand: {
-                command: ['exmeh','meh?'],
-                rank: 'residentdj',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if(chat.message.length === cmd.length) return API.sendChat('/me No user specified.');
-                        var name = chat.message.substring(cmd.length + 2);
-                        var roomUser = USERS.lookupUserName(name);
-                        if(typeof roomUser === 'boolean') return API.sendChat('/me Invalid user specified.');
-                        var msgSend = "@" + roomUser.username + ": If you find yourself Meh-ing most songs, this isn't the room for you. Serial Meh'ers will be banned. If you don't like the music find a different room please.";
-                        API.sendChat(msgSend);
-                    }
-                    catch(err) {
-                        UTIL.logException("exmeh: " + err.message);
                     }
                 }
             },
@@ -4609,11 +5110,11 @@ var BOTCOMMANDS = {
                             var roomUser = USERS.lookupUserName(name);
                             if(typeof roomUser === 'boolean') return API.chatLog('/me Invalid user specified.');
                             var resetDebug = false;
-                            if (basicBot.room.debug === false) resetDebug = true;
-                            basicBot.room.debug = true;
+                            if (dubBot.room.debug === false) resetDebug = true;
+                            dubBot.room.debug = true;
                             basicBot.roomUtilities.logObject(roomUser, "User");
                             botDebug.debugMessage("JSON: " + JSON.stringify(roomUser), true);
-                            if (resetDebug) basicBot.room.debug = false;
+                            if (resetDebug) dubBot.room.debug = false;
                         }
                     }
                     catch(err) { UTIL.logException("loguserCommand: " + err.message); }
@@ -4698,28 +5199,6 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-            eightballCommand: {   //Added 04/01/2015 Zig
-                command: ['8ball', 'eightball', 'larry'],
-                rank: 'user',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var msg = chat.message;
-                        var magicResponse = basicBot.roomUtilities.eightBallSelect();
-                        if (msg.length === cmd.length)  return API.sendChat(botChat.subChat(botChat.chatMessages.eightballresponse2, {name: chat.un, response: magicResponse }));
-                        var myQuestion = msg.substring(cmd.length + 1);
-                        API.sendChat(botChat.subChat(botChat.chatMessages.eightballquestion, {name: chat.un, question: myQuestion}));
-                        setTimeout(function () {
-                            API.sendChat(botChat.subChat(botChat.chatMessages.eightballresponse1, {response: magicResponse}));
-                        }, 500);
-                    }
-                    catch(err) {
-                        UTIL.logException("eightballCommand: " + err.message);
-                    }
-                }
-            },
             zigbanCommand: {
                 command: 'zigban',
                 rank: 'manager',
@@ -4740,19 +5219,6 @@ var BOTCOMMANDS = {
                             $(".icon-chat").click();
                         }, 1000);
                     }, 1000);
-                }
-            },
-            zigaCommand: {
-                command: 'ziga',
-                rank: 'cohost',
-                type: 'exact',
-                functionality: function (chat, cmd)  {
-                    try {
-                        API.botDjNow();
-                    }
-                    catch(err) {
-                        UTIL.logException("zigaCommand: " + err.message);
-                    }
                 }
             },
             zigaaCommand: {
@@ -4808,8 +5274,8 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        basicBot.room.debug = (!basicBot.room.debug);
-                        API.logInfo("Debug = " + basicBot.room.debug);
+                        dubBot.room.debug = (!dubBot.room.debug);
+                        API.logInfo("Debug = " + dubBot.room.debug);
                     }
                     catch(err) { UTIL.logException("debugCommand: " + err.message); }
                 }
@@ -4822,8 +5288,8 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        basicBot.settings.gifEnabled = (!basicBot.settings.gifEnabled);
-                        API.logInfo("GifEnabled = " + basicBot.room.debug);
+                        SETTINGS.settings.gifEnabled = (!SETTINGS.settings.gifEnabled);
+                        API.logInfo("GifEnabled = " + SETTINGS.settings.gifEnabled);
                     }
                     catch(err) { UTIL.logException("gifenabledCommand: " + err.message); }
                 }
@@ -4881,8 +5347,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (typeof basicBot.settings.youtubeLink === "string")
-                            API.sendChat(botChat.subChat(botChat.chatMessages.youtube, {name: chat.un, link: basicBot.settings.youtubeLink}));
+                        if (typeof SETTINGS.settings.youtubeLink === "string")
+                            API.sendChat(botChat.subChat(botChat.chatMessages.youtube, {name: chat.un, link: SETTINGS.settings.youtubeLink}));
                     }
                 }
             }
@@ -4895,3 +5361,5 @@ if (!window.APIisRunning) {
   setTimeout(API.main.initbot, 1000);
 }
 // basicBot.chat -> botChat.chatMessages
+// dubBot.room. cBot.room.
+// rollCommand, 8ball, random comments, tasty comments, user stats, song stat, ban list, time limit
