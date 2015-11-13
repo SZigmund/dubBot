@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00042",
+  version: "Version 1.01.1.00043",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -1185,8 +1185,8 @@ var UTIL = {
 //SECTION ROLL: All Roll functionality
 var TASTY = {
     settings: {
-	  rolled: false
-	}
+	  rolledDice: false
+	},
 	resetDailyRolledStats: function (roomUser) {
 		try {
 		var DOY = UTIL.getDOY();
@@ -1256,7 +1256,7 @@ var TASTY = {
 		//API.sendChat(subChat(botChat.getChatMessage("tastyvote"), {name: cmd.username}));
 		setTimeout(function () { API.sendChat(subChat(tastyComment, {pointfrom: cmd.username})); }, 1000);
 	
-		botVar.songStats.tastyCount += 1;
+		botVar.songStats.tastyCount++;
 		//todoer USERS: var currdj = USERS.lookupUser(dj.id);
 		//todoer USERS: currdj.votes.tasty += 1;
 		}
@@ -2268,7 +2268,8 @@ var API = {
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
-	  TASTY.settings.rolled = false;
+	  TASTY.settings.rolledDice = false;
+	  botVar.songStats.tastyCount = 0;
       var songName = $(".currentSong").text();
       var djName = $(".currentDJSong").text();
       var dubCount = $(".dubup.dub-counter").text();
@@ -2715,7 +2716,7 @@ var BOTCOMMANDS = {
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         //todoer USERS: if (API.getDJ().id !== chat.uid) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
                         if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
-						if (TASTY.settings.rolled === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
+						if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
                         var dicesides = 6;
                         if (msg.length > cmd.length){
@@ -2740,7 +2741,7 @@ var BOTCOMMANDS = {
                             wooting = false;
                         }
                         API.sendChat(resultsMsg + TASTY.updateRolledStats(chat.un, wooting));
-						TASTY.settings.rolled = true;
+						TASTY.settings.rolledDice = true;
                         //if (rollResults >= (dicesides * 0.8))
                         //    setTimeout(function () { TASTY.tastyVote(API.getCurrentDubUser().id, "winner"); }, 1000);
                         //else if (rollResults <= (dicesides * 0.2))
