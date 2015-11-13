@@ -2,7 +2,7 @@
 //SECTION Var: All global variables:
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00021",
+  version: "Version 1.01.1.00022",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -453,7 +453,7 @@ var botChat = {
 };
 //SECTION UTIL: Core functionality:
 var UTIL = {
-  var linkFixer = function (msg) {
+  linkFixer: function (msg) {
         var parts = msg.splitBetween('<a href="', '<\/a>');
         for (var i = 1; i < parts.length; i = i + 2) {
             var link = parts[i].split('"')[0];
