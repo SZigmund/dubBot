@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00030",
+  version: "Version 1.01.1.00031",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -260,7 +260,7 @@ var SETTINGS = {
         }
 
     },
-    var storeToStorage = function () {
+    storeToStorage: function () {
         try {
         botDebug.debugMessage("START: storeToStorage", true);
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
@@ -2594,7 +2594,27 @@ var BOTCOMMANDS = {
                         UTIL.logException("zigbCommand: " + err.message);
                     }
                 }
-            }
+            },
+            zigCommand: {  //Added 02/14/2015 Zig 
+                command: 'zig',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var msg = chat.message;
+                        var maxTime = msg.substring(cmd.length + 1);
+                        if (!isNaN(maxTime)) {
+                            if (maxTime === "1") SETTINGS.storeToStorage();
+							if (maxTime === "2") SETTINGS.retrieveFromStorage();
+							if (maxTime === "3") SETTINGS.retrieveSettings();
+							if (maxTime === "4")
+                        }
+                        else return API.sendChat(botChat.subChat(botChat.chatMessages.invalidtime, {name: chat.un}));
+                    }
+                }
+            },
 
             /*
             activeCommand: {
@@ -3357,7 +3377,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        storeToStorage();
+                        SETTINGS.storeToStorage();
                         API.sendChat(botChat.chatMessages.kill);
                         basicBot.disconnectAPI();
                         setTimeout(function () { UTIL.killbot(); }, 1000);
@@ -3777,7 +3797,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        storeToStorage();
+                        SETTINGS.storeToStorage();
                         basicBot.disconnectAPI();
                         setTimeout(function () {
                             window.location.reload(false);
@@ -3796,7 +3816,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         API.sendChat(botChat.chatMessages.reload);
-                        storeToStorage();
+                        SETTINGS.storeToStorage();
                         basicBot.disconnectAPI();
 						UTIL.killbot();
                         setTimeout(function () { $.getScript(basicBot.scriptLink); }, 2000);
@@ -3813,7 +3833,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         API.sendChat(botChat.chatMessages.reload);
-                        storeToStorage();
+                        SETTINGS.storeToStorage();
                         basicBot.disconnectAPI();
                         UTIL.killbot();
                         setTimeout(function () { $.getScript(basicBot.scriptTestLink); }, 2000);
