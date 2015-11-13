@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00043",
+  version: "Version 1.01.1.00046",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -506,17 +506,17 @@ var botChat = {
 		if (ch >= 'A' && ch <= 'Z') capitals++;
 	}
 	if (capitals >= 40) {
-		API.sendChat(subChat(botChat.getChatMessage("caps"), {name: chat.un}));
+		API.sendChat(botChat.subChat(botChat.getChatMessage("caps"), {name: chat.un}));
 		return true;
 	}
 	msg = msg.toLowerCase();
 	if (msg === 'skip') {
-		API.sendChat(subChat(botChat.getChatMessage("askskip"), {name: chat.un}));
+		API.sendChat(botChat.subChat(botChat.getChatMessage("askskip"), {name: chat.un}));
 		return true;
 	}
 	for (var j = 0; j < botChat.spam.length; j++) {
 		if (msg === botChat.spam[j]) {
-			API.sendChat(subChat(botChat.spam, {name: chat.un}));
+			API.sendChat(botChat.subChat(botChat.spam, {name: chat.un}));
 			return true;
 		}
 	}
@@ -779,7 +779,7 @@ var botChat = {
 		}
 		if (msg.indexOf('http://adf.ly/') > -1) {
 			API.moderateDeleteChat(chat.cid);
-			API.sendChat(subChat(botChat.getChatMessage("adfly"), {name: chat.un}));
+			API.sendChat(botChat.subChat(botChat.getChatMessage("adfly"), {name: chat.un}));
 			return true;
 		}
 		if (msg.indexOf('autojoin was not enabled') > 0 || msg.indexOf('AFK message was not enabled') > 0 || msg.indexOf('.afkdisable') > 0 || msg.indexOf('.joindisable') > 0 || msg.indexOf('autojoin disabled') > 0 || msg.indexOf('AFK message disabled') > 0) {
@@ -864,14 +864,15 @@ var botChat = {
       if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
       botDebug.debugMessage("User: " + username, false);
-      for (var i = chatItems.length -1; i >= itemHistory.chatCount; i--) {
+	  var historyChatCount = itemHistory.chatCount;
+      itemHistory.chatCount = chatItems.length;
+      for (var i = chatItems.length -1; i >= historyChatCount; i--) {
           var node = chatItems[i];
           var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
           chatMsg = chatMsg.replace(username, "");
           botChat.processChatItem(chatMsg, username);
       }
       //todoer Process any unprocessed messages:
-      itemHistory.chatCount = chatItems.length;
       //todoer botVar.chatHistoryList.push(new botVar.chatHistoryList(chatID, chatCount));
 
       //var streamItems = document.getElementsByClassName("stream-item-content");
@@ -1190,11 +1191,11 @@ var TASTY = {
 	resetDailyRolledStats: function (roomUser) {
 		try {
 		var DOY = UTIL.getDOY();
-		if (roomUser.rollStats.DOY !== DOY) {
-			roomUser.rollStats.DOY = DOY;
-			roomUser.rollStats.dayWoot = 0;
-			roomUser.rollStats.dayTotal = 0;
-		}
+		//todoer USER: if (roomUser.rollStats.DOY !== DOY) {
+		//todoer USER: 	roomUser.rollStats.DOY = DOY;
+		//todoer USER: 	roomUser.rollStats.dayWoot = 0;
+		//todoer USER: 	roomUser.rollStats.dayTotal = 0;
+		//todoer USER: }
 	  }
 		catch(err) {
 		  UTIL.logException("resetDailyRolledStats: " + err.message);
@@ -1203,11 +1204,12 @@ var TASTY = {
 	},
 	getRolledStats: function (roomUser) {
 		try {
-		   var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
-		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
-		   rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
-		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
-		   return rollStats;
+		   return "";
+		   //todoer USER: var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
+		   //todoer USER: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
+		   //todoer USER: rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
+		   //todoer USER: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
+		   //todoer USER: return rollStats;
 		}
 		catch(err) {
 		  UTIL.logException("getRolledStats: " + err.message);
@@ -1216,14 +1218,14 @@ var TASTY = {
 	},
 	updateRolledStats: function (username, wooting) {
 		try {
-		var roomUser = USERS.lookupUserName(username);
-		TASTY.resetDailyRolledStats(roomUser);
-		if (wooting) {
-			roomUser.rollStats.lifeWoot++;
-			roomUser.rollStats.dayWoot++;
-		}
-		roomUser.rollStats.lifeTotal++;
-		roomUser.rollStats.dayTotal++;
+		//todoer USER: var roomUser = USERS.lookupUserName(username);
+		//todoer USER: TASTY.resetDailyRolledStats(roomUser);
+		//todoer USER: if (wooting) {
+		//todoer USER: 	roomUser.rollStats.lifeWoot++;
+		//todoer USER: 	roomUser.rollStats.dayWoot++;
+		//todoer USER: }
+		//todoer USER: roomUser.rollStats.lifeTotal++;
+		//todoer USER: roomUser.rollStats.dayTotal++;
 		return TASTY.getRolledStats(roomUser);
 	  }
 		catch(err) {
@@ -1240,7 +1242,7 @@ var TASTY = {
 		//todeor USER: return user.rolled;
 		return false;
 	},
-	tastyVote: function (userId, cmd) {
+	tastyVote: function (username, cmd) {
 		try {
 		//todoer USERS: var user = USERS.lookupUser(userId);
 		//todoer USERS: if (user.tastyVote) return;
@@ -1248,13 +1250,18 @@ var TASTY = {
 		//todoer USERS: if (typeof dj === 'undefined') return;
 		//todoer USERS: if (dj.id === userId) 
 		//todoer USERS: {
-		//todoer USERS:    API.sendChat("I'm glad you find your own play tasty @" + user.username);
+		//todoer USERS:    API.sendChat("I'm glad you find your own play tasty @" + username);
 		//todoer USERS:    return;
 		//todoer USERS: }
+		if (API.currentDjName() === username)
+		{
+		    API.sendChat("I'm glad you find your own play tasty @" + username);
+		    return;
+		 }
 		var tastyComment = TASTY.tastyComment(cmd);
 		//todoer USERS: user.tastyVote = true;
-		//API.sendChat(subChat(botChat.getChatMessage("tastyvote"), {name: cmd.username}));
-		setTimeout(function () { API.sendChat(subChat(tastyComment, {pointfrom: cmd.username})); }, 1000);
+		//API.sendChat(botChat.subChat(botChat.getChatMessage("tastyvote"), {name: username}));
+		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: username})); }, 1000);
 	
 		botVar.songStats.tastyCount++;
 		//todoer USERS: var currdj = USERS.lookupUser(dj.id);
@@ -2177,6 +2184,7 @@ var API = {
   getCurrentDubUser: function () {
 	  //todoer COMPLETE
 	//return API.getUser();
+	return USERS.User(0, botVar.botName);
   },
   getDubUserID: function (userid) {
 	try {
@@ -2253,7 +2261,18 @@ var API = {
 		API.chatLog(message);
 	
   },
-
+  currentDjName: function() {
+    try {
+	  var userInfo = document.getElementsByClassName("infoContainerInner");
+	  botDebug.debugMessage("userInfo count: " + userInfo.length, true);
+	  var spans = userInfo[0].getElementsByClassName("currentDJSong");
+	  var djName = spans[0].innerHTML;
+	  botDebug.debugMessage("djName: " + djName);
+	  djName = djName.replace("is playing", "");
+	  botDebug.debugMessage("djName: " + djName.trim());
+	  return djName.trim();
+	}
+  },
   logInfo: function(msg) {  // Log info to console
 	try {
 	   console.log("INFO: " + msg);
@@ -2271,7 +2290,7 @@ var API = {
 	  TASTY.settings.rolledDice = false;
 	  botVar.songStats.tastyCount = 0;
       var songName = $(".currentSong").text();
-      var djName = $(".currentDJSong").text();
+      var djName = API.currentDjName();
       var dubCount = $(".dubup.dub-counter").text();
       var mehCount = $(".dubdown.dub-counter").text();
 
@@ -2676,7 +2695,7 @@ var BOTCOMMANDS = {
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
-                        TASTY.tastyVote(chat.uid, cmd);
+                        TASTY.tastyVote(chat.un, cmd);
                     }
                     catch(err) {
                         UTIL.logException("tastyCommand: " + err.message);
@@ -2714,7 +2733,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        //todoer USERS: if (API.getDJ().id !== chat.uid) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
+						if (API.currentDjName() !== chat.un) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
                         if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
 						if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
@@ -2731,7 +2750,7 @@ var BOTCOMMANDS = {
                         rollResults = 6;
                         if (rollResults >= (dicesides * 0.5)) {
                             //Pick a random word for the tasty command
-                            setTimeout(function () { TASTY.tastyVote(API.getCurrentDubUser().id,TASTY.bopCommand("")); }, 1000);
+                            setTimeout(function () { TASTY.tastyVote(chat.un, TASTY.bopCommand("")); }, 1000);
                             setTimeout(function () { API.wootThisSong(); }, 1500);
                             resultsMsg = botChat.subChat(botChat.getChatMessage("rollresultsgood"), {name: chat.un, roll: UTIL.numberToIcon(rollResults)});
                         }
@@ -2743,7 +2762,7 @@ var BOTCOMMANDS = {
                         API.sendChat(resultsMsg + TASTY.updateRolledStats(chat.un, wooting));
 						TASTY.settings.rolledDice = true;
                         //if (rollResults >= (dicesides * 0.8))
-                        //    setTimeout(function () { TASTY.tastyVote(API.getCurrentDubUser().id, "winner"); }, 1000);
+                        //    setTimeout(function () { TASTY.tastyVote(chat.un, "winner"); }, 1000);
                         //else if (rollResults <= (dicesides * 0.2))
                         //    setTimeout(function () { API.mehThisSong(); }, 1000);
                     }
@@ -2898,7 +2917,7 @@ var BOTCOMMANDS = {
 							if (maxTime === "3") SETTINGS.retrieveSettings();
 							if (maxTime === "4") API.mehThisSong();
 							if (maxTime === "5") API.wootThisSong();
-							if (maxTime === "6") TASTY.tastyVote(0, "winner");
+							if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
                         }
                         else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
                     }
@@ -4435,6 +4454,7 @@ var BOTCOMMANDS = {
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
+					//<a class="ytp-title-link yt-uix-sessionlink" tabindex="13" target="_blank" data-sessionlink="feature=player-title" href="https://www.youtube.com/watch?v=4pjCcIh9O5c">Mase-Feel So Good</a>
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if ((!BOTCOMMANDS.commands.executable(this.rank, chat)) && chat.uid !== botVar.botID) return void (0);
                         var histIndex = "2"; //Default to 2nd song on the list, or the last song played
