@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00036",
+  version: "Version 1.01.1.00037",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -674,8 +674,8 @@ var botChat = {
    botChat.chatmessages.push(["voteratio", "/me [@%%NAME%%] @%%USERNAME%% ~ woots: %%WOOT%%, mehs: %%MEHS%%, ratio (w/m): %%RATIO%%."]);
    botChat.chatmessages.push(["website", "/me Please visit our website: %%LINK%%"]);
    botChat.chatmessages.push(["youtube", "/me [%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
-   botChat.chatmessages.push(["songstatistics", "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
-   botChat.chatmessages.push(["mystats":  "%%NAME%% [:musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatmessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
+   botChat.chatmessages.push(["mystats", "%%NAME%% [:musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatmessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
    botChat.chatmessages.push(["songstatisticstasty", "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatmessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
