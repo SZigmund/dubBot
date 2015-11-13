@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00031",
+  version: "Version 1.01.1.00032",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -1871,7 +1871,7 @@ var API = {
 	   UTIL.logException("getWaitListPosition: " + err.message);
 	}
   },
-  mehThisSong: function ()
+  mehThisSong: function () {
 	try  {
          $('.dubdown').click();
 		//$("#meh").click();
@@ -2609,7 +2609,9 @@ var BOTCOMMANDS = {
                             if (maxTime === "1") SETTINGS.storeToStorage();
 							if (maxTime === "2") SETTINGS.retrieveFromStorage();
 							if (maxTime === "3") SETTINGS.retrieveSettings();
-							if (maxTime === "4")
+							if (maxTime === "4") API.mehThisSong();
+							if (maxTime === "5") API.wootThisSong();
+							if (maxTime === "6") TASTY.tastyVote(0, "winner");
                         }
                         else return API.sendChat(botChat.subChat(botChat.chatMessages.invalidtime, {name: chat.un}));
                     }
