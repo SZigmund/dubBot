@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00035",
+  version: "Version 1.01.1.00036",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -506,7 +506,186 @@ var botChat = {
 		'gringo', 'fuder', 'foder', 'hua', 'ahue', 'modafuka', 'modafoka', 'mudafuka', 'mudafoka', 'ooooooooooooooo', 'foda'],
   curses: ['nigger', 'faggot', 'nigga', 'niqqa', 'motherfucker', 'modafocka'],
   //chatMessages: null,
-  loadChat: function (cb) {
+
+  loadChat: function () {
+   botChat.chatmessages.push(["nodatafound", "No previous data found."]);
+   botChat.chatmessages.push(["retrievingdata", "Retrieving previously stored data."]);
+   botChat.chatmessages.push(["datarestored", "Previously stored data successfully retrieved."]);
+   botChat.chatmessages.push(["greyuser", "Only bouncers and up can run a bot."]);
+   botChat.chatmessages.push(["bouncer", "The bot can't move people when it's run as a bouncer."]);
+   botChat.chatmessages.push(["online", "/me %%BOTNAME%% v%%VERSION%% online!"]);
+
+   botChat.chatmessages.push(["validgiftags", "/me [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Tags: %%TAGS%%]"]);
+   botChat.chatmessages.push(["invalidgiftags", "/me [@%%NAME%%] Invalid tags, try something different. [Tags: %%TAGS%%]"]);
+   botChat.chatmessages.push(["validgifrandom", "/me [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Random GIF]"]);
+   botChat.chatmessages.push(["invalidgifrandom", "/me [@%%NAME%%] Invalid request, try again."]);
+   botChat.chatmessages.push(["logout", "/me [@%%NAME%%] Logging out %%BOTNAME%%"]);
+
+   botChat.chatmessages.push(["welcome", "/me Welcome %%NAME%%.  Check out our room rules here: http://tinyurl.com/TastyTunesRules"]);
+   botChat.chatmessages.push(["welcomeback", "/me Welcome back, %%NAME%%"]);
+   botChat.chatmessages.push(["songknown", "/me :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:"]);
+   botChat.chatmessages.push(["songknown2", "/me :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:"]);
+   botChat.chatmessages.push(["timelimit", "/me @%%NAME%% your song is longer than %%MAXLENGTH%% minutes, you need permission to play longer songs."]);
+   botChat.chatmessages.push(["permissionownsong", "/me :up: @%%NAME%% has permission to play their own production!"]);
+   botChat.chatmessages.push(["isblacklisted", "/me @%%NAME%% [%%SONG%%]] is banned in this room! Skipping song...Please read the rules before you play your next play."]);
+   botChat.chatmessages.push(["whois", "/me [%%NAME1%%] Username: %%NAME2%%, ID: %%ID%%, Rank: %%RANK%%, Joined: %%JOINED%%, Level: %%LEVEL%%, Language: %%LANGUAGE%%, Avatar: %%AVATAR%%%%PROFILE%%"]);
+
+   botChat.chatmessages.push(["notghosting", "[%%NAME1%%] %%NAME2%% is not ghosting."]);
+   botChat.chatmessages.push(["ghosting", "[%%NAME1%%] %%NAME2%% is either ghosting or not here."]);
+
+   botChat.chatmessages.push(["isopen", "/me @djs - The roulette is now open! Type .join to participate!"]);
+   botChat.chatmessages.push(["winnerpicked", "/me A winner has been picked! @%%NAME%% to position %%POSITION%%."]);
+
+
+   botChat.chatmessages.push(["alreadyadding", "/me User is already being added! Changed the desired position to %%POSITION%%."]);
+   botChat.chatmessages.push(["adding", "/me Added @%%NAME%% to the queue. Current queue: %%POSITION%%."]);
+
+
+   botChat.chatmessages.push(["usernotfound", "/me User not found."]);
+   botChat.chatmessages.push(["notdisconnected", "/me @%%NAME%% did not disconnect during my time here."]);
+   botChat.chatmessages.push(["noposition", "/me No last position known. The waitlist needs to update at least once to register a user's last position."]);
+   botChat.chatmessages.push(["toolongago", "/me @%%NAME%%'s last disconnect (DC or leave) was too long ago: %%TIME%%."]);
+   botChat.chatmessages.push(["valid", "/me @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatmessages.push(["meetingreturn", "/me @%%NAME%% how was your meeting?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatmessages.push(["lunchreturn", "/me @%%NAME%% how was lunch?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatmessages.push(["beerrunreturn", "/me @%%NAME%% What kind of :beer: did you buy?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatmessages.push(["meetingleave", "/me %%NAME%% enjoy your meeting. :sleeping: (Position: %%POS%%)"]);
+   botChat.chatmessages.push(["lunchleave", "/me %%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)"]);
+   botChat.chatmessages.push(["beerrunleave", "/me %%NAME%% Going to get some :beer:. (Position: %%POS%%)"]);
+
+
+   botChat.chatmessages.push(["warning1", "/me @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
+   botChat.chatmessages.push(["warning2", "/me @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
+   botChat.chatmessages.push(["afkremove", "/me @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatmessages.push(["afkUserReset", "/me Thanks @%%NAME%% your afk status has been reset. "]);
+
+
+   botChat.chatmessages.push(["caps", "/me @%%NAME%% unglue your capslock button please."]);
+   botChat.chatmessages.push(["askskip", "/me @%%NAME%% don't ask for skips."]);
+   botChat.chatmessages.push(["spam", "/me @%%NAME%% please don't spam."]);
+   botChat.chatmessages.push(["roomadvertising", "/me @%%NAME%% don't post links to other rooms please."]);
+   botChat.chatmessages.push(["adfly", "/me @%%NAME%% please change your autowoot program. We suggest PlugCubed: http://plugcubed.net/"]);
+
+
+   botChat.chatmessages.push(["invalidtime", "/me [@%%NAME%%] Invalid time specified."]);
+   botChat.chatmessages.push(["nouserspecified", "/me [@%%NAME%%] No user specified."]);
+   botChat.chatmessages.push(["invaliduserspecified", "/me [@%%NAME%%] Invalid user specified."]);
+   botChat.chatmessages.push(["nolistspecified", "/me [@%%NAME%%] No list specified."]);
+   botChat.chatmessages.push(["invalidlistspecified", "/me [@%%NAME%%] Invalid list specified."]);
+   botChat.chatmessages.push(["novaliduserspecified", "/me [@%%NAME%%] No valid user specified."]);
+   botChat.chatmessages.push(["nolimitspecified", "/me [@%%NAME%%] No limit specified."]);
+   botChat.chatmessages.push(["invalidlimitspecified", "/me [@%%NAME%%] Invalid limit."]);
+   botChat.chatmessages.push(["invalidpositionspecified", "/me [@%%NAME%%] Invalid position specified."]);
+   botChat.chatmessages.push(["toggleon", "/me [@%%NAME%%] %%FUNCTION%% enabled."]);
+   botChat.chatmessages.push(["toggleoff", "/me [@%%NAME%%] %%FUNCTION%% disabled."]);
+   botChat.chatmessages.push(["afkremoval", "AFK removal"]);
+   botChat.chatmessages.push(["afksremoved", "AFK's removed"]);
+   botChat.chatmessages.push(["afklimit", "AFK limit"]);
+   botChat.chatmessages.push(["repeatSongs", "Skip History"]);
+   botChat.chatmessages.push(["repeatSongLimit", "Skip History limit"]);
+   botChat.chatmessages.push(["autoskip", "autoskip"]);
+   botChat.chatmessages.push(["newblacklisted", "/me [@%%NAME%%] Adding song to ban list: [ %%AUTHOR%% - %%TITLE%% - %%MID%% ]"]);
+   botChat.chatmessages.push(["blinfo", "[@%%NAME%%] Song info - author: %%AUTHOR%%, title: %%TITLE%%, mid: %%SONGID%%"]);
+   botChat.chatmessages.push(["blacklist", "blacklist"]);
+   botChat.chatmessages.push(["cycleguard", "cycleguard"]);
+   botChat.chatmessages.push(["timeguard", "timeguard"]);
+   botChat.chatmessages.push(["chatfilter", "chatfilter"]);
+   botChat.chatmessages.push(["lockdown", "lockdown"]);
+   botChat.chatmessages.push(["lockguard", "lockguard"]);
+   botChat.chatmessages.push(["usercommands", "usercommands"]);
+   botChat.chatmessages.push(["motd", "MotD"]);
+   botChat.chatmessages.push(["welcomemsg", "welcome message"]);
+   botChat.chatmessages.push(["songstats", "song statistics"]);
+   botChat.chatmessages.push(["etarestriction", "eta restriction"]);
+   botChat.chatmessages.push(["voteskip", "voteskip"]);
+   botChat.chatmessages.push(["voteskiplimit", "/me [@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
+   botChat.chatmessages.push(["voteskipexceededlimit", "/me @%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
+   botChat.chatmessages.push(["voteskipinvalidlimit", "/me [@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
+   botChat.chatmessages.push(["voteskipsetlimit", "/me [@%%NAME%%] Voteskip limit set to %%LIMIT%%."]);
+   botChat.chatmessages.push(["activeusersintime", "/me [@%%NAME%% There have been %%AMOUNT%% users chatting in the past %%TIME%% minutes."]);
+   botChat.chatmessages.push(["maximumafktimeset", "/me [@%%NAME%%] Maximum afk duration set to %%TIME%% minutes."]);
+   botChat.chatmessages.push(["afkstatusreset", "/me [@%%NAME%%] Reset the afk status of @%%USERNAME%%."]);
+   botChat.chatmessages.push(["inactivefor", "/me [@%%NAME%%] @%%USERNAME%% has been inactive for %%TIME%%."]);
+   botChat.chatmessages.push(["autowoot", "/me We recommend PlugCubed for autowooting: http://plugcubed.net/"]);
+   botChat.chatmessages.push(["brandambassador", "/me A Brand Ambassador is the voice of the plug.dj users. They promote events, engage the community and share the plug.dj message around the world. For more info: https://plug.dj/ba"]);
+   botChat.chatmessages.push(["origem", "/me To install Origem-Woot go here: http://origem-woot.com/Instalation/"]);
+   botChat.chatmessages.push(["bouncerplusrank", "/me [@%%NAME%%] You have to be manager or up to enable Bouncer+."]);
+   botChat.chatmessages.push(["chatcleared", "/me [@%%NAME%%] Cleared the chat."]);
+   botChat.chatmessages.push(["deletechat", "/me [@%%NAME%%] Cleared the chat of %%USERNAME%%."]);
+   botChat.chatmessages.push(["commandslink", "/me %%BOTNAME%% commands: %%LINK%%"]);
+   botChat.chatmessages.push(["eatcookie", "/me eats a cookie."]);
+   botChat.chatmessages.push(["nousercookie", "/em doesn't see %%NAME%% in room and eats a cookie himself."]);
+   botChat.chatmessages.push(["selfcookie", "/me @%%NAME%% you're a bit greedy, aren't you? Giving cookies to yourself, bah. Share some with other people!"]);
+   botChat.chatmessages.push(["cookie", "/me @%%NAMETO%%, @%%NAMEFROM%% %%COOKIE%%"]);
+   botChat.chatmessages.push(["cycleguardtime", "/me [@%%NAME%%] The cycleguard is set to %%TIME%% minute(s)."]);
+   botChat.chatmessages.push(["dclookuprank", "/me [@%%NAME%%] Only bouncers and above can do a lookup for others."]);
+   botChat.chatmessages.push(["bootrank", "/me [@%%NAME%%] Only bouncers and above can boot other users."]);
+   botChat.chatmessages.push(["bootableDisabled", "/me [@%%NAME%%] line removal canceled. %%USERBYNAME%%"]);
+   botChat.chatmessages.push(["bootableEnabled", "/me By request [@%%NAME%%] will get removed from line after next song. %%USERBYNAME%%"]);
+   botChat.chatmessages.push(["emojilist", "/me Emoji list: %%LINK%%"]);
+   botChat.chatmessages.push(["notinwaitlist", "/me %%NAME%% you are not on the waitlist."]);
+   botChat.chatmessages.push(["doubleroll", "/me %%NAME%% you already rolled. Sorry no double dipping."]);
+   botChat.chatmessages.push(["rollresults", "/me %%NAME%% you rolled a %%ROLL%%"]);
+   botChat.chatmessages.push(["rollresultsgood", "/me Nice %%NAME%% you rolled a %%ROLL%%"]);
+   botChat.chatmessages.push(["rollresultsbad", "/me Bummer %%NAME%% you rolled a %%ROLL%%"]);
+   botChat.chatmessages.push(["notcurrentdj", "/me %%NAME%% you are not the current dj."]);
+   botChat.chatmessages.push(["eta", "/me @%%NAME%% you will reach the booth in approximately %%TIME%%."]);
+   botChat.chatmessages.push(["facebook", "/me Like us on facebook: %%LINK%%"]);
+   botChat.chatmessages.push(["starterhelp", "/me This image will get you started on plug: %%LINK%%"]);
+   botChat.chatmessages.push(["roulettejoin", "/me @%%NAME%% joined the roulette! (.leave if you regret it.)"]);
+   botChat.chatmessages.push(["jointime", "/me [@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
+   botChat.chatmessages.push(["kickrank", "/me [@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
+   botChat.chatmessages.push(["kick", "/me [@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
+   botChat.chatmessages.push(["kill", "/me Shutting down."]);
+   botChat.chatmessages.push(["rouletteleave", "/me @%%NAME%% left the roulette!"]);
+   botChat.chatmessages.push(["songlink", "/me [@%%NAME%%] Link to current song: %%LINK%%"]);
+   botChat.chatmessages.push(["usedlockskip", "/me [%%NAME%% used lockskip.]"]);
+   botChat.chatmessages.push(["lockskippos", "/me [@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
+   botChat.chatmessages.push(["lockguardtime", "/me [@%%NAME%%] The lockguard is set to %%TIME%% minute(s)."]);
+   botChat.chatmessages.push(["maxlengthtime", "/me [@%%NAME%%] The maximum song duration is set to %%TIME%% minutes."]);
+   botChat.chatmessages.push(["motdset", "/me MotD set to:  %%MSG%%"]);
+   botChat.chatmessages.push(["motdintervalset", "/me MotD interval set to %%INTERVAL%%."]);
+   botChat.chatmessages.push(["addbotwaitlist", "/me @%%NAME%% don't try to add me to the waitlist, please."]);
+   botChat.chatmessages.push(["move", "/me [%%NAME%% used move.]"]);
+   botChat.chatmessages.push(["mutednotime", "/me [@%%NAME%%] Muted @%%USERNAME%%."]);
+   botChat.chatmessages.push(["mutedmaxtime", "/me [@%%NAME%%] You can only mute for maximum %%TIME%% minutes."]);
+   botChat.chatmessages.push(["mutedtime", "/me [@%%NAME%%] Muted @%%USERNAME%% for %%TIME%% minutes."]);
+   botChat.chatmessages.push(["unmuted", "/me [@%%NAME%%] Unmuted @%%USERNAME%%."]);
+   botChat.chatmessages.push(["muterank", "/me [@%%NAME%%] You can't mute persons with an equal or higher rank than you."]);
+   botChat.chatmessages.push(["oplist", "/me OP list: %%LINK%%"]);
+   botChat.chatmessages.push(["pong", "/me Pong!"]);
+   botChat.chatmessages.push(["reload", "/me Be right back."]);
+   botChat.chatmessages.push(["removenotinwl", "/me [@%%NAME%%] Specified user @%%USERNAME%% is not in the waitlist."]);
+   botChat.chatmessages.push(["roomrules", "This is an English speaking community for English speaking music. We play a wide variety of music. Please avoid Dubstep, EDM, Mashups, and children music. Check out all of our rules: %%LINK%%"]);
+   botChat.chatmessages.push(["sessionstats", "/me [@%%NAME%%] Total woots: %%WOOTS%%, total mehs: %%MEHS%%, total grabs: %%GRABS%%."]);
+   botChat.chatmessages.push(["skip", "/me [%%NAME%% used skip.]"]);
+   botChat.chatmessages.push(["madeby", "/me This bot was made by %%NAME%%."]);
+   botChat.chatmessages.push(["activefor", "I have been active for %%TIME%%."]);
+   botChat.chatmessages.push(["swapinvalid", "/me [@%%NAME%%] Invalid user specified. (No names with spaces!)"]);
+   botChat.chatmessages.push(["swapwlonly", "/me [@%%NAME%%] Please only swap users that are in the waitlist!"]);
+   botChat.chatmessages.push(["swapping", "/me Swapping %%NAME1%% with %%NAME2%%."]);
+   botChat.chatmessages.push(["genres", "/me Please find the permissible room genres here: %%LINK%%"]);
+   botChat.chatmessages.push(["notbanned", "/me [@%%NAME%%] The user was not banned."]);
+   botChat.chatmessages.push(["unmutedeveryone", "/me [@%%NAME%%] Unmuted everyone."]);
+   botChat.chatmessages.push(["unmuteeveryonerank", "/me [@%%NAME%%] Only managers and up can unmute everyone at once."]);
+   botChat.chatmessages.push(["notmuted", "/me [@%%NAME%%] that user wasn't muted."]);
+   botChat.chatmessages.push(["unmuterank", "/me [@%%NAME%%] You can't unmute persons with an equal or higher rank than you."]);
+   botChat.chatmessages.push(["commandscd", "/me [@%%NAME%%] The cooldown for commands by users is now set to %%TIME%% seconds."]);
+   botChat.chatmessages.push(["voteratio", "/me [@%%NAME%%] @%%USERNAME%% ~ woots: %%WOOT%%, mehs: %%MEHS%%, ratio (w/m): %%RATIO%%."]);
+   botChat.chatmessages.push(["website", "/me Please visit our website: %%LINK%%"]);
+   botChat.chatmessages.push(["youtube", "/me [%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
+   botChat.chatmessages.push(["songstatistics", "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
+   botChat.chatmessages.push(["mystats":  "%%NAME%% [:musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatmessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
+   botChat.chatmessages.push(["songstatisticstasty", "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
+   botChat.chatmessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
+   botChat.chatmessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
+   botChat.chatmessages.push(["eightballresponse2", "%%NAME%% The all knowing Larry says: %%RESPONSE%%"]);
+   botChat.chatmessages.push(["lastplayed0", ":notes: This is the 1st time this song has been played! :notes:"]);
+   botChat.chatmessages.push(["lastplayed1", ":notes: This song has only been played one other time. [first time: %%LASTPLAYED%% ago] :notes:"]);
+   botChat.chatmessages.push(["lastplayed2", ":notes: This song has been played %%PLAYCOUNT%% other times. [first time: %%FIRSTPLAYED%% ago] [last time: %%LASTPLAYED%% ago] :notes:"]);
+  },
+  loadChatA: function (cb) {
         if (!cb) cb = function () {
         };
         $.get("https://rawgit.com/SZigmund/dubBot/master/lang/langIndex.json", function (json) {
@@ -680,184 +859,7 @@ var botChat = {
         UTIL.logException("processChatItems: " + err.message);
       }
     },
-  chatmessages: [
-   "nodatafound": "No previous data found.",
-    "retrievingdata": "Retrieving previously stored data.",
-    "datarestored": "Previously stored data successfully retrieved.",
-    "greyuser": "Only bouncers and up can run a bot.",
-    "bouncer": "The bot can't move people when it's run as a bouncer.",
-    "online": "/me %%BOTNAME%% v%%VERSION%% online!",
-
-    "validgiftags": "/me [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Tags: %%TAGS%%]",
-    "invalidgiftags": "/me [@%%NAME%%] Invalid tags, try something different. [Tags: %%TAGS%%]",
-    "validgifrandom": "/me [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Random GIF]",
-    "invalidgifrandom": "/me [@%%NAME%%] Invalid request, try again.",
-    "logout": "/me [@%%NAME%%] Logging out %%BOTNAME%%",
-
-    "welcome": "/me Welcome %%NAME%%.  Check out our room rules here: http://tinyurl.com/TastyTunesRules",
-    "welcomeback": "/me Welcome back, %%NAME%%",
-    "songknown": "/me :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:",
-    "songknown2": "/me :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:",
-    "timelimit": "/me @%%NAME%% your song is longer than %%MAXLENGTH%% minutes, you need permission to play longer songs.",
-    "permissionownsong": "/me :up: @%%NAME%% has permission to play their own production!",
-    "isblacklisted": "/me @%%NAME%% [%%SONG%%]] is banned in this room! Skipping song...Please read the rules before you play your next play.",
-    "whois": "/me [%%NAME1%%] Username: %%NAME2%%, ID: %%ID%%, Rank: %%RANK%%, Joined: %%JOINED%%, Level: %%LEVEL%%, Language: %%LANGUAGE%%, Avatar: %%AVATAR%%%%PROFILE%%",
-
-    "notghosting": "[%%NAME1%%] %%NAME2%% is not ghosting.",
-    "ghosting": "[%%NAME1%%] %%NAME2%% is either ghosting or not here.",
-
-    "isopen": "/me @djs - The roulette is now open! Type .join to participate!",
-    "winnerpicked": "/me A winner has been picked! @%%NAME%% to position %%POSITION%%.",
-
-
-    "alreadyadding": "/me User is already being added! Changed the desired position to %%POSITION%%.",
-    "adding": "/me Added @%%NAME%% to the queue. Current queue: %%POSITION%%.",
-
-
-    "usernotfound": "/me User not found.",
-    "notdisconnected": "/me @%%NAME%% did not disconnect during my time here.",
-    "noposition": "/me No last position known. The waitlist needs to update at least once to register a user's last position.",
-    "toolongago": "/me @%%NAME%%'s last disconnect (DC or leave) was too long ago: %%TIME%%.",
-    "valid": "/me @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%.",
-    "meetingreturn": "/me @%%NAME%% how was your meeting?  You left %%TIME%% ago and should be at position %%POSITION%%.",
-    "lunchreturn": "/me @%%NAME%% how was lunch?  You left %%TIME%% ago and should be at position %%POSITION%%.",
-    "beerrunreturn": "/me @%%NAME%% What kind of :beer: did you buy?  You left %%TIME%% ago and should be at position %%POSITION%%.",
-    "meetingleave": "/me %%NAME%% enjoy your meeting. :sleeping: (Position: %%POS%%)",
-    "lunchleave": "/me %%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)",
-    "beerrunleave": "/me %%NAME%% Going to get some :beer:. (Position: %%POS%%)",
-
-
-    "warning1": "/me @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed.",
-    "warning2": "/me @%%NAME%% you will be removed due to AFK soon if you don't respond.",
-    "afkremove": "/me @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song.",
-    "afkUserReset": "/me Thanks @%%NAME%% your afk status has been reset. ",
-
-
-    "caps": "/me @%%NAME%% unglue your capslock button please.",
-    "askskip": "/me @%%NAME%% don't ask for skips.",
-    "spam": "/me @%%NAME%% please don't spam.",
-    "roomadvertising": "/me @%%NAME%% don't post links to other rooms please.",
-    "adfly": "/me @%%NAME%% please change your autowoot program. We suggest PlugCubed: http://plugcubed.net/",
-
-
-    "invalidtime": "/me [@%%NAME%%] Invalid time specified.",
-    "nouserspecified": "/me [@%%NAME%%] No user specified.",
-    "invaliduserspecified": "/me [@%%NAME%%] Invalid user specified.",
-    "nolistspecified": "/me [@%%NAME%%] No list specified.",
-    "invalidlistspecified": "/me [@%%NAME%%] Invalid list specified.",
-    "novaliduserspecified": "/me [@%%NAME%%] No valid user specified.",
-    "nolimitspecified": "/me [@%%NAME%%] No limit specified.",
-    "invalidlimitspecified": "/me [@%%NAME%%] Invalid limit.",
-    "invalidpositionspecified": "/me [@%%NAME%%] Invalid position specified.",
-    "toggleon": "/me [@%%NAME%%] %%FUNCTION%% enabled.",
-    "toggleoff": "/me [@%%NAME%%] %%FUNCTION%% disabled.",
-    "afkremoval": "AFK removal",
-    "afksremoved": "AFK's removed",
-    "afklimit": "AFK limit",
-    "repeatSongs": "Skip History",
-    "repeatSongLimit": "Skip History limit",
-    "autoskip": "autoskip",
-    "newblacklisted": "/me [@%%NAME%%] Adding song to ban list: [ %%AUTHOR%% - %%TITLE%% - %%MID%% ]",
-    "blinfo": "[@%%NAME%%] Song info - author: %%AUTHOR%%, title: %%TITLE%%, mid: %%SONGID%%",
-    "blacklist": "blacklist",
-    "cycleguard": "cycleguard",
-    "timeguard": "timeguard",
-    "chatfilter": "chatfilter",
-    "lockdown": "lockdown",
-    "lockguard": "lockguard",
-    "usercommands": "usercommands",
-    "motd": "MotD",
-    "welcomemsg": "welcome message",
-    "songstats": "song statistics",
-    "etarestriction": "eta restriction",
-    "voteskip": "voteskip",
-    "voteskiplimit": "/me [@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs.",
-    "voteskipexceededlimit": "/me @%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs).",
-    "voteskipinvalidlimit": "/me [@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs.",
-    "voteskipsetlimit": "/me [@%%NAME%%] Voteskip limit set to %%LIMIT%%.",
-    "activeusersintime": "/me [@%%NAME%% There have been %%AMOUNT%% users chatting in the past %%TIME%% minutes.",
-    "maximumafktimeset": "/me [@%%NAME%%] Maximum afk duration set to %%TIME%% minutes.",
-    "afkstatusreset": "/me [@%%NAME%%] Reset the afk status of @%%USERNAME%%.",
-    "inactivefor": "/me [@%%NAME%%] @%%USERNAME%% has been inactive for %%TIME%%.",
-    "autowoot": "/me We recommend PlugCubed for autowooting: http://plugcubed.net/",
-    "brandambassador": "/me A Brand Ambassador is the voice of the plug.dj users. They promote events, engage the community and share the plug.dj message around the world. For more info: https://plug.dj/ba",
-    "origem": "/me To install Origem-Woot go here: http://origem-woot.com/Instalation/",
-    "bouncerplusrank": "/me [@%%NAME%%] You have to be manager or up to enable Bouncer+.",
-    "chatcleared": "/me [@%%NAME%%] Cleared the chat.",
-    "deletechat": "/me [@%%NAME%%] Cleared the chat of %%USERNAME%%.",
-    "commandslink": "/me %%BOTNAME%% commands: %%LINK%%",
-    "eatcookie": "/me eats a cookie.",
-    "nousercookie": "/em doesn't see %%NAME%% in room and eats a cookie himself.",
-    "selfcookie": "/me @%%NAME%% you're a bit greedy, aren't you? Giving cookies to yourself, bah. Share some with other people!",
-    "cookie": "/me @%%NAMETO%%, @%%NAMEFROM%% %%COOKIE%%",
-    "cycleguardtime": "/me [@%%NAME%%] The cycleguard is set to %%TIME%% minute(s).",
-    "dclookuprank": "/me [@%%NAME%%] Only bouncers and above can do a lookup for others.",
-    "bootrank": "/me [@%%NAME%%] Only bouncers and above can boot other users.",
-    "bootableDisabled": "/me [@%%NAME%%] line removal canceled. %%USERBYNAME%%",
-    "bootableEnabled": "/me By request [@%%NAME%%] will get removed from line after next song. %%USERBYNAME%%",
-    "emojilist": "/me Emoji list: %%LINK%%",
-    "notinwaitlist": "/me %%NAME%% you are not on the waitlist.",
-    "doubleroll": "/me %%NAME%% you already rolled. Sorry no double dipping.",
-    "rollresults": "/me %%NAME%% you rolled a %%ROLL%%",
-    "rollresultsgood": "/me Nice %%NAME%% you rolled a %%ROLL%%",
-    "rollresultsbad": "/me Bummer %%NAME%% you rolled a %%ROLL%%",
-    "notcurrentdj": "/me %%NAME%% you are not the current dj.",
-    "eta": "/me @%%NAME%% you will reach the booth in approximately %%TIME%%.",
-    "facebook": "/me Like us on facebook: %%LINK%%",
-    "starterhelp": "/me This image will get you started on plug: %%LINK%%",
-    "roulettejoin": "/me @%%NAME%% joined the roulette! (.leave if you regret it.)",
-    "jointime": "/me [@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%.",
-    "kickrank": "/me [@%%NAME%%] you can't kick users with an equal or higher rank than you!",
-    "kick": "/me [@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes.",
-    "kill": "/me Shutting down.",
-    "rouletteleave": "/me @%%NAME%% left the roulette!",
-    "songlink": "/me [@%%NAME%%] Link to current song: %%LINK%%",
-    "usedlockskip": "/me [%%NAME%% used lockskip.]",
-    "lockskippos": "/me [@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%.",
-    "lockguardtime": "/me [@%%NAME%%] The lockguard is set to %%TIME%% minute(s).",
-    "maxlengthtime": "/me [@%%NAME%%] The maximum song duration is set to %%TIME%% minutes.",
-    "motdset": "/me MotD set to:  %%MSG%%",
-    "motdintervalset": "/me MotD interval set to %%INTERVAL%%.",
-    "addbotwaitlist": "/me @%%NAME%% don't try to add me to the waitlist, please.",
-    "move": "/me [%%NAME%% used move.]",
-    "mutednotime": "/me [@%%NAME%%] Muted @%%USERNAME%%.",
-    "mutedmaxtime": "/me [@%%NAME%%] You can only mute for maximum %%TIME%% minutes.",
-    "mutedtime": "/me [@%%NAME%%] Muted @%%USERNAME%% for %%TIME%% minutes.",
-    "unmuted": "/me [@%%NAME%%] Unmuted @%%USERNAME%%.",
-    "muterank": "/me [@%%NAME%%] You can't mute persons with an equal or higher rank than you.",
-    "oplist": "/me OP list: %%LINK%%",
-    "pong": "/me Pong!",
-    "reload": "/me Be right back.",
-    "removenotinwl": "/me [@%%NAME%%] Specified user @%%USERNAME%% is not in the waitlist.",
-    "roomrules": "This is an English speaking community for English speaking music. We play a wide variety of music. Please avoid Dubstep, EDM, Mashups, and children music. Check out all of our rules: %%LINK%%",
-    "sessionstats": "/me [@%%NAME%%] Total woots: %%WOOTS%%, total mehs: %%MEHS%%, total grabs: %%GRABS%%.",
-    "skip": "/me [%%NAME%% used skip.]",
-    "madeby": "/me This bot was made by %%NAME%%.",
-    "activefor": "I have been active for %%TIME%%.",
-    "swapinvalid": "/me [@%%NAME%%] Invalid user specified. (No names with spaces!)",
-    "swapwlonly": "/me [@%%NAME%%] Please only swap users that are in the waitlist!",
-    "swapping": "/me Swapping %%NAME1%% with %%NAME2%%.",
-    "genres": "/me Please find the permissible room genres here: %%LINK%%",
-    "notbanned": "/me [@%%NAME%%] The user was not banned.",
-    "unmutedeveryone": "/me [@%%NAME%%] Unmuted everyone.",
-    "unmuteeveryonerank": "/me [@%%NAME%%] Only managers and up can unmute everyone at once.",
-    "notmuted": "/me [@%%NAME%%] that user wasn't muted.",
-    "unmuterank": "/me [@%%NAME%%] You can't unmute persons with an equal or higher rank than you.",
-    "commandscd": "/me [@%%NAME%%] The cooldown for commands by users is now set to %%TIME%% seconds.",
-    "voteratio": "/me [@%%NAME%%] @%%USERNAME%% ~ woots: %%WOOT%%, mehs: %%MEHS%%, ratio (w/m): %%RATIO%%.",
-    "website": "/me Please visit our website: %%LINK%%",
-    "youtube": "/me [%%NAME%%] Subscribe to us on youtube: %%LINK%%",
-    "songstatistics": "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]",
-    "mystats":  "%%NAME%% [:musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]",
-    "tastyvote": "[%%NAME%%  gave you a fake point for this tasty tune :cake:]",
-    "songstatisticstasty": "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]",
-    "eightballquestion": "%%NAME%% Question: [%%QUESTION%%]",
-    "eightballresponse1": "The all knowing Larry says: %%RESPONSE%%",
-    "eightballresponse2": "%%NAME%% The all knowing Larry says: %%RESPONSE%%",
-    "lastplayed0": ":notes: This is the 1st time this song has been played! :notes:",
-    "lastplayed1": ":notes: This song has only been played one other time. [first time: %%LASTPLAYED%% ago] :notes:",
-    "lastplayed2": ":notes: This song has been played %%PLAYCOUNT%% other times. [first time: %%FIRSTPLAYED%% ago] [last time: %%LASTPLAYED%% ago] :notes:"
-	]
+  chatmessages: []
 };
 
 //SECTION EIGHTBALL: Core 8 ball functionality:
@@ -2075,7 +2077,7 @@ var API = {
 
       window.APIisRunning = true;
 
-      //botChat.loadChat();
+      botChat.loadChat();
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
