@@ -2,11 +2,12 @@
 //SECTION Var: All global variables:
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00022",
+  version: "Version 1.01.1.00023",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
   debugLowLevel: false,
+  botStatus: false, 
   songStats: {
     mehCount: 0,
     dubCount: 0,
@@ -22,7 +23,6 @@ var botVar = {
     etaRestriction: false,
     filterChat: true,
 	lockdownEnabled: false,
-    randomInterval: null,
 	roomstats: {
 		accountName: null,
 		totalWoots: 0,
@@ -33,12 +33,8 @@ var botVar = {
 		songCount: 0,
 		chatmessagescnt: 0
 	},
-	maximumAfk: 60,
-	afkRemoval: true,
-	afk5Days: true,
-	afk7Days: true,
-	afkRemoveStart: 0,
-	afkRemoveEnd: 24,
+	repeatSongs: true,
+	repeatSongTime: 180,
 	maximumDc: 90,
 	maximumDcOutOfRoom: 10,
 	commandCooldown: 30
@@ -326,7 +322,7 @@ var botChat = {
 	},
 
   /* Old loadchat
-  var loadChat = function (cb) {
+  loadChat: function (cb) {
         if (!cb) cb = function () {
         };
         $.get("https://rawgit.com/SZigmund/dubBot/master/lang/langIndex.json", function (json) {
@@ -453,6 +449,11 @@ var botChat = {
 };
 //SECTION UTIL: Core functionality:
 var UTIL = {
+  killbot: function () {
+        clearInterval(AFK.afkInterval);
+		clearInterval(RANDOMCOMMENTS.randomInterval);
+        botVar.botStatus = false;
+  },
   linkFixer: function (msg) {
         var parts = msg.splitBetween('<a href="', '<\/a>');
         for (var i = 1; i < parts.length; i = i + 2) {
@@ -465,6 +466,85 @@ var UTIL = {
         }
         return m;
    },
+  msToStr: function (msTime) {
+	var ms, msg, timeAway;
+	msg = '';
+	timeAway = {
+		'days': 0,
+		'hours': 0,
+		'minutes': 0,
+		'seconds': 0
+	};
+	ms = {
+		'day': 24 * 60 * 60 * 1000,
+		'hour': 60 * 60 * 1000,
+		'minute': 60 * 1000,
+		'second': 1000
+	};
+	if (msTime > ms.day) {
+		timeAway.days = Math.floor(msTime / ms.day);
+		msTime = msTime % ms.day;
+	}
+	if (msTime > ms.hour) {
+		timeAway.hours = Math.floor(msTime / ms.hour);
+		msTime = msTime % ms.hour;
+	}
+	if (msTime > ms.minute) {
+		timeAway.minutes = Math.floor(msTime / ms.minute);
+		msTime = msTime % ms.minute;
+	}
+	if (msTime > ms.second) {
+		timeAway.seconds = Math.floor(msTime / ms.second);
+	}
+	if (timeAway.days !== 0) {
+		msg += timeAway.days.toString() + 'd';
+	}
+	if (timeAway.hours !== 0) {
+		msg += timeAway.hours.toString() + 'h';
+	}
+	if (timeAway.minutes !== 0) {
+		msg += timeAway.minutes.toString() + 'm';
+	}
+	if (timeAway.minutes < 1 && timeAway.hours < 1 && timeAway.days < 1) {
+		msg += timeAway.seconds.toString() + 's';
+	}
+	if (msg !== '') {
+		return msg;
+	} else {
+		return false;
+	}
+  },
+   
+  rankToNumber: function (rankString) {
+	var rankInt = null;
+	switch (rankString) {
+		case "admin":
+			rankInt = 10;
+			break;
+		case "ambassador":
+			rankInt = 7;
+			break;
+		case "host":
+			rankInt = 5;
+			break;
+		case "cohost":
+			rankInt = 4;
+			break;
+		case "manager":
+			rankInt = 3;
+			break;
+		case "bouncer":
+			rankInt = 2;
+			break;
+		case "residentdj":
+			rankInt = 1;
+			break;
+		case "user":
+			rankInt = 0;
+			break;
+	}
+	return rankInt;
+  },
   logException: function(exceptionMessage) {
     console.log("[EXCEPTION]: " + exceptionMessage);
   }
@@ -548,8 +628,107 @@ var botDebug = {
     console.log("[DEBUG]: " + message);
   }
 };
+
+//SECTION AFK: All AFK functionality:
+var AFK = {
+  afkInterval: null,
+  afkList: [],
+  settings: {
+	maximumAfk: 60,
+	afkRemoval: true,
+	afk5Days: true,
+	afk7Days: true,
+	afkRemoveStart: 0,
+	afkRemoveEnd: 24,
+	afkpositionCheck: 30,
+    afkRankCheck: "ambassador"
+  },
+  afkCheck: function () {
+	try {
+	if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
+	if (!AFK.afkRemovalNow()) return void (0);
+	var rank = UTIL.rankToNumber(AFK.settings.afkRankCheck);
+	var djlist = API.getWaitList();
+	var lastPos = Math.min(djlist.length, AFK.settings.afkpositionCheck);
+	if (lastPos - 1 > djlist.length) return void (0);
+	for (var i = 0; i < lastPos; i++) {
+		if (typeof djlist[i] !== 'undefined') {
+			var id = djlist[i].id;
+			var user = USERS.lookupUser(id);
+			if (typeof user !== 'boolean') {
+				var dubUser = API.getDubUser(user);
+				if (rank !== null) {
+					var name = dubUser.username;
+					var lastActive = USERS.getLastActivity(user);
+					var inactivity = Date.now() - lastActive;
+					var time = UTIL.msToStr(inactivity);
+					var warncount = user.afkWarningCount;
+					if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
+						if (warncount === 0) {
+							API.sendChat(botChat.subChat(botChat.chatMessages.warning1, {name: name, time: time}));
+							user.afkWarningCount = 3;
+							user.afkCountdown = setTimeout(function (userToChange) {
+								userToChange.afkWarningCount = 1;
+							}, 90 * 1000, user);
+						}
+						else if (warncount === 1) {
+							API.sendChat(botChat.subChat(botChat.chatMessages.warning2, {name: name}));
+							user.afkWarningCount = 3;
+							user.afkCountdown = setTimeout(function (userToChange) {
+								userToChange.afkWarningCount = 2;
+							}, 30 * 1000, user);
+						}
+						else if (warncount === 2) {
+							var pos = API.getWaitListPosition(id);
+							if (pos !== -1) {
+								pos++;
+								AFK.afkList.push([id, Date.now(), pos]);
+								AFK.resetDC(user);
+								API.moderateRemoveDJ(id);
+								user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
+								API.sendChat(botChat.subChat(botChat.chatMessages.afkremove, {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+							}
+							user.afkWarningCount = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+	catch(err) { UTIL.logException("afkCheck: " + err.message); }
+  },
+  resetDC: function (user) {
+	user.lastDC.time = null;
+	user.lastDC.position = -1;
+	user.lastDC.leftroom = null;
+	user.lastKnownPosition = -1;
+	user.lastSeenInLine = null;
+	user.lastDC.songCount = 0;
+	user.beerRun = false;
+	user.inMeeting = false;
+	user.atLunch = false;
+  },
+
+  afkRemovalNow: function () {
+	try {
+		if (!AFK.settings.afk5Days && !AFK.settings.afk7Days) return false;
+		var currDate = new Date();
+		//Not on Saturday/Sunday if not monitoring 7 days a week
+		if (!AFK.settings.afk7Days) {
+			var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
+			if (dayofweek === 6 || dayofweek === 0) return false;
+		}
+		var hourofday = currDate.getHours();
+		if (hourofday >= AFK.settings.afkRemoveStart && hourofday < AFK.settings.afkRemoveEnd) return true;
+		return false;
+	}
+	catch(err) { UTIL.logException("afkRemovalNow: " + err.message); }
+  },
+};
+
 //SECTION RANDOM COMMENTS: All Random Comment functionality:
 var RANDOMCOMMENTS = {
+  randomInterval: null,
   settings: {
 	randomComments: true,
 	randomCommentMin: 60,
@@ -1213,7 +1392,7 @@ var AI = {
 //SECTION API: All API functionality:
 var API = {
   main: {
-    init: function() {
+    initbot: function() {
       if (window.APIisRunning) {
         console.log("[PlugAPI-Dubtrack] already running...")
         return;
@@ -1227,27 +1406,70 @@ var API = {
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
 
       RANDOMCOMMENTS.randomCommentSetTimer();
-      botVar.room.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
+      RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
+
+      AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
       API.chatLog(botVar.botName + " " + botVar.version + " Online");
+      botVar.botStatus = true;
 
       // [...]
     },
   },
-  getPlugUserID: function (userid) {
+  getWaitListPosition: function(id){
+	try {
+		if(typeof id === 'undefined' || id === null){
+			id = API.getCurrentDubUser().id;
+		}
+		var wl = API.getWaitList();
+		for(var i = 0; i < wl.length; i++){
+			if(wl[i].id === id){
+				return i;
+			}
+		}
+		return -1;
+	}
+	   catch(err) {
+	   UTIL.logException("getWaitListPosition: " + err.message);
+	}
+  },
+
+  getWaitList: function () {
+  //todoer
+  },
+  getCurrentDubUser: function () {
+	  //todoer COMPLETE
+	//return API.getUser();
+  },
+  getDubUserID: function (userid) {
 	try {
 	  //todoer COMPLETE
 	  //return API.getUser(userid);
 	}
-	catch(err) { UTIL.logException("getPlugUserID: " + err.message); }
+	catch(err) { UTIL.logException("getDubUserID: " + err.message); }
   },
+  getDubUser: function (user) {
+	try {
+		return API.getUser(user);
+	}
+	catch(err) { UTIL.logException("getDubUser: " + err.message); }
+  },
+  getUser: function (user) {
+	try {
+		return API.getDubUserID(user.id);
+	}
+	catch(err) {
+	  UTIL.logException("getUser: " + err.message);
+	}
+  },
+  
   getPermission: function (obj) { //1 requests
 	try {
 	  return 10;
 	  /* TODOER
 	  var u;
 	  if (typeof obj === "object") u = obj;
-	  else u = API.getPlugUserID(obj);
+	  else u = API.getDubUserID(obj);
 	  if (botCreatorIDs.indexOf(u.id) > -1) return 10;    // admin
 	  if (botVar.botID === u.id) return 4;          // cohost
 	  if (u.gRole < 2) return u.role;
@@ -1270,7 +1492,7 @@ var API = {
 	  UTIL.logException("getPermission: " + err.message);
 	}
   },
-  moderateDeleteChat = function (cid) {
+  moderateDeleteChat: function (cid) {
       /* todoer
 		$.ajax({
 			url: "https://plug.dj/_/chat/" + cid,
@@ -1712,8 +1934,8 @@ var BOTCOMMANDS = {
                         if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.chatMessages.nolimitspecified, {name: chat.un}));
                         var limit = msg.substring(cmd.length + 1);
                         if (!isNaN(limit)) {
-                            botVar.room.maximumAfk = parseInt(limit, 10);
-                            API.sendChat(botChat.subChat(botChat.chatMessages.maximumafktimeset, {name: chat.un, time: botVar.room.maximumAfk}));
+                            AFK.settings.maximumAfk = parseInt(limit, 10);
+                            API.sendChat(botChat.subChat(botChat.chatMessages.maximumafktimeset, {name: chat.un, time: AFK.settings.maximumAfk}));
                         }
                         else API.sendChat(botChat.subChat(botChat.chatMessages.invalidlimitspecified, {name: chat.un}));
                     }
@@ -1747,16 +1969,15 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.settings.repeatSongs) {
-                            basicBot.settings.repeatSongs = !basicBot.settings.repeatSongs;
-                            clearInterval(basicBot.room.afkInterval);
+                        if (botVar.room.repeatSongs) {
+                            botVar.room.repeatSongs = !botVar.room.repeatSongs;
+							//todoer why do we clear the afk interval here???
+                            clearInterval(AFK.afkInterval);
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.repeatSongs}));
                         }
                         else {
-                            basicBot.settings.repeatSongs = !basicBot.settings.repeatSongs;
-                            basicBot.room.afkInterval = setInterval(function () {
-                                basicBot.roomUtilities.afkCheck()
-                            }, 2 * 1000);
+                            botVar.room.repeatSongs = !botVar.room.repeatSongs;
+                            AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 2 * 1000);
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.repeatSongs}));
                         }
                     }
@@ -1770,16 +1991,14 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (botVar.room.afkRemoval) {
-                            botVar.room.afkRemoval = !botVar.room.afkRemoval;
-                            clearInterval(basicBot.room.afkInterval);
+                        if (AFK.settings.afkRemoval) {
+                            AFK.settings.afkRemoval = !AFK.settings.afkRemoval;
+                            clearInterval(AFK.afkInterval);
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.afkremoval}));
                         }
                         else {
-                            botVar.room.afkRemoval = !botVar.room.afkRemoval;
-                            basicBot.room.afkInterval = setInterval(function () {
-                                basicBot.roomUtilities.afkCheck()
-                            }, 2 * 1000);
+                            AFK.settings.afkRemoval = !AFK.settings.afkRemoval;
+                            AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 2 * 1000);
                             API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.afkremoval}));
                         }
                     }
@@ -1840,7 +2059,7 @@ var BOTCOMMANDS = {
                         if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.chatMessages.invaliduserspecified, {name: chat.un}));
                         var lastActive = USERS.getLastActivity(user);
                         var inactivity = Date.now() - lastActive;
-                        var time = basicBot.roomUtilities.msToStr(inactivity);
+                        var time = UTIL.msToStr(inactivity);
                         API.sendChat(botChat.subChat(botChat.chatMessages.inactivefor, {name: chat.un, username: name, time: time}));
                     }
                 }
@@ -2240,7 +2459,7 @@ var BOTCOMMANDS = {
                         if (pos < 0) return API.sendChat(botChat.subChat(botChat.chatMessages.notinwaitlist, {name: name}));
                         var timeRemaining = API.getTimeRemaining();
                         var estimateMS = ((pos * 4 * 60) + timeRemaining) * 1000;
-                        var estimateString = basicBot.roomUtilities.msToStr(estimateMS);
+                        var estimateString = UTIL.msToStr(estimateMS);
                         API.sendChat(botChat.subChat(botChat.chatMessages.eta, {name: name, time: estimateString}));
                     }
                 }
@@ -2477,7 +2696,7 @@ var BOTCOMMANDS = {
                         if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.chatMessages.invaliduserspecified, {name: chat.un}));
                         var join = basicBot.userUtilities.getJointime(user);
                         var time = Date.now() - join;
-                        var timeString = basicBot.roomUtilities.msToStr(time);
+                        var timeString = UTIL.msToStr(time);
                         API.sendChat(botChat.subChat(botChat.chatMessages.jointime, {namefrom: chat.un, username: name, time: timeString}));
                     }
                 }
@@ -2539,9 +2758,7 @@ var BOTCOMMANDS = {
                         storeToStorage();
                         API.sendChat(botChat.chatMessages.kill);
                         basicBot.disconnectAPI();
-                        setTimeout(function () {
-                            kill();
-                        }, 1000);
+                        setTimeout(function () { UTIL.killbot(); }, 1000);
                     }
                 }
             },
@@ -3001,10 +3218,8 @@ var BOTCOMMANDS = {
                         API.sendChat(botChat.chatMessages.reload);
                         storeToStorage();
                         basicBot.disconnectAPI();
-                        kill();
-                        setTimeout(function () {
-                            $.getScript(basicBot.scriptLink);
-                        }, 2000);
+						UTIL.killbot();
+                        setTimeout(function () { $.getScript(basicBot.scriptLink); }, 2000);
                     }
                 }
             },
@@ -3020,10 +3235,8 @@ var BOTCOMMANDS = {
                         API.sendChat(botChat.chatMessages.reload);
                         storeToStorage();
                         basicBot.disconnectAPI();
-                        kill();
-                        setTimeout(function () {
-                            $.getScript(basicBot.scriptTestLink);
-                        }, 2000);
+                        UTIL.killbot();
+                        setTimeout(function () { $.getScript(basicBot.scriptTestLink); }, 2000);
                     }
                 }
             },
@@ -3041,7 +3254,7 @@ var BOTCOMMANDS = {
                             var name = msg.substr(cmd.length + 2);
                             var user = USERS.lookupUserName(name);
                             if (typeof user !== 'boolean') {
-                                basicBot.userUtilities.resetDC(user);
+                                AFK.resetDC(user);
                                 if (API.getDJ().id === user.id) {
                                     basicBot.roomUtilities.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
                                     API.moderateForceSkip();
@@ -3581,14 +3794,14 @@ var BOTCOMMANDS = {
                         var msg = '/me [@' + from + '] ';
 
                         msg += botChat.chatMessages.afkremoval + ': ';
-                        if (botVar.room.afkRemoval) msg += 'ON';
+                        if (AFK.settings.afkRemoval) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
-                        msg += botChat.chatMessages.afksremoved + ": " + basicBot.room.afkList.length + '. ';
-                        msg += botChat.chatMessages.afklimit + ': ' + botVar.room.maximumAfk + '. ';
+                        msg += botChat.chatMessages.afksremoved + ": " + AFK.afkList.length + '. ';
+                        msg += botChat.chatMessages.afklimit + ': ' + AFK.settings.maximumAfk + '. ';
 
                         msg += botChat.chatMessages.repeatSongs + ': ';
-                        if (basicBot.settings.repeatSongs) msg += 'ON';
+                        if (botVar.room.repeatSongs) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
                         msg += botChat.chatMessages.repeatSongLimit + ': ' + basicBot.settings.repeatSongTime + '. ';
@@ -3630,7 +3843,7 @@ var BOTCOMMANDS = {
 
                         var launchT = basicBot.room.roomstats.launchTime;
                         var durationOnline = Date.now() - launchT;
-                        var since = basicBot.roomUtilities.msToStr(durationOnline);
+                        var since = UTIL.msToStr(durationOnline);
                         msg2 += botChat.subChat(botChat.chatMessages.activefor, {time: since});
 
                         setTimeout(function () { API.sendChat(msg2); }, 500);
@@ -4118,7 +4331,7 @@ var BOTCOMMANDS = {
                             var name = chat.message.substring(cmd.length + 2);
                             var roomUser = USERS.lookupUserName(name);
                             if(typeof roomUser === 'boolean') return API.sendChat('/me Invalid user specified.');
-                            var lang = basicBot.userUtilities.getPlugUser(roomUser).language;
+                            var lang = API.getDubUser(roomUser).language;
                             botDebug.debugMessage("lang: " + lang, true);
                             botDebug.debugMessage("roomUser: " + roomUser.username, true);
                             botDebug.debugMessage("roomUser: " + roomUser.id, true);
@@ -4222,7 +4435,7 @@ var BOTCOMMANDS = {
                         rollResults = 6;
                         if (rollResults >= (dicesides * 0.5)) {
                             //Pick a random word for the tasty command
-                            setTimeout(function () { basicBot.userUtilities.tastyVote(basicBot.userUtilities.getCurrentPlugUser().id,basicBot.roomUtilities.bopCommand("")); }, 1000);
+                            setTimeout(function () { basicBot.userUtilities.tastyVote(API.getCurrentDubUser().id,basicBot.roomUtilities.bopCommand("")); }, 1000);
                             setTimeout(function () { basicBot.roomUtilities.wootThisSong(); }, 1500);
                             resultsMsg = botChat.subChat(botChat.chatMessages.rollresultsgood, {name: chat.un, roll: basicBot.roomUtilities.numberToIcon(rollResults)});
                         }
@@ -4234,7 +4447,7 @@ var BOTCOMMANDS = {
                         API.sendChat(resultsMsg + basicBot.userUtilities.updateRolledStats(chat.un, wooting));
                         /*
                         if (rollResults >= (dicesides * 0.8))
-                            setTimeout(function () { basicBot.userUtilities.tastyVote(basicBot.userUtilities.getCurrentPlugUser().id, "winner"); }, 1000);
+                            setTimeout(function () { basicBot.userUtilities.tastyVote(API.getCurrentDubUser().id, "winner"); }, 1000);
                         else if (rollResults <= (dicesides * 0.2))
                             setTimeout(function () { basicBot.roomUtilities.mehThisSong(); }, 1000);
                             */
@@ -4271,15 +4484,15 @@ var BOTCOMMANDS = {
                         var msg;
                         if (cmd == '.beerrun') {
                             basicBot.userUtilities.setBeerRunStatus(user, true);
-                            msg = botChat.subChat(botChat.chatMessages.beerrunleave, {name: basicBot.userUtilities.getPlugUser(user).username, pos: currPos});
+                            msg = botChat.subChat(botChat.chatMessages.beerrunleave, {name: API.getDubUser(user).username, pos: currPos});
                         }
                         if (cmd == '.lunch') {
                             basicBot.userUtilities.setLunchStatus(user, true);
-                            msg = botChat.subChat(botChat.chatMessages.lunchleave, {name: basicBot.userUtilities.getPlugUser(user).username, pos: currPos});
+                            msg = botChat.subChat(botChat.chatMessages.lunchleave, {name: API.getDubUser(user).username, pos: currPos});
                         }
                         if (cmd == '.meeting') {
                             basicBot.userUtilities.setMeetingStatus(user, true);
-                            msg = botChat.subChat(botChat.chatMessages.meetingleave, {name: basicBot.userUtilities.getPlugUser(user).username, pos: currPos});
+                            msg = botChat.subChat(botChat.chatMessages.meetingleave, {name: API.getDubUser(user).username, pos: currPos});
 
                         }
                         setTimeout(function () { API.moderateRemoveDJ(user.id); }, 1000);
@@ -4765,7 +4978,7 @@ var BOTCOMMANDS = {
 //                        botDebug.debugMessage("whois: " + whoisuser, true);
 //                        var user;
 //                        if (isNaN(whoisuser)) user = USERS.lookupUserName(whoisuser);
-//                        else                  user = basicBot.userUtilities.getPlugUser(whoisuser);
+//                        else                  user = API.getDubUser(whoisuser);
 //                        if (typeof user !== 'undefined')  {
 //                            botDebug.debugMessage("USER ID: " + user.id, true);
 //                            API.sendChat("USER: " + user.username + " " + user.id);
@@ -4813,8 +5026,8 @@ var BOTCOMMANDS = {
         }
 };
 if (!window.APIisRunning) {
-  API.main.init();
+  API.main.initbot();
 } else {
-  setTimeout(API.main.init, 1000);
+  setTimeout(API.main.initbot, 1000);
 }
 // basicBot.chat -> botChat.chatMessages
