@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00029",
+  version: "Version 1.01.1.00030",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -212,7 +212,7 @@ var SETTINGS = {
         }
     },
 
-    var retrieveFromStorage: function () {
+    retrieveFromStorage: function () {
         try {
         var info = localStorage.getItem("dubBotStorageInfo");
         if (info === null) API.chatLog(botChat.chatMessages.nodatafound);
