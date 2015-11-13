@@ -31,7 +31,7 @@ var dubBot = {
 };
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00032",
+  version: "Version 1.01.1.00033",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -136,6 +136,64 @@ var USERS = {
 		//}
 		//return false;
 	},
+	importUserList: function() { // userlistimport << command
+		try {
+			dubBot.room.usersImport = [];
+			$.get(CONST.userlistLink, function (json) {
+				if (json !== null && typeof json !== "undefined") {
+					UTIL.logObject(json, "USR");
+					for (var idx in json) {
+						var newUser = json[idx];
+						//dubBot.room.usersImport.push(new USERS.User(user.id, user.username));
+						dubBot.room.usersImport.push(newUser);
+					}
+				}
+			});
+			botDebug.debugMessage("LIST COUNT: " + dubBot.room.usersImport.length, true);
+		}
+		catch(err) { console.log("ERROR:importBlackList: " + err.message); }
+	},
+	User: function (id, name) {
+		this.id = id;
+		this.username = name;
+		this.jointime = Date.now();
+		this.lastActivity = Date.now();
+		this.votes = {
+			songs: 0,
+			tasty: 0,
+			woot: 0,
+			meh: 0,
+			curate: 0
+		};
+		this.tastyVote = false;
+		this.rolled = false;
+		this.lastEta = null;
+		this.bootable = false;
+		this.beerRun = false;
+		this.inMeeting = false;
+		this.atLunch = false;
+		this.afkWarningCount = 0;
+		this.badSongCount = 0;
+		this.afkCountdown = null;
+		this.inRoom = true;
+		this.isMuted = false;
+		this.rollStats = {
+			lifeWoot: 0,
+			lifeTotal: 0,
+			dayWoot: 0,
+			dayTotal: 0,
+			DOY: -1
+		};
+		this.lastDC = {
+			time: null,
+			leftroom: null,
+			resetReason: "",
+			position: -1,
+			songCount: 0
+		};
+		this.lastKnownPosition = -1;
+		this.lastSeenInLine = null;
+	}
 };
 
 //SECTION COMMANDS: All bot commands:
@@ -903,6 +961,18 @@ var UTIL = {
 	}
 	return rankInt;
   },
+  logObject: function (objectToLog, objectName) {
+	try {
+		for (var prop in objectToLog) {
+			if (typeof objectToLog[prop] === "object") 
+				UTIL.logObject(objectToLog[prop], objectName + "." + prop);
+			else
+				botDebug.debugMessage("Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop], true);
+		}
+	}
+	catch(err) { UTIL.logException("logObject: " + err.message); }
+  },
+
   logException: function(exceptionMessage) {
     console.log("[EXCEPTION]: " + exceptionMessage);
   }
@@ -1940,7 +2010,7 @@ var API = {
 	  //		return 10;
 	  //}
 	  //}
-	return 0;
+	  //return 0;
 	}
 	catch(err) {
 	  UTIL.logException("getPermission: " + err.message);
@@ -2013,6 +2083,9 @@ var API = {
 //SECTION CONST: All Constants:
 var CONST = {
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
+  blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
+  userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
+  blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
   commandLiteral: ".",
             howAreYouComments: [
@@ -2583,8 +2656,6 @@ var BOTCOMMANDS = {
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try { 
-					//#player-controller > div.left > ul > li.infoContainer.display-block > div
-					// //*[@id="player-controller"]/div[2]/ul/li[3]/div<div class=""><div class="progressBg" style="width: 19.991%;"></div><span class="currentDJSong">whitewidow is playing</span><span class="currentSong">Anthrax and Public Enemy - Bring The Noise (1987)</span><div class="currentTime" style="display: block;"><span class="min">02</span>:<span class="sec">48</span></div></div>
 						var userInfo = document.getElementsByClassName("infoContainerInner");
 						botDebug.debugMessage("userInfo count: " + userInfo.length, true);
 						var spans = userInfo.getElementsByClassName("currentDJSong");
@@ -2617,6 +2688,60 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            userlistxferCommand: {   //Added: 08/28/2015
+                command: 'userlistxfer',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
+                        USERS.users = dubBot.room.usersImport;
+                    }
+                    catch (err) { UTIL.logException("userlistxfer: " + err.message); }
+                }
+            },
+            userlistcountCommand: {   //Added: 08/28/2015
+                command: 'userlistcount',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
+                        API.logInfo("I've got " + dubBot.room.usersImport.length + " users in the new list.");
+                        setTimeout(function () {
+                            API.logInfo("I've got " + USERS.users.length + " users in the old list.")
+                        }, 1 * 1000);
+                    }
+                    catch (err) { UTIL.logException("userlistcount: " + err.message); }
+                }
+            },
+            userlistimportCommand: {   //Added: 08/23/2015 Import User list from last saved in Github
+                command: 'userlistimport',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
+                        USERS.importUserList();
+                        API.logInfo("I've got " + dubBot.room.usersImport.length + " users in the new list.");
+                        var DocZ = USERS.lookupUserNameImport("Doc_Z");
+                        if (DocZ === false) return API.logInfo(botChat.subChat(botChat.chatMessages.invaliduserspecified, {name: chat.un}));
+                        var msg = botChat.subChat(botChat.chatMessages.mystats, {name: DocZ.username, 
+                                                                     songs: DocZ.votes.songs,
+                                                                     woot: DocZ.votes.woot, 
+                                                                     mehs: DocZ.votes.meh, 
+                                                                     grabs: DocZ.votes.curate, 
+                                                                     tasty: DocZ.votes.tasty});
+                        TASTY.resetDailyRolledStats(DocZ);
+                        msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
+                        API.logInfo(msg);
+                    }
+                    catch (err) { UTIL.logException("userlistimport: " + err.message); }
+                }
+            }
 
             /*
             activeCommand: {
@@ -4153,19 +4278,6 @@ var BOTCOMMANDS = {
                     catch (err) { UTIL.logException("userlistjson: " + err.message); }
                 }
             },
-            userlistxferCommand: {   //Added: 08/28/2015
-                command: 'userlistxfer',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        USERS.users = USERS.usersImport;
-                    }
-                    catch (err) { UTIL.logException("userlistxfer: " + err.message); }
-                }
-            },
             userliststatsCommand: {   //Added: 08/28/2015
                 command: 'userliststats',
                 rank: 'manager',
@@ -4185,7 +4297,7 @@ var BOTCOMMANDS = {
                         else {
                             msg = botChat.subChat(botChat.chatMessages.mystats, {name: user.username, songs: user.votes.songs, woot: user.votes.woot, 
                                                               mehs: user.votes.meh, grabs: user.votes.curate, tasty: user.votes.tasty});
-                            basicBot.userUtilities.resetDailyRolledStats(user);
+                            TASTY.resetDailyRolledStats(user);
                             msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         }
                         API.logInfo(msg);
@@ -4197,53 +4309,12 @@ var BOTCOMMANDS = {
                         else {
                             msg = botChat.subChat(botChat.chatMessages.mystats, {name: newuser.username, songs: newuser.votes.songs,  woot: newuser.votes.woot, 
                                                                   mehs: newuser.votes.meh, grabs: newuser.votes.curate, tasty: newuser.votes.tasty});
-                            basicBot.userUtilities.resetDailyRolledStats(newuser);
+                            TASTY.resetDailyRolledStats(newuser);
                             msg += " Roll Stats: " + TASTY.getRolledStats(newuser);
                         }
                         setTimeout(function () { API.logInfo(msg); }, 1 * 1000);
                     }
                     catch (err) { UTIL.logException("userliststats: " + err.message); }
-                }
-            },
-            userlistcountCommand: {   //Added: 08/28/2015
-                command: 'userlistcount',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
-                        setTimeout(function () {
-                            API.logInfo("I've got " + USERS.users.length + " users in the old list.")
-                        }, 1 * 1000);
-                    }
-                    catch (err) { UTIL.logException("userlistcount: " + err.message); }
-                }
-            },
-            userlistimportCommand: {   //Added: 08/23/2015 Import User list from last saved in Github
-                command: 'userlistimport',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        basicBot.roomUtilities.importUserList();
-                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
-                        var DocZ = USERS.lookupUserNameImport("Doc_Z");
-                        if (DocZ === false) return API.logInfo(botChat.subChat(botChat.chatMessages.invaliduserspecified, {name: chat.un}));
-                        var msg = botChat.subChat(botChat.chatMessages.mystats, {name: DocZ.username, 
-                                                                     songs: DocZ.votes.songs,
-                                                                     woot: DocZ.votes.woot, 
-                                                                     mehs: DocZ.votes.meh, 
-                                                                     grabs: DocZ.votes.curate, 
-                                                                     tasty: DocZ.votes.tasty});
-                        basicBot.userUtilities.resetDailyRolledStats(DocZ);
-                        msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
-                        API.logInfo(msg);
-                    }
-                    catch (err) { UTIL.logException("userlistimport: " + err.message); }
                 }
             },
 
@@ -4716,7 +4787,7 @@ var BOTCOMMANDS = {
                                                                      mehs: user.votes.meh, 
                                                                      grabs: user.votes.curate, 
                                                                      tasty: user.votes.tasty});
-                        basicBot.userUtilities.resetDailyRolledStats(user);
+                        TASTY.resetDailyRolledStats(user);
                         msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         var byusername = " [ executed by " + chat.un + " ]";
                         if (chat.un !== name) msg += byusername;
