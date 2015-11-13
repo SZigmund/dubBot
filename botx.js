@@ -1,5 +1,4 @@
 // Written by Doc_Z
-
 var dubBot = {
   room: {
 	users: [],
@@ -29,9 +28,10 @@ var dubBot = {
 	blacklistLoaded: false,
   }
 };
+
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00039",
+  version: "Version 1.01.1.00040",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -374,7 +374,7 @@ var COMMANDS = {
 			//USERS.setLastActivityID(chat.uid, true);
 			//todoer afk activity
 			//USERS.setUserName(chat.uid, chat.un);
-			if (botChat.chatfilter(chat)) return void (0);
+			if (botChat.chatFilter(chat)) return void (0);
 			if (!COMMANDS.commandCheck(chat))
 				botChat.action(chat);
 		}
