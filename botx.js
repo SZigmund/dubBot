@@ -2,7 +2,7 @@
 //SECTION Var: All global variables:
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00024",
+  version: "Version 1.01.1.00025",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -17,11 +17,13 @@ var botVar = {
     currentDj: ""
   },
   room: {
+    autoskip: false,
+    autoskipTimer: null,
     allcommand: true,
     usercommand: true,
 	mutedUsers: [],
     etaRestriction: false,
-    filterChat: true,
+   filterChat: true,
 	lockdownEnabled: false,
 	roomstats: {
 		accountName: null,
@@ -2074,13 +2076,13 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (basicBot.room.autoskip) {
-                            basicBot.room.autoskip = !basicBot.room.autoskip;
-                            clearTimeout(basicBot.room.autoskipTimer);
+                        if (botVar.room.autoskip) {
+                            botVar.room.autoskip = !botVar.room.autoskip;
+                            clearTimeout(botVar.room.autoskipTimer);
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleoff, {name: chat.un, 'function': botChat.chatMessages.autoskip}));
                         }
                         else {
-                            basicBot.room.autoskip = !basicBot.room.autoskip;
+                            botVar.room.autoskip = !botVar.room.autoskip;
                             return API.sendChat(botChat.subChat(botChat.chatMessages.toggleon, {name: chat.un, 'function': botChat.chatMessages.autoskip}));
                         }
                     }
@@ -5023,7 +5025,7 @@ var BOTCOMMANDS = {
                     }
                 }
             }
-             **/
+             */
         }
 };
 if (!window.APIisRunning) {
