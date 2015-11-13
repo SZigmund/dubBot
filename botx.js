@@ -2,7 +2,7 @@
 //SECTION Var: All global variables:
 var botVar = {
   /*ZZZ: Updated Version*/
-  version: "Version 1.01.1.00020",
+  version: "Version 1.01.1.00021",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -52,7 +52,7 @@ var botVar = {
 
 //SECTION USERS: All User data
 var USERS = {
-  users = [],
+  users: [],
   getLastActivity: function (user) {
 	  return user.lastActivity;
   },
