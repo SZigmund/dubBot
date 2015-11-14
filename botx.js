@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00051",
+  version: "Version 1.01.1.00052",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -223,10 +223,10 @@ var USERS = {
 	  //var mainChat = document.getElementsByClassName("chat-main");
 	  //var avatarList = document.getElementsByClassName("main-user-list-room");
 
-	  //var avatarList = document.getElementsByClassName("avatar-list");
-      //botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
-	  var avatarList = document.getElementById("avatar-list");
+	  var avatarList = document.getElementsByClassName("avatar-list");
       botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
+	  avatarList = document.getElementById("avatar-list");
+      botDebug.debugMessage(true, "avatarList count: " + avatarList.length);
 
       var usernameList = avatarList[0].getElementsByTagName("li");
       botDebug.debugMessage(true, "usernameList count: " + usernameList.length);
