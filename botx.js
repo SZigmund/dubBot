@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00048",
+  version: "Version 1.01.1.00049",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -207,18 +207,20 @@ var USERS = {
 	},
 
 //	   Sample object:
-//	   <ul class="avatar-list" id="avatar-list">
-//		 <li rel="17356" class="co-owner currentDJ user-doc_z"><p class="username">doc_z</p><p class="dubs"><span>17356 </span> dubs</p></li>
-//		 <li rel="17131" class="co-owner user-barstoolsaints"><p class="username">barstoolsaints</p><p class="dubs"><span>17131 </span> dubs</p></li>
-//		 <li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
-//		 <li rel="8113" class="mod user-bcav"><p class="username">bcav</p><p class="dubs"><span>8113 </span> dubs</p></li>
-//		 <li rel="7049" class="mod user-larry_the_law"><p class="username">larry_the_law</p><p class="dubs"><span>7049 </span> dubs</p></li>
-//		 <li rel="4649" class="creator co-owner user-balloon_knot"><p class="username">balloon_knot</p><p class="dubs"><span>4649 </span> dubs</p></li>
-//		</ul>
+//	<div class="tabItem ps-container" id="main-user-list-room">
+//	  <ul class="avatar-list" id="avatar-list">
+//	    <li rel="17356" class="co-owner user-doc_z currentDJ updub"><p class="username">doc_z</p><p class="dubs"><span>17394</span> dubs</p></li>
+//	    <li rel="17131" class="co-owner user-barstoolsaints updub"><p class="username">barstoolsaints</p><p class="dubs"><span>17145</span> dubs</p></li>
+//	    <li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
+//	    <li rel="8113" class="mod user-bcav"><p class="username">bcav</p><p class="dubs"><span>8143</span> dubs</p></li>
+//	    <li rel="7049" class="mod user-larry_the_law updub"><p class="username">larry_the_law</p><p class="dubs"><span>7063</span> dubs</p></li>
+//	    <li rel="4649" class="creator co-owner user-balloon_knot updub"><p class="username">balloon_knot</p><p class="dubs"><span>4663</span> dubs</p></li>
+//	  </ul>
+//	<div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 3px; width: 480px; display: none;">
 	loadUsersInRoom: function () {  //ererererer
 	  try {
 	  // Avatar List for users in the room
-	  var avatarList = document.getElementsByClassName("avatar-list");
+	  var avatarList = document.getElementsByClassName("main-user-list-room");
       botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
 
       var usernameList = avatarList[0].getElementsByTagName("li");
@@ -232,7 +234,6 @@ var USERS = {
 		  USERS.users.push(new USERS.User("new", username));
 		else
 		  roomUser.inRoom = true;
-		
       }
 	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
 	  }
@@ -2305,12 +2306,12 @@ var API = {
   currentDjName: function() {
     try {
 	  var userInfo = document.getElementsByClassName("infoContainerInner");
-	  botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
+	  botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
 	  var spans = userInfo[0].getElementsByClassName("currentDJSong");
 	  var djName = spans[0].innerHTML;
-	  botDebug.debugMessage(true, "djName: " + djName);
+	  botDebug.debugMessage(false, "djName: " + djName);
 	  djName = djName.replace("is playing", "");
-	  botDebug.debugMessage(true, "djName: " + djName.trim());
+	  botDebug.debugMessage(false, "djName: " + djName.trim());
 	  return djName.trim();
 	}
 	catch(err) { UTIL.logException("currentDjName: " + err.message); }
