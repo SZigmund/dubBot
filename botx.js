@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00053",
+  version: "Version 1.01.1.00054",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -108,12 +108,12 @@ var USERS = {
 	  //return user.lastActivity;
   },
   setUserName: function (userId, userName) {
-	var user = USERS.lookupUser(userId);
+	var user = USERS.lookupUserID(userId);
 	//todoer
 	//if (user.username !== userName) user.username = userName;
   },
   setLastActivityID: function (userId, dispMsg) {
-	var user = USERS.lookupUser(userId);
+	var user = USERS.lookupUserID(userId);
 	//todoer
 	//USERS.setLastActivity(user, dispMsg);
   },
@@ -129,7 +129,7 @@ var USERS = {
 	}
 	return false;
   },
-  lookupUser: function (id) {   //getroomuser
+  lookupUserID: function (id) {   //getroomuser
   //todoer USER: 
 		//for (var i = 0; i < USERS.users.length; i++) {
 		//	if (USERS.users[i].id === id) {
@@ -161,6 +161,7 @@ var USERS = {
 		this.jointime = Date.now();
 		this.firstActivity = Date.now();
 		this.lastActivity = Date.now();
+		this.userRole = "UNDEFINED";
 		this.votes = {
 			songs: 0,
 			tasty: 0,
@@ -206,17 +207,27 @@ var USERS = {
       catch(err) { UTIL.logException("resetAllUsers: " + err.message); }
 	},
 
+	//<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
+	// DOC_Z: <li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447537103945">
+
+////*[@id="562ba5be67a3641400ebabfb-1447537287106"]/div/div[1]/span	
+//#\35 62ba5be67a3641400ebabfb-1447537287106 > div > div.chatDelete > span
+click
+	<div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.helpers.displayUser('542465ce43f5a10200c07f11', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">doc_z</a> Howdy</p></div><div class="meta-info"><span class="username">doc_z </span><i class="icon-dot"></i><span class="timeinfo"><time class="timeago" datetime="2015-11-14T21:38:23.890Z" title="11/14/2015, 4:38:23 PM">13 minutes ago</time></span></div></div></div></li>
 //	   Sample object:
-//	<div class="tabItem ps-container" id="main-user-list-room">
-//	  <ul class="avatar-list" id="avatar-list">
-//	    <li rel="17356" class="co-owner user-doc_z currentDJ updub"><p class="username">doc_z</p><p class="dubs"><span>17394</span> dubs</p></li>
-//	    <li rel="17131" class="co-owner user-barstoolsaints updub"><p class="username">barstoolsaints</p><p class="dubs"><span>17145</span> dubs</p></li>
-//	    <li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
-//	    <li rel="8113" class="mod user-bcav"><p class="username">bcav</p><p class="dubs"><span>8143</span> dubs</p></li>
-//	    <li rel="7049" class="mod user-larry_the_law updub"><p class="username">larry_the_law</p><p class="dubs"><span>7063</span> dubs</p></li>
-//	    <li rel="4649" class="creator co-owner user-balloon_knot updub"><p class="username">balloon_knot</p><p class="dubs"><span>4663</span> dubs</p></li>
-//	  </ul>
-//	<div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 3px; width: 480px; display: none;">
+//	<div class="tabsContainer">
+//		<div class="tabItem ps-container" id="main-user-list-room">
+//			<ul class="avatar-list" id="avatar-list">
+//				<li rel="17412" class="co-owner user-doc_z updub"><p class="username">doc_z</p><p class="dubs"><span>17431</span> dubs</p></li>
+//				<li rel="17151" class="co-owner user-barstoolsaints updub"><p class="username">barstoolsaints</p><p class="dubs"><span>17158</span> dubs</p></li>
+//				<li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
+//				<li rel="8155" class="mod user-bcav currentDJ"><p class="username">bcav</p><p class="dubs"><span>8167</span> dubs</p></li>
+//				<li rel="7069" class="mod user-larry_the_law updub"><p class="username">larry_the_law</p><p class="dubs"><span>7076</span> dubs</p></li>
+//				<li rel="4669" class="creator co-owner user-balloon_knot updub"><p class="username">balloon_knot</p><p class="dubs"><span>4676</span> dubs</p></li>
+//			</ul>
+//		</div>
+//	</div>
+
 	loadUsersInRoom: function () {  //ererererer
 	  try {
 	  // Avatar List for users in the room
@@ -225,10 +236,11 @@ var USERS = {
 
 	  //var avatarList = document.getElementsByClassName("avatar-list");
       //botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
-	  var avatarList = document.getElementById("avatar-list");
-      botDebug.debugMessage(true, "avatarList count: " + avatarList.length);
+	  //var avatarList = document.getElementById("main-user-list-room");
+      //botDebug.debugMessage(true, "avatarList count: " + avatarList.length);
 
-      var usernameList = avatarList[0].getElementsByTagName("li");
+	  var tabsContainer = document.getElementsByClassName("tabsContainer");
+      var usernameList = tabsContainer[0].getElementsByTagName("li");
       botDebug.debugMessage(true, "usernameList count: " + usernameList.length);
 	  
       for (var i = 0; i < usernameList.length; i++) {
@@ -458,7 +470,7 @@ var COMMANDS = {
 			
 			//if (chat.message.toLowerCase() === '.eta' && botVar.room.etaRestriction) {
 			//	if (userPerm < 2) {
-			//		var u = USERS.lookupUser(chat.uid);
+			//		var u = USERS.lookupUserID(chat.uid);
 			//		if (u.lastEta !== null && (Date.now() - u.lastEta) < 1 * 60 * 60 * 1000) {
 			//			if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
 			//			return void (0);
@@ -802,7 +814,7 @@ var botChat = {
 	chatFilter: function (chat) {
 		var msg = chat.message;
 		var perm = API.getPermission(chat.uid);
-		var user = USERS.lookupUser(chat.uid);
+		var user = USERS.lookupUserID(chat.uid);
 		var isMuted = false;
 		for (var i = 0; i < botVar.room.mutedUsers.length; i++) {
 			if (botVar.room.mutedUsers[i] === chat.uid) isMuted = true;
@@ -1288,7 +1300,7 @@ var TASTY = {
 	},
 	tastyVote: function (username, cmd) {
 		try {
-		//todoer USERS: var user = USERS.lookupUser(userId);
+		//todoer USERS: var user = USERS.lookupUserID(userId);
 		//todoer USERS: if (user.tastyVote) return;
 		//todoer USERS: var dj = API.getDJ();
 		//todoer USERS: if (typeof dj === 'undefined') return;
@@ -1308,7 +1320,7 @@ var TASTY = {
 		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: username})); }, 1000);
 	
 		botVar.songStats.tastyCount++;
-		//todoer USERS: var currdj = USERS.lookupUser(dj.id);
+		//todoer USERS: var currdj = USERS.lookupUserID(dj.id);
 		//todoer USERS: currdj.votes.tasty += 1;
 		}
 		catch(err) {
@@ -1418,7 +1430,7 @@ var AFK = {
 	for (var i = 0; i < lastPos; i++) {
 		if (typeof djlist[i] !== 'undefined') {
 			var id = djlist[i].id;
-			var user = USERS.lookupUser(id);
+			var user = USERS.lookupUserID(id);
 			if (typeof user !== 'boolean') {
 				var dubUser = API.getDubUser(user);
 				if (rank !== null) {
@@ -2965,6 +2977,16 @@ var BOTCOMMANDS = {
 							if (maxTime === "4") API.mehThisSong();
 							if (maxTime === "5") API.wootThisSong();
 							if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
+							if (maxTime === "7") {
+								  var avatarList7 = document.getElementById("main-user-list-room");
+								  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
+							}
+							if (maxTime === "8") {
+								  var avatarList8 = document.getElementById("avatar-list");
+								  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
+							}
+							
+
                         }
                         else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
                     }
@@ -3814,7 +3836,7 @@ var BOTCOMMANDS = {
                     else {
                         var media = API.getMedia();
                         var from = chat.un;
-                        var user = USERS.lookupUser(chat.uid);
+                        var user = USERS.lookupUserID(chat.uid);
                         var perm = API.getPermission(chat.uid);
                         var dj = API.getDJ().id;
                         var isDj = false;
@@ -4110,7 +4132,7 @@ var BOTCOMMANDS = {
                              // }
                              //if (indexMuted > -1) {
                              //botVar.room.mutedUsers.splice(indexMuted);
-                             //var u = USERS.lookupUser(id);
+                             //var u = USERS.lookupUserID(id);
                              //var name = u.username;
                              //API.sendChat(botChat.subChat(botChat.getChatMessage("unmuted"), {name: chat.un, username: name}));
                              //}
