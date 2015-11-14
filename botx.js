@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00054",
+  version: "Version 1.01.1.00055",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -114,7 +114,7 @@ var USERS = {
   },
   setLastActivityID: function (userId, dispMsg) {
 	var user = USERS.lookupUserID(userId);
-	//todoer
+	if (user === false) return;
 	//USERS.setLastActivity(user, dispMsg);
   },
   setLastActivity: function (user, dispMsg) {
@@ -130,13 +130,13 @@ var USERS = {
 	return false;
   },
   lookupUserID: function (id) {   //getroomuser
-  //todoer USER: 
-		//for (var i = 0; i < USERS.users.length; i++) {
-		//	if (USERS.users[i].id === id) {
-		//		return USERS.users[i];
-		//	}
-		//}
-		//return false;
+  //todoer TEST: 
+		for (var i = 0; i < USERS.users.length; i++) {
+			if (USERS.users[i].id === id) {
+				return USERS.users[i];
+			}
+		}
+		return false;
 	},
 	importUserList: function() { // userlistimport << command
 		try {
@@ -210,10 +210,6 @@ var USERS = {
 	//<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
 	// DOC_Z: <li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447537103945">
 
-////*[@id="562ba5be67a3641400ebabfb-1447537287106"]/div/div[1]/span	
-//#\35 62ba5be67a3641400ebabfb-1447537287106 > div > div.chatDelete > span
-click
-	<div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.helpers.displayUser('542465ce43f5a10200c07f11', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">doc_z</a> Howdy</p></div><div class="meta-info"><span class="username">doc_z </span><i class="icon-dot"></i><span class="timeinfo"><time class="timeago" datetime="2015-11-14T21:38:23.890Z" title="11/14/2015, 4:38:23 PM">13 minutes ago</time></span></div></div></div></li>
 //	   Sample object:
 //	<div class="tabsContainer">
 //		<div class="tabItem ps-container" id="main-user-list-room">
@@ -2297,6 +2293,9 @@ var API = {
   },
   moderateDeleteChat: function (cid) {
     // todoer
+	// *[@id="562ba5be67a3641400ebabfb-1447537287106"]/div/div[1]/span	
+	// #\35 62ba5be67a3641400ebabfb-1447537287106 > div > div.chatDelete > span
+
 	//	$.ajax({
 	//		url: "https://plug.dj/_/chat/" + cid,
 	//		type: "DELETE"
