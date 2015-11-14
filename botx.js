@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00047",
+  version: "Version 1.01.1.00048",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -123,12 +123,10 @@ var USERS = {
 	//todoer USER: user.afkWarningCount = 0;
 	//todoer USER: clearTimeout(user.afkCountdown);
   },
-  lookupUserName: function (name) {
-	//todoer USER: for (var i = 0; i < USERS.users.length; i++) {
-	//todoer USER: 	if (USERS.users[i].username.trim() == name.trim()) {
-	//todoer USER: 		return USERS.users[i];
-	//todoer USER: 	}
-	//todoer USER: }
+  lookupUserName: function (username) {
+	for (var i = 0; i < USERS.users.length; i++) {
+	  if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
+	}
 	return false;
   },
   lookupUser: function (id) {   //getroomuser
@@ -153,7 +151,7 @@ var USERS = {
 					}
 				}
 			});
-			botDebug.debugMessage("LIST COUNT: " + dubBot.room.usersImport.length, true);
+			botDebug.debugMessage(true, "LIST COUNT: " + dubBot.room.usersImport.length);
 		}
 		catch(err) { console.log("ERROR:importBlackList: " + err.message); }
 	},
@@ -161,6 +159,7 @@ var USERS = {
 		this.id = id;
 		this.username = name;
 		this.jointime = Date.now();
+		this.firstActivity = Date.now();
 		this.lastActivity = Date.now();
 		this.votes = {
 			songs: 0,
@@ -197,6 +196,47 @@ var USERS = {
 		};
 		this.lastKnownPosition = -1;
 		this.lastSeenInLine = null;
+	},
+
+	resetAllUsers: function () {
+	  try {
+	    for (var i = 0; i < USERS.users.length; i++) 
+	      USERS.users[i].inRoom = false;
+	  }
+      catch(err) { UTIL.logException("resetAllUsers: " + err.message); }
+	},
+
+//	   Sample object:
+//	   <ul class="avatar-list" id="avatar-list">
+//		 <li rel="17356" class="co-owner currentDJ user-doc_z"><p class="username">doc_z</p><p class="dubs"><span>17356 </span> dubs</p></li>
+//		 <li rel="17131" class="co-owner user-barstoolsaints"><p class="username">barstoolsaints</p><p class="dubs"><span>17131 </span> dubs</p></li>
+//		 <li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
+//		 <li rel="8113" class="mod user-bcav"><p class="username">bcav</p><p class="dubs"><span>8113 </span> dubs</p></li>
+//		 <li rel="7049" class="mod user-larry_the_law"><p class="username">larry_the_law</p><p class="dubs"><span>7049 </span> dubs</p></li>
+//		 <li rel="4649" class="creator co-owner user-balloon_knot"><p class="username">balloon_knot</p><p class="dubs"><span>4649 </span> dubs</p></li>
+//		</ul>
+	loadUsersInRoom: function () {  //ererererer
+	  try {
+	  // Avatar List for users in the room
+	  var avatarList = document.getElementsByClassName("avatar-list");
+      botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
+
+      var usernameList = avatarList[0].getElementsByTagName("li");
+      botDebug.debugMessage(true, "usernameList count: " + usernameList.length);
+	  
+      for (var i = 0; i < usernameList.length; i++) {
+	    var username = usernameList[i].getAttribute("username");
+	    botDebug.debugMessage(true, "USER: " + username);
+		var roomUser = USERS.lookupUserName(username);
+		if (roomUser === false)
+		  USERS.users.push(new USERS.User("new", username));
+		else
+		  roomUser.inRoom = true;
+		
+      }
+	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
+	  }
+      catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
 	}
 };
 
@@ -281,7 +321,7 @@ var SETTINGS = {
         else {
             var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
             var room = JSON.parse(localStorage.getItem("dubBotRoom"));
-            botDebug.debugMessage("room.users.length: " + room.users.length, true);
+            botDebug.debugMessage(true, "room.users.length: " + room.users.length);
             if (localStorage.getItem("BLACKLIST") !== null) {
               var myBLList = localStorage["BLACKLIST"];
               var myBLIDs = localStorage["BLACKLISTIDS"];
@@ -293,15 +333,15 @@ var SETTINGS = {
               dubBot.room.newBlacklist = JSON.parse(localStorage["BLACKLIST"]);
               dubBot.room.newBlacklistIDs = JSON.parse(localStorage["BLACKLISTIDS"]);
               
-              botDebug.debugMessage("BL LOAD:   BL Count: " + dubBot.room.newBlacklist.length, true);
-              botDebug.debugMessage("BL LOAD: BLID Count: " + dubBot.room.newBlacklistIDs.length, true);
+              botDebug.debugMessage(true, "BL LOAD:   BL Count: " + dubBot.room.newBlacklist.length);
+              botDebug.debugMessage(true, "BL LOAD: BLID Count: " + dubBot.room.newBlacklistIDs.length);
             }
             dubBot.room.blacklistLoaded = true;
-            botDebug.debugMessage("BL LOADED: TRUE", true);
+            botDebug.debugMessage(true, "BL LOADED: TRUE");
             var elapsed = Date.now() - JSON.parse(info).time;
             dubBot.room.users = room.users;
             dubBot.room.historyList = room.historyList;
-            botDebug.debugMessage("dubBot.room.users.length: " + dubBot.room.users.length + " TIME: " + JSON.parse(info).time, true);
+            botDebug.debugMessage(true, "dubBot.room.users.length: " + dubBot.room.users.length + " TIME: " + JSON.parse(info).time);
             if ((elapsed < 1 * 60 * 60 * 1000)) {
                 API.chatLog(botChat.getChatMessage("retrievingdata"));
                 for (var prop in settings) {
@@ -317,32 +357,30 @@ var SETTINGS = {
             }
         }
         }
-        catch(err) {
-           UTIL.logException("retrieveFromStorage: " + err.message);
-        }
+        catch(err) { UTIL.logException("retrieveFromStorage: " + err.message); }
 
     },
     storeToStorage: function () {
         try {
-        botDebug.debugMessage("START: storeToStorage", true);
+        botDebug.debugMessage(true, "START: storeToStorage");
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
         localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
-        botDebug.debugMessage("STORED DATA: " + JSON.stringify(dubBot.room), true);
+        botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
             version: botVar.version
         };
-        botDebug.debugMessage("DONE: storeToStorage - UserCnt: " + dubBot.room.users.length + " TIME: " + dubBotStorageInfo.time, true);
+        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + dubBot.room.users.length + " TIME: " + dubBotStorageInfo.time);
         localStorage.setItem("dubBotStorageInfo", JSON.stringify(dubBotStorageInfo));
         }
         catch(err) {
            UTIL.logException("storeToStorage: " + err.message);
         }
     }
-
 	
 };
+
 //SECTION COMMANDS: All bot commands:
 var COMMANDS = {
 	botChatcommand: function (command) {
@@ -372,21 +410,21 @@ var COMMANDS = {
 	checkCommands: function (chat) {
 		try {
 			//if (!botVar.botRunning) return;
-			botDebug.debugMessage("STEP 001", true);
+			botDebug.debugMessage(false, "STEP 001");
 			chat.message = UTIL.linkFixer(chat.message);
-			botDebug.debugMessage("STEP 002", true);
+			botDebug.debugMessage(false, "STEP 002");
 			chat.message = chat.message.trim();
 			//todoer afk activity
 			//USERS.setLastActivityID(chat.uid, true);
 			//todoer afk activity
 			//USERS.setUserName(chat.uid, chat.un);
-			botDebug.debugMessage("STEP 003", true);
+			botDebug.debugMessage(false, "STEP 003");
 			if (botChat.chatFilter(chat)) return void (0);
-			botDebug.debugMessage("STEP 004", true);
+			botDebug.debugMessage(false, "STEP 004");
 			if (COMMANDS.commandCheck(chat)) return;
-			botDebug.debugMessage("STEP 005", true);
+			botDebug.debugMessage(false, "STEP 005");
 			botChat.action(chat);  //user
-			botDebug.debugMessage("STEP 006", true);
+			botDebug.debugMessage(false, "STEP 006");
 		}
 		catch(err) { UTIL.logException("checkCommands: " + err.message); }
 	},
@@ -395,7 +433,7 @@ var COMMANDS = {
 	//chat.uid chat.message chat.cid chat.un
 		try {
 			var cmd;
-		botDebug.debugMessage("STEP 201", true);
+		botDebug.debugMessage(false, "STEP 201");
 			if (chat.message.substring(0,1) === CONST.commandLiteral) {
 				var space = chat.message.indexOf(' ');
 				if (space === -1) {
@@ -404,13 +442,13 @@ var COMMANDS = {
 				else cmd = chat.message.substring(0, space).toLowerCase();
 			}
 			else return false;
-		botDebug.debugMessage("STEP 202", true);
+		botDebug.debugMessage(false, "STEP 202");
 			var userPerm = API.getPermission(chat.uid);
 			if (chat.message.toLowerCase() !== ".join" && chat.message.toLowerCase() !== ".leave" && (!TASTY.bopCommand(cmd))) {
 				if (userPerm === 0 && !botVar.room.usercommand) return void (0);
 				if (!botVar.room.allcommand) return void (0);
 			}
-		botDebug.debugMessage("STEP 203", true);
+		botDebug.debugMessage(false, "STEP 203");
 			
 			//if (chat.message.toLowerCase() === '.eta' && botVar.room.etaRestriction) {
 			//	if (userPerm < 2) {
@@ -424,7 +462,7 @@ var COMMANDS = {
 			//}
 
 			var executed = false;
-		botDebug.debugMessage("STEP 204", true);
+		botDebug.debugMessage(false, "STEP 204");
 
 			for (var comm in BOTCOMMANDS.commands) {
 				var cmdCall = BOTCOMMANDS.commands[comm].command;
@@ -440,18 +478,18 @@ var COMMANDS = {
 				}
 			}
 
-		botDebug.debugMessage("STEP 205", true);
+		botDebug.debugMessage(false, "STEP 205");
 			if (executed && userPerm === 0) {
 				botVar.room.usercommand = false;
 				setTimeout(function () { botVar.room.usercommand = true; }, botVar.room.commandCooldown * 1000);
 			}
-		botDebug.debugMessage("STEP 206", true);
+		botDebug.debugMessage(false, "STEP 206");
 			if (executed) {
 				if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
 				botVar.room.allcommand = false;
 				setTimeout(function () { botVar.room.allcommand = true; }, 5 * 1000);
 			}
-		botDebug.debugMessage("STEP 207", true);
+		botDebug.debugMessage(false, "STEP 207");
 			return executed;
 		}
 		catch(err) { UTIL.logException("commandCheck: " + err.message); }
@@ -470,20 +508,20 @@ var botChat = {
 		sound: "mention"
   },
   action: function (chat) {
-		botDebug.debugMessage("STEP 101", true);
+		botDebug.debugMessage(false, "STEP 101");
 		if (chat.type === 'message' || chat.type === 'emote')  {
-			botDebug.debugMessage("STEP 102", true);
-			USERS.setLastActivityID(chat.uid, true);
-			botDebug.debugMessage("STEP 103", true);
+			botDebug.debugMessage(false, "STEP 102");
+			USERS.setLastActivityID(chat.uid, false);
+			botDebug.debugMessage(false, "STEP 103");
 		}
 		else if (chat.type !== 'log')  {
-		  botDebug.debugMessage("CHAT.TYPE: " + chat.type, true);
+		  botDebug.debugMessage(true, "CHAT.TYPE: " + chat.type);
 		}
-		botDebug.debugMessage("STEP 104", true);
+		botDebug.debugMessage(false, "STEP 104");
 		AI.larryAI(chat.message, chat.un);
-		botDebug.debugMessage("STEP 105", true);
+		botDebug.debugMessage(false, "STEP 105");
 		botVar.room.roomstats.chatmessagescnt++;
-		botDebug.debugMessage("STEP 106", true);
+		botDebug.debugMessage(false, "STEP 106");
   },
   chatcleaner: function (chat) {
 	if (!botVar.room.filterChat) return false;
@@ -847,7 +885,7 @@ var botChat = {
   },
   processChatItem: function(chatMessage, username) {
     try{
-      botDebug.debugMessage(username + ": " + chatMessage, false);
+      botDebug.debugMessage(false, username + ": " + chatMessage);
 	  var chat = botChat.formatChat(chatMessage, username);
 	  COMMANDS.checkCommands(chat);
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
@@ -855,15 +893,15 @@ var botChat = {
   processChatItems: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;                // ignore empty items
-      botDebug.debugMessage("Item ID: " + liItem.id, false);
+      botDebug.debugMessage(false, "Item ID: " + liItem.id);
       if (liItem.id.length < 10) return;                        // ignore chat without IDs
       var itemHistory = botChat.findChatItem(liItem.id);
-      botDebug.debugMessage("Hist Item count: " + itemHistory.chatCount, false);
+      botDebug.debugMessage(false, "Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
-      botDebug.debugMessage("chat Items count: " + chatItems.length, false);
+      botDebug.debugMessage(false, "chat Items count: " + chatItems.length);
       if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-      botDebug.debugMessage("User: " + username, false);
+      botDebug.debugMessage(false, "User: " + username);
 	  var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
       for (var i = chatItems.length -1; i >= historyChatCount; i--) {
@@ -1172,7 +1210,7 @@ var UTIL = {
 			if (typeof objectToLog[prop] === "object") 
 				UTIL.logObject(objectToLog[prop], objectName + "." + prop);
 			else
-				botDebug.debugMessage("Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop], true);
+				botDebug.debugMessage(false, "Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop]);
 		}
 	}
 	catch(err) { UTIL.logException("logObject: " + err.message); }
@@ -1342,7 +1380,7 @@ var TASTY = {
 };
 //SECTION Debug: All Debug functionality:
 var botDebug = {
-  debugMessage: function(message, highLevel) {
+  debugMessage: function(highLevel, message) {
     if ((highLevel === true) && (botVar.debugHighLevel === false)) return;
     if ((highLevel === false) && (botVar.debugLowLevel === false)) return;
     console.log("[DEBUG]: " + message);
@@ -1470,9 +1508,9 @@ var RANDOMCOMMENTS = {
 	  try  {
 	  //var testTime = new Date();
 	  //var timeDiff = testTime.getMinutes() - RANDOMCOMMENTS.settings.nextRandomComment.getMinutes();
-	  //botDebug.debugMessage("randomCommentCheck:" + testTime.getMinutes() + " - " + RANDOMCOMMENTS.settings.nextRandomComment.getMinutes(), true);
-	  //botDebug.debugMessage("randomCommentCheck-NOW TIME: " + Date.now(), true);
-	  //botDebug.debugMessage("randomCommentCheck-timeDiff: " + timeDiff, true);
+	  //botDebug.debugMessage(true, "randomCommentCheck:" + testTime.getMinutes() + " - " + RANDOMCOMMENTS.settings.nextRandomComment.getMinutes());
+	  //botDebug.debugMessage(true, "randomCommentCheck-NOW TIME: " + Date.now());
+	  //botDebug.debugMessage(true, "randomCommentCheck-timeDiff: " + timeDiff);
 	  //if (timeDiff > 0)
 	  //{
 	  //	  RANDOMCOMMENTS.randomCommentSetTimer();
@@ -1504,7 +1542,7 @@ var RANDOMCOMMENTS = {
 	  myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
 	  nextTime.setTime(nextTime.getTime() + myTimeSpan);
 	  RANDOMCOMMENTS.settings.nextRandomComment = nextTime;
-	  botDebug.debugMessage("Next Random Comment: " + nextTime, true);
+	  botDebug.debugMessage(true, "Next Random Comment: " + nextTime);
 	}  
 	catch(err) {
 	  UTIL.logException("randomCommentSetTimer: " + err.message);
@@ -1950,7 +1988,7 @@ var AI = {
     var fuComment = "";
 
     var chatmsg = chat.toUpperCase();
-    botDebug.debugMessage("Larry AI chatmsg: " + chatmsg, false);
+    botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
     chatmsg = chatmsg.replace(/\W/g, '')      // Remove all non-alphanumeric values
     chatmsg = chatmsg.replace(/[0-9]/g, '');  // Remove all numeric values
     chatmsg = chatmsg.replace(/'/g, '');
@@ -1969,7 +2007,7 @@ var AI = {
     chatmsg = chatmsg.replace(/YOUARE/g, "YOURE");   // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/LARRYIS/g, "LARRYS");
     chatmsg = chatmsg.replace(/IAM/g, "IM");
-    botDebug.debugMessage("Larry AI chatmsg: " + chatmsg, false);
+    botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
 
     if (chatmsg.indexOf("USUCKLARRY") > -1) fuComment = "You're still sore about the other night %%FU%% :kiss:";
     if (chatmsg.indexOf("DUCKULARRY") > -1) fuComment = AI.fuComment();
@@ -2122,6 +2160,9 @@ var API = {
       window.APIisRunning = true;
 
       botChat.loadChat();
+	  USERS.loadUsersInRoom();
+	  USERS.resetAllUsers();
+
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
@@ -2264,12 +2305,12 @@ var API = {
   currentDjName: function() {
     try {
 	  var userInfo = document.getElementsByClassName("infoContainerInner");
-	  botDebug.debugMessage("userInfo count: " + userInfo.length, true);
+	  botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
 	  var spans = userInfo[0].getElementsByClassName("currentDJSong");
 	  var djName = spans[0].innerHTML;
-	  botDebug.debugMessage("djName: " + djName);
+	  botDebug.debugMessage(true, "djName: " + djName);
 	  djName = djName.replace("is playing", "");
-	  botDebug.debugMessage("djName: " + djName.trim());
+	  botDebug.debugMessage(true, "djName: " + djName.trim());
 	  return djName.trim();
 	}
 	catch(err) { UTIL.logException("currentDjName: " + err.message); }
@@ -2748,7 +2789,6 @@ var BOTCOMMANDS = {
                         TASTY.setRolled(chat.un, true);
                         var resultsMsg = "";
                         var wooting = true;
-                        rollResults = 6;
                         if (rollResults >= (dicesides * 0.5)) {
                             //Pick a random word for the tasty command
                             setTimeout(function () { TASTY.tastyVote(chat.un, TASTY.bopCommand("")); }, 1000);
@@ -2877,9 +2917,9 @@ var BOTCOMMANDS = {
                 functionality: function (chat, cmd)  {
                     try { 
 						var userInfo = document.getElementsByClassName("user-info");
-						botDebug.debugMessage("userInfo count: " + userInfo.length, true);
+						botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
 						var spans = userInfo[0].getElementsByTagName("span");
-						botDebug.debugMessage("userInfo: " + spans[0].innerHTML, true);
+						botDebug.debugMessage(true, "userInfo: " + spans[0].innerHTML);
                     }
                     catch(err) {
                         UTIL.logException("zigaCommand: " + err.message);
@@ -2893,9 +2933,9 @@ var BOTCOMMANDS = {
                 functionality: function (chat, cmd)  {
                     try {
 						var userInfo = document.getElementsByClassName("infoContainerInner");
-						botDebug.debugMessage("userInfo count: " + userInfo.length, true);
+						botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
 						var spans = userInfo[0].getElementsByClassName("currentDJSong");
-						botDebug.debugMessage("currentDJSong: " + spans[0].innerHTML, true);
+						botDebug.debugMessage(true, "currentDJSong: " + spans[0].innerHTML);
                     }
                     catch(err) {
                         UTIL.logException("zigbCommand: " + err.message);
@@ -3499,28 +3539,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            ghostbusterCommand: {
-                command: 'ghostbuster',
-                rank: 'user',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        var name;
-                        if (msg.length === cmd.length) name = chat.un;
-                        else {
-                            name = msg.substr(cmd.length + 2);
-                        }
-                        var user = USERS.lookupUserName(name);
-                        if (user === false || !user.inRoom) {
-                            return API.sendChat(botChat.subChat(botChat.getChatMessage("ghosting"), {name1: chat.un, name2: name}));
-                        }
-                        else API.sendChat(botChat.subChat(botChat.getChatMessage("notghosting"), {name1: chat.un, name2: name}));     
-                    }
-                }
-            },
 
             gifCommand: {
                 command: ['gif', 'giphy'],
@@ -3739,7 +3757,7 @@ var BOTCOMMANDS = {
                             else API.moderateBanUser(user.id, 1, API.BAN.DAY);
                             setTimeout(function (id, name) {
                                 API.moderateUnbanUser(id);
-                                //botDebug.debugMessage('Unbanned @' + name + '. (' + id + ')', true);
+                                //botDebug.debugMessage(true, 'Unbanned @' + name + '. (' + id + ')');
                             }, time * 60 * 1000, user.id, name);
                         }
                         else API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
@@ -4384,7 +4402,7 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         if (msg.length === cmd.length) return API.sendChat("Missing mid to remove...");
                         var midToRemove = msg.substring(cmd.length + 1);
-                        botDebug.debugMessage("Keyword: " + midToRemove, true);
+                        botDebug.debugMessage(true, "Keyword: " + midToRemove);
                         var idxToRemove = dubBot.room.newBlacklistIDs.indexOf(midToRemove);
                         if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
                         if (dubBot.room.newBlacklist.length !== dubBot.room.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
@@ -4611,7 +4629,7 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         var matchCnt = 0;
                         if (msg.length > cmd.length) keyword = msg.substring(cmd.length + 1).toUpperCase();
-                        botDebug.debugMessage("Keyword: " + keyword, true);
+                        botDebug.debugMessage(true, "Keyword: " + keyword);
                         var dispMsgs = [];
                         for (var i = 0; i < dubBot.room.newBlacklist.length; i++) {
                             var track = dubBot.room.newBlacklist[i];
@@ -4907,7 +4925,7 @@ var BOTCOMMANDS = {
                                 return API.sendChat(botChat.subChat(botChat.getChatMessage("notbanned"), {name: chat.un}));
                             }
                             API.moderateUnbanUser(bannedUser.id);
-                            //botDebug.debugMessage("Unbanned " + name, true);
+                            //botDebug.debugMessage(true, "Unbanned " + name);
                             setTimeout(function () {
                                 $(".icon-chat").click();
                             }, 1000);
@@ -5194,9 +5212,9 @@ var BOTCOMMANDS = {
                             var roomUser = USERS.lookupUserName(name);
                             if(typeof roomUser === 'boolean') return API.sendChat('/me Invalid user specified.');
                             var lang = API.getDubUser(roomUser).language;
-                            botDebug.debugMessage("lang: " + lang, true);
-                            botDebug.debugMessage("roomUser: " + roomUser.username, true);
-                            botDebug.debugMessage("roomUser: " + roomUser.id, true);
+                            botDebug.debugMessage(true, "lang: " + lang);
+                            botDebug.debugMessage(true, "roomUser: " + roomUser.username);
+                            botDebug.debugMessage(true, "roomUser: " + roomUser.id);
                             var englishMessage = basicBot.userUtilities.englishMessage(lang, name);
                             API.sendChat(englishMessage);
                         }
@@ -5264,8 +5282,8 @@ var BOTCOMMANDS = {
                                 return API.sendChat(botChat.subChat(botChat.getChatMessage("notbanned"), {name: chat.un}));
                             }
                             //API.moderateUnbanUser(bannedUser.id);
-                            botDebug.debugMessage("Unbanned: " + name, true);
-                            botDebug.debugMessage("Unban ID: " + bannedUser.id, true);
+                            botDebug.debugMessage(true, "Unbanned: " + name);
+                            botDebug.debugMessage(true, "Unban ID: " + bannedUser.id);
                             setTimeout(function () {
                                 $(".icon-chat").click();
                             }, 1000);
@@ -5443,7 +5461,7 @@ var BOTCOMMANDS = {
                             if (dubBot.room.debug === false) resetDebug = true;
                             dubBot.room.debug = true;
                             basicBot.roomUtilities.logObject(roomUser, "User");
-                            botDebug.debugMessage("JSON: " + JSON.stringify(roomUser), true);
+                            botDebug.debugMessage(true, "JSON: " + JSON.stringify(roomUser));
                             if (resetDebug) dubBot.room.debug = false;
                         }
                     }
@@ -5543,7 +5561,7 @@ var BOTCOMMANDS = {
                     $(".icon-population").click();
                     $(".icon-ban").click();
                     setTimeout(function (bootid) {
-                        botDebug.debugMessage("Boot ID: " + bootid, true);
+                        botDebug.debugMessage(true, "Boot ID: " + bootid);
                         //API.moderateBanUser(bootid, 1, API.BAN.PERMA);
                         setTimeout(function () {
                             $(".icon-chat").click();
@@ -5585,7 +5603,7 @@ var BOTCOMMANDS = {
                         var songHistory = API.getHistory();
                         //var songHistory = API.getUsers();
                         basicBot.roomUtilities.logObject(songHistory[0], "songHistory");
-                        botDebug.debugMessage("Media cid: " + songHistory[0].media.cid, true);
+                        botDebug.debugMessage(true, "Media cid: " + songHistory[0].media.cid);
                         var newMedia = API.getMedia();
                         basicBot.roomUtilities.logObject(newMedia, "Media");
                         API.grabSong("7527918", songHistory[0].media.cid);
@@ -5635,15 +5653,15 @@ var BOTCOMMANDS = {
 //                        var msg = chat.message;
 //                        if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
 //                        var whoisuser = msg.substr(cmd.length + 2);
-//                        botDebug.debugMessage("whois: " + whoisuser, true);
+//                        botDebug.debugMessage(true, "whois: " + whoisuser);
 //                        var user;
 //                        if (isNaN(whoisuser)) user = USERS.lookupUserName(whoisuser);
 //                        else                  user = API.getDubUser(whoisuser);
 //                        if (typeof user !== 'undefined')  {
-//                            botDebug.debugMessage("USER ID: " + user.id, true);
+//                            botDebug.debugMessage(true, "USER ID: " + user.id);
 //                            API.sendChat("USER: " + user.username + " " + user.id);
 //                        }
-//                        botDebug.debugMessage("TYPE: " + typeof user, true);
+//                        botDebug.debugMessage(true, "TYPE: " + typeof user);
 //                    }
 //                    catch(err) {
 //                        UTIL.logException("whoisCommand: " + err.message);
