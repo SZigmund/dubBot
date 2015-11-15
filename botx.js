@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00056",
+  version: "Version 1.01.1.00057",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -205,7 +205,9 @@ var USERS = {
 		newUser ? welcomeMessage = subChat(basicBot.chat.welcome, {name: roomUser.username})
 				: welcomeMessage = subChat(basicBot.chat.welcomeback, {name: roomUser.username});
 		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
-		setTimeout(function (user) { API.sendChat(welcomeMessage); }, 1 * 1000, user);
+		roomUser.lastActivity = Date.now();
+		setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
+		
 	  }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
 	},
@@ -270,7 +272,7 @@ var USERS = {
 		  USERS.users.push(roomUser);
 		  newUser = true;
 		}
-        if (if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
+        if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
 		roomUser.userRole = userRole;
       }
