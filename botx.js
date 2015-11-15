@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00059",
+  version: "Version 1.01.1.00060",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -40,15 +40,12 @@ var botVar = {
   botStatus: false, 
   botMuted: false,
   botRunning: false,
+  currentDJ: "",
+  currentSong: "",
+  tastyCount: 0,
+  previousSong: "",
+  previousStats: "",
   songStats: {
-    mehCount: 0,
-    dubCount: 0,
-    snagCount: 0,
-    tastyCount: 0,
-    currentSong: "",
-    currentDj: ""
-  },
-  prevStats: {
     mehCount: 0,
     dubCount: 0,
     snagCount: 0,
@@ -188,6 +185,7 @@ var USERS = {
 		this.badSongCount = 0;
 		this.afkCountdown = null;
 		this.inRoom = false;
+		this.dubDown = false;
 		this.isMuted = false;
 		this.rollStats = {
 			lifeWoot: 0,
@@ -256,12 +254,20 @@ var USERS = {
 	  }
       catch(err) { UTIL.logException("defineUserRole: " + err.message); }
 	},
-	resetAllUsers: function () {
+	resetDubDown: function () {
 	  try {
-	    for (var i = 0; i < USERS.users.length; i++) 
-	      USERS.users[i].inRoom = false;
+	    for (var i = 0; i < USERS.users.length; i++) USERS.users[i].dubDown = false;
 	  }
-      catch(err) { UTIL.logException("resetAllUsers: " + err.message); }
+      catch(err) { UTIL.logException("resetDubDown: " + err.message); }
+	},
+	resetAllUsersOnStartup: function () {
+	  try {
+	    for (var i = 0; i < USERS.users.length; i++) {
+		  USERS.users[i].inRoom = false;
+		  USERS.users[i].dubDown = false;
+		}
+	  }
+      catch(err) { UTIL.logException("resetAllUsersOnStartup: " + err.message); }
 	},
 
 	//<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
@@ -807,9 +813,10 @@ var botChat = {
    botChat.chatMessages.push(["website", "/me Please visit our website: %%LINK%%"]);
    botChat.chatMessages.push(["youtube", "/me [%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
    botChat.chatMessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
-   botChat.chatMessages.push(["mystats", "%%NAME%% [:musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatMessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
-   botChat.chatMessages.push(["songstatisticstasty", "[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
+   botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
+   //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatMessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
    botChat.chatMessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
    botChat.chatMessages.push(["eightballresponse2", "%%NAME%% The all knowing Larry says: %%RESPONSE%%"]);
@@ -1373,7 +1380,7 @@ var TASTY = {
 		//API.sendChat(botChat.subChat(botChat.getChatMessage("tastyvote"), {name: username}));
 		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: username})); }, 1000);
 	
-		botVar.songStats.tastyCount++;
+		botVar.tastyCount++;
 		//todoer USERS: var currdj = USERS.lookupUserID(dj.id);
 		//todoer USERS: currdj.votes.tasty += 1;
 		}
@@ -2233,12 +2240,17 @@ var API = {
 
       botChat.loadChat();
 	  USERS.loadUsersInRoom(false);
-	  USERS.resetAllUsers();
+	  USERS.resetAllUsersOnStartup();
+
+  	  botVar.currentSong = API.currentSongName();
 
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
       $('.room-user-counter').bind("DOMSubtreeModified", API.on.EVENT_USER_JOIN);
+	  $('.dubup').bind("DOMSubtreeModified", API.on.EVENT_DUBUP);
+      $('.dubdown').bind("DOMSubtreeModified", API.on.EVENT_DUBDOWN);
+
 
       RANDOMCOMMENTS.randomCommentSetTimer();
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
@@ -2376,6 +2388,19 @@ var API = {
 		API.chatLog(message);
 	
   },
+  
+  getDubUpCount: function() {
+    try        { return $(".dubup").text(); }
+	catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
+  }
+  getDubDownCount: function() {
+    try        { return $(".dubdown").text(); }
+	catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
+  }
+  currentSongName: function() {
+    try { return $(".currentSong").text();	}
+	catch(err) { UTIL.logException("currentSongName: " + err.message); }
+  },
   currentDjName: function() {
     try {
 	  var userInfo = document.getElementsByClassName("infoContainerInner");
@@ -2400,6 +2425,10 @@ var API = {
   },
 
   on: {
+	EVENT_DUBUP: function () {
+	},
+    EVENT_DUBDOWN: function () {
+	},
     EVENT_USER_JOIN: function () {
 	  botDebug.debugMessage(true, "USERJOIN");
 	  USERS.loadUsersInRoom(false);
@@ -2408,23 +2437,26 @@ var API = {
       // UPDATE ON SONG UPDATE
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
-	  botVar.songStats.tastyCount = 0;
-      var songName = $(".currentSong").text();
-      var djName = API.currentDjName();
+
+
+      var dubCount = API.getDubUpCount();
+      var mehCount = API.getDubDownCount();
+      var previousDJ = botVar.currentDJ;
+	  var previousSong = botVar.currentSong;  //erer
+	  botVar.currentDJ   = API.currentDjName();
+	  botVar.currentSong = API.currentSongName();
+	  var tastyPoints = botVar.tastyCount;
+	  botVar.tastyCount = 0;
 	  
-	  //document.getElementsByClassName("dubup")[0].getElementsByClassName("dub-counter")[0].innerHTML
-	  //document.getElementsByClassName("dubdown")[0].getElementsByClassName("dub-counter")[0].innerHTML
-	  //User down voted:
-	  //<li rel="52" class="dj user-levis_homer manager currentDJ downdub"><p class="username">levis_homer</p><p class="dubs"><span>65</span> dubs</p></li>
-	  var mainChat = document.getElementsByClassName("dubdown");
-      var dubCount = $(".dubup").text();
-      var mehCount = $(".dubdown").text();
+ 	  USERS.resetDubDown();
 
       //If "loading..." do nothing
-      if (songName == "loading...") return;
-      API.sendChat(djName + " - " + songName);
-      API.sendChat("[ :thumbsup: " + dubCount + " :thumbsdown: " + mehCount + " ]");
-      //"[:thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"
+      if (previousSong == "loading...") return;
+
+      //API.sendChat(previousDJ + " - " + previousSong);
+      //API.sendChat("[ :thumbsup: " + dubCount + " :thumbsdown: " + mehCount + " ]");
+	  API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
+	  //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
     },
     EVENT_NEW_CHAT: function() {
       try {
@@ -5805,4 +5837,5 @@ if (!window.APIisRunning) {
 }
 // basicBot.chat -> botChat.chatMessages
 // dubBot.room. cBot.room.
-// rollCommand, 8ball, random comments, tasty comments, user stats, song stat, ban list, time limit
+// rollCommand, roll/tasty stats, user stats, song stat, ban list, time limit
+//WORKING: 8ball, random comments, tasty comments,
