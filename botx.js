@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00055",
+  version: "Version 1.01.1.00056",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -146,7 +146,7 @@ var USERS = {
 					UTIL.logObject(json, "USR");
 					for (var idx in json) {
 						var newUser = json[idx];
-						//dubBot.room.usersImport.push(new USERS.User(user.id, user.username));
+						//dubBot.room.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
 						dubBot.room.usersImport.push(newUser);
 					}
 				}
@@ -155,13 +155,13 @@ var USERS = {
 		}
 		catch(err) { console.log("ERROR:importBlackList: " + err.message); }
 	},
-	User: function (id, name) {
-		this.id = id;
-		this.username = name;
+	User: function (userID, username, userRole) {
+		this.id = userID;
+		this.username = username;
 		this.jointime = Date.now();
 		this.firstActivity = Date.now();
 		this.lastActivity = Date.now();
-		this.userRole = "UNDEFINED";
+		this.userRole = userRole;
 		this.votes = {
 			songs: 0,
 			tasty: 0,
@@ -179,7 +179,7 @@ var USERS = {
 		this.afkWarningCount = 0;
 		this.badSongCount = 0;
 		this.afkCountdown = null;
-		this.inRoom = true;
+		this.inRoom = false;
 		this.isMuted = false;
 		this.rollStats = {
 			lifeWoot: 0,
@@ -199,6 +199,16 @@ var USERS = {
 		this.lastSeenInLine = null;
 	},
 
+    welcomeUser: function (roomUser, newUser) {
+	  try {
+		var welcomeMessage = "";
+		newUser ? welcomeMessage = subChat(basicBot.chat.welcome, {name: roomUser.username})
+				: welcomeMessage = subChat(basicBot.chat.welcomeback, {name: roomUser.username});
+		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
+		setTimeout(function (user) { API.sendChat(welcomeMessage); }, 1 * 1000, user);
+	  }
+      catch(err) { UTIL.logException("welcomeUser: " + err.message); }
+	},
 	resetAllUsers: function () {
 	  try {
 	    for (var i = 0; i < USERS.users.length; i++) 
@@ -223,8 +233,7 @@ var USERS = {
 //			</ul>
 //		</div>
 //	</div>
-
-	loadUsersInRoom: function () {  //ererererer
+	loadUsersInRoom: function (welcomeMsg) {  //ererererer
 	  try {
 	  // Avatar List for users in the room
 	  //var mainChat = document.getElementsByClassName("chat-main");
@@ -234,19 +243,36 @@ var USERS = {
       //botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
 	  //var avatarList = document.getElementById("main-user-list-room");
       //botDebug.debugMessage(true, "avatarList count: " + avatarList.length);
-
+	  //THIS IS THE PATH:
+      //document.getElementsByClassName("tabsContainer")[0].getElementsByTagName("li")[1].getElementsByClassName("username")[0].innerHTML
+	  //ROLES:
+	  //creator co-owner
+	  //user-levis_homer currenDJ co-owner
+	  //user-levis_homer currenDJ manager
+	  //user-levis_homer currenDJ mod
+	  //user-levis_homer currenDJ manager
+	  //user-levis_homer currenDJ vip
+	  //user-levis_homer currenDJ resident-dj
+	  //
+	  
 	  var tabsContainer = document.getElementsByClassName("tabsContainer");
       var usernameList = tabsContainer[0].getElementsByTagName("li");
       botDebug.debugMessage(true, "usernameList count: " + usernameList.length);
 	  
       for (var i = 0; i < usernameList.length; i++) {
-	    var username = usernameList[i].getAttribute("username");
+	    var newUser = false;
+	    var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
 	    botDebug.debugMessage(true, "USER: " + username);
+		userRole = USERS.DefineUserRole(usernameList[i].className);
 		var roomUser = USERS.lookupUserName(username);
-		if (roomUser === false)
-		  USERS.users.push(new USERS.User("new", username));
-		else
-		  roomUser.inRoom = true;
+		if (roomUser === false) {
+		  var roomUser = new USERS.User("new", username, userRole);
+		  USERS.users.push(roomUser);
+		  newUser = true;
+		}
+        if (if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
+		roomUser.inRoom = true;
+		roomUser.userRole = userRole;
       }
 	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
 	  }
@@ -2239,7 +2265,8 @@ var API = {
   getCurrentDubUser: function () {
 	  //todoer COMPLETE
 	//return API.getUser();
-	return USERS.User(0, botVar.botName);
+	lookup "UNDEFINED" ererer 
+	return USERS.User(0, botVar.botName, );
   },
   getDubUserID: function (userid) {
 	try {
@@ -2983,6 +3010,7 @@ var BOTCOMMANDS = {
 							if (maxTime === "8") {
 								  var avatarList8 = document.getElementById("avatar-list");
 								  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
+							if (maxTime === "9") USERS.loadUsersInRoom();
 							}
 							
 
