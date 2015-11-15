@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00060",
+  version: "Version 1.01.1.00061",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -2392,11 +2392,11 @@ var API = {
   getDubUpCount: function() {
     try        { return $(".dubup").text(); }
 	catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
-  }
+  },
   getDubDownCount: function() {
     try        { return $(".dubdown").text(); }
 	catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
-  }
+  },
   currentSongName: function() {
     try { return $(".currentSong").text();	}
 	catch(err) { UTIL.logException("currentSongName: " + err.message); }
