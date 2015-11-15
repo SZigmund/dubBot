@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00057",
+  version: "Version 1.01.1.00058",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -206,6 +206,7 @@ var USERS = {
 				: welcomeMessage = subChat(basicBot.chat.welcomeback, {name: roomUser.username});
 		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
 		roomUser.lastActivity = Date.now();
+		roomUser.jointime = Date.now();
 		setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
 		
 	  }
@@ -2202,12 +2203,13 @@ var API = {
       window.APIisRunning = true;
 
       botChat.loadChat();
-	  USERS.loadUsersInRoom();
+	  USERS.loadUsersInRoom(false);
 	  USERS.resetAllUsers();
 
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
+      $('.room-user-counter').bind("DOMSubtreeModified", API.on.EVENT_USER_JOIN);
 
       RANDOMCOMMENTS.randomCommentSetTimer();
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
@@ -2223,7 +2225,7 @@ var API = {
     },
   },
   getDJ: function(){
-  //todoer USER:
+    return USERS.lookupUserName(API.currentDjName());
   },
 
   getWaitListPosition: function(id){
@@ -2265,10 +2267,7 @@ var API = {
   //todoer
   },
   getCurrentDubUser: function () {
-	  //todoer COMPLETE
-	//return API.getUser();
-	lookup "UNDEFINED" ererer 
-	return USERS.User(0, botVar.botName, );
+	return USERS.lookupUserName(botVar.botName);
   },
   getDubUserID: function (userid) {
 	try {
@@ -2372,6 +2371,10 @@ var API = {
   },
 
   on: {
+    EVENT_USER_JOIN: function () {
+	  botDebug.debugMessage(true, "USERJOIN");
+	  USERS.loadUsersInRoom(false);
+	},
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
@@ -3012,7 +3015,7 @@ var BOTCOMMANDS = {
 							if (maxTime === "8") {
 								  var avatarList8 = document.getElementById("avatar-list");
 								  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
-							if (maxTime === "9") USERS.loadUsersInRoom();
+							if (maxTime === "9") USERS.loadUsersInRoom(true);
 							}
 							
 
