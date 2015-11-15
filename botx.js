@@ -32,7 +32,7 @@ var dubBot = {
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00058",
+  version: "Version 1.01.1.00059",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -41,6 +41,14 @@ var botVar = {
   botMuted: false,
   botRunning: false,
   songStats: {
+    mehCount: 0,
+    dubCount: 0,
+    snagCount: 0,
+    tastyCount: 0,
+    currentSong: "",
+    currentDj: ""
+  },
+  prevStats: {
     mehCount: 0,
     dubCount: 0,
     snagCount: 0,
@@ -212,6 +220,42 @@ var USERS = {
 	  }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
 	},
+	defineUserRole: function (userElement) {
+	  try {
+	    // SAMPLE: "user-levis_homer dj manager currentDJ"
+	    botDebug.debugMessage(true, userElement);
+	    userElement = userElement.replace("currentDJ", "");
+	    userElement = userElement.replace("downdub", "");
+	    userElement = userElement.trim();
+	    userElement = userElement.toLowerCase();
+	    var space = userElement.indexOf(' ');
+	    var dispRole;
+	    if (space === -1) dispRole = userElement;
+	    if (space !== -1) dispRole = userElement.substring(0, space);
+	    botDebug.debugMessage(true, "DISP ROLE: " + dispRole);
+		switch (dispRole) {
+			case "creator":     return "creator";
+			case "co-owner":    return "co-owner";
+			case "manager":     return "manager";
+			case "mod":         return "mod";
+			case "vip":         return "vip";
+			case "resident-dj": return "resident-dj";
+			case "dj":          return "dj";
+		}
+	    // SAMPLE: "user-levis_homer dj manager"
+	    // SAMPLE: "dj manager"
+		if (userElement.substring(userElement.length - 8,  userElement.length) === " creator")           return "creator"
+		if (userElement.substring(userElement.length - 17, userElement.length) === " creator co-owner")  return "creator co-owner"
+		if (userElement.substring(userElement.length - 9,  userElement.length) === " co-owner")          return "co-owner"
+		if (userElement.substring(userElement.length - 8,  userElement.length) === " manager")           return "manager"
+		if (userElement.substring(userElement.length - 4,  userElement.length) === " mod")               return "mod"
+		if (userElement.substring(userElement.length - 4,  userElement.length) === " vip")               return "vip"
+		if (userElement.substring(userElement.length - 12, userElement.length) === " resident-dj")       return "resident-dj"
+		if (userElement.substring(userElement.length - 3,  userElement.length) === " dj")                return "dj"
+	    return "";
+	  }
+      catch(err) { UTIL.logException("defineUserRole: " + err.message); }
+	},
 	resetAllUsers: function () {
 	  try {
 	    for (var i = 0; i < USERS.users.length; i++) 
@@ -222,6 +266,7 @@ var USERS = {
 
 	//<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
 	// DOC_Z: <li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447537103945">
+	// 
 
 //	   Sample object:
 //	<div class="tabsContainer">
@@ -236,28 +281,11 @@ var USERS = {
 //			</ul>
 //		</div>
 //	</div>
-	loadUsersInRoom: function (welcomeMsg) {  //ererererer
-	  try {
-	  // Avatar List for users in the room
-	  //var mainChat = document.getElementsByClassName("chat-main");
-	  //var avatarList = document.getElementsByClassName("main-user-list-room");
-
-	  //var avatarList = document.getElementsByClassName("avatar-list");
-      //botDebug.debugMessage(true, "avatarList count: " + avatarList.count);
-	  //var avatarList = document.getElementById("main-user-list-room");
-      //botDebug.debugMessage(true, "avatarList count: " + avatarList.length);
-	  //THIS IS THE PATH:
-      //document.getElementsByClassName("tabsContainer")[0].getElementsByTagName("li")[1].getElementsByClassName("username")[0].innerHTML
-	  //ROLES:
-	  //creator co-owner
-	  //user-levis_homer currenDJ co-owner
-	  //user-levis_homer currenDJ manager
-	  //user-levis_homer currenDJ mod
-	  //user-levis_homer currenDJ manager
-	  //user-levis_homer currenDJ vip
-	  //user-levis_homer currenDJ resident-dj
-	  //
-	  
+//USERS.loadUsersInRoom(true);
+  loadUsersInRoom: function (welcomeMsg) {  //ererererer
+	try {
+	  //Username path:
+	  //document.getElementsByClassName("tabsContainer")[0].getElementsByTagName("li")[0].getElementsByClassName("username")[0].innerHTML;
 	  var tabsContainer = document.getElementsByClassName("tabsContainer");
       var usernameList = tabsContainer[0].getElementsByTagName("li");
       botDebug.debugMessage(true, "usernameList count: " + usernameList.length);
@@ -266,7 +294,7 @@ var USERS = {
 	    var newUser = false;
 	    var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
 	    botDebug.debugMessage(true, "USER: " + username);
-		userRole = USERS.DefineUserRole(usernameList[i].className);
+		userRole = USERS.defineUserRole(usernameList[i].className);
 		var roomUser = USERS.lookupUserName(username);
 		if (roomUser === false) {
 		  var roomUser = new USERS.User("new", username, userRole);
@@ -278,9 +306,9 @@ var USERS = {
 		roomUser.userRole = userRole;
       }
 	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
-	  }
-      catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
 	}
+    catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
+  }
 };
 
 //SECTION SETTINGS: All bot commands:
@@ -1315,13 +1343,14 @@ var TASTY = {
 		}
 	},
 	setRolled: function (username, value, wooting) {
-		//todeor USER: var user = USERS.lookupUserName(username);
-		//todeor USER: user.rolled = value;
+		var user = USERS.lookupUserName(username);
+		if (user === false) return;
+		user.rolled = value;
 	},
 	getRolled: function (username) {
-		//todeor USER: var user = USERS.lookupUserName(username);
-		//todeor USER: return user.rolled;
-		return false;
+		var user = USERS.lookupUserName(username);
+		if (user === false) return false;
+		return user.rolled;
 	},
 	tastyVote: function (username, cmd) {
 		try {
@@ -2382,8 +2411,14 @@ var API = {
 	  botVar.songStats.tastyCount = 0;
       var songName = $(".currentSong").text();
       var djName = API.currentDjName();
-      var dubCount = $(".dubup.dub-counter").text();
-      var mehCount = $(".dubdown.dub-counter").text();
+	  
+	  //document.getElementsByClassName("dubup")[0].getElementsByClassName("dub-counter")[0].innerHTML
+	  //document.getElementsByClassName("dubdown")[0].getElementsByClassName("dub-counter")[0].innerHTML
+	  //User down voted:
+	  //<li rel="52" class="dj user-levis_homer manager currentDJ downdub"><p class="username">levis_homer</p><p class="dubs"><span>65</span> dubs</p></li>
+	  var mainChat = document.getElementsByClassName("dubdown");
+      var dubCount = $(".dubup").text();
+      var mehCount = $(".dubdown").text();
 
       //If "loading..." do nothing
       if (songName == "loading...") return;
