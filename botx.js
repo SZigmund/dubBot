@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069",
+  version: "Version 1.01.1.00069a",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -356,7 +356,8 @@ var USERS = {
 	    botDebug.debugMessage(true, "USER: " + username);
 		var userInfo = usernameList[i].className;
 		userRole = USERS.defineUserRole(userInfo);
-		if (userInfo.search("downdub") === null) userMehing = false;
+		var userMehing = false;
+		if (userInfo.indexOf("downdub") >= 0) userMehing = true;
 		var roomUser = USERS.lookupUserName(username);
 		if (roomUser === false) {
 		  var roomUser = new USERS.User("new", username, userRole);
