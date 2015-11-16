@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069b",
+  version: "Version 1.01.1.00069c",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -33,6 +33,7 @@ var botVar = {
 	voteSkipLimit: 1,  //ererer
     etaRestriction: false,
     filterChat: true,
+	currentMehCount: 0,
 	botRoomUrl: "",
 	roomstats: {
 		accountName: null,
@@ -105,7 +106,7 @@ var dubBot = {
 	var tooMany = false;
 	//tooMany = dubBot.tooManyBadSongs(userName);
 	//if (tooMany) API.botDjNow();
-	setTimeout(function () { API.moderateForceSkip(); }, 1 * 500);
+	API.moderateForceSkip();
 	//if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
 	//if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
   }
@@ -367,7 +368,7 @@ var USERS = {
 		}
         if ((roomUser.inRoom === false) && (welcomeMsg === true)) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
-		botDebug.debugMessage(true, "USERS IN THE ROOM: roomUser.username);
+		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
 		roomUser.userRole = userRole;
 		if (userMehing && !roomUser.isMehing) API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
 		roomUser.isMehing = userMehing;
@@ -2500,7 +2501,10 @@ var API = {
     EVENT_DUBDOWN: function () {
 	  try {
 		botDebug.debugMessage(true, "EVENT_DUBDOWN");
-		if (API.getDubDownCount() >= botVar.room.voteSkipLimit) {
+		var dubCount = API.getDubDownCount();
+		if (dubCount <= botVar.room.currentMehCount) return;  // Prevent back-2-back calls skipping multiple songs.
+		botVar.room.currentMehCount = dubCount;
+		if (dubCount >= botVar.room.voteSkipLimit) {
 		  API.sendChat(botChat.subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
 		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
 		}
@@ -2514,6 +2518,7 @@ var API = {
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
 	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE");
+	  botVar.room.currentMehCount = 0;
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
 
