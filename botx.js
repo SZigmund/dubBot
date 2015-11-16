@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069e",
+  version: "Version 1.01.1.00069f",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -95,6 +95,7 @@ var dubBot = {
 	  
 	  botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
 	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+		API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: name, botVar.currentDJ: SETTINGS.settings.maximumSongLength}));
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
 	  }
 	}
@@ -368,6 +369,9 @@ var USERS = {
 		  USERS.users.push(roomUser);
 		  newUser = true;
 		}
+		//USERS.users[i].username 
+		//
+		// clearInterval(USERS.loadUserInterval);
         if ((roomUser.inRoom === false) && (welcomeMsg === true)) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
 		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
@@ -811,7 +815,8 @@ var botChat = {
    botChat.chatMessages.push(["maximumafktimeset", "[@%%NAME%%] Maximum afk duration set to %%TIME%% minutes."]);
    botChat.chatMessages.push(["afkstatusreset", "[@%%NAME%%] Reset the afk status of @%%USERNAME%%."]);
    botChat.chatMessages.push(["inactivefor", "[@%%NAME%%] @%%USERNAME%% has been inactive for %%TIME%%."]);
-   botChat.chatMessages.push(["autowoot", "We recommend PlugCubed for autowooting: http://plugcubed.net/"]);
+   botChat.chatMessages.push(["autowoot", "We recommend DubX for autowooting. Dub X Button: https://dubx.net/"]);
+   botChat.chatMessages.push(["autowootx", "Or the DubX chome extension: https://chrome.google.com/webstore/detail/dubx/oceofndagjnpebjmknefoelcpcnpcedm"]);
    botChat.chatMessages.push(["brandambassador", "A Brand Ambassador is the voice of the plug.dj users. They promote events, engage the community and share the plug.dj message around the world. For more info: https://plug.dj/ba"]);
    botChat.chatMessages.push(["origem", "To install Origem-Woot go here: http://origem-woot.com/Instalation/"]);
    botChat.chatMessages.push(["bouncerplusrank", "[@%%NAME%%] You have to be manager or up to enable Bouncer+."]);
@@ -2018,9 +2023,7 @@ var RANDOMCOMMENTS = {
 	"Would you rather: A. Have sex with a goat, but no one would know OR B. not have sex with one, but everyone would think you did?",
 	"Would you rather: A. Always have to say everything on your mind OR B. never speak again?",
 	"Would you rather: A. Be able to turn invisible OR B. be able to fly?",
-	"We are stuck with technology when what we really want is just stuff that works. - Every plug user ever",
 	"Space, it seems to go on and on forever. But then you get to the end and a gorilla starts throwing barrels at you.",
-	"When plug is in command, every mission's a suicide mission!",
 	"I was having the most wonderful dream. Except you were there, and you were there, and you were there!",
 	"Hey, this is mine. That's mine. All of this is mine. Except that bit. I don't want that bit. But all the rest of this is mine. Hey, this has been a really good day.",
 	"Time - Unknown. Location - Unknown. Cause of accident - Unknown. Should someone find this recording, perhaps it will shed light as to what happened here.",
@@ -2079,8 +2082,6 @@ var RANDOMCOMMENTS = {
 	"Smoking is a slow death! But we’re not in a hurry…",
 	"I became a vegetarian – switched to weed.",
 	"We must pay for the mistakes of our youth… at the drugstore.",
-	"What does plug pay their developers in xp?",
-	"Color blind people are lucky; They can't tell if their plug name is gray or purple",
 	"Friends come and go. Enemies pile up.",
 	"I would like to know when someone unfriends me on Facebook, so I could like it.",
 	"Maybe you need a ladder to climb out of my business?",
@@ -2122,9 +2123,6 @@ var RANDOMCOMMENTS = {
 	"I know I don’t look like much now, but I’m drinking milk ",
 	"I know I don’t look like much now, but I’m drinking milk. ",
 	"If I followed you home, would you keep me? ",
-	"Hey, did plug just shit it's pants again? ",
-	"Hey, did plug just shit it's pants again? ",
-	"Hey plug here's to for all those times I got blamed for your issues!  Eff you see kay owe eff eff Plug!!",
 	"I always wrap my shit. Using a smart phone without a case is like having unprotected sex. It feels so good but the consequences suck."
 	]
 };
@@ -2307,8 +2305,8 @@ var API = {
       window.APIisRunning = true;
 
       botChat.loadChat();
-	  USERS.loadUsersInRoom(false);
 	  USERS.resetAllUsersOnStartup();
+	  USERS.loadUsersInRoom(false);
 
   	  botVar.currentSong = API.currentSongName();
 	  botVar.currentDJ   = API.currentDjName();
