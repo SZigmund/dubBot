@@ -27,12 +27,23 @@ var dubBot = {
 	newBlacklist: [],
 	newBlacklistIDs: [],
 	blacklistLoaded: false,
-  }
+  },
+  
+  skipBadSong: function (userName, skippedBy, reason) {
+	API.logInfo("Skip: [" + botVar.currentsong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
+	var tooMany = false;
+	//tooMany = ROOM.tooManyBadSongs(userName);
+	//if (tooMany) API.botDjNow();
+	setTimeout(function () { API.moderateForceSkip(); }, 1 * 500);
+	//if (tooMany) setTimeout(function () { basicBot.userUtilities.removeDJ(userName); }, 1 * 1000);
+	//if (tooMany) setTimeout(function () { basicBot.userUtilities.setBadSongCount(userName, 0); }, 1 * 1500);
+  },
+
 };
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00061",
+  version: "Version 1.01.1.00062",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -166,6 +177,7 @@ var USERS = {
 		this.jointime = Date.now();
 		this.firstActivity = Date.now();
 		this.lastActivity = Date.now();
+		this.isMehing = false;
 		this.userRole = userRole;
 		this.votes = {
 			songs: 0,
@@ -208,8 +220,8 @@ var USERS = {
     welcomeUser: function (roomUser, newUser) {
 	  try {
 		var welcomeMessage = "";
-		newUser ? welcomeMessage = subChat(basicBot.chat.welcome, {name: roomUser.username})
-				: welcomeMessage = subChat(basicBot.chat.welcomeback, {name: roomUser.username});
+		newUser ? welcomeMessage = subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
+				: welcomeMessage = subChat(botChat.getChatMessage("welcomeback"), {name: roomUser.username});
 		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
 		roomUser.lastActivity = Date.now();
 		roomUser.jointime = Date.now();
@@ -300,7 +312,9 @@ var USERS = {
 	    var newUser = false;
 	    var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
 	    botDebug.debugMessage(true, "USER: " + username);
-		userRole = USERS.defineUserRole(usernameList[i].className);
+		var userInfo = usernameList[i].className;
+		userRole = USERS.defineUserRole(userInfo);
+		userMehing = !(userInfo.search("downdub") === null)
 		var roomUser = USERS.lookupUserName(username);
 		if (roomUser === false) {
 		  var roomUser = new USERS.User("new", username, userRole);
@@ -310,6 +324,7 @@ var USERS = {
         if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
 		roomUser.userRole = userRole;
+		if (userMehing && !roomUser.isMehing) findChatItem erererer
       }
 	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
 	}
@@ -2287,21 +2302,12 @@ var API = {
 	}
   },
   mehThisSong: function () {
-	try  {
-         $('.dubdown').click();
-		//$("#meh").click();
-	}  
-	catch(err) {
-	  UTIL.logException("mehThisSong: " + err.message);
-	}
+	try  {  $('.dubdown').click();	}  
+	catch(err) { UTIL.logException("mehThisSong: " + err.message); }
   },
   wootThisSong: function () {
-	try  {
-         $('.dubup').click();
-	}  
-	catch(err) {
-	  UTIL.logException("wootThisSong: " + err.message);
-	}
+	try  { $('.dubup').click(); }  
+	catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
   getWaitList: function () {
@@ -2414,6 +2420,9 @@ var API = {
 	}
 	catch(err) { UTIL.logException("currentDjName: " + err.message); }
   },
+  moderateForceSkip: function() {
+	API.sendChat("/skip");
+  },
   logInfo: function(msg) {  // Log info to console
 	try {
 	   console.log("INFO: " + msg);
@@ -2426,18 +2435,29 @@ var API = {
 
   on: {
 	EVENT_DUBUP: function () {
+	  try {
+		botDebug.debugMessage(true, "EVENT_DUBUP");
+	  }
+	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
 	},
     EVENT_DUBDOWN: function () {
+	  try {
+		botDebug.debugMessage(true, "EVENT_DUBUP");
+		if (API.getDubDownCount() >= botVar.room.voteSkipLimit) {
+		  API.sendChat(subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
+		  ROOM.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
+		}
+	  }
+	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
 	},
     EVENT_USER_JOIN: function () {
 	  botDebug.debugMessage(true, "USERJOIN");
-	  USERS.loadUsersInRoom(false);
+	  USERS.loadUsersInRoom(true);
 	},
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
-
 
       var dubCount = API.getDubUpCount();
       var mehCount = API.getDubDownCount();
@@ -2447,9 +2467,12 @@ var API = {
 	  botVar.currentSong = API.currentSongName();
 	  var tastyPoints = botVar.tastyCount;
 	  botVar.tastyCount = 0;
-	  
  	  USERS.resetDubDown();
 
+	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+		ROOM.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
+	  }
+	  
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
 
@@ -3143,6 +3166,51 @@ var BOTCOMMANDS = {
                         API.logInfo(msg);
                     }
                     catch (err) { UTIL.logException("userlistimport: " + err.message); }
+                }
+            },
+            exrollCommand: {
+                command: ['exroll','roll?'],
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Explain ROLL: A dj can roll the dice during their spin. Rolling 1-3=MEH, 4-6=WOOT. 50% chance. type .roll during your spin to do it.");
+                    }
+                    catch(err) {
+                        UTIL.logException("exrollcommand: " + err.message);
+                    }
+                }
+            },
+            whyCommand: {
+                command: 'why',
+                rank: 'bouncer',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("You're only getting woots cause we all have auto woot");
+                    }
+                    catch(err) {
+                        UTIL.logException("whycommand: " + err.message);
+                    }
+                }
+            },
+            ughCommand: {
+                command: 'ugh',
+                rank: 'bouncer',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("You know your play sucks when the chat goes quiet");
+                    }
+                    catch(err) {
+                        UTIL.logException("ughcommand: " + err.message);
+                    }
                 }
             },
             speakCommand: {   //Added 02/25/2015 Zig 
@@ -5510,51 +5578,6 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-            whyCommand: {
-                command: 'why',
-                rank: 'bouncer',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("You're only getting woots cause we all have auto woot");
-                    }
-                    catch(err) {
-                        UTIL.logException("whycommand: " + err.message);
-                    }
-                }
-            },
-            ughCommand: {
-                command: 'ugh',
-                rank: 'bouncer',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("You know your play sucks when the chat goes quiet");
-                    }
-                    catch(err) {
-                        UTIL.logException("ughcommand: " + err.message);
-                    }
-                }
-            },
-            exrollCommand: {
-                command: ['exroll','roll?'],
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("Explain ROLL: A dj can roll the dice during their spin. Rolling 1-3=MEH, 4-6=WOOT. 50% chance. type .roll during your spin to do it.");
-                    }
-                    catch(err) {
-                        UTIL.logException("exrollcommand: " + err.message);
-                    }
-                }
-            },
             kissCommand: {
                 command: 'kiss',
                 rank: 'residentdj',
@@ -5835,7 +5858,7 @@ if (!window.APIisRunning) {
 } else {
   setTimeout(API.main.initbot, 1000);
 }
-// basicBot.chat -> botChat.chatMessages
+// basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 // rollCommand, roll/tasty stats, user stats, song stat, ban list, time limit
 //WORKING: 8ball, random comments, tasty comments,
