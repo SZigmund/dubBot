@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00064",
+  version: "Version 1.01.1.00065",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -285,6 +285,8 @@ var USERS = {
 
 	//<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
 	// DOC_Z: <li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447537103945">
+	// bcav:  <li class="user-562ba5be67a3641400ebabfb isMod" id="562ba5be67a3641400ebabfb-1447628453068">
+	// MKay:  <li class="user-56009988bfb6340300a2dc6a isManager" id="56009988bfb6340300a2dc6a-1447628469537">
 	// 
 
 //	   Sample object:
@@ -753,7 +755,7 @@ var botChat = {
    botChat.chatMessages.push(["songstats", "song statistics"]);
    botChat.chatMessages.push(["etarestriction", "eta restriction"]);
    botChat.chatMessages.push(["voteskip", "voteskip"]);
-   botChat.chatMessages.push(["whyyoumeh", "/me [@%%NAME%%] mehed this song [%%SONG%%]");
+   botChat.chatMessages.push(["whyyoumeh", "/me [@%%NAME%%] mehed this song [%%SONG%%]"]);
    botChat.chatMessages.push(["voteskiplimit", "/me [@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
    botChat.chatMessages.push(["voteskipexceededlimit", "/me @%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
    botChat.chatMessages.push(["voteskipinvalidlimit", "/me [@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
@@ -1325,11 +1327,11 @@ var TASTY = {
 	resetDailyRolledStats: function (roomUser) {
 		try {
 		var DOY = UTIL.getDOY();
-		//todoer USER: if (roomUser.rollStats.DOY !== DOY) {
-		//todoer USER: 	roomUser.rollStats.DOY = DOY;
-		//todoer USER: 	roomUser.rollStats.dayWoot = 0;
-		//todoer USER: 	roomUser.rollStats.dayTotal = 0;
-		//todoer USER: }
+		if (roomUser.rollStats.DOY !== DOY) {
+		 	roomUser.rollStats.DOY = DOY;
+		 	roomUser.rollStats.dayWoot = 0;
+		 	roomUser.rollStats.dayTotal = 0;
+		}
 	  }
 		catch(err) {
 		  UTIL.logException("resetDailyRolledStats: " + err.message);
@@ -1339,11 +1341,11 @@ var TASTY = {
 	getRolledStats: function (roomUser) {
 		try {
 		   return "";
-		   //todoer USER: var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
-		   //todoer USER: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
-		   //todoer USER: rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
-		   //todoer USER: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
-		   //todoer USER: return rollStats;
+		   var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
+		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
+		   rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
+		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
+		   return rollStats;
 		}
 		catch(err) {
 		  UTIL.logException("getRolledStats: " + err.message);
@@ -1352,16 +1354,16 @@ var TASTY = {
 	},
 	updateRolledStats: function (username, wooting) {
 		try {
-		//todoer USER: var roomUser = USERS.lookupUserName(username);
-		//todoer USER: TASTY.resetDailyRolledStats(roomUser);
-		//todoer USER: if (wooting) {
-		//todoer USER: 	roomUser.rollStats.lifeWoot++;
-		//todoer USER: 	roomUser.rollStats.dayWoot++;
-		//todoer USER: }
-		//todoer USER: roomUser.rollStats.lifeTotal++;
-		//todoer USER: roomUser.rollStats.dayTotal++;
-		return TASTY.getRolledStats(roomUser);
-	  }
+		  var roomUser = USERS.lookupUserName(username);
+		  TASTY.resetDailyRolledStats(roomUser);
+		  if (wooting) {
+		 	roomUser.rollStats.lifeWoot++;
+		 	roomUser.rollStats.dayWoot++;
+		  } 
+		  roomUser.rollStats.lifeTotal++;
+		  roomUser.rollStats.dayTotal++;
+		  return TASTY.getRolledStats(roomUser);
+	    }
 		catch(err) {
 		  UTIL.logException("updateRolledStats: " + err.message);
 		  return "";
@@ -2935,7 +2937,7 @@ var BOTCOMMANDS = {
                         TASTY.setRolled(chat.un, true);
                         var resultsMsg = "";
                         var wooting = true;
-                        if (rollResults >= (dicesides * 0.5)) {
+                        if (rollResults > (dicesides * 0.5)) {
                             //Pick a random word for the tasty command
                             setTimeout(function () { TASTY.tastyVote(chat.un, TASTY.bopCommand("")); }, 1000);
                             setTimeout(function () { API.wootThisSong(); }, 1500);
