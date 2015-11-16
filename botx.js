@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069g",
+  version: "Version 1.01.1.00069h",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -90,6 +90,7 @@ var dubBot = {
 
   validateCurrentSong: function () {
     try {
+	  botVar.room.currentMehCount = 0;
   	  botVar.currentSong = API.currentSongName();
 	  botVar.currentDJ   = API.currentDjName();
 	  
@@ -253,7 +254,7 @@ var USERS = {
 	defineUserRole: function (userElement, username) {
 	  try {
 	    // SAMPLE: "user-levis_homer dj manager currentDJ"
-	    botDebug.debugMessage(true, userElement);
+	    botDebug.debugMessage(false, userElement);
 	    userElement = userElement.replace("user-", "");
 	    userElement = userElement.replace(username, "");
 	    userElement = userElement.replace("currentDJ", "");
@@ -264,7 +265,7 @@ var USERS = {
 	    var dispRole;
 	    if (space === -1) dispRole = userElement;
 	    if (space !== -1) dispRole = userElement.substring(0, space);
-	    botDebug.debugMessage(true, "DISP ROLE: " + dispRole);
+	    botDebug.debugMessage(false, "DISP ROLE: " + dispRole);
 		switch (dispRole) {
 			case "creator":     return "creator";
 			case "co-owner":    return "co-owner";
@@ -417,11 +418,6 @@ var SETTINGS = {
 		skipSoundStart: 7,
 		skipSoundEnd: 15,
 		skipSoundRange: "Monday-Friday between 7AM and 3PM EST",
-		roulette5Days: true,
-		roulette7Days: false,
-		rouletteStart: 9,
-		rouletteEnd: 17,
-		randomRoulette: false,
 		autodisable: false,
 		commandCooldown: 30,
 		usercommandsEnabled: true,
@@ -1395,11 +1391,11 @@ var TASTY = {
 	getRolledStats: function (roomUser) {
 		try {
 		   return "";
-		   var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
-		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
-		   rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
-		   rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
-		   return rollStats;
+		   //todoer RollStats: var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
+		   //todoer RollStats: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
+		   //todoer RollStats: rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
+		   //todoer RollStats: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
+		   //todoer RollStats: return rollStats;
 		}
 		catch(err) {
 		  UTIL.logException("getRolledStats: " + err.message);
@@ -1636,6 +1632,102 @@ var AFK = {
 	}
 	catch(err) { UTIL.logException("afkRemovalNow: " + err.message); }
   },
+};
+
+// Will not currently work as Larry cannot move people in the line AND the @all mention doesn't work.
+//SECTION ROULETTE: All roulette functionality:
+var ROULETTE = {
+  settings: {
+	roulette5Days: true,
+	roulette7Days: false,
+	rouletteStart: 9,
+	rouletteEnd: 17,
+	randomRoulette: false,
+	rouletteStatus: false
+	randomRouletteMin: 45,
+	randomRouletteMax: 120,
+	nextRandomRoulette: null,
+	participants: [],
+	countdown: null
+  },
+
+  startRoulette: function () {
+	try  {
+		if (ROULETTE.rouletteStatus) return;
+		ROULETTE.rouletteStatus = true;
+		ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
+		API.sendChat(botChat.getChatMessage("isopen"));
+	}
+	catch(err) { UTIL.logException("startRoulette: " + err.message); }
+  },
+  randomRouletteCheck: function() {
+	try  {
+		if (ROULETTE.nextRandomRoulette <= Date.now())
+		{
+			ROULETTE.randomRouletteSetTimer();
+			if (ROULETTE.randomRoulette === false) return;
+			if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette();
+		}
+	}
+	catch(err) { UTIL.logException("randomRouletteCheck: " + err.message); }
+  },
+
+  
+  rouletteTimeRange: function () {
+	try {
+		if (!ROULETTE.roulette5Days && !ROULETTE.roulette7Days) return false;
+		if (ROULETTE.randomRoulette === false) return false;
+		var currDate = new Date();
+		//Not on Saturday/Sunday if not monitoring 7 days a week
+		if (!ROULETTE.roulette7Days) {
+			var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
+			if (dayofweek === 6 || dayofweek === 0) return false;
+		}
+		var hourofday = currDate.getHours();
+		if (hourofday >= ROULETTE.rouletteStart && hourofday < ROULETTE.rouletteEnd) return true;
+		return false;
+	}
+	catch(err) { UTIL.logException("rouletteTimeRange: " + err.message); }
+  },
+
+  randomRouletteSetTimer: function () {
+	try  {
+		var randomRange = (ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin)
+		var randomMins = Math.floor(Math.random() * randomRange);
+		randomMins += ROULETTE.randomRouletteMin;
+		//JIC: Ensure we are in the correct time range:
+		if ((randomMins > ROULETTE.randomRouletteMax) || (randomMins < ROULETTE.randomRouletteMin))
+		{
+		  randomMins = ROULETTE.randomRouletteMin + ((ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin) / 2.0)
+		}
+		var nextTime = new Date();
+		var myTimeSpan;
+		myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
+		nextTime.setTime(nextTime.getTime() + myTimeSpan);
+		API.chatLog("Next Roulette: " + UTIL.msToStr(myTimeSpan));
+		ROULETTE.nextRandomRoulette = nextTime;
+	}
+	catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
+  },
+
+  endRoulette: function () {
+	try {
+		ROULETTE.rouletteStatus = false;
+		if (ROULETTE.participants.length === 0) {
+		   API.sendChat("Roulette has ended with no participants");
+		   return;
+		}
+		var ind = Math.floor(Math.random() * ROULETTE.participants.length);
+		var winner = ROULETTE.participants[ind];
+		ROULETTE.participants = [];
+		var pos = Math.floor((Math.random() * API.getWaitList().length) + 1);
+		var user = USERS.lookupUser(winner);
+		var name = user.username;
+		API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, position: pos}));
+		setTimeout(function (winner, pos) { API.moveUser(winner, pos, false); }, 1 * 1000, winner, pos);
+	}
+	catch(err) { UTIL.logException("endRoulette: " + err.message); }
+  }
 };
 
 //SECTION RANDOM COMMENTS: All Random Comment functionality:
@@ -2519,7 +2611,6 @@ var API = {
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
 	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
-	  botVar.room.currentMehCount = 0;
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
 
@@ -3304,6 +3395,22 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            rouletteCommand: {
+                command: 'roulette',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    if (ROULETTE.rouletteStatus) return void (0);
+                    if (ROULETTE.rouletteTimeRange()) {
+                        API.sendChat("The LAW runs the Roulette weekdays 9AM-5PM EST");
+                        return;
+                    }
+                    ROULETTE.startRoulette();
+                }
+            },
+			
 
             /*
             activeCommand: {
@@ -3962,8 +4069,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (dubBot.room.roulette.rouletteStatus && dubBot.room.roulette.participants.indexOf(chat.uid) < 0) {
-                            dubBot.room.roulette.participants.push(chat.uid);
+                        if (ROULETTE.rouletteStatus && ROULETTE.participants.indexOf(chat.uid) < 0) {
+                            ROULETTE.participants.push(chat.uid);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
                         }
                     }
@@ -4060,9 +4167,9 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        var ind = dubBot.room.roulette.participants.indexOf(chat.uid);
+                        var ind = ROULETTE.participants.indexOf(chat.uid);
                         if (ind > -1) {
-                            dubBot.room.roulette.participants.splice(ind, 1);
+                            ROULETTE.participants.splice(ind, 1);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("rouletteleave"), {name: chat.un}));
                         }
                     }
@@ -4540,21 +4647,6 @@ var BOTCOMMANDS = {
                             return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("etarestriction")}));
                         }
                     }
-                }
-            },
-            rouletteCommand: {
-                command: 'roulette',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    if (dubBot.room.roulette.rouletteStatus) return void (0);
-                    if (basicBot.roomUtilities.rouletteTimeRange()) {
-                        API.sendChat("The LAW runs the Roulette weekdays 9AM-5PM EST");
-                        return void (0);
-                    }
-                    dubBot.room.roulette.startRoulette();
                 }
             },
 
@@ -5924,4 +6016,4 @@ if (!window.APIisRunning) {
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 // roll/tasty stats, Save/Load users, ban list, 
-//WORKING: 8ball, random comments, tasty comments, rollCommand,  song stat, time limit
+//WORKING: welcome users, 8ball, random comments, tasty comments, rollCommand,  song stat, time limit
