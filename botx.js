@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069h",
+  version: "Version 1.01.1.00069i",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -1643,7 +1643,7 @@ var ROULETTE = {
 	rouletteStart: 9,
 	rouletteEnd: 17,
 	randomRoulette: false,
-	rouletteStatus: false
+	rouletteStatus: false,
 	randomRouletteMin: 45,
 	randomRouletteMax: 120,
 	nextRandomRoulette: null,
