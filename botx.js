@@ -1,9 +1,9 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069i",
+  version: "Version 1.00.0069j",
   ImHidden: true,
-  botName: "Larry The Law",
+  botName: "larry_the_law",
   botID: -1,
   botStatus: false, 
   botMuted: false,
@@ -413,7 +413,6 @@ var SETTINGS = {
 		autoHopDownCount: 4,
 		botRoomUrl: "",
 		hoppingDownNow: false,
-		botName: "Larry the LAW",
 		language: "english",
 		chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
 		bouncerPlus: true,
@@ -2394,7 +2393,8 @@ var API = {
       }
 
       window.APIisRunning = true;
-
+	  botVar.botName = API.getBotName();
+	  if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
 	  USERS.resetAllUsersOnStartup();
 	  USERS.loadUsersInRoom(false);
@@ -2552,6 +2552,10 @@ var API = {
   getDubDownCount: function() {
     try        { return $(".dubdown").text(); }
 	catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
+  },
+  getBotName: function() {
+    try { return $(".user-info").text();	}
+	catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
   currentSongName: function() {
     try { return $(".currentSong").text();	}
@@ -2923,7 +2927,7 @@ var CONST = {
             ":cake: *** Thanks to Al Gore %%POINTFROM%% can give you this: :cake: *** :cake:",
             ":cake: *** Goose, take me to bed or lose me forever. (%%POINTFROM%%) *** :cake:",
             ":cake: *** If we weren’t on the internet %%POINTFROM%% would get you tin roof rusted. *** :cake:",
-            ":cake: *** :dancer: %%POINTFROM%% gave you a tasty point.  @Larry the Law will now dance the robot in your honor. :dancer: *** :cake:",
+            ":cake: *** :dancer: %%POINTFROM%% gave you a tasty point.  @larry_the_law will now dance the robot in your honor. :dancer: *** :cake:",
             ":cake: *** Beanbags are great and so are you!! (%%POINTFROM%%) *** :cake:",
             ":cake: *** That green jacket is within reach! (%%POINTFROM%%) *** :cake:",
             ":cake: *** You're smarter than Google and Mary Poppins combined. (%%POINTFROM%%) *** :cake:",
