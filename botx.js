@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00065",
+  version: "Version 1.01.1.00066",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -30,7 +30,7 @@ var botVar = {
     usercommand: true,
 	mutedUsers: [],
 	voteSkipEnabled: true,
-	voteSkipLimit: 4,
+	voteSkipLimit: 1,  //ererer
     etaRestriction: false,
     filterChat: true,
 	botRoomUrl: "",
@@ -221,8 +221,8 @@ var USERS = {
     welcomeUser: function (roomUser, newUser) {
 	  try {
 		var welcomeMessage = "";
-		newUser ? welcomeMessage = subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
-				: welcomeMessage = subChat(botChat.getChatMessage("welcomeback"), {name: roomUser.username});
+		newUser ? welcomeMessage = botChat.subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
+				: welcomeMessage = botChat.subChat(botChat.getChatMessage("welcomeback"), {name: roomUser.username});
 		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
 		roomUser.lastActivity = Date.now();
 		roomUser.jointime = Date.now();
@@ -267,11 +267,14 @@ var USERS = {
 	  }
       catch(err) { UTIL.logException("defineUserRole: " + err.message); }
 	},
-	resetDubDown: function () {
+	resetUserSongStats: function () {
 	  try {
-	    for (var i = 0; i < USERS.users.length; i++) USERS.users[i].dubDown = false;
+	    for (var i = 0; i < USERS.users.length; i++) {
+		  USERS.users[i].dubDown = false;
+		  USERS.users[i].rolled = false;
+		}
 	  }
-      catch(err) { UTIL.logException("resetDubDown: " + err.message); }
+      catch(err) { UTIL.logException("resetUserSongStats: " + err.message); }
 	},
 	resetAllUsersOnStartup: function () {
 	  try {
@@ -327,7 +330,7 @@ var USERS = {
         if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
 		roomUser.userRole = userRole;
-		if (userMehing && !roomUser.isMehing) API.sendChat(subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
+		if (userMehing && !roomUser.isMehing) API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
 		roomUser.isMehing = userMehing;
       }
 	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
@@ -1589,8 +1592,8 @@ var RANDOMCOMMENTS = {
   randomInterval: null,
   settings: {
 	randomComments: true,
-	randomCommentMin: 1, 	//  60
-	randomCommentMax: 4,	// 180
+	randomCommentMin: 5, 	//  60 ererer
+	randomCommentMax: 20,	// 180
 	nextRandomComment: Date.now(),
   },
   randomCommentSelect: function()  {  //Added 02/19/2015 Zig
@@ -2263,7 +2266,9 @@ var API = {
 	  USERS.resetAllUsersOnStartup();
 
   	  botVar.currentSong = API.currentSongName();
-
+	  botVar.currentDJ   = API.currentDjName();
+	  botDebug.debugMessage(true, "botVar.currentDJ: " + botVar.currentDJ);
+	  
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
@@ -2451,13 +2456,13 @@ var API = {
 	},
     EVENT_DUBDOWN: function () {
 	  try {
-		botDebug.debugMessage(true, "EVENT_DUBUP");
+		botDebug.debugMessage(true, "EVENT_DUBDOWN");
 		if (API.getDubDownCount() >= botVar.room.voteSkipLimit) {
-		  API.sendChat(subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
+		  API.sendChat(botChat.subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
 		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
 		}
 	  }
-	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
+	catch(err) { UTIL.logException("EVENT_DUBDOWN: " + err.message); }
 	},
     EVENT_USER_JOIN: function () {
 	  botDebug.debugMessage(true, "USERJOIN");
@@ -2472,11 +2477,14 @@ var API = {
       var mehCount = API.getDubDownCount();
       var previousDJ = botVar.currentDJ;
 	  var previousSong = botVar.currentSong;
+	  botDebug.debugMessage(true, "previousDJ: " + previousDJ);
 	  botVar.currentDJ   = API.currentDjName();
+	  botDebug.debugMessage(true, "botVar.currentDJ: " + botVar.currentDJ);
 	  botVar.currentSong = API.currentSongName();
 	  var tastyPoints = botVar.tastyCount;
 	  botVar.tastyCount = 0;
- 	  USERS.resetDubDown();
+ 	  USERS.resetUserSongStats();
+	  TASTY.setRolled(previousDJ, true);
 
 	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
@@ -2488,6 +2496,7 @@ var API = {
       //API.sendChat(previousDJ + " - " + previousSong);
       //API.sendChat("[ :thumbsup: " + dubCount + " :thumbsdown: " + mehCount + " ]");
 	  API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
+	  //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
 	  //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
     },
     EVENT_NEW_CHAT: function() {
