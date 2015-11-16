@@ -1,49 +1,8 @@
 // Written by Doc_Z
-//SECTION ROOM: All room settings:
-var dubBot = {
-  room: {
-	users: [],
-	usersImport: [],
-	debug: true,
-	afkList: [],
-	mutedUsers: [],
-	bannedUsers: [],
-	skippable: true,
-	usercommand: true,
-	allcommand: true,
-	blacklistInterval: null,
-	queueing: 0,
-	queueable: true,
-	currentDJID: null,
-	currentMediaCid: 999,
-	currentMediaStart: 999,
-	historyList: [],
-	cycleTimer: setTimeout(function () {
-	}, 1),
-	queue: {
-		id: [],
-		position: []
-	},
-	newBlacklist: [],
-	newBlacklistIDs: [],
-	blacklistLoaded: false,
-  },
-  
-  skipBadSong: function (userName, skippedBy, reason) {
-	API.logInfo("Skip: [" + botVar.currentsong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
-	var tooMany = false;
-	//tooMany = ROOM.tooManyBadSongs(userName);
-	//if (tooMany) API.botDjNow();
-	setTimeout(function () { API.moderateForceSkip(); }, 1 * 500);
-	//if (tooMany) setTimeout(function () { basicBot.userUtilities.removeDJ(userName); }, 1 * 1000);
-	//if (tooMany) setTimeout(function () { basicBot.userUtilities.setBadSongCount(userName, 0); }, 1 * 1500);
-  },
-
-};
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00062",
+  version: "Version 1.01.1.00063",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -96,6 +55,48 @@ var botVar = {
       this.chatId = id;
       this.chatCount = count;
   }
+};
+
+//SECTION ROOM: All room settings:
+var dubBot = {
+  room: {
+	users: [],
+	usersImport: [],
+	debug: true,
+	afkList: [],
+	mutedUsers: [],
+	bannedUsers: [],
+	skippable: true,
+	usercommand: true,
+	allcommand: true,
+	blacklistInterval: null,
+	queueing: 0,
+	queueable: true,
+	currentDJID: null,
+	currentMediaCid: 999,
+	currentMediaStart: 999,
+	historyList: [],
+	cycleTimer: setTimeout(function () {
+	}, 1),
+	queue: {
+		id: [],
+		position: []
+	},
+	newBlacklist: [],
+	newBlacklistIDs: [],
+	blacklistLoaded: false,
+  },
+  
+  skipBadSong: function (userName, skippedBy, reason) {
+	API.logInfo("Skip: [" + botVar.currentsong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
+	var tooMany = false;
+	//tooMany = dubBot.tooManyBadSongs(userName);
+	//if (tooMany) API.botDjNow();
+	setTimeout(function () { API.moderateForceSkip(); }, 1 * 500);
+	//if (tooMany) setTimeout(function () { basicBot.userUtilities.removeDJ(userName); }, 1 * 1000);
+	//if (tooMany) setTimeout(function () { basicBot.userUtilities.setBadSongCount(userName, 0); }, 1 * 1500);
+  }
+
 };
 
 String.prototype.splitBetween = function (a, b) {
@@ -2399,6 +2400,10 @@ var API = {
     try        { return $(".dubup").text(); }
 	catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
   },
+  getSongLength: function() {
+    try        { return $(".min").text(); }
+	catch(err) { UTIL.logException("getSongLength: " + err.message); }
+  },
   getDubDownCount: function() {
     try        { return $(".dubdown").text(); }
 	catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
@@ -2445,7 +2450,7 @@ var API = {
 		botDebug.debugMessage(true, "EVENT_DUBUP");
 		if (API.getDubDownCount() >= botVar.room.voteSkipLimit) {
 		  API.sendChat(subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
-		  ROOM.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
+		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
 		}
 	  }
 	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
@@ -2462,7 +2467,7 @@ var API = {
       var dubCount = API.getDubUpCount();
       var mehCount = API.getDubDownCount();
       var previousDJ = botVar.currentDJ;
-	  var previousSong = botVar.currentSong;  //erer
+	  var previousSong = botVar.currentSong;
 	  botVar.currentDJ   = API.currentDjName();
 	  botVar.currentSong = API.currentSongName();
 	  var tastyPoints = botVar.tastyCount;
@@ -2470,7 +2475,7 @@ var API = {
  	  USERS.resetDubDown();
 
 	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
-		ROOM.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
+		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
 	  }
 	  
       //If "loading..." do nothing
