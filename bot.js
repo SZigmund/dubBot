@@ -1,7 +1,10 @@
 // Written by: DocZ
+//[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
+//[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
+
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0000",
+  version: "Version 1.01.0001",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -103,13 +106,16 @@ var dubBot = {
   },
 
   skipBadSong: function (userName, skippedBy, reason) {
-	API.logInfo("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
-	var tooMany = false;
-	//tooMany = dubBot.tooManyBadSongs(userName);
-	//if (tooMany) API.botDjNow();
-	API.moderateForceSkip();
-	//if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
-	//if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
+    try {
+	  API.chatLog("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
+	  var tooMany = false;
+	  //tooMany = dubBot.tooManyBadSongs(userName);
+	  //if (tooMany) API.botDjNow();
+	  API.moderateForceSkip();
+	  //if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
+	  //if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
+	}
+	  catch(err) { UTIL.logException("skipBadSong: " + err.message); }
   }
 
 };
@@ -453,7 +459,7 @@ var SETTINGS = {
 		etaRestriction: false,
 		welcome: true,
 		opLink: null,
-		rulesLink: null,
+		rulesLink: "http://tinyurl.com/TastyTunesRules",
 		themeLink: null,
 		fbLink: null,
 		youtubeLink: null,
@@ -1481,7 +1487,7 @@ var TASTY = {
 					  'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
 					  'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
 					  'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
-					  'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','classic','clutch',
+					  'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
 					  'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
 					  'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
 					  'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
@@ -1495,7 +1501,7 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink','classy'];
+					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -2237,6 +2243,7 @@ var AI = {
     chatmsg = chatmsg.replace(/@/g, '');
     chatmsg = chatmsg.replace(/,/g, '');
     chatmsg = chatmsg.replace(/-/g, '');
+    chatmsg = chatmsg.replace(/_/g, '');
     chatmsg = chatmsg.replace(/ /g, '');
     chatmsg = chatmsg.replace(/THELAW/g, '');
     chatmsg = chatmsg.replace(/FUCKBOT/g, "LARRY");
@@ -2245,6 +2252,8 @@ var AI = {
     chatmsg = chatmsg.replace(/HOWIS/g, "HOWS");     // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/YOUARE/g, "YOURE");   // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/LARRYIS/g, "LARRYS");
+    chatmsg = chatmsg.replace(/LARRY_THE_LAW/g, "LARRY");
+    chatmsg = chatmsg.replace(/LARRYTHELAW/g, "LARRY");
     chatmsg = chatmsg.replace(/IAM/g, "IM");
     botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
 
@@ -2286,6 +2295,7 @@ var AI = {
     if (chatmsg.indexOf("BITEMELARRY") > -1) fuComment = "I wouldn't give you the pleasure %%FU%%....You're a freak!";
     if (chatmsg.indexOf("MISSYOULITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("MISSYALITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
+    if (chatmsg.indexOf("ILOVEYOULARRY") > -1) fuComment = " :kiss: %%FU%%";
     if (chatmsg.indexOf("IHATEYOULARRY") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("LARRYIHATEYOU") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("HATESLARRY") > -1) fuComment = "Well rest assured the feeling is mutual %%FU%%!  :kiss:";
@@ -2330,6 +2340,7 @@ var AI = {
     if (chatmsg.indexOf("LARRYFUCKOFF") > -1) fuComment = "Hey I have an idea: Why don't you go outside and play hide-and-go fuck yourself %%FU%%?!";
     if (chatmsg.indexOf("FUCKOFFLARRY") > -1) fuComment = "Hey I have an idea: Why don't you go outside and play hide-and-go fuck yourself %%FU%%?!";
     if (chatmsg.indexOf("KICKSLARRY") > -1) fuComment = "Kicks %%FU%% right back!";
+    if (chatmsg.indexOf("IMISSEDYOULARRY") > -1) fuComment = "I missed you too %%FU%%!";
     if (chatmsg.indexOf("IMISSYOULARRY") > -1) fuComment = "I miss you too %%FU%%!";
     if (chatmsg.indexOf("IMISSLARRY") > -1) fuComment = "I miss you too %%FU%%!";
     if (chatmsg.indexOf("HITSLARRY") > -1) fuComment = "Hits %%FU%% upside the head!";
@@ -2422,7 +2433,7 @@ var API = {
 	  //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
-	  API.chatLog(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+	  API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
 	  botVar.botRunning = true;
 
@@ -2541,7 +2552,7 @@ var API = {
 			var space = message.indexOf(' ', 120);
 			if (space === -1) space = 120;
 			API.sendChat(message.substring(0, space));
-			API.sendChat(message.substring(space));
+			setTimeout(function () { API.sendChat(message.substring(space))  }, 500);
 			return;
 		}
 		Dubtrack.room.chat._messageInputEl.val(message);
@@ -3039,7 +3050,7 @@ var BOTCOMMANDS = {
                           'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
                           'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
                           'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
-                          'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','classic','clutch',
+                          'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                           'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                           'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
@@ -3053,7 +3064,7 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink','classy'],
+                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3435,6 +3446,19 @@ var BOTCOMMANDS = {
                         return;
                     }
                     ROULETTE.startRoulette();
+                }
+            },
+            rulesCommand: {
+                command: 'rules',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (typeof SETTINGS.settings.rulesLink === "string")
+                            return API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink}));
+                    }
                 }
             },
 			
@@ -4673,20 +4697,6 @@ var BOTCOMMANDS = {
                             SETTINGS.settings.etaRestriction = !SETTINGS.settings.etaRestriction;
                             return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("etarestriction")}));
                         }
-                    }
-                }
-            },
-
-            rulesCommand: {
-                command: 'rules',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        if (typeof SETTINGS.settings.rulesLink === "string")
-                            return API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink}));
                     }
                 }
             },
