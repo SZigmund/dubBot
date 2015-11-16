@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069d",
+  version: "Version 1.00.0069e",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -101,7 +101,7 @@ var dubBot = {
 	  }
 	  //todoer check blacklist
 	}
-	  catch(err) { console.log("validateCurrentSong: " + err.message); }
+	  catch(err) { UTIL.logException("validateCurrentSong: " + err.message); }
   },
 
   skipBadSong: function (userName, skippedBy, reason) {
@@ -203,7 +203,7 @@ var USERS = {
 			});
 			botDebug.debugMessage(true, "LIST COUNT: " + dubBot.room.usersImport.length);
 		}
-		catch(err) { console.log("importBlackList: " + err.message); }
+		catch(err) { UTIL.logException("importBlackList: " + err.message); }
 	},
 	User: function (userID, username, userRole) {
 		this.id = userID;
@@ -734,7 +734,7 @@ var botChat = {
    botChat.chatMessages.push(["datarestored", "Previously stored data successfully retrieved."]);
    botChat.chatMessages.push(["greyuser", "Only bouncers and up can run a bot."]);
    botChat.chatMessages.push(["bouncer", "The bot can't move people when it's run as a bouncer."]);
-   botChat.chatMessages.push(["online", " %%BOTNAME%% v%%VERSION%% online!"]);
+   botChat.chatMessages.push(["online", " %%BOTNAME%% %%VERSION%% online!"]);
 
    botChat.chatMessages.push(["validgiftags", " [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Tags: %%TAGS%%]"]);
    botChat.chatMessages.push(["invalidgiftags", " [@%%NAME%%] Invalid tags, try something different. [Tags: %%TAGS%%]"]);
@@ -2414,7 +2414,7 @@ var API = {
 	  //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
-      API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+	  API.logInfo(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
 	  botVar.botRunning = true;
 
@@ -3188,10 +3188,10 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if(chat.message.length === cmd.length) return API.sendChat('/me No user specified.');
+                        if(chat.message.length === cmd.length) return API.sendChat('No user specified.');
                         var name = chat.message.substring(cmd.length + 2);
                         var roomUser = USERS.lookupUserName(name);
-                        if(typeof roomUser === 'boolean') return API.sendChat('/me Invalid user specified.');
+                        if(typeof roomUser === 'boolean') return API.sendChat('Invalid user specified.');
                         var msgSend = "@" + roomUser.username + ": If you find yourself Meh-ing most songs, this isn't the room for you. Serial Meh'ers will be banned. If you don't like the music find a different room please.";
                         API.sendChat(msgSend);
                     }
@@ -4392,7 +4392,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         var msg = chat.message;
-                        if (msg.length <= cmd.length + 1) return API.sendChat('/me MotD: ' + SETTINGS.settings.motd);
+                        if (msg.length <= cmd.length + 1) return API.sendChat('MotD: ' + SETTINGS.settings.motd);
                         var argument = msg.substring(cmd.length + 1);
                         if (!SETTINGS.settings.motdEnabled) SETTINGS.settings.motdEnabled = !SETTINGS.settings.motdEnabled;
                         if (isNaN(argument)) {
@@ -5074,7 +5074,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        API.sendChat('/me This bot was made by ' + botCreator + '.');
+                        API.sendChat('This bot was made by ' + botCreator + '.');
                     }
                 }
             },
@@ -5088,7 +5088,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         var from = chat.un;
-                        var msg = '/me [@' + from + '] ';
+                        var msg = '[@' + from + '] ';
 
                         msg += botChat.getChatMessage("afkremoval") + ': ';
                         if (AFK.settings.afkRemoval) msg += 'ON';
@@ -5561,10 +5561,10 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         else {
-                            if(chat.message.length === cmd.length) return API.sendChat('/me No user specified.');
+                            if(chat.message.length === cmd.length) return API.sendChat('No user specified.');
                             var name = chat.message.substring(cmd.length + 2);
                             var roomUser = USERS.lookupUserName(name);
-                            if(typeof roomUser === 'boolean') return API.sendChat('/me Invalid user specified.');
+                            if(typeof roomUser === 'boolean') return API.sendChat('Invalid user specified.');
                             var lang = API.getDubUser(roomUser).language;
                             botDebug.debugMessage(true, "lang: " + lang);
                             botDebug.debugMessage(true, "roomUser: " + roomUser.username);
@@ -5762,10 +5762,10 @@ var BOTCOMMANDS = {
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         else {
                         
-                            if(chat.message.length === cmd.length) return API.chatLog('/me No user specified.');
+                            if(chat.message.length === cmd.length) return API.chatLog('No user specified.');
                             var name = chat.message.substring(cmd.length + 2);
                             var roomUser = USERS.lookupUserName(name);
-                            if(typeof roomUser === 'boolean') return API.chatLog('/me Invalid user specified.');
+                            if(typeof roomUser === 'boolean') return API.chatLog('Invalid user specified.');
                             var resetDebug = false;
                             if (dubBot.room.debug === false) resetDebug = true;
                             dubBot.room.debug = true;
