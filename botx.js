@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00063",
+  version: "Version 1.01.1.00064",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -325,7 +325,8 @@ var USERS = {
         if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
 		roomUser.userRole = userRole;
-		if (userMehing && !roomUser.isMehing) findChatItem erererer
+		if (userMehing && !roomUser.isMehing) API.sendChat(subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
+		roomUser.isMehing = userMehing;
       }
 	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
 	}
@@ -752,6 +753,7 @@ var botChat = {
    botChat.chatMessages.push(["songstats", "song statistics"]);
    botChat.chatMessages.push(["etarestriction", "eta restriction"]);
    botChat.chatMessages.push(["voteskip", "voteskip"]);
+   botChat.chatMessages.push(["whyyoumeh", "/me [@%%NAME%%] mehed this song [%%SONG%%]");
    botChat.chatMessages.push(["voteskiplimit", "/me [@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
    botChat.chatMessages.push(["voteskipexceededlimit", "/me @%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
    botChat.chatMessages.push(["voteskipinvalidlimit", "/me [@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
