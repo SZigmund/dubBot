@@ -1,4 +1,4 @@
-// Written by: Doc_Z
+// Written by: Doc_z
 //SECTION Var: All global variables:
 var botVar = {
   version: "Version 1.01.0069",
@@ -2542,8 +2542,8 @@ var API = {
 	    if (message.length > 135) {
 			var space = message.indexOf(' ', 120);
 			if (space === -1) space = 120;
-			API.sendChat(message.substring(0, space);
-			API.sendChat(message.substring(space);
+			API.sendChat(message.substring(0, space));
+			API.sendChat(message.substring(space));
 			return;
 		}
 		Dubtrack.room.chat._messageInputEl.val(message);
