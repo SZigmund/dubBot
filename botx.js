@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069g",
+  version: "Version 1.00.0069h",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -162,13 +162,13 @@ var USERS = {
   // This will return a room user from: Object, Username, UserID
   defineRoomUser: function (usrObjectID) {
 	  try {
-		if (typeof usrObjectID === "object") return obj;
+		if (typeof usrObjectID === "object") return usrObjectID;
 		var roomUser = USERS.lookupUserName(usrObjectID);
 		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
 		return roomUser;
 	  }
 	  catch(err) {
-		UTIL.logException("updateRolledStats: " + err.message); 
+		UTIL.logException("defineRoomUser: " + err.message); 
 		return false;
 	  }
   },
@@ -395,7 +395,7 @@ var USERS = {
 		roomUser.inRoom = true;
 		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
 		roomUser.userRole = userRole;
-		if (userMehing && !roomUser.isMehing) API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
+		if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName)) API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
 		roomUser.isMehing = userMehing;
 	    roomUser.inRoomUpdated = true;
       }
