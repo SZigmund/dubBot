@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069c",
+  version: "Version 1.01.1.00069d",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -242,7 +242,7 @@ var USERS = {
 		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
 		roomUser.lastActivity = Date.now();
 		roomUser.jointime = Date.now();
-		if (roomUser.username = botVar.botName) return;
+		if (roomUser.username === botVar.botName) return;
 		setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
 		
 	  }
@@ -2517,7 +2517,7 @@ var API = {
 	},
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
-	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE");
+	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
 	  botVar.room.currentMehCount = 0;
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
