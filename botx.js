@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069c",
+  version: "Version 1.00.0069d",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -158,6 +158,21 @@ var USERS = {
 	//todoer USER : user.afkWarningCount = 0;
 	//todoer USER : clearTimeout(user.afkCountdown);
   },
+
+  // This will return a room user from: Object, Username, UserID
+  defineRoomUser: function (usrObjectID) {
+	  try {
+		if (typeof usrObjectID === "object") return obj;
+		var roomUser = USERS.lookupUserName(usrObjectID);
+		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+		return roomUser;
+	  }
+	  catch(err) {
+		UTIL.logException("updateRolledStats: " + err.message); 
+		return false;
+	  }
+  },
+
   lookupUserName: function (username) {
 	for (var i = 0; i < USERS.users.length; i++) {
 	  if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
@@ -1404,19 +1419,6 @@ var TASTY = {
 		  return "";
 		}
 	},
-	// This will return a room user from: Object, Username, UserID
-	defineRoomUser: function (usrObjectID) {
-	  try {
-        if (typeof usrObjectID === "object") return obj;
-		var roomUser = USERS.lookupUserName(usrObjectID);
-		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
-		return roomUser;
-	  }
-	  catch(err) {
-	    UTIL.logException("updateRolledStats: " + err.message); 
-	    return false;
-	  }
-    },
 	setRolled: function (usrObjectID, value, wooting) {
 		var roomUser = USERS.defineRoomUser(usrObjectID);
 		if (roomUser === false) return;
@@ -6017,8 +6019,8 @@ if (!window.APIisRunning) {
 }
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
-//TODO: 
-// • Load UID from chat and Update users
+//TODO:
+// • Load UID from chat and update/remove users as needed
 // • roll/tasty stats
 // • Save/Load users
 // • ban list, 
