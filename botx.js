@@ -1,7 +1,7 @@
-// Written by: Doc_Z
+// Written by: DocZ
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002",
+  version: "Version 1.01.0003",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -2240,6 +2240,7 @@ var AI = {
     chatmsg = chatmsg.replace(/@/g, '');
     chatmsg = chatmsg.replace(/,/g, '');
     chatmsg = chatmsg.replace(/-/g, '');
+    chatmsg = chatmsg.replace(/_/g, '');
     chatmsg = chatmsg.replace(/ /g, '');
     chatmsg = chatmsg.replace(/THELAW/g, '');
     chatmsg = chatmsg.replace(/FUCKBOT/g, "LARRY");
@@ -2248,6 +2249,8 @@ var AI = {
     chatmsg = chatmsg.replace(/HOWIS/g, "HOWS");     // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/YOUARE/g, "YOURE");   // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/LARRYIS/g, "LARRYS");
+    chatmsg = chatmsg.replace(/LARRY_THE_LAW/g, "LARRY");
+    chatmsg = chatmsg.replace(/LARRYTHELAW/g, "LARRY");
     chatmsg = chatmsg.replace(/IAM/g, "IM");
     botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
 
@@ -2333,6 +2336,7 @@ var AI = {
     if (chatmsg.indexOf("LARRYFUCKOFF") > -1) fuComment = "Hey I have an idea: Why don't you go outside and play hide-and-go fuck yourself %%FU%%?!";
     if (chatmsg.indexOf("FUCKOFFLARRY") > -1) fuComment = "Hey I have an idea: Why don't you go outside and play hide-and-go fuck yourself %%FU%%?!";
     if (chatmsg.indexOf("KICKSLARRY") > -1) fuComment = "Kicks %%FU%% right back!";
+    if (chatmsg.indexOf("IMISSEDYOULARRY") > -1) fuComment = "I missed you too %%FU%%!";
     if (chatmsg.indexOf("IMISSYOULARRY") > -1) fuComment = "I miss you too %%FU%%!";
     if (chatmsg.indexOf("IMISSLARRY") > -1) fuComment = "I miss you too %%FU%%!";
     if (chatmsg.indexOf("HITSLARRY") > -1) fuComment = "Hits %%FU%% upside the head!";
