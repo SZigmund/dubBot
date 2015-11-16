@@ -1,12 +1,10 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069h",
+  version: "Version 1.00.0069i",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
-  debugHighLevel: true,
-  debugLowLevel: false,
   botStatus: false, 
   botMuted: false,
   botRunning: false,
@@ -1523,9 +1521,14 @@ var TASTY = {
 };
 //SECTION Debug: All Debug functionality:
 var botDebug = {
+  settings: {
+    debugHighLevel: false,   //erer
+    debugLowLevel: false
+  },
+
   debugMessage: function(highLevel, message) {
-    if ((highLevel === true) && (botVar.debugHighLevel === false)) return;
-    if ((highLevel === false) && (botVar.debugLowLevel === false)) return;
+    if ((highLevel === true) && (botDebug.settings.debugHighLevel === false)) return;
+    if ((highLevel === false) && (botDebug.settings.debugLowLevel === false)) return;
     console.log("[DEBUG]: " + message);
   }
 };
