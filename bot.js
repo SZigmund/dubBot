@@ -1,4 +1,4 @@
-// Written by: Doc_Z
+// Written by: Doc_z
 //SECTION Var: All global variables:
 var botVar = {
   version: "Version 1.01.0000",
@@ -2538,6 +2538,14 @@ var API = {
 	if (botVar.botMuted === true)
 		API.logInfo(message);
 	else if (botVar.botRunning) {
+	    //Max length: 140
+	    if (message.length > 135) {
+			var space = message.indexOf(' ', 120);
+			if (space === -1) space = 120;
+			API.sendChat(message.substring(0, space));
+			API.sendChat(message.substring(space));
+			return;
+		}
 		Dubtrack.room.chat._messageInputEl.val(message);
 		Dubtrack.room.chat.sendMessage();
 	    botVar.ImHidden = false;
@@ -6034,6 +6042,7 @@ if (!window.APIisRunning) {
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 //TODO:
+// • tasty comments too long!
 // • Load UID from chat and update/remove users as needed
 // • roll/tasty stats
 // • Save/Load users
