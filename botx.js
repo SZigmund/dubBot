@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069k",
+  version: "Version 1.00.0069l",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -1651,10 +1651,11 @@ var ROULETTE = {
 
   startRoulette: function () {
 	try  {
-		if (ROULETTE.rouletteStatus) return;
-		ROULETTE.rouletteStatus = true;
-		ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
-		API.sendChat(botChat.getChatMessage("isopen"));
+		//if (ROULETTE.rouletteStatus) return;
+		//ROULETTE.rouletteStatus = true;
+		//ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
+		//API.sendChat(botChat.getChatMessage("isopen"));
+		API.sendChat("Sorry I cannot manage the queue yet, plus the @all command does not exist yet.");
 	}
 	catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
