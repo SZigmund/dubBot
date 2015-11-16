@@ -1,7 +1,10 @@
 // Written by: DocZ
+//[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
+//[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
+
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0003",
+  version: "Version 1.01.0004",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -104,7 +107,7 @@ var dubBot = {
 
   skipBadSong: function (userName, skippedBy, reason) {
     try {
-	  API.logInfo("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
+	  API.chatLog("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
 	  var tooMany = false;
 	  //tooMany = dubBot.tooManyBadSongs(userName);
 	  //if (tooMany) API.botDjNow();
@@ -1484,7 +1487,7 @@ var TASTY = {
 					  'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
 					  'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
 					  'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
-					  'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','classic','clutch',
+					  'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
 					  'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
 					  'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
 					  'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
@@ -1498,7 +1501,7 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink','classy'];
+					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -3046,7 +3049,7 @@ var BOTCOMMANDS = {
                           'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
                           'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
                           'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
-                          'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','classic','clutch',
+                          'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                           'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                           'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
@@ -3060,7 +3063,7 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink','classy'],
+                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
