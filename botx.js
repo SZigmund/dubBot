@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069e",
+  version: "Version 1.00.0069g",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -311,6 +311,7 @@ var USERS = {
 	    for (var i = 0; i < USERS.users.length; i++) {
 		  USERS.users[i].dubDown = false;
 		  USERS.users[i].rolled = false;
+		  USERS.users[i].tastyVote = false;
 		}
 	  }
       catch(err) { UTIL.logException("resetUserSongStats: " + err.message); }
@@ -390,7 +391,7 @@ var USERS = {
 		//USERS.users[i].username 
 		//
 		// clearInterval(USERS.loadUserInterval);
-        if ((roomUser.inRoom === false) && (welcomeMsg === true)) USERS.welcomeUser(roomUser, newUser);
+        if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
 		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
 		roomUser.userRole = userRole;
@@ -1497,7 +1498,7 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink'];
+					  'ooga-chaka','snag','snagged','yoink','classy'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -2414,7 +2415,7 @@ var API = {
 	  //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
-	  API.logInfo(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+	  API.chatLog(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
 	  botVar.botRunning = true;
 
@@ -2603,9 +2604,9 @@ var API = {
 	},
     EVENT_USER_JOIN: function () {
 	  try {
-	    if (botVar.ImHidden === true) return;
-	    botDebug.debugMessage(true, "USERJOIN");
-	    USERS.loadUsersInRoom(true);
+	    //if (botVar.ImHidden === true) return;
+	    //botDebug.debugMessage(true, "USERJOIN");
+	    //USERS.loadUsersInRoom(true);
 	  }
 	  catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
 	},
@@ -3030,7 +3031,7 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink'],
+                          'ooga-chaka','snag','snagged','yoink','classy'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
