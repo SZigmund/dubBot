@@ -1,4 +1,4 @@
-// Written by: Doc_Z
+// Written by: DocZ
 //SECTION Var: All global variables:
 var botVar = {
   version: "Version 1.01.0069",
@@ -1447,9 +1447,7 @@ var TASTY = {
 		var currdj = API.getDJ();
 		currdj.votes.tastyRcv++;
 		}
-		catch(err) {
-		  UTIL.logException("tastyVote: " + err.message);
-		}
+		catch(err) { UTIL.logException("tastyVote: " + err.message); }
 	},
 	bopCommand: function (cmd) {
 		try {
@@ -3114,7 +3112,7 @@ var BOTCOMMANDS = {
                         var wooting = true;
                         if (rollResults > (dicesides * 0.5)) {
                             //Pick a random word for the tasty command
-                            setTimeout(function () { TASTY.tastyVote(chat.un, TASTY.bopCommand("")); }, 1000);
+                            setTimeout(function () { TASTY.tastyVote(botVar.botName, TASTY.bopCommand("")); }, 1000);
                             setTimeout(function () { API.wootThisSong(); }, 1500);
                             resultsMsg = botChat.subChat(botChat.getChatMessage("rollresultsgood"), {name: chat.un, roll: UTIL.numberToIcon(rollResults)});
                         }
