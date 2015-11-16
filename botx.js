@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00068",
+  version: "Version 1.01.1.00069",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -133,6 +133,7 @@ String.prototype.splitBetween = function (a, b) {
 //SECTION USERS: All User data
 var USERS = {
   users: [],
+  loadUserInterval: null,
   getLastActivity: function (user) {
 	  //todoer
 	  //return user.lastActivity;
@@ -300,7 +301,7 @@ var USERS = {
 	removeMissingUsersFromRoom: function () {
 	  try {
 	    for (var i = 0; i < USERS.users.length; i++) {
-		  if ((USERS.users[i].inRoom === true && USERS.users[i].inRoomUpdated === false) {
+		  if ((USERS.users[i].inRoom === true) && (USERS.users[i].inRoomUpdated === false)) {
 		    USERS.users[i].inRoom = false;
 			API.logInfo(USERS.users[i].username + " left the room");
 		  }
@@ -1249,6 +1250,7 @@ var UTIL = {
   killbot: function () {
         clearInterval(AFK.afkInterval);
 		clearInterval(RANDOMCOMMENTS.randomInterval);
+		clearInterval(USERS.loadUserInterval);
         botVar.botStatus = false;
   },
   linkFixer: function (msg) {
@@ -2316,6 +2318,7 @@ var API = {
 
       RANDOMCOMMENTS.randomCommentSetTimer();
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
+      USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
 
 	  //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
@@ -2494,7 +2497,6 @@ var API = {
     EVENT_DUBDOWN: function () {
 	  try {
 		botDebug.debugMessage(true, "EVENT_DUBDOWN");
-		USERS.loadUsersInRoom(true);
 		if (API.getDubDownCount() >= botVar.room.voteSkipLimit) {
 		  API.sendChat(botChat.subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
 		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
