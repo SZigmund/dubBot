@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00067",
+  version: "Version 1.01.1.00068",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -86,15 +86,28 @@ var dubBot = {
 	newBlacklistIDs: [],
 	blacklistLoaded: false,
   },
-  
+
+  validateCurrentSong: function () {
+    try {
+  	  botVar.currentSong = API.currentSongName();
+	  botVar.currentDJ   = API.currentDjName();
+	  
+	  botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
+	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
+	  }
+	}
+	  catch(err) { console.log("validateCurrentSong: " + err.message); }
+  },
+
   skipBadSong: function (userName, skippedBy, reason) {
 	API.logInfo("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
 	var tooMany = false;
 	//tooMany = dubBot.tooManyBadSongs(userName);
 	//if (tooMany) API.botDjNow();
 	setTimeout(function () { API.moderateForceSkip(); }, 1 * 500);
-	//if (tooMany) setTimeout(function () { basicBot.userUtilities.removeDJ(userName); }, 1 * 1000);
-	//if (tooMany) setTimeout(function () { basicBot.userUtilities.setBadSongCount(userName, 0); }, 1 * 1500);
+	//if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
+	//if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
   }
 
 };
@@ -170,7 +183,7 @@ var USERS = {
 			});
 			botDebug.debugMessage(true, "LIST COUNT: " + dubBot.room.usersImport.length);
 		}
-		catch(err) { console.log("ERROR:importBlackList: " + err.message); }
+		catch(err) { console.log("importBlackList: " + err.message); }
 	},
 	User: function (userID, username, userRole) {
 		this.id = userID;
@@ -280,23 +293,20 @@ var USERS = {
 	},
 	resetInRoomUpdated: function () {
 	  try {
-	    for (var i = 0; i < USERS.users.length; i++) {
-		  USERS.users[i].dubDown = false;
-		  USERS.users[i].rolled = false;
-		}
+	    for (var i = 0; i < USERS.users.length; i++) { USERS.users[i].inRoomUpdated = false; }
 	  }
-      catch(err) { UTIL.logException("resetUserSongStats: " + err.message); }
+      catch(err) { UTIL.logException("resetInRoomUpdated: " + err.message); }
 	},
 	removeMissingUsersFromRoom: function () {
-		  
 	  try {
 	    for (var i = 0; i < USERS.users.length; i++) {
-		  USERS.users[i].dubDown = false;
-		  USERS.users[i].inRoom = false;
-		  USERS.users[i].rolled = false;
+		  if ((USERS.users[i].inRoom === true && USERS.users[i].inRoomUpdated === false) {
+		    USERS.users[i].inRoom = false;
+			API.logInfo(USERS.users[i].username + " left the room");
+		  }
 		}
 	  }
-      catch(err) { UTIL.logException("resetUserSongStats: " + err.message); }
+      catch(err) { UTIL.logException("removeMissingUsersFromRoom: " + err.message); }
 	},
 	resetAllUsersOnStartup: function () {
 	  try {
@@ -345,7 +355,7 @@ var USERS = {
 	    botDebug.debugMessage(true, "USER: " + username);
 		var userInfo = usernameList[i].className;
 		userRole = USERS.defineUserRole(userInfo);
-		userMehing = !(userInfo.search("downdub") === null)
+		if (userInfo.search("downdub") === null) userMehing = false;
 		var roomUser = USERS.lookupUserName(username);
 		if (roomUser === false) {
 		  var roomUser = new USERS.User("new", username, userRole);
@@ -700,78 +710,78 @@ var botChat = {
    botChat.chatMessages.push(["datarestored", "Previously stored data successfully retrieved."]);
    botChat.chatMessages.push(["greyuser", "Only bouncers and up can run a bot."]);
    botChat.chatMessages.push(["bouncer", "The bot can't move people when it's run as a bouncer."]);
-   botChat.chatMessages.push(["online", "/me %%BOTNAME%% v%%VERSION%% online!"]);
+   botChat.chatMessages.push(["online", " %%BOTNAME%% v%%VERSION%% online!"]);
 
-   botChat.chatMessages.push(["validgiftags", "/me [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Tags: %%TAGS%%]"]);
-   botChat.chatMessages.push(["invalidgiftags", "/me [@%%NAME%%] Invalid tags, try something different. [Tags: %%TAGS%%]"]);
-   botChat.chatMessages.push(["validgifrandom", "/me [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Random GIF]"]);
-   botChat.chatMessages.push(["invalidgifrandom", "/me [@%%NAME%%] Invalid request, try again."]);
-   botChat.chatMessages.push(["logout", "/me [@%%NAME%%] Logging out %%BOTNAME%%"]);
+   botChat.chatMessages.push(["validgiftags", " [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Tags: %%TAGS%%]"]);
+   botChat.chatMessages.push(["invalidgiftags", " [@%%NAME%%] Invalid tags, try something different. [Tags: %%TAGS%%]"]);
+   botChat.chatMessages.push(["validgifrandom", " [@%%NAME%%] http://media.giphy.com/media/%%ID%%/giphy.gif [Random GIF]"]);
+   botChat.chatMessages.push(["invalidgifrandom", " [@%%NAME%%] Invalid request, try again."]);
+   botChat.chatMessages.push(["logout", " [@%%NAME%%] Logging out %%BOTNAME%%"]);
 
-   botChat.chatMessages.push(["welcome", "/me Welcome %%NAME%%.  Check out our room rules here: http://tinyurl.com/TastyTunesRules"]);
-   botChat.chatMessages.push(["welcomeback", "/me Welcome back, %%NAME%%"]);
-   botChat.chatMessages.push(["songknown", "/me :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:"]);
-   botChat.chatMessages.push(["songknown2", "/me :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:"]);
-   botChat.chatMessages.push(["timelimit", "/me @%%NAME%% your song is longer than %%MAXLENGTH%% minutes, you need permission to play longer songs."]);
-   botChat.chatMessages.push(["permissionownsong", "/me :up: @%%NAME%% has permission to play their own production!"]);
-   botChat.chatMessages.push(["isblacklisted", "/me @%%NAME%% [%%SONG%%]] is banned in this room! Skipping song...Please read the rules before you play your next play."]);
-   botChat.chatMessages.push(["whois", "/me [%%NAME1%%] Username: %%NAME2%%, ID: %%ID%%, Rank: %%RANK%%, Joined: %%JOINED%%, Level: %%LEVEL%%, Language: %%LANGUAGE%%, Avatar: %%AVATAR%%%%PROFILE%%"]);
+   botChat.chatMessages.push(["welcome", "Welcome to Tasty Tunes @%%NAME%%.  Check out our room rules here: http://tinyurl.com/TastyTunesRules"]);
+   botChat.chatMessages.push(["welcomeback", "Welcome back, @%%NAME%%"]);
+   botChat.chatMessages.push(["songknown", " :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:"]);
+   botChat.chatMessages.push(["songknown2", " :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:"]);
+   botChat.chatMessages.push(["timelimit", " @%%NAME%% your song is longer than %%MAXLENGTH%% minutes, you need permission to play longer songs."]);
+   botChat.chatMessages.push(["permissionownsong", " :up: @%%NAME%% has permission to play their own production!"]);
+   botChat.chatMessages.push(["isblacklisted", " @%%NAME%% [%%SONG%%]] is banned in this room! Skipping song...Please read the rules before you play your next play."]);
+   botChat.chatMessages.push(["whois", " [%%NAME1%%] Username: %%NAME2%%, ID: %%ID%%, Rank: %%RANK%%, Joined: %%JOINED%%, Level: %%LEVEL%%, Language: %%LANGUAGE%%, Avatar: %%AVATAR%%%%PROFILE%%"]);
 
    botChat.chatMessages.push(["notghosting", "[%%NAME1%%] %%NAME2%% is not ghosting."]);
    botChat.chatMessages.push(["ghosting", "[%%NAME1%%] %%NAME2%% is either ghosting or not here."]);
 
-   botChat.chatMessages.push(["isopen", "/me @djs - The roulette is now open! Type .join to participate!"]);
-   botChat.chatMessages.push(["winnerpicked", "/me A winner has been picked! @%%NAME%% to position %%POSITION%%."]);
+   botChat.chatMessages.push(["isopen", " @djs - The roulette is now open! Type .join to participate!"]);
+   botChat.chatMessages.push(["winnerpicked", " A winner has been picked! @%%NAME%% to position %%POSITION%%."]);
 
 
-   botChat.chatMessages.push(["alreadyadding", "/me User is already being added! Changed the desired position to %%POSITION%%."]);
-   botChat.chatMessages.push(["adding", "/me Added @%%NAME%% to the queue. Current queue: %%POSITION%%."]);
+   botChat.chatMessages.push(["alreadyadding", " User is already being added! Changed the desired position to %%POSITION%%."]);
+   botChat.chatMessages.push(["adding", " Added @%%NAME%% to the queue. Current queue: %%POSITION%%."]);
 
 
-   botChat.chatMessages.push(["usernotfound", "/me User not found."]);
-   botChat.chatMessages.push(["notdisconnected", "/me @%%NAME%% did not disconnect during my time here."]);
-   botChat.chatMessages.push(["noposition", "/me No last position known. The waitlist needs to update at least once to register a user's last position."]);
-   botChat.chatMessages.push(["toolongago", "/me @%%NAME%%'s last disconnect (DC or leave) was too long ago: %%TIME%%."]);
-   botChat.chatMessages.push(["valid", "/me @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%."]);
-   botChat.chatMessages.push(["meetingreturn", "/me @%%NAME%% how was your meeting?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
-   botChat.chatMessages.push(["lunchreturn", "/me @%%NAME%% how was lunch?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
-   botChat.chatMessages.push(["beerrunreturn", "/me @%%NAME%% What kind of :beer: did you buy?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
-   botChat.chatMessages.push(["meetingleave", "/me %%NAME%% enjoy your meeting. :sleeping: (Position: %%POS%%)"]);
-   botChat.chatMessages.push(["lunchleave", "/me %%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)"]);
-   botChat.chatMessages.push(["beerrunleave", "/me %%NAME%% Going to get some :beer:. (Position: %%POS%%)"]);
+   botChat.chatMessages.push(["usernotfound", " User not found."]);
+   botChat.chatMessages.push(["notdisconnected", " @%%NAME%% did not disconnect during my time here."]);
+   botChat.chatMessages.push(["noposition", " No last position known. The waitlist needs to update at least once to register a user's last position."]);
+   botChat.chatMessages.push(["toolongago", " @%%NAME%%'s last disconnect (DC or leave) was too long ago: %%TIME%%."]);
+   botChat.chatMessages.push(["valid", " @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatMessages.push(["meetingreturn", " @%%NAME%% how was your meeting?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatMessages.push(["lunchreturn", " @%%NAME%% how was lunch?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatMessages.push(["beerrunreturn", " @%%NAME%% What kind of :beer: did you buy?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatMessages.push(["meetingleave", " @%%NAME%% enjoy your meeting. :sleeping: (Position: %%POS%%)"]);
+   botChat.chatMessages.push(["lunchleave", " @%%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)"]);
+   botChat.chatMessages.push(["beerrunleave", " @%%NAME%% Going to get some :beer:. (Position: %%POS%%)"]);
 
 
-   botChat.chatMessages.push(["warning1", "/me @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
-   botChat.chatMessages.push(["warning2", "/me @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
-   botChat.chatMessages.push(["afkremove", "/me @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
-   botChat.chatMessages.push(["afkUserReset", "/me Thanks @%%NAME%% your afk status has been reset. "]);
+   botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
+   botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
+   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkUserReset", "Thanks @%%NAME%% your afk status has been reset. "]);
 
 
-   botChat.chatMessages.push(["caps", "/me @%%NAME%% unglue your capslock button please."]);
-   botChat.chatMessages.push(["askskip", "/me @%%NAME%% don't ask for skips."]);
-   botChat.chatMessages.push(["spam", "/me @%%NAME%% please don't spam."]);
-   botChat.chatMessages.push(["roomadvertising", "/me @%%NAME%% don't post links to other rooms please."]);
-   botChat.chatMessages.push(["adfly", "/me @%%NAME%% please change your autowoot program. We suggest PlugCubed: http://plugcubed.net/"]);
+   botChat.chatMessages.push(["caps", "@%%NAME%% unglue your capslock button please."]);
+   botChat.chatMessages.push(["askskip", "@%%NAME%% don't ask for skips."]);
+   botChat.chatMessages.push(["spam", "@%%NAME%% please don't spam."]);
+   botChat.chatMessages.push(["roomadvertising", "@%%NAME%% don't post links to other rooms please."]);
+   botChat.chatMessages.push(["adfly", "@%%NAME%% please change your autowoot program. We suggest PlugCubed: http://plugcubed.net/"]);
 
 
-   botChat.chatMessages.push(["invalidtime", "/me [@%%NAME%%] Invalid time specified."]);
-   botChat.chatMessages.push(["nouserspecified", "/me [@%%NAME%%] No user specified."]);
-   botChat.chatMessages.push(["invaliduserspecified", "/me [@%%NAME%%] Invalid user specified."]);
-   botChat.chatMessages.push(["nolistspecified", "/me [@%%NAME%%] No list specified."]);
-   botChat.chatMessages.push(["invalidlistspecified", "/me [@%%NAME%%] Invalid list specified."]);
-   botChat.chatMessages.push(["novaliduserspecified", "/me [@%%NAME%%] No valid user specified."]);
-   botChat.chatMessages.push(["nolimitspecified", "/me [@%%NAME%%] No limit specified."]);
-   botChat.chatMessages.push(["invalidlimitspecified", "/me [@%%NAME%%] Invalid limit."]);
-   botChat.chatMessages.push(["invalidpositionspecified", "/me [@%%NAME%%] Invalid position specified."]);
-   botChat.chatMessages.push(["toggleon", "/me [@%%NAME%%] %%FUNCTION%% enabled."]);
-   botChat.chatMessages.push(["toggleoff", "/me [@%%NAME%%] %%FUNCTION%% disabled."]);
+   botChat.chatMessages.push(["invalidtime", "[@%%NAME%%] Invalid time specified."]);
+   botChat.chatMessages.push(["nouserspecified", "[@%%NAME%%] No user specified."]);
+   botChat.chatMessages.push(["invaliduserspecified", "[@%%NAME%%] Invalid user specified."]);
+   botChat.chatMessages.push(["nolistspecified", "[@%%NAME%%] No list specified."]);
+   botChat.chatMessages.push(["invalidlistspecified", "[@%%NAME%%] Invalid list specified."]);
+   botChat.chatMessages.push(["novaliduserspecified", "[@%%NAME%%] No valid user specified."]);
+   botChat.chatMessages.push(["nolimitspecified", "[@%%NAME%%] No limit specified."]);
+   botChat.chatMessages.push(["invalidlimitspecified", "[@%%NAME%%] Invalid limit."]);
+   botChat.chatMessages.push(["invalidpositionspecified", "[@%%NAME%%] Invalid position specified."]);
+   botChat.chatMessages.push(["toggleon", "[@%%NAME%%] %%FUNCTION%% enabled."]);
+   botChat.chatMessages.push(["toggleoff", "[@%%NAME%%] %%FUNCTION%% disabled."]);
    botChat.chatMessages.push(["afkremoval", "AFK removal"]);
    botChat.chatMessages.push(["afksremoved", "AFK's removed"]);
    botChat.chatMessages.push(["afklimit", "AFK limit"]);
    botChat.chatMessages.push(["repeatSongs", "Skip History"]);
    botChat.chatMessages.push(["repeatSongLimit", "Skip History limit"]);
    botChat.chatMessages.push(["autoskip", "autoskip"]);
-   botChat.chatMessages.push(["newblacklisted", "/me [@%%NAME%%] Adding song to ban list: [ %%AUTHOR%% - %%TITLE%% - %%MID%% ]"]);
+   botChat.chatMessages.push(["newblacklisted", "[@%%NAME%%] Adding song to ban list: [ %%AUTHOR%% - %%TITLE%% - %%MID%% ]"]);
    botChat.chatMessages.push(["blinfo", "[@%%NAME%%] Song info - author: %%AUTHOR%%, title: %%TITLE%%, mid: %%SONGID%%"]);
    botChat.chatMessages.push(["blacklist", "blacklist"]);
    botChat.chatMessages.push(["cycleguard", "cycleguard"]);
@@ -785,83 +795,83 @@ var botChat = {
    botChat.chatMessages.push(["songstats", "song statistics"]);
    botChat.chatMessages.push(["etarestriction", "eta restriction"]);
    botChat.chatMessages.push(["voteskip", "voteskip"]);
-   botChat.chatMessages.push(["whyyoumeh", "/me [@%%NAME%%] mehed this song [%%SONG%%]"]);
-   botChat.chatMessages.push(["voteskiplimit", "/me [@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
-   botChat.chatMessages.push(["voteskipexceededlimit", "/me @%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
-   botChat.chatMessages.push(["voteskipinvalidlimit", "/me [@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
-   botChat.chatMessages.push(["voteskipsetlimit", "/me [@%%NAME%%] Voteskip limit set to %%LIMIT%%."]);
-   botChat.chatMessages.push(["activeusersintime", "/me [@%%NAME%% There have been %%AMOUNT%% users chatting in the past %%TIME%% minutes."]);
-   botChat.chatMessages.push(["maximumafktimeset", "/me [@%%NAME%%] Maximum afk duration set to %%TIME%% minutes."]);
-   botChat.chatMessages.push(["afkstatusreset", "/me [@%%NAME%%] Reset the afk status of @%%USERNAME%%."]);
-   botChat.chatMessages.push(["inactivefor", "/me [@%%NAME%%] @%%USERNAME%% has been inactive for %%TIME%%."]);
-   botChat.chatMessages.push(["autowoot", "/me We recommend PlugCubed for autowooting: http://plugcubed.net/"]);
-   botChat.chatMessages.push(["brandambassador", "/me A Brand Ambassador is the voice of the plug.dj users. They promote events, engage the community and share the plug.dj message around the world. For more info: https://plug.dj/ba"]);
-   botChat.chatMessages.push(["origem", "/me To install Origem-Woot go here: http://origem-woot.com/Instalation/"]);
-   botChat.chatMessages.push(["bouncerplusrank", "/me [@%%NAME%%] You have to be manager or up to enable Bouncer+."]);
-   botChat.chatMessages.push(["chatcleared", "/me [@%%NAME%%] Cleared the chat."]);
-   botChat.chatMessages.push(["deletechat", "/me [@%%NAME%%] Cleared the chat of %%USERNAME%%."]);
-   botChat.chatMessages.push(["commandslink", "/me %%BOTNAME%% commands: %%LINK%%"]);
+   botChat.chatMessages.push(["whyyoumeh", "[@%%NAME%%] mehed this song [%%SONG%%]"]);
+   botChat.chatMessages.push(["voteskiplimit", "[@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
+   botChat.chatMessages.push(["voteskipexceededlimit", "@%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
+   botChat.chatMessages.push(["voteskipinvalidlimit", "[@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
+   botChat.chatMessages.push(["voteskipsetlimit", "[@%%NAME%%] Voteskip limit set to %%LIMIT%%."]);
+   botChat.chatMessages.push(["activeusersintime", "[@%%NAME%% There have been %%AMOUNT%% users chatting in the past %%TIME%% minutes."]);
+   botChat.chatMessages.push(["maximumafktimeset", "[@%%NAME%%] Maximum afk duration set to %%TIME%% minutes."]);
+   botChat.chatMessages.push(["afkstatusreset", "[@%%NAME%%] Reset the afk status of @%%USERNAME%%."]);
+   botChat.chatMessages.push(["inactivefor", "[@%%NAME%%] @%%USERNAME%% has been inactive for %%TIME%%."]);
+   botChat.chatMessages.push(["autowoot", "We recommend PlugCubed for autowooting: http://plugcubed.net/"]);
+   botChat.chatMessages.push(["brandambassador", "A Brand Ambassador is the voice of the plug.dj users. They promote events, engage the community and share the plug.dj message around the world. For more info: https://plug.dj/ba"]);
+   botChat.chatMessages.push(["origem", "To install Origem-Woot go here: http://origem-woot.com/Instalation/"]);
+   botChat.chatMessages.push(["bouncerplusrank", "[@%%NAME%%] You have to be manager or up to enable Bouncer+."]);
+   botChat.chatMessages.push(["chatcleared", "[@%%NAME%%] Cleared the chat."]);
+   botChat.chatMessages.push(["deletechat", "[@%%NAME%%] Cleared the chat of %%USERNAME%%."]);
+   botChat.chatMessages.push(["commandslink", "%%BOTNAME%% commands: %%LINK%%"]);
    botChat.chatMessages.push(["eatcookie", "/me eats a cookie."]);
-   botChat.chatMessages.push(["nousercookie", "/em doesn't see %%NAME%% in room and eats a cookie himself."]);
-   botChat.chatMessages.push(["selfcookie", "/me @%%NAME%% you're a bit greedy, aren't you? Giving cookies to yourself, bah. Share some with other people!"]);
-   botChat.chatMessages.push(["cookie", "/me @%%NAMETO%%, @%%NAMEFROM%% %%COOKIE%%"]);
-   botChat.chatMessages.push(["cycleguardtime", "/me [@%%NAME%%] The cycleguard is set to %%TIME%% minute(s)."]);
-   botChat.chatMessages.push(["dclookuprank", "/me [@%%NAME%%] Only bouncers and above can do a lookup for others."]);
-   botChat.chatMessages.push(["bootrank", "/me [@%%NAME%%] Only bouncers and above can boot other users."]);
-   botChat.chatMessages.push(["bootableDisabled", "/me [@%%NAME%%] line removal canceled. %%USERBYNAME%%"]);
-   botChat.chatMessages.push(["bootableEnabled", "/me By request [@%%NAME%%] will get removed from line after next song. %%USERBYNAME%%"]);
-   botChat.chatMessages.push(["emojilist", "/me Emoji list: %%LINK%%"]);
-   botChat.chatMessages.push(["notinwaitlist", "/me %%NAME%% you are not on the waitlist."]);
-   botChat.chatMessages.push(["doubleroll", "/me %%NAME%% you already rolled. Sorry no double dipping."]);
-   botChat.chatMessages.push(["rollresults", "/me %%NAME%% you rolled a %%ROLL%%"]);
-   botChat.chatMessages.push(["rollresultsgood", "/me Nice %%NAME%% you rolled a %%ROLL%%"]);
-   botChat.chatMessages.push(["rollresultsbad", "/me Bummer %%NAME%% you rolled a %%ROLL%%"]);
-   botChat.chatMessages.push(["notcurrentdj", "/me %%NAME%% you are not the current dj."]);
-   botChat.chatMessages.push(["eta", "/me @%%NAME%% you will reach the booth in approximately %%TIME%%."]);
-   botChat.chatMessages.push(["facebook", "/me Like us on facebook: %%LINK%%"]);
-   botChat.chatMessages.push(["starterhelp", "/me This image will get you started on plug: %%LINK%%"]);
-   botChat.chatMessages.push(["roulettejoin", "/me @%%NAME%% joined the roulette! (.leave if you regret it.)"]);
-   botChat.chatMessages.push(["jointime", "/me [@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
-   botChat.chatMessages.push(["kickrank", "/me [@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
-   botChat.chatMessages.push(["kick", "/me [@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
+   botChat.chatMessages.push(["nousercookie", "/me doesn't see %%NAME%% in room and eats a cookie himself."]);
+   botChat.chatMessages.push(["selfcookie", "@%%NAME%% you're a bit greedy, aren't you? Giving cookies to yourself, bah. Share some with other people!"]);
+   botChat.chatMessages.push(["cookie", "@%%NAMETO%%, @%%NAMEFROM%% %%COOKIE%%"]);
+   botChat.chatMessages.push(["cycleguardtime", "[@%%NAME%%] The cycleguard is set to %%TIME%% minute(s)."]);
+   botChat.chatMessages.push(["dclookuprank", "[@%%NAME%%] Only bouncers and above can do a lookup for others."]);
+   botChat.chatMessages.push(["bootrank", "[@%%NAME%%] Only bouncers and above can boot other users."]);
+   botChat.chatMessages.push(["bootableDisabled", "[@%%NAME%%] line removal canceled. %%USERBYNAME%%"]);
+   botChat.chatMessages.push(["bootableEnabled", "By request [@%%NAME%%] will get removed from line after next song. %%USERBYNAME%%"]);
+   botChat.chatMessages.push(["emojilist", "Emoji list: %%LINK%%"]);
+   botChat.chatMessages.push(["notinwaitlist", "@%%NAME%% you are not on the waitlist."]);
+   botChat.chatMessages.push(["doubleroll", "@%%NAME%% you already rolled. Sorry no double dipping."]);
+   botChat.chatMessages.push(["rollresults", "@%%NAME%% you rolled a %%ROLL%%"]);
+   botChat.chatMessages.push(["rollresultsgood", "Nice %%NAME%% you rolled a %%ROLL%%"]);
+   botChat.chatMessages.push(["rollresultsbad", "Bummer %%NAME%% you rolled a %%ROLL%%"]);
+   botChat.chatMessages.push(["notcurrentdj", "@%%NAME%% you are not the current dj."]);
+   botChat.chatMessages.push(["eta", "@%%NAME%% you will reach the booth in approximately %%TIME%%."]);
+   botChat.chatMessages.push(["facebook", "Like us on facebook: %%LINK%%"]);
+   botChat.chatMessages.push(["starterhelp", "This image will get you started on plug: %%LINK%%"]);
+   botChat.chatMessages.push(["roulettejoin", "@%%NAME%% joined the roulette! (.leave if you regret it.)"]);
+   botChat.chatMessages.push(["jointime", "[@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
+   botChat.chatMessages.push(["kickrank", "[@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
+   botChat.chatMessages.push(["kick", "[@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
    botChat.chatMessages.push(["kill", "/me Shutting down."]);
-   botChat.chatMessages.push(["rouletteleave", "/me @%%NAME%% left the roulette!"]);
-   botChat.chatMessages.push(["songlink", "/me [@%%NAME%%] Link to current song: %%LINK%%"]);
-   botChat.chatMessages.push(["usedlockskip", "/me [%%NAME%% used lockskip.]"]);
-   botChat.chatMessages.push(["lockskippos", "/me [@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
-   botChat.chatMessages.push(["lockguardtime", "/me [@%%NAME%%] The lockguard is set to %%TIME%% minute(s)."]);
-   botChat.chatMessages.push(["maxlengthtime", "/me [@%%NAME%%] The maximum song duration is set to %%TIME%% minutes."]);
-   botChat.chatMessages.push(["motdset", "/me MotD set to:  %%MSG%%"]);
-   botChat.chatMessages.push(["motdintervalset", "/me MotD interval set to %%INTERVAL%%."]);
-   botChat.chatMessages.push(["addbotwaitlist", "/me @%%NAME%% don't try to add me to the waitlist, please."]);
-   botChat.chatMessages.push(["move", "/me [%%NAME%% used move.]"]);
-   botChat.chatMessages.push(["mutednotime", "/me [@%%NAME%%] Muted @%%USERNAME%%."]);
-   botChat.chatMessages.push(["mutedmaxtime", "/me [@%%NAME%%] You can only mute for maximum %%TIME%% minutes."]);
-   botChat.chatMessages.push(["mutedtime", "/me [@%%NAME%%] Muted @%%USERNAME%% for %%TIME%% minutes."]);
-   botChat.chatMessages.push(["unmuted", "/me [@%%NAME%%] Unmuted @%%USERNAME%%."]);
-   botChat.chatMessages.push(["muterank", "/me [@%%NAME%%] You can't mute persons with an equal or higher rank than you."]);
-   botChat.chatMessages.push(["oplist", "/me OP list: %%LINK%%"]);
-   botChat.chatMessages.push(["pong", "/me Pong!"]);
-   botChat.chatMessages.push(["reload", "/me Be right back."]);
-   botChat.chatMessages.push(["removenotinwl", "/me [@%%NAME%%] Specified user @%%USERNAME%% is not in the waitlist."]);
+   botChat.chatMessages.push(["rouletteleave", "@%%NAME%% left the roulette!"]);
+   botChat.chatMessages.push(["songlink", "[@%%NAME%%] Link to current song: %%LINK%%"]);
+   botChat.chatMessages.push(["usedlockskip", "[%%NAME%% used lockskip.]"]);
+   botChat.chatMessages.push(["lockskippos", "[@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
+   botChat.chatMessages.push(["lockguardtime", "[@%%NAME%%] The lockguard is set to %%TIME%% minute(s)."]);
+   botChat.chatMessages.push(["maxlengthtime", "[@%%NAME%%] The maximum song duration is set to %%TIME%% minutes."]);
+   botChat.chatMessages.push(["motdset", "MotD set to:  %%MSG%%"]);
+   botChat.chatMessages.push(["motdintervalset", "MotD interval set to %%INTERVAL%%."]);
+   botChat.chatMessages.push(["addbotwaitlist", "@%%NAME%% don't try to add me to the waitlist, please."]);
+   botChat.chatMessages.push(["move", "[%%NAME%% used move.]"]);
+   botChat.chatMessages.push(["mutednotime", "[@%%NAME%%] Muted @%%USERNAME%%."]);
+   botChat.chatMessages.push(["mutedmaxtime", "[@%%NAME%%] You can only mute for maximum %%TIME%% minutes."]);
+   botChat.chatMessages.push(["mutedtime", "[@%%NAME%%] Muted @%%USERNAME%% for %%TIME%% minutes."]);
+   botChat.chatMessages.push(["unmuted", "[@%%NAME%%] Unmuted @%%USERNAME%%."]);
+   botChat.chatMessages.push(["muterank", "[@%%NAME%%] You can't mute persons with an equal or higher rank than you."]);
+   botChat.chatMessages.push(["oplist", "OP list: %%LINK%%"]);
+   botChat.chatMessages.push(["pong", "Pong!"]);
+   botChat.chatMessages.push(["reload", "Be right back."]);
+   botChat.chatMessages.push(["removenotinwl", "[@%%NAME%%] Specified user @%%USERNAME%% is not in the waitlist."]);
    botChat.chatMessages.push(["roomrules", "This is an English speaking community for English speaking music. We play a wide variety of music. Please avoid Dubstep, EDM, Mashups, and children music. Check out all of our rules: %%LINK%%"]);
-   botChat.chatMessages.push(["sessionstats", "/me [@%%NAME%%] Total woots: %%WOOTS%%, total mehs: %%MEHS%%, total grabs: %%GRABS%%."]);
-   botChat.chatMessages.push(["skip", "/me [%%NAME%% used skip.]"]);
-   botChat.chatMessages.push(["madeby", "/me This bot was made by %%NAME%%."]);
+   botChat.chatMessages.push(["sessionstats", "[@%%NAME%%] Total woots: %%WOOTS%%, total mehs: %%MEHS%%, total grabs: %%GRABS%%."]);
+   botChat.chatMessages.push(["skip", "[%%NAME%% used skip.]"]);
+   botChat.chatMessages.push(["madeby", "This bot was made by %%NAME%%."]);
    botChat.chatMessages.push(["activefor", "I have been active for %%TIME%%."]);
-   botChat.chatMessages.push(["swapinvalid", "/me [@%%NAME%%] Invalid user specified. (No names with spaces!)"]);
-   botChat.chatMessages.push(["swapwlonly", "/me [@%%NAME%%] Please only swap users that are in the waitlist!"]);
-   botChat.chatMessages.push(["swapping", "/me Swapping %%NAME1%% with %%NAME2%%."]);
-   botChat.chatMessages.push(["genres", "/me Please find the permissible room genres here: %%LINK%%"]);
-   botChat.chatMessages.push(["notbanned", "/me [@%%NAME%%] The user was not banned."]);
-   botChat.chatMessages.push(["unmutedeveryone", "/me [@%%NAME%%] Unmuted everyone."]);
-   botChat.chatMessages.push(["unmuteeveryonerank", "/me [@%%NAME%%] Only managers and up can unmute everyone at once."]);
-   botChat.chatMessages.push(["notmuted", "/me [@%%NAME%%] that user wasn't muted."]);
-   botChat.chatMessages.push(["unmuterank", "/me [@%%NAME%%] You can't unmute persons with an equal or higher rank than you."]);
-   botChat.chatMessages.push(["commandscd", "/me [@%%NAME%%] The cooldown for commands by users is now set to %%TIME%% seconds."]);
-   botChat.chatMessages.push(["voteratio", "/me [@%%NAME%%] @%%USERNAME%% ~ woots: %%WOOT%%, mehs: %%MEHS%%, ratio (w/m): %%RATIO%%."]);
-   botChat.chatMessages.push(["website", "/me Please visit our website: %%LINK%%"]);
-   botChat.chatMessages.push(["youtube", "/me [%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
+   botChat.chatMessages.push(["swapinvalid", "[@%%NAME%%] Invalid user specified. (No names with spaces!)"]);
+   botChat.chatMessages.push(["swapwlonly", "[@%%NAME%%] Please only swap users that are in the waitlist!"]);
+   botChat.chatMessages.push(["swapping", "Swapping %%NAME1%% with %%NAME2%%."]);
+   botChat.chatMessages.push(["genres", "Please find the permissible room genres here: %%LINK%%"]);
+   botChat.chatMessages.push(["notbanned", "[@%%NAME%%] The user was not banned."]);
+   botChat.chatMessages.push(["unmutedeveryone", "[@%%NAME%%] Unmuted everyone."]);
+   botChat.chatMessages.push(["unmuteeveryonerank", "[@%%NAME%%] Only managers and up can unmute everyone at once."]);
+   botChat.chatMessages.push(["notmuted", "[@%%NAME%%] that user wasn't muted."]);
+   botChat.chatMessages.push(["unmuterank", "[@%%NAME%%] You can't unmute persons with an equal or higher rank than you."]);
+   botChat.chatMessages.push(["commandscd", "[@%%NAME%%] The cooldown for commands by users is now set to %%TIME%% seconds."]);
+   botChat.chatMessages.push(["voteratio", "[@%%NAME%%] @%%USERNAME%% ~ woots: %%WOOT%%, mehs: %%MEHS%%, ratio (w/m): %%RATIO%%."]);
+   botChat.chatMessages.push(["website", "Please visit our website: %%LINK%%"]);
+   botChat.chatMessages.push(["youtube", "[%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
    botChat.chatMessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatMessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
@@ -2310,7 +2320,7 @@ var API = {
 	  //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
-      API.chatLog(botVar.botName + " " + botVar.version + " Online");
+      API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
 	  botVar.botRunning = true;
 
@@ -2437,7 +2447,7 @@ var API = {
 	catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
   },
   getSongLength: function() {
-    try        { return $(".min").text(); }
+    try        { return parseInt($(".min").text()); }
 	catch(err) { UTIL.logException("getSongLength: " + err.message); }
   },
   getDubDownCount: function() {
@@ -2484,6 +2494,7 @@ var API = {
     EVENT_DUBDOWN: function () {
 	  try {
 		botDebug.debugMessage(true, "EVENT_DUBDOWN");
+		USERS.loadUsersInRoom(true);
 		if (API.getDubDownCount() >= botVar.room.voteSkipLimit) {
 		  API.sendChat(botChat.subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
 		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
@@ -2511,12 +2522,9 @@ var API = {
 	  var tastyPoints = botVar.tastyCount;
 	  botVar.tastyCount = 0;
  	  USERS.resetUserSongStats();
-	  TASTY.setRolled(previousDJ, true);
+	  TASTY.setRolled(previousDJ, false);
 
-	  botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
-	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
-		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
-	  }
+      setTimeout(function () ROOM.validateCurrentSong(), 1500);
 	  
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
@@ -2959,7 +2967,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
 						if (API.currentDjName() !== chat.un) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
-                        if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
+                        //if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
 						if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
                         var dicesides = 6;
@@ -3089,7 +3097,7 @@ var BOTCOMMANDS = {
                 command: 'version',
                 rank: 'manager',
                 type: 'exact',
-                functionality: function (chat, cmd)                 {
+                functionality: function (chat, cmd) {
                     API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
                 }
             },
@@ -3270,6 +3278,18 @@ var BOTCOMMANDS = {
                 catch(err) {
                     UTIL.logException("speakCommand: " + err.message);
                 }
+                }
+            },
+            pingCommand: {
+                command: 'ping',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        API.sendChat(botChat.getChatMessage("pong"))
+                    }
                 }
             },
 
@@ -4395,19 +4415,6 @@ var BOTCOMMANDS = {
                     else {
                         if (typeof SETTINGS.settings.opLink === "string")
                             return API.sendChat(botChat.subChat(botChat.getChatMessage("oplist"), {link: SETTINGS.settings.opLink}));
-                    }
-                }
-            },
-
-            pingCommand: {
-                command: 'ping',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.sendChat(botChat.getChatMessage("pong"))
                     }
                 }
             },
