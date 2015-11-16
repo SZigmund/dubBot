@@ -1,4 +1,4 @@
-// Written by: Doc_z
+// Written by: Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
   version: "Version 1.01.0000",
@@ -2632,6 +2632,7 @@ var API = {
 	  catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
 	},
     EVENT_SONG_ADVANCE: function() {  //songadvance
+	  try {
       // UPDATE ON SONG UPDATE
 	  if (botVar.ImHidden === true) return;
 	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
@@ -2653,7 +2654,7 @@ var API = {
 	  TASTY.setRolled(roomUser, false);
 	  roomUser.votes.songsPlayed += 1;
 
-      setTimeout(function () dubBot.validateCurrentSong(), 1500);
+      setTimeout(function () { dubBot.validateCurrentSong() }, 1500);
 	  
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
@@ -2661,6 +2662,8 @@ var API = {
 	  API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
 	  //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
 	  //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
+	  }
+	  catch(err) { UTIL.logException("EVENT_SONG_ADVANCE: " + err.message); }
     },
     EVENT_NEW_CHAT: function() {
       try {
@@ -6037,7 +6040,7 @@ var BOTCOMMANDS = {
 if (!window.APIisRunning) {
   API.main.initbot();
 } else {
-  setTimeout(API.main.initbot, 1000);
+  setTimeout(function () { API.main.initbot(); }, 1000);
 }
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
