@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069l",
+  version: "Version 1.01.0069",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -1514,7 +1514,10 @@ var TASTY = {
 			var arrayCount = CONST.tastyCommentArray.length;
 			var arrayID = Math.floor(Math.random() * arrayCount);
 			if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
-			return "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
+			var tastyCmt = "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
+			var djName = API.currentDjName();
+			if (djName.length > 0) tastyCmt += " @"  + djName;
+			return tastyCmt;
 		}
 		catch(err) { UTIL.logException("tastyComment: " + err.message);		}
 	},
@@ -1655,7 +1658,7 @@ var ROULETTE = {
 		//ROULETTE.rouletteStatus = true;
 		//ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
 		//API.sendChat(botChat.getChatMessage("isopen"));
-		API.sendChat("Sorry I cannot manage the queue yet, plus the @all command does not exist yet.");
+		API.sendChat("Sorry no roulette yet, I can't manage the queue yet, plus the @all command does not exist yet.");
 	}
 	catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
@@ -6034,6 +6037,7 @@ if (!window.APIisRunning) {
 // • Load UID from chat and update/remove users as needed
 // • roll/tasty stats
 // • Save/Load users
+// • Skip songs played in last 90 mins
 // • ban list, 
 //WORKING: 
 // • tasty comments
