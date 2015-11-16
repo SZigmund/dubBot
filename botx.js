@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069a",
+  version: "Version 1.01.1.00069b",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -241,6 +241,7 @@ var USERS = {
 		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
 		roomUser.lastActivity = Date.now();
 		roomUser.jointime = Date.now();
+		if (roomUser.username = botVar.botName) return;
 		setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
 		
 	  }
@@ -348,12 +349,12 @@ var USERS = {
 	  USERS.resetInRoomUpdated();
 	  var tabsContainer = document.getElementsByClassName("tabsContainer");
       var usernameList = tabsContainer[0].getElementsByTagName("li");
-      botDebug.debugMessage(true, "usernameList count: " + usernameList.length);
+      botDebug.debugMessage(false, "usernameList count: " + usernameList.length);
 	  
       for (var i = 0; i < usernameList.length; i++) {
 	    var newUser = false;
 	    var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
-	    botDebug.debugMessage(true, "USER: " + username);
+	    botDebug.debugMessage(false, "USER: " + username);
 		var userInfo = usernameList[i].className;
 		userRole = USERS.defineUserRole(userInfo);
 		var userMehing = false;
@@ -364,15 +365,16 @@ var USERS = {
 		  USERS.users.push(roomUser);
 		  newUser = true;
 		}
-        if ((roomUser.inRoom === false) && welcomeMsg) USERS.welcomeUser(roomUser, newUser);
+        if ((roomUser.inRoom === false) && (welcomeMsg === true)) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
+		botDebug.debugMessage(true, "USERS IN THE ROOM: roomUser.username);
 		roomUser.userRole = userRole;
 		if (userMehing && !roomUser.isMehing) API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
 		roomUser.isMehing = userMehing;
 	    roomUser.inRoomUpdated = true;
       }
 	  USERS.removeMissingUsersFromRoom();
-	  botDebug.debugMessage(true, "USERS.users Count: " + USERS.users.length);
+	  botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
 	}
     catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
   }
@@ -2511,6 +2513,7 @@ var API = {
 	},
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
+	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE");
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
 
@@ -2527,7 +2530,7 @@ var API = {
  	  USERS.resetUserSongStats();
 	  TASTY.setRolled(previousDJ, false);
 
-      setTimeout(function () ROOM.validateCurrentSong(), 1500);
+      setTimeout(function () dubBot.validateCurrentSong(), 1500);
 	  
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
