@@ -1,8 +1,7 @@
 // Written by Doc_Z
-
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069b",
+  version: "Version 1.00.0069c",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -1411,10 +1410,11 @@ var TASTY = {
         if (typeof usrObjectID === "object") return obj;
 		var roomUser = USERS.lookupUserName(usrObjectID);
 		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+		return roomUser;
 	  }
-	  catch {
-	  UTIL.logException("updateRolledStats: " + err.message); 
-	  return false;
+	  catch(err) {
+	    UTIL.logException("updateRolledStats: " + err.message); 
+	    return false;
 	  }
     },
 	setRolled: function (usrObjectID, value, wooting) {
@@ -1495,7 +1495,7 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka'];
+					  'ooga-chaka','snag','snagged','yoink'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -3028,7 +3028,7 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka'],
+                          'ooga-chaka','snag','snagged','yoink'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
