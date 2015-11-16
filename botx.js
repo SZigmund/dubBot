@@ -2,7 +2,8 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069i",
+  version: "Version 1.00.0069",
+  ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -30,7 +31,7 @@ var botVar = {
     usercommand: true,
 	mutedUsers: [],
 	voteSkipEnabled: true,
-	voteSkipLimit: 1,  //ererer
+	voteSkipLimit: 4,
     etaRestriction: false,
     filterChat: true,
 	currentMehCount: 0,
@@ -153,10 +154,10 @@ var USERS = {
 	//USERS.setLastActivity(user, dispMsg);
   },
   setLastActivity: function (user, dispMsg) {
-	//todoer USER: user.lastActivity = Date.now();
-	//todoer USER: if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
-	//todoer USER: user.afkWarningCount = 0;
-	//todoer USER: clearTimeout(user.afkCountdown);
+	//todoer USER : user.lastActivity = Date.now();
+	//todoer USER : if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
+	//todoer USER : user.afkWarningCount = 0;
+	//todoer USER : clearTimeout(user.afkCountdown);
   },
   lookupUserName: function (username) {
 	for (var i = 0; i < USERS.users.length; i++) {
@@ -199,8 +200,9 @@ var USERS = {
 		this.isMehing = false;
 		this.userRole = userRole;
 		this.votes = {
-			songs: 0,
-			tasty: 0,
+			.songsPlayed: 0,
+			tastyRcv: 0,
+			tastyGiv: 0,
 			woot: 0,
 			meh: 0,
 			curate: 0
@@ -1051,29 +1053,13 @@ var botChat = {
       botDebug.debugMessage(false, "User: " + username);
 	  var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
+      //Process any unprocessed messages:
       for (var i = chatItems.length -1; i >= historyChatCount; i--) {
           var node = chatItems[i];
           var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
           chatMsg = chatMsg.replace(username, "");
           botChat.processChatItem(chatMsg, username);
       }
-      //todoer Process any unprocessed messages:
-      //todoer botVar.chatHistoryList.push(new botVar.chatHistoryList(chatID, chatCount));
-
-      //var streamItems = document.getElementsByClassName("stream-item-content");
-      //console.log("streamItems count: " + streamItems.length);
-      //for (var i = 0; i < streamItems.length; i++) {
-      //  var chatItems = streamItems[i].getElementsByTagName("p");
-      //  console.log("chatItems count: " + chatItems.length);
-      //  var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-      //  console.log("User: " + username);
-      //  for (var j = 0; j < chatItems.length; j++) {
-      //    var node = chatItems[j];
-      //    var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
-      //    chatMsg = chatMsg.replace(username, "");
-      //    console.log("Chat: " + chatMsg);
-      //  }
-      //}
       } catch (err) {
         UTIL.logException("processChatItems: " + err.message);
       }
@@ -1402,9 +1388,9 @@ var TASTY = {
 		  return "";
 		}
 	},
-	updateRolledStats: function (username, wooting) {
+	updateRolledStats: function (usrObjectID, wooting) {
 		try {
-		  var roomUser = USERS.lookupUserName(username);
+		  var roomUser = USERS.defineRoomUser(usrObjectID);
 		  TASTY.resetDailyRolledStats(roomUser);
 		  if (wooting) {
 		 	roomUser.rollStats.lifeWoot++;
@@ -1419,40 +1405,41 @@ var TASTY = {
 		  return "";
 		}
 	},
-	setRolled: function (username, value, wooting) {
-		var user = USERS.lookupUserName(username);
-		if (user === false) return;
-		user.rolled = value;
+	// This will return a room user from: Object, Username, UserID
+	defineRoomUser: function (usrObjectID) {
+	  try {
+        if (typeof usrObjectID === "object") return obj;
+		var roomUser = USERS.lookupUserName(usrObjectID);
+		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+	  }
+    },
+	setRolled: function (usrObjectID, value, wooting) {
+		var roomUser = USERS.defineRoomUser(usrObjectID);
+		if (roomUser === false) return;
+		roomUser.rolled = value;
 	},
-	getRolled: function (username) {
-		var user = USERS.lookupUserName(username);
+	getRolled: function (usrObjectID) {
+		var user = USERS.defineRoomUser(usrObjectID);
 		if (user === false) return false;
 		return user.rolled;
 	},
-	tastyVote: function (username, cmd) {
+	tastyVote: function (usrObjectID, cmd) {   //todoerererererererer
 		try {
-		//todoer USERS: var user = USERS.lookupUserID(userId);
-		//todoer USERS: if (user.tastyVote) return;
-		//todoer USERS: var dj = API.getDJ();
-		//todoer USERS: if (typeof dj === 'undefined') return;
-		//todoer USERS: if (dj.id === userId) 
-		//todoer USERS: {
-		//todoer USERS:    API.sendChat("I'm glad you find your own play tasty @" + username);
-		//todoer USERS:    return;
-		//todoer USERS: }
-		if (API.currentDjName() === username)
+		var roomUser = USERS.defineRoomUser(usrObjectID);
+		if (roomUser.tastyVote) return;
+		roomUser.votes.tastyGiv++;
+		if (API.currentDjName() === roomUser.username)
 		{
-		    API.sendChat("I'm glad you find your own play tasty @" + username);
+		    API.sendChat("I'm glad you find your own play tasty @" + roomUser.username);
 		    return;
 		 }
 		var tastyComment = TASTY.tastyComment(cmd);
-		//todoer USERS: user.tastyVote = true;
-		//API.sendChat(botChat.subChat(botChat.getChatMessage("tastyvote"), {name: username}));
-		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: username})); }, 1000);
+		roomUser.tastyVote = true;
+		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: roomUser.username})); }, 1000);
 	
 		botVar.tastyCount++;
-		//todoer USERS: var currdj = USERS.lookupUserID(dj.id);
-		//todoer USERS: currdj.votes.tasty += 1;
+		var currdj = API.getDJ();
+		currdj.votes.tastyRcv++;
 		}
 		catch(err) {
 		  UTIL.logException("tastyVote: " + err.message);
@@ -1510,7 +1497,7 @@ var TASTY = {
 				if (commandList.indexOf(cmd) < 0) return true;
 				return false;
 			}
-			// Else return a random Tasty command for Larry to use on his .tasty points:
+			// Else return a random Tasty command for Larry to use on his tasty points:
 			var idx = Math.floor(Math.random() * commandList.length);
 			return commandList[idx];
 		}
@@ -1735,8 +1722,8 @@ var RANDOMCOMMENTS = {
   randomInterval: null,
   settings: {
 	randomComments: true,
-	randomCommentMin: 5, 	//  60 ererer
-	randomCommentMax: 20,	// 180
+	randomCommentMin: 60,
+	randomCommentMax: 180,
 	nextRandomComment: Date.now(),
   },
   randomCommentSelect: function()  {  //Added 02/19/2015 Zig
@@ -1765,6 +1752,7 @@ var RANDOMCOMMENTS = {
 	  if (RANDOMCOMMENTS.settings.nextRandomComment <= Date.now())
 	  {
 		  RANDOMCOMMENTS.randomCommentSetTimer();
+		  if (botVar.ImHidden === true) return;
 		  if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
 	  }
 	}  
@@ -2531,11 +2519,12 @@ var API = {
   sendChat: function(message) {
 	//todoer Delete this after we re-enable the bot kill on room change code.
 	//if(botVar.room.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
-	if (botVar.botMuted === true) 
+	if (botVar.botMuted === true)
 		API.logInfo(message);
 	else if (botVar.botRunning) {
 		Dubtrack.room.chat._messageInputEl.val(message);
 		Dubtrack.room.chat.sendMessage();
+	    botVar.ImHidden = false;
 	}
 	else 
 		API.chatLog(message);
@@ -2587,12 +2576,14 @@ var API = {
   on: {
 	EVENT_DUBUP: function () {
 	  try {
+	    if (botVar.ImHidden === true) return;
 		botDebug.debugMessage(true, "EVENT_DUBUP");
 	  }
 	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
 	},
     EVENT_DUBDOWN: function () {
 	  try {
+	    if (botVar.ImHidden === true) return;
 		botDebug.debugMessage(true, "EVENT_DUBDOWN");
 		var dubCount = API.getDubDownCount();
 		if (dubCount <= botVar.room.currentMehCount) return;  // Prevent back-2-back calls skipping multiple songs.
@@ -2602,14 +2593,19 @@ var API = {
 		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
 		}
 	  }
-	catch(err) { UTIL.logException("EVENT_DUBDOWN: " + err.message); }
+	  catch(err) { UTIL.logException("EVENT_DUBDOWN: " + err.message); }
 	},
     EVENT_USER_JOIN: function () {
-	  botDebug.debugMessage(true, "USERJOIN");
-	  USERS.loadUsersInRoom(true);
+	  try {
+	    if (botVar.ImHidden === true) return;
+	    botDebug.debugMessage(true, "USERJOIN");
+	    USERS.loadUsersInRoom(true);
+	  }
+	  catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
 	},
     EVENT_SONG_ADVANCE: function() {  //songadvance
       // UPDATE ON SONG UPDATE
+	  if (botVar.ImHidden === true) return;
 	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
@@ -2625,7 +2621,9 @@ var API = {
 	  var tastyPoints = botVar.tastyCount;
 	  botVar.tastyCount = 0;
  	  USERS.resetUserSongStats();
-	  TASTY.setRolled(previousDJ, false);
+	  var roomUser = USERS.lookupUserName(previousDJ);
+	  TASTY.setRolled(roomUser, false);
+	  roomUser.votes.songs += 1;
 
       setTimeout(function () dubBot.validateCurrentSong(), 1500);
 	  
@@ -3311,11 +3309,11 @@ var BOTCOMMANDS = {
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
                         if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
-                                                                     songs: DocZ.votes.songs,
+                                                                     songs: DocZ.votes.songsPlayed,
                                                                      woot: DocZ.votes.woot, 
                                                                      mehs: DocZ.votes.meh, 
                                                                      grabs: DocZ.votes.curate, 
-                                                                     tasty: DocZ.votes.tasty});
+                                                                     tasty: DocZ.votes.tastyRcv});
                         TASTY.resetDailyRolledStats(DocZ);
                         msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
                         API.logInfo(msg);
@@ -4915,8 +4913,8 @@ var BOTCOMMANDS = {
                             msg = "Could not find old user";
                         }
                         else {
-                            msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, songs: user.votes.songs, woot: user.votes.woot, 
-                                                              mehs: user.votes.meh, grabs: user.votes.curate, tasty: user.votes.tasty});
+                            msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, songs: user.votes.songsPlayed, woot: user.votes.woot, 
+                                                              mehs: user.votes.meh, grabs: user.votes.curate, tasty: user.votes.tastyRcv});
                             TASTY.resetDailyRolledStats(user);
                             msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         }
@@ -4927,8 +4925,8 @@ var BOTCOMMANDS = {
                             msg = "Could not find new user";
                         }
                         else {
-                            msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: newuser.username, songs: newuser.votes.songs,  woot: newuser.votes.woot, 
-                                                                  mehs: newuser.votes.meh, grabs: newuser.votes.curate, tasty: newuser.votes.tasty});
+                            msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: newuser.username, songs: newuser.votes.songsPlayed,  woot: newuser.votes.woot, 
+                                                                  mehs: newuser.votes.meh, grabs: newuser.votes.curate, tasty: newuser.votes.tastyRcv});
                             TASTY.resetDailyRolledStats(newuser);
                             msg += " Roll Stats: " + TASTY.getRolledStats(newuser);
                         }
@@ -5402,11 +5400,11 @@ var BOTCOMMANDS = {
                         var user = USERS.lookupUserName(name);
                         if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
-                                                                     songs: user.votes.songs,
+                                                                     songs: user.votes.songsPlayed,
                                                                      woot: user.votes.woot, 
                                                                      mehs: user.votes.meh, 
                                                                      grabs: user.votes.curate, 
-                                                                     tasty: user.votes.tasty});
+                                                                     tasty: user.votes.tastyRcv});
                         TASTY.resetDailyRolledStats(user);
                         msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         var byusername = " [ executed by " + chat.un + " ]";
@@ -5433,11 +5431,11 @@ var BOTCOMMANDS = {
                         var user = USERS.lookupUserName(name);
                         if (user === false) return API.chatLog(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
-                                                                     songs: user.votes.songs,
+                                                                     songs: user.votes.songsPlayed,
                                                                      woot: user.votes.woot, 
                                                                      mehs: user.votes.meh, 
                                                                      grabs: user.votes.curate, 
-                                                                     tasty: user.votes.tasty});
+                                                                     tasty: user.votes.tastyRcv});
                         var byusername = " [ executed by " + chat.un + " ]";
                         if (chat.un !== name) msg += byusername;
                         API.chatLog(msg);
@@ -6015,5 +6013,17 @@ if (!window.APIisRunning) {
 }
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
-// roll/tasty stats, Save/Load users, ban list, 
-//WORKING: welcome users, 8ball, random comments, tasty comments, rollCommand,  song stat, time limit
+//TODO: 
+// • Load UID from chat and Update users
+// • roll/tasty stats
+// • Save/Load users
+// • ban list, 
+//WORKING: 
+// • tasty comments
+// • welcome users
+// • 8ball, 
+// • random comments
+// • rollCommand
+// • song stat
+// • Skip if > 8 Min
+// • Skip if 4 Mehs
