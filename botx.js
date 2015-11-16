@@ -1,7 +1,7 @@
-// Written by: DocZ
+// Written by: Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069",
+  version: "Version 1.01.0002",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -103,13 +103,16 @@ var dubBot = {
   },
 
   skipBadSong: function (userName, skippedBy, reason) {
-	API.logInfo("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
-	var tooMany = false;
-	//tooMany = dubBot.tooManyBadSongs(userName);
-	//if (tooMany) API.botDjNow();
-	API.moderateForceSkip();
-	//if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
-	//if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
+    try {
+	  API.logInfo("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
+	  var tooMany = false;
+	  //tooMany = dubBot.tooManyBadSongs(userName);
+	  //if (tooMany) API.botDjNow();
+	  API.moderateForceSkip();
+	  //if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
+	  //if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
+	}
+	  catch(err) { UTIL.logException("skipBadSong: " + err.message); }
   }
 
 };
@@ -453,7 +456,7 @@ var SETTINGS = {
 		etaRestriction: false,
 		welcome: true,
 		opLink: null,
-		rulesLink: null,
+		rulesLink: "http://tinyurl.com/TastyTunesRules",
 		themeLink: null,
 		fbLink: null,
 		youtubeLink: null,
@@ -2422,7 +2425,7 @@ var API = {
 	  //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
-	  API.chatLog(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+	  API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
 	  botVar.botRunning = true;
 
@@ -2541,7 +2544,7 @@ var API = {
 			var space = message.indexOf(' ', 120);
 			if (space === -1) space = 120;
 			API.sendChat(message.substring(0, space));
-			API.sendChat(message.substring(space));
+			setTimeout(function () { API.sendChat(message.substring(space))  }, 500);
 			return;
 		}
 		Dubtrack.room.chat._messageInputEl.val(message);
@@ -3435,6 +3438,19 @@ var BOTCOMMANDS = {
                         return;
                     }
                     ROULETTE.startRoulette();
+                }
+            },
+            rulesCommand: {
+                command: 'rules',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (typeof SETTINGS.settings.rulesLink === "string")
+                            return API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink}));
+                    }
                 }
             },
 			
@@ -4673,20 +4689,6 @@ var BOTCOMMANDS = {
                             SETTINGS.settings.etaRestriction = !SETTINGS.settings.etaRestriction;
                             return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("etarestriction")}));
                         }
-                    }
-                }
-            },
-
-            rulesCommand: {
-                command: 'rules',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        if (typeof SETTINGS.settings.rulesLink === "string")
-                            return API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink}));
                     }
                 }
             },
