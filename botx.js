@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069f",
+  version: "Version 1.01.1.00069g",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -95,9 +95,10 @@ var dubBot = {
 	  
 	  botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
 	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
-		API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: name, botVar.currentDJ: SETTINGS.settings.maximumSongLength}));
+		API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
 	  }
+	  //todoer check blacklist
 	}
 	  catch(err) { console.log("validateCurrentSong: " + err.message); }
   },
@@ -5922,5 +5923,5 @@ if (!window.APIisRunning) {
 }
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
-// rollCommand, roll/tasty stats, user stats, song stat, ban list, time limit
-//WORKING: 8ball, random comments, tasty comments,
+// roll/tasty stats, Save/Load users, ban list, 
+//WORKING: 8ball, random comments, tasty comments, rollCommand,  song stat, time limit
