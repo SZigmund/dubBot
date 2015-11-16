@@ -1,7 +1,8 @@
 // Written by Doc_Z
+
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069a",
+  version: "Version 1.00.0069b",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -1410,6 +1411,10 @@ var TASTY = {
         if (typeof usrObjectID === "object") return obj;
 		var roomUser = USERS.lookupUserName(usrObjectID);
 		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+	  }
+	  catch {
+	  UTIL.logException("updateRolledStats: " + err.message); 
+	  return false;
 	  }
     },
 	setRolled: function (usrObjectID, value, wooting) {
