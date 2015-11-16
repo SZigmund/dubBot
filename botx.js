@@ -2,7 +2,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.1.00069d",
+  version: "Version 1.01.1.00069e",
   botName: "Larry The Law",
   botID: -1,
   debugHighLevel: true,
@@ -248,10 +248,12 @@ var USERS = {
 	  }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
 	},
-	defineUserRole: function (userElement) {
+	defineUserRole: function (userElement, username) {
 	  try {
 	    // SAMPLE: "user-levis_homer dj manager currentDJ"
 	    botDebug.debugMessage(true, userElement);
+	    userElement = userElement.replace("user-", "");
+	    userElement = userElement.replace(username, "");
 	    userElement = userElement.replace("currentDJ", "");
 	    userElement = userElement.replace("downdub", "");
 	    userElement = userElement.trim();
@@ -357,7 +359,7 @@ var USERS = {
 	    var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
 	    botDebug.debugMessage(false, "USER: " + username);
 		var userInfo = usernameList[i].className;
-		userRole = USERS.defineUserRole(userInfo);
+		userRole = USERS.defineUserRole(userInfo, username);
 		var userMehing = false;
 		if (userInfo.indexOf("downdub") >= 0) userMehing = true;
 		var roomUser = USERS.lookupUserName(username);
