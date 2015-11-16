@@ -1,7 +1,7 @@
 // Written by Doc_Z
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069j",
+  version: "Version 1.00.0069k",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -393,7 +393,9 @@ var USERS = {
 		roomUser.inRoom = true;
 		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
 		roomUser.userRole = userRole;
-		if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName)) API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
+		if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
+		  API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
+		}
 		roomUser.isMehing = userMehing;
 	    roomUser.inRoomUpdated = true;
       }
