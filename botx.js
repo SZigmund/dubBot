@@ -1,8 +1,7 @@
 // Written by Doc_Z
-
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.00.0069",
+  version: "Version 1.00.0069a",
   ImHidden: true,
   botName: "Larry The Law",
   botID: -1,
@@ -200,7 +199,7 @@ var USERS = {
 		this.isMehing = false;
 		this.userRole = userRole;
 		this.votes = {
-			.songsPlayed: 0,
+			songsPlayed: 0,
 			tastyRcv: 0,
 			tastyGiv: 0,
 			woot: 0,
@@ -2623,7 +2622,7 @@ var API = {
  	  USERS.resetUserSongStats();
 	  var roomUser = USERS.lookupUserName(previousDJ);
 	  TASTY.setRolled(roomUser, false);
-	  roomUser.votes.songs += 1;
+	  roomUser.votes.songsPlayed += 1;
 
       setTimeout(function () dubBot.validateCurrentSong(), 1500);
 	  
