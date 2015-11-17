@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0004",
+  version: "Version 1.01.0069",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -2293,8 +2293,10 @@ var AI = {
     if (chatmsg.indexOf("FUCKINLARRY") > -1) fuComment = "Do you kiss you mother with that mouth %%FU%%?";
     if (chatmsg.indexOf("FUCKINGLARRY") > -1) fuComment = "Do you kiss you mother with that mouth %%FU%%?";
     if (chatmsg.indexOf("BITEMELARRY") > -1) fuComment = "I wouldn't give you the pleasure %%FU%%....You're a freak!";
+    if (chatmsg.indexOf("BLOWMELARRY") > -1) fuComment = "Can't right now %%FU%%, don't have a magnifying glass on me";
     if (chatmsg.indexOf("MISSYOULITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("MISSYALITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
+    if (chatmsg.indexOf("ILOVEYOULARRY") > -1) fuComment = " :kiss: %%FU%%";
     if (chatmsg.indexOf("IHATEYOULARRY") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("LARRYIHATEYOU") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("HATESLARRY") > -1) fuComment = "Well rest assured the feeling is mutual %%FU%%!  :kiss:";
@@ -2308,8 +2310,11 @@ var AI = {
     if (chatmsg.indexOf("LARRYLIKESME") > -1) fuComment = "I tolerate you %%FU%%. It's not the same thing.";
     if (chatmsg.indexOf("LARRYLOVESME") > -1) fuComment = "BAHAHAHA, You must be new around here %%FU%%?  You're killin me!!";
     if (chatmsg.indexOf("DOYOUHATEMELARRY") > -1) fuComment = "Does the tin-man have a sheet metal cock %%FU%%?";
+    if (chatmsg === "LARRY?") fuComment = "WHAT??!?!??";
+    if (chatmsg.indexOf("LARRYSTILLHATESME") > -1) fuComment = "You make it too easy %%FU%%!";
     if (chatmsg.indexOf("DOYOULIKEMELARRY") > -1) fuComment = "Does Grizzly Adams have a beard %%FU%%?";
     if (chatmsg.indexOf("DOYOULOVEMELARRY") > -1) fuComment = "Is a bear catholic? Does the pope shit in the woods %%FU%%?";
+    if (chatmsg.indexOf("LARRYDOYOULOVEME") > -1) fuComment = "Is a bear catholic? Does the pope shit in the woods %%FU%%?";
     
     if (chatmsg.indexOf("DAMNYOULARRY") > -1) fuComment = "Oh no, I have been Damned!!  In return, I too shall damn you %%FU%%";
     if (chatmsg.indexOf("DAMNULARRY") > -1) fuComment = "Settle down %%FU%%. Get over yourself.";
@@ -2595,6 +2600,54 @@ var API = {
 	  return djName.trim();
 	}
 	catch(err) { UTIL.logException("currentDjName: " + err.message); }
+  },
+  //<li id="560be6cbdce3260300e40770-1447722815886" class="user-560be6cbdce3260300e40770 current-chat-user"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/560be6cbdce3260300e40770/image" alt="levis_homer" onclick="Dubtrack.helpers.displayUser('560be6cbdce3260300e40770', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">levis_homer</a> test</p></div><div class="meta-info"><span class="username">levis_homer </span><i class="icon-dot"></i><span class="timeinfo"><time title="11/16/2015, 8:13:33 PM" class="timeago" datetime="2015-11-17T01:13:33.552Z">2 minutes ago</time></span></div></div></div></li>
+
+  //<li id="564933a1d4dcab140021cdeb-1447720313471" class="user-564933a1d4dcab140021cdeb"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/564933a1d4dcab140021cdeb/image" alt="dexter_nix" onclick="Dubtrack.helpers.displayUser('564933a1d4dcab140021cdeb', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">dexter_nix</a> sadf</p></div><div class="meta-info"><span class="username">dexter_nix </span><i class="icon-dot"></i><span class="timeinfo"><time title="11/16/2015, 7:31:53 PM" class="timeago" datetime="2015-11-17T00:31:53.471Z">14 minutes ago</time></span></div></div></div></li>
+  
+  //<li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447723108852"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.helpers.displayUser('542465ce43f5a10200c07f11', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">doc_z</a> .roll</p></div><div class="meta-info"><span class="username">doc_z </span><i class="icon-dot"></i><span class="timeinfo"><time class="timeago" datetime="2015-11-17T01:18:26.463Z" title="11/16/2015, 8:18:26 PM">3 minutes ago</time></span></div></div></div></li>
+  
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+  //OPTIONS /room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all HTTP/1.1
+  //Host: api.dubtrack.fm
+  //Connection: keep-alive
+  //Access-Control-Request-Method: DELETE
+  //Origin: https://www.dubtrack.fm
+  //User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36
+  //Access-Control-Request-Headers: accept
+  //Accept: * / *
+  //Referer: https://www.dubtrack.fm/browser/room-queue/
+  //Accept-Encoding: gzip, deflate, sdch
+  //Accept-Language: en-US,en;q=0.8
+  //RESPONSE: connect.sid=s%3AIc6OZZrrITqik97YfAWpPwN_q0cQozk1.B3pP5IW%2BRMV%2B8gz5hxbUR%2F9pfhNVLGy4C4bF8zNYHlI;
+
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/560be6cbdce3260300e40770/all
+  //DELETE /room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all HTTP/1.1
+  //Host: api.dubtrack.fm
+  //Connection: keep-alive
+  //Accept: * / *
+  //Origin: https://www.dubtrack.fm
+  //User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36
+  //Referer: https://www.dubtrack.fm/browser/room-queue/
+  //Accept-Encoding: gzip, deflate, sdch
+  //Accept-Language: en-US,en;q=0.8
+  //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
+
+
+  moderateRemoveDJ: function() {  
+    try {
+	  var uid = "560be6cbdce3260300e40770";
+	  var roomid = "5602ed62e8632103004663c2";
+	  
+      //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+	  $.ajax({
+			url: "https://api.dubtrack.fm/room/" + roomid + "/queue/user/" + uid + "/all",
+			type: "DELETE"
+		});
+	}
+	catch(err) { UTIL.logException("logInfo: " + err.message); }
   },
   moderateForceSkip: function() {
 	API.sendChat("/skip");
@@ -3414,10 +3467,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     return API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
-                    }
-                catch(err) {
-                    UTIL.logException("speakCommand: " + err.message);
                 }
+                catch(err) { UTIL.logException("speakCommand: " + err.message);  }
                 }
             },
             pingCommand: {
@@ -3460,7 +3511,39 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-			
+            removeCommand: {
+                command: 'remove',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+				  try {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					var msg = chat.message;
+					if (msg.length > cmd.length + 2) {
+					  API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
+					  return;
+					}
+					var name = msg.substr(cmd.length + 2);
+					var user = USERS.lookupUserName:(name);
+					if (typeof usre !== "object") {
+					  else API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
+					  return;
+					}
+					//todoer AFK:  AFK.resetDC(user);
+					API.moderateRemoveDJ();
+					//if (API.getDJ().id === user.id) {
+					//    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
+					//    API.moderateForceSkip();
+					//    setTimeout(function () {
+					//        API.moderateRemoveDJ(user.id);
+					//    }, 1 * 1000, user);
+					//}
+					//else API.moderateRemoveDJ(user.id);
+                }
+				catch(err) { UTIL.logException("speakCommand: " + err.message);  }
+              }
+            },
 
             /*
             activeCommand: {
@@ -4648,34 +4731,6 @@ var BOTCOMMANDS = {
                         basicBot.disconnectAPI();
                         UTIL.killbot();
                         setTimeout(function () { $.getScript(basicBot.scriptTestLink); }, 2000);
-                    }
-                }
-            },
-
-            removeCommand: {
-                command: 'remove',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        if (msg.length > cmd.length + 2) {
-                            var name = msg.substr(cmd.length + 2);
-                            var user = USERS.lookupUserName(name);
-                            if (typeof user !== 'boolean') {
-                                AFK.resetDC(user);
-                                if (API.getDJ().id === user.id) {
-                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
-                                    API.moderateForceSkip();
-                                    setTimeout(function () {
-                                        API.moderateRemoveDJ(user.id);
-                                    }, 1 * 1000, user);
-                                }
-                                else API.moderateRemoveDJ(user.id);
-                            } else API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
-                        } else API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
                     }
                 }
             },
@@ -6057,6 +6112,7 @@ if (!window.APIisRunning) {
 // • roll/tasty stats
 // • Save/Load users
 // • Skip songs played in last 90 mins
+// • Delete comments
 // • ban list, 
 //WORKING: 
 // • tasty comments
