@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069d",
+  version: "Version 1.01.0069e",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2643,9 +2643,10 @@ var API = {
   //Accept-Language: en-US,en;q=0.8
   //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
 
-
-  moderateRemoveDJ: function() {  
+  moderateRemoveDJ: function(usrObjectID) {
     try {
+	  var roomUser = USERS.defineRoomUser(usrObjectID);
+	  //todoer roomUser.uid.....
 	  var uid = "560be6cbdce3260300e40770";
 	  var roomid = "5602ed62e8632103004663c2";
 	  
@@ -3539,12 +3540,12 @@ var BOTCOMMANDS = {
 					}
 					var name = msg.substr(cmd.length + 2);
 					var user = USERS.lookupUserName(name);
-					if (typeof usre !== "object") {
-					  API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
+					if (typeof user !== "object") {
+					  API.sendChat("Invalid user specified.");
 					  return;
 					}
-					//todoer AFK:  AFK.resetDC(user);
-					API.moderateRemoveDJ();
+					AFK.resetDC(user);  // so when they rejoin they'll not get bugged
+					API.moderateRemoveDJ(user);
 					//if (API.getDJ().id === user.id) {
 					//    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
 					//    API.moderateForceSkip();
