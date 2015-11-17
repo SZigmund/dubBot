@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069f",
+  version: "Version 1.01.0002.6900",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -178,6 +178,7 @@ var USERS = {
   },
 
   lookupUserName: function (username) {
+    botDebug.debugMessage(true, "username: [" + username + "]");
 	for (var i = 0; i < USERS.users.length; i++) {
 	  if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
 	}
@@ -1510,7 +1511,7 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'];
+					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -1527,7 +1528,7 @@ var TASTY = {
 			var arrayCount = CONST.tastyCommentArray.length;
 			var arrayID = Math.floor(Math.random() * arrayCount);
 			if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
-			var tastyCmt = "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
+			var tastyCmt = "[ " + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
 			var djName = API.currentDjName();
 			if (djName.length > 0) tastyCmt += " @"  + djName;
 			return tastyCmt;
@@ -2305,6 +2306,7 @@ var AI = {
     if (chatmsg.indexOf("MISSYOULITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("MISSYALITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("ILOVEYOULARRY") > -1) fuComment = " :kiss: %%FU%%";
+    if (chatmsg.indexOf("ILOVELARRY") > -1) fuComment = " :kiss: %%FU%%";
     if (chatmsg.indexOf("IHATEYOULARRY") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("LARRYIHATEYOU") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("HATESLARRY") > -1) fuComment = "Well rest assured the feeling is mutual %%FU%%!  :kiss:";
@@ -2317,6 +2319,7 @@ var AI = {
     if (chatmsg.indexOf("LARRYHATESME") > -1) fuComment = "If you were you, wouldn't you hate you too %%FU%%?";
     if (chatmsg.indexOf("LARRYLIKESME") > -1) fuComment = "I tolerate you %%FU%%. It's not the same thing.";
     if (chatmsg.indexOf("LARRYLOVESME") > -1) fuComment = "BAHAHAHA, You must be new around here %%FU%%?  You're killin me!!";
+    if (chatmsg.indexOf("LARRYUNDERSTANSSME") > -1) fuComment = "BAHAHAHA, I'm merely acting %%FU%%";
     if (chatmsg.indexOf("DOYOUHATEMELARRY") > -1) fuComment = "Does the tin-man have a sheet metal cock %%FU%%?";
     if (chatmsg === "LARRY?") fuComment = "WHAT??!?!??";
     if (chatmsg.indexOf("LARRYSTILLHATESME") > -1) fuComment = "You make it too easy %%FU%%!";
@@ -3129,7 +3132,7 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'],
+                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3559,7 +3562,83 @@ var BOTCOMMANDS = {
               }
             },
 
-            /*
+            commandsCommand: {
+                command: 'commands',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+				  try {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    API.sendChat(botChat.subChat(botChat.getChatMessage("commandslink"), {botname: botVar.botName, link: CONST.cmdLink}));
+				  }
+                  catch (err) { UTIL.logException("cookieCommand: " + err.message); }
+                }
+            },
+
+            cookieCommand: {
+                command: 'cookie',
+                rank: 'user',
+                type: 'startsWith',
+                cookies: ['has given you a chocolate chip cookie!',
+                    'has given you a soft homemade oatmeal cookie!',
+                    'has given you a plain, dry, old cookie. It was the last one in the bag. Gross.',
+                    'gives you a sugar cookie. What, no frosting and sprinkles? 0/10 would not touch.',
+                    'gives you a chocolate chip cookie. Oh wait, those are raisins. Bleck!',
+                    'gives you an enormous cookie. Poking it gives you more cookies. Weird.',
+                    'gives you a fortune cookie. It reads "Why aren\'t you working on any projects?"',
+                    'gives you a fortune cookie. It reads "Give that special someone a compliment"',
+                    'gives you a fortune cookie. It reads "Take a risk!"',
+                    'gives you a fortune cookie. It reads "Go outside."',
+                    'gives you a fortune cookie. It reads "Don\'t forget to eat your veggies!"',
+                    'gives you a fortune cookie. It reads "Do you even lift?"',
+                    'gives you a fortune cookie. It reads "m808 pls"',
+                    'gives you a fortune cookie. It reads "If you move your hips, you\'ll get all the ladies."',
+                    'gives you a fortune cookie. It reads "I love you."',
+                    'gives you a Golden Cookie. You can\'t eat it because it is made of gold. Dammit.',
+                    'gives you an Oreo cookie with a glass of milk!',
+                    'gives you a rainbow cookie made with love :heart:',
+                    'gives you an old cookie that was left out in the rain, it\'s moldy.',
+                    'bakes you fresh cookies, it smells amazing.'
+                ],
+                getCookie: function () {
+                    var c = Math.floor(Math.random() * this.cookies.length);
+                    return this.cookies[c];
+                },
+                functionality: function (chat, cmd) {
+				  try {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					var msg = chat.message;
+					var space = msg.indexOf(' ');
+					if (space === -1) return API.sendChat(botChat.getChatMessage("eatcookie"));
+					var name = msg.substring(space + 2);
+					var user = USERS.lookupUserName(name);
+					if (user === false || !user.inRoom)
+						return API.sendChat(botChat.subChat(botChat.getChatMessage("nousercookie"), {name: name}));
+					if (user.username === chat.un) 
+						return API.sendChat(botChat.subChat(botChat.getChatMessage("selfcookie"), {name: name}));
+					return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
+				  }
+                  catch (err) { UTIL.logException("cookieCommand: " + err.message); }
+                }
+            },
+
+            fbCommand: {
+                command: 'fb',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (typeof SETTINGS.settings.fbLink === "string")
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("facebook"), {link: SETTINGS.settings.fbLink}));
+                    }
+                }
+            },
+
+            /* basic
             activeCommand: {
                 command: 'active',
                 rank: 'bouncer',
@@ -3707,9 +3786,7 @@ var BOTCOMMANDS = {
                         if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         API.moderateBanUser(user.id, 1, API.BAN.PERMA);
                     }
-                    catch (err) {
-                        UTIL.logException("trollCommand: " + err.message);
-                    }
+                    catch (err) { UTIL.logException("trollCommand: " + err.message); }
                 }
             },
             afkresetCommand: {
@@ -3852,76 +3929,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            commandsCommand: {
-                command: 'commands',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("commandslink"), {botname: botVar.botName, link: CONST.cmdLink}));
-                    }
-                }
-            },
-
-            cookieCommand: {
-                command: 'cookie',
-                rank: 'user',
-                type: 'startsWith',
-                cookies: ['has given you a chocolate chip cookie!',
-                    'has given you a soft homemade oatmeal cookie!',
-                    'has given you a plain, dry, old cookie. It was the last one in the bag. Gross.',
-                    'gives you a sugar cookie. What, no frosting and sprinkles? 0/10 would not touch.',
-                    'gives you a chocolate chip cookie. Oh wait, those are raisins. Bleck!',
-                    'gives you an enormous cookie. Poking it gives you more cookies. Weird.',
-                    'gives you a fortune cookie. It reads "Why aren\'t you working on any projects?"',
-                    'gives you a fortune cookie. It reads "Give that special someone a compliment"',
-                    'gives you a fortune cookie. It reads "Take a risk!"',
-                    'gives you a fortune cookie. It reads "Go outside."',
-                    'gives you a fortune cookie. It reads "Don\'t forget to eat your veggies!"',
-                    'gives you a fortune cookie. It reads "Do you even lift?"',
-                    'gives you a fortune cookie. It reads "m808 pls"',
-                    'gives you a fortune cookie. It reads "If you move your hips, you\'ll get all the ladies."',
-                    'gives you a fortune cookie. It reads "I love you."',
-                    'gives you a Golden Cookie. You can\'t eat it because it is made of gold. Dammit.',
-                    'gives you an Oreo cookie with a glass of milk!',
-                    'gives you a rainbow cookie made with love :heart:',
-                    'gives you an old cookie that was left out in the rain, it\'s moldy.',
-                    'bakes you fresh cookies, it smells amazing.'
-                ],
-                getCookie: function () {
-                    var c = Math.floor(Math.random() * this.cookies.length);
-                    return this.cookies[c];
-                },
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-
-                        var space = msg.indexOf(' ');
-                        if (space === -1) {
-                            API.sendChat(botChat.getChatMessage("eatcookie"));
-                            return false;
-                        }
-                        else {
-                            var name = msg.substring(space + 2);
-                            var user = USERS.lookupUserName(name);
-                            if (user === false || !user.inRoom) {
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("nousercookie"), {name: name}));
-                            }
-                            else if (user.username === chat.un) {
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("selfcookie"), {name: name}));
-                            }
-                            else {
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
-                            }
-                        }
-                    }
-                }
-            },
-
             voteskipCommand: {
                 command: 'voteskip',
                 rank: 'manager',
@@ -4026,20 +4033,6 @@ var BOTCOMMANDS = {
                         var estimateMS = ((pos * 4 * 60) + timeRemaining) * 1000;
                         var estimateString = UTIL.msToStr(estimateMS);
                         API.sendChat(botChat.subChat(botChat.getChatMessage("eta"), {name: name, time: estimateString}));
-                    }
-                }
-            },
-
-            fbCommand: {
-                command: 'fb',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        if (typeof SETTINGS.settings.fbLink === "string")
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("facebook"), {link: SETTINGS.settings.fbLink}));
                     }
                 }
             },
@@ -6121,10 +6114,13 @@ if (!window.APIisRunning) {
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 //TODO:
-// • tasty comments too long!
+// • /me comments to not trigger AI detection
+// • USER PERMISSIONS
 // • Load UID from chat and update/remove users as needed
 // • roll/tasty stats
 // • Save/Load users
+// • afk Monitor
+// • .nsfw
 // • Skip songs played in last 90 mins
 // • Delete comments
 // • ban list, 
@@ -6137,3 +6133,4 @@ if (!window.APIisRunning) {
 // • song stat
 // • Skip if > 8 Min
 // • Skip if 4 Mehs
+// • tasty comments too long!
