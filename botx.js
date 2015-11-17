@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069b",
+  version: "Version 1.01.0069c",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -3522,7 +3522,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
 					var msg = chat.message;
-					if (msg.length > cmd.length + 2) {
+					if (msg.length <= cmd.length + 2) {
 					  API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
 					  return;
 					}
