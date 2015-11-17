@@ -4,8 +4,8 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0001",
-  ImHidden: true,
+  version: "Version 1.01.0002",
+  ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
   botStatus: false, 
@@ -663,6 +663,7 @@ var COMMANDS = {
 };
 //SECTION Chat: All bot chat functionality:
 var botChat = {
+  lastMessageCount: 0,
   commandChat: {
 		cid: "",
 		message: "",
@@ -909,7 +910,8 @@ var botChat = {
    botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
    //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatMessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
-   botChat.chatMessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
+   botChat.chatMessages.push(["eightballresponse1", "%%RESPONSE%%"]);
+   //botChat.chatMessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
    botChat.chatMessages.push(["eightballresponse2", "%%NAME%% The all knowing Larry says: %%RESPONSE%%"]);
    botChat.chatMessages.push(["lastplayed0", ":notes: This is the 1st time this song has been played! :notes:"]);
    botChat.chatMessages.push(["lastplayed1", ":notes: This song has only been played one other time. [first time: %%LASTPLAYED%% ago] :notes:"]);
@@ -1032,6 +1034,12 @@ var botChat = {
     },
   findChatItem: function(itemID) {
     try{
+	  //Only scan up to the last 10 items in history:
+	  if (botVar.chatHistoryList.length > 10) {
+	    botDebug.debugMessage(true, "BEFORE LEN: " + botVar.chatHistoryList.length);
+	    botVar.chatHistoryList.splice(0, botVar.chatHistoryList.length - 10);
+	    botDebug.debugMessage(true, " AFTER LEN: " + botVar.chatHistoryList.length);
+	  }
       for (var i = 0; i < botVar.chatHistoryList.length; i++) {
           if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
               return botVar.chatHistoryList[i];
@@ -1073,6 +1081,7 @@ var botChat = {
       botDebug.debugMessage(false, "User: " + username);
 	  var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
+	  
       //Process any unprocessed messages:
       for (var i = chatItems.length -1; i >= historyChatCount; i--) {
           var node = chatItems[i];
@@ -1447,7 +1456,7 @@ var TASTY = {
 		 }
 		var tastyComment = TASTY.tastyComment(cmd);
 		roomUser.tastyVote = true;
-		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: roomUser.username})); }, 1000);
+		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: roomUser.username})); }, 250);
 	
 		botVar.tastyCount++;
 		var currdj = API.getDJ();
@@ -1525,12 +1534,11 @@ var TASTY = {
 		}
 		catch(err) { UTIL.logException("tastyComment: " + err.message);		}
 	},
-
 };
 //SECTION Debug: All Debug functionality:
 var botDebug = {
   settings: {
-    debugHighLevel: false,   //erer
+    debugHighLevel: false,
     debugLowLevel: false
   },
 
@@ -1759,9 +1767,9 @@ var RANDOMCOMMENTS = {
 	  try  {
 	  //var testTime = new Date();
 	  //var timeDiff = testTime.getMinutes() - RANDOMCOMMENTS.settings.nextRandomComment.getMinutes();
-	  //botDebug.debugMessage(true, "randomCommentCheck:" + testTime.getMinutes() + " - " + RANDOMCOMMENTS.settings.nextRandomComment.getMinutes());
-	  //botDebug.debugMessage(true, "randomCommentCheck-NOW TIME: " + Date.now());
-	  //botDebug.debugMessage(true, "randomCommentCheck-timeDiff: " + timeDiff);
+	  //botDebug.debugMessage(false, "randomCommentCheck:" + testTime.getMinutes() + " - " + RANDOMCOMMENTS.settings.nextRandomComment.getMinutes());
+	  //botDebug.debugMessage(false, "randomCommentCheck-NOW TIME: " + Date.now());
+	  //botDebug.debugMessage(false, "randomCommentCheck-timeDiff: " + timeDiff);
 	  //if (timeDiff > 0)
 	  //{
 	  //	  RANDOMCOMMENTS.randomCommentSetTimer();
@@ -2246,6 +2254,7 @@ var AI = {
     chatmsg = chatmsg.replace(/_/g, '');
     chatmsg = chatmsg.replace(/ /g, '');
     chatmsg = chatmsg.replace(/THELAW/g, '');
+    chatmsg = chatmsg.replace(/CRAZYBOT/g, '');
     chatmsg = chatmsg.replace(/FUCKBOT/g, "LARRY");
     chatmsg = chatmsg.replace(/BOTT/g, "LARRY");
     chatmsg = chatmsg.replace(/BOT/g, "LARRY");
@@ -2253,7 +2262,6 @@ var AI = {
     chatmsg = chatmsg.replace(/YOUARE/g, "YOURE");   // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/LARRYIS/g, "LARRYS");
     chatmsg = chatmsg.replace(/LARRY_THE_LAW/g, "LARRY");
-    chatmsg = chatmsg.replace(/LARRYTHELAW/g, "LARRY");
     chatmsg = chatmsg.replace(/IAM/g, "IM");
     botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
 
@@ -2293,6 +2301,7 @@ var AI = {
     if (chatmsg.indexOf("FUCKINLARRY") > -1) fuComment = "Do you kiss you mother with that mouth %%FU%%?";
     if (chatmsg.indexOf("FUCKINGLARRY") > -1) fuComment = "Do you kiss you mother with that mouth %%FU%%?";
     if (chatmsg.indexOf("BITEMELARRY") > -1) fuComment = "I wouldn't give you the pleasure %%FU%%....You're a freak!";
+    if (chatmsg.indexOf("BLOWMELARRY") > -1) fuComment = "Can't right now %%FU%%, don't have a magnifying glass on me";
     if (chatmsg.indexOf("MISSYOULITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("MISSYALITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("ILOVEYOULARRY") > -1) fuComment = " :kiss: %%FU%%";
@@ -2309,8 +2318,11 @@ var AI = {
     if (chatmsg.indexOf("LARRYLIKESME") > -1) fuComment = "I tolerate you %%FU%%. It's not the same thing.";
     if (chatmsg.indexOf("LARRYLOVESME") > -1) fuComment = "BAHAHAHA, You must be new around here %%FU%%?  You're killin me!!";
     if (chatmsg.indexOf("DOYOUHATEMELARRY") > -1) fuComment = "Does the tin-man have a sheet metal cock %%FU%%?";
+    if (chatmsg === "LARRY?") fuComment = "WHAT??!?!??";
+    if (chatmsg.indexOf("LARRYSTILLHATESME") > -1) fuComment = "You make it too easy %%FU%%!";
     if (chatmsg.indexOf("DOYOULIKEMELARRY") > -1) fuComment = "Does Grizzly Adams have a beard %%FU%%?";
     if (chatmsg.indexOf("DOYOULOVEMELARRY") > -1) fuComment = "Is a bear catholic? Does the pope shit in the woods %%FU%%?";
+    if (chatmsg.indexOf("LARRYDOYOULOVEME") > -1) fuComment = "Is a bear catholic? Does the pope shit in the woods %%FU%%?";
     
     if (chatmsg.indexOf("DAMNYOULARRY") > -1) fuComment = "Oh no, I have been Damned!!  In return, I too shall damn you %%FU%%";
     if (chatmsg.indexOf("DAMNULARRY") > -1) fuComment = "Settle down %%FU%%. Get over yourself.";
@@ -2370,7 +2382,7 @@ var AI = {
     if (chatmsg.indexOf("FUCKYOULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("SCREWULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("SCREWYOULARRY") > -1) fuComment = AI.fuComment();
-    if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 1000);
+    if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 250);
     }
     catch(err) {
       UTIL.logException("larryAI: " + err.message);
@@ -2416,7 +2428,7 @@ var API = {
 
   	  botVar.currentSong = API.currentSongName();
 	  botVar.currentDJ   = API.currentDjName();
-	  botDebug.debugMessage(true, "botVar.currentDJ: " + botVar.currentDJ);
+	  botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
 	  
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
@@ -2597,6 +2609,55 @@ var API = {
 	}
 	catch(err) { UTIL.logException("currentDjName: " + err.message); }
   },
+  //<li id="560be6cbdce3260300e40770-1447722815886" class="user-560be6cbdce3260300e40770 current-chat-user"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/560be6cbdce3260300e40770/image" alt="levis_homer" onclick="Dubtrack.helpers.displayUser('560be6cbdce3260300e40770', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">levis_homer</a> test</p></div><div class="meta-info"><span class="username">levis_homer </span><i class="icon-dot"></i><span class="timeinfo"><time title="11/16/2015, 8:13:33 PM" class="timeago" datetime="2015-11-17T01:13:33.552Z">2 minutes ago</time></span></div></div></div></li>
+
+  //<li id="564933a1d4dcab140021cdeb-1447720313471" class="user-564933a1d4dcab140021cdeb"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/564933a1d4dcab140021cdeb/image" alt="dexter_nix" onclick="Dubtrack.helpers.displayUser('564933a1d4dcab140021cdeb', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">dexter_nix</a> sadf</p></div><div class="meta-info"><span class="username">dexter_nix </span><i class="icon-dot"></i><span class="timeinfo"><time title="11/16/2015, 7:31:53 PM" class="timeago" datetime="2015-11-17T00:31:53.471Z">14 minutes ago</time></span></div></div></div></li>
+  
+  //<li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447723108852"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.helpers.displayUser('542465ce43f5a10200c07f11', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">doc_z</a> .roll</p></div><div class="meta-info"><span class="username">doc_z </span><i class="icon-dot"></i><span class="timeinfo"><time class="timeago" datetime="2015-11-17T01:18:26.463Z" title="11/16/2015, 8:18:26 PM">3 minutes ago</time></span></div></div></div></li>
+  
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+  //OPTIONS /room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all HTTP/1.1
+  //Host: api.dubtrack.fm
+  //Connection: keep-alive
+  //Access-Control-Request-Method: DELETE
+  //Origin: https://www.dubtrack.fm
+  //User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36
+  //Access-Control-Request-Headers: accept
+  //Accept: * / *
+  //Referer: https://www.dubtrack.fm/browser/room-queue/
+  //Accept-Encoding: gzip, deflate, sdch
+  //Accept-Language: en-US,en;q=0.8
+  //RESPONSE: connect.sid=s%3AIc6OZZrrITqik97YfAWpPwN_q0cQozk1.B3pP5IW%2BRMV%2B8gz5hxbUR%2F9pfhNVLGy4C4bF8zNYHlI;
+
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/560be6cbdce3260300e40770/all
+  //DELETE /room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all HTTP/1.1
+  //Host: api.dubtrack.fm
+  //Connection: keep-alive
+  //Accept: * / *
+  //Origin: https://www.dubtrack.fm
+  //User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36
+  //Referer: https://www.dubtrack.fm/browser/room-queue/
+  //Accept-Encoding: gzip, deflate, sdch
+  //Accept-Language: en-US,en;q=0.8
+  //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
+
+  moderateRemoveDJ: function(usrObjectID) {
+    try {
+	  var roomUser = USERS.defineRoomUser(usrObjectID);
+	  //todoer roomUser.uid.....
+	  var uid = "560be6cbdce3260300e40770";
+	  var roomid = "5602ed62e8632103004663c2";
+	  
+      //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
+	  $.ajax({
+			url: "https://api.dubtrack.fm/room/" + roomid + "/queue/user/" + uid + "/all",
+			type: "DELETE"
+		});
+	}
+	catch(err) { UTIL.logException("logInfo: " + err.message); }
+  },
   moderateForceSkip: function() {
 	API.sendChat("/skip");
   },
@@ -2614,14 +2675,14 @@ var API = {
 	EVENT_DUBUP: function () {
 	  try {
 	    if (botVar.ImHidden === true) return;
-		botDebug.debugMessage(true, "EVENT_DUBUP");
+		botDebug.debugMessage(false, "EVENT_DUBUP");
 	  }
 	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
 	},
     EVENT_DUBDOWN: function () {
 	  try {
 	    if (botVar.ImHidden === true) return;
-		botDebug.debugMessage(true, "EVENT_DUBDOWN");
+		botDebug.debugMessage(false, "EVENT_DUBDOWN");
 		var dubCount = API.getDubDownCount();
 		if (dubCount <= botVar.room.currentMehCount) return;  // Prevent back-2-back calls skipping multiple songs.
 		botVar.room.currentMehCount = dubCount;
@@ -2635,7 +2696,7 @@ var API = {
     EVENT_USER_JOIN: function () {
 	  try {
 	    //if (botVar.ImHidden === true) return;
-	    //botDebug.debugMessage(true, "USERJOIN");
+	    //botDebug.debugMessage(false, "USERJOIN");
 	    //USERS.loadUsersInRoom(true);
 	  }
 	  catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
@@ -2644,6 +2705,7 @@ var API = {
 	  try {
       // UPDATE ON SONG UPDATE
 	  if (botVar.ImHidden === true) return;
+	  if (botVar.currentSong === API.currentSongName()) return;
 	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
 	  TASTY.settings.rolledDice = false;
@@ -2678,7 +2740,10 @@ var API = {
       try {
         var mainChat = document.getElementsByClassName("chat-main");
         var LiItems = mainChat[0].getElementsByTagName("li");
-        for (var i = 0; i < LiItems.length; i++) {
+		var startCounter = 0;
+		if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
+		botChat.lastMessageCount = LiItems.length;
+        for (var i = startCounter; i < LiItems.length; i++) {
           botChat.processChatItems(LiItems[i]);
         }
       } catch (err) {
@@ -3089,10 +3154,11 @@ var BOTCOMMANDS = {
                         var magicResponse = EIGHTBALL.eightBallSelect();
                         if (msg.length === cmd.length)  return API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse2"), {name: chat.un, response: magicResponse }));
                         var myQuestion = msg.substring(cmd.length + 1);
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("eightballquestion"), {name: chat.un, question: myQuestion}));
-                        setTimeout(function () {
+						//Since we don't delete comments yet repeating the question is pointless.
+                        //API.sendChat(botChat.subChat(botChat.getChatMessage("eightballquestion"), {name: chat.un, question: myQuestion}));
+                        //setTimeout(function () {
                             API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse1"), {response: magicResponse}));
-                        }, 500);
+                        //}, 500);
                     }
                     catch(err) {
                         UTIL.logException("eightballCommand: " + err.message);
@@ -3123,12 +3189,12 @@ var BOTCOMMANDS = {
                         var wooting = true;
                         if (rollResults > (dicesides * 0.5)) {
                             //Pick a random word for the tasty command
-                            setTimeout(function () { TASTY.tastyVote(botVar.botName, TASTY.bopCommand("")); }, 1000);
-                            setTimeout(function () { API.wootThisSong(); }, 1500);
+                            setTimeout(function () { TASTY.tastyVote(botVar.botName, TASTY.bopCommand("")); }, 250);
+                            setTimeout(function () { API.wootThisSong(); }, 500);
                             resultsMsg = botChat.subChat(botChat.getChatMessage("rollresultsgood"), {name: chat.un, roll: UTIL.numberToIcon(rollResults)});
                         }
                         else {
-                            setTimeout(function () { API.mehThisSong(); }, 1000);
+                            setTimeout(function () { API.mehThisSong(); }, 250);
                             resultsMsg = botChat.subChat(botChat.getChatMessage("rollresultsbad"), {name: chat.un, roll: UTIL.numberToIcon(rollResults)});
                             wooting = false;
                         }
@@ -3415,10 +3481,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     return API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
-                    }
-                catch(err) {
-                    UTIL.logException("speakCommand: " + err.message);
                 }
+                catch(err) { UTIL.logException("speakCommand: " + err.message);  }
                 }
             },
             pingCommand: {
@@ -3461,7 +3525,39 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-			
+            removeCommand: {
+                command: 'remove',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+				  try {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					var msg = chat.message;
+					if (msg.length <= cmd.length + 2) {
+					  API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
+					  return;
+					}
+					var name = msg.substr(cmd.length + 2);
+					var user = USERS.lookupUserName(name);
+					if (typeof user !== "object") {
+					  API.sendChat("Invalid user specified.");
+					  return;
+					}
+					AFK.resetDC(user);  // so when they rejoin they'll not get bugged
+					API.moderateRemoveDJ(user);
+					//if (API.getDJ().id === user.id) {
+					//    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
+					//    API.moderateForceSkip();
+					//    setTimeout(function () {
+					//        API.moderateRemoveDJ(user.id);
+					//    }, 1 * 1000, user);
+					//}
+					//else API.moderateRemoveDJ(user.id);
+                }
+				catch(err) { UTIL.logException("speakCommand: " + err.message);  }
+              }
+            },
 
             /*
             activeCommand: {
@@ -4649,34 +4745,6 @@ var BOTCOMMANDS = {
                         basicBot.disconnectAPI();
                         UTIL.killbot();
                         setTimeout(function () { $.getScript(basicBot.scriptTestLink); }, 2000);
-                    }
-                }
-            },
-
-            removeCommand: {
-                command: 'remove',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        if (msg.length > cmd.length + 2) {
-                            var name = msg.substr(cmd.length + 2);
-                            var user = USERS.lookupUserName(name);
-                            if (typeof user !== 'boolean') {
-                                AFK.resetDC(user);
-                                if (API.getDJ().id === user.id) {
-                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
-                                    API.moderateForceSkip();
-                                    setTimeout(function () {
-                                        API.moderateRemoveDJ(user.id);
-                                    }, 1 * 1000, user);
-                                }
-                                else API.moderateRemoveDJ(user.id);
-                            } else API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
-                        } else API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
                     }
                 }
             },
@@ -6058,6 +6126,7 @@ if (!window.APIisRunning) {
 // • roll/tasty stats
 // • Save/Load users
 // • Skip songs played in last 90 mins
+// • Delete comments
 // • ban list, 
 //WORKING: 
 // • tasty comments
