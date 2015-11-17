@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069",
+  version: "Version 1.01.0069a",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -3525,7 +3525,7 @@ var BOTCOMMANDS = {
 					  return;
 					}
 					var name = msg.substr(cmd.length + 2);
-					var user = USERS.lookupUserName:(name);
+					var user = USERS.lookupUserName(name);
 					if (typeof usre !== "object") {
 					  else API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
 					  return;
