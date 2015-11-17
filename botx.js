@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069e",
+  version: "Version 1.01.0069f",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2254,6 +2254,7 @@ var AI = {
     chatmsg = chatmsg.replace(/_/g, '');
     chatmsg = chatmsg.replace(/ /g, '');
     chatmsg = chatmsg.replace(/THELAW/g, '');
+    chatmsg = chatmsg.replace(/CRAZYBOT/g, '');
     chatmsg = chatmsg.replace(/FUCKBOT/g, "LARRY");
     chatmsg = chatmsg.replace(/BOTT/g, "LARRY");
     chatmsg = chatmsg.replace(/BOT/g, "LARRY");
@@ -2261,7 +2262,6 @@ var AI = {
     chatmsg = chatmsg.replace(/YOUARE/g, "YOURE");   // Convert 2 words to the contraction
     chatmsg = chatmsg.replace(/LARRYIS/g, "LARRYS");
     chatmsg = chatmsg.replace(/LARRY_THE_LAW/g, "LARRY");
-    chatmsg = chatmsg.replace(/LARRYTHELAW/g, "LARRY");
     chatmsg = chatmsg.replace(/IAM/g, "IM");
     botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
 
