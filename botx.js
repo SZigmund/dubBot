@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0069a",
+  version: "Version 1.01.0069b",
   ImHidden: true,
   botName: "larry_the_law",
   botID: -1,
@@ -909,7 +909,8 @@ var botChat = {
    botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
    //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatMessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
-   botChat.chatMessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
+   botChat.chatMessages.push(["eightballresponse1", "%%RESPONSE%%"]);
+   //botChat.chatMessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
    botChat.chatMessages.push(["eightballresponse2", "%%NAME%% The all knowing Larry says: %%RESPONSE%%"]);
    botChat.chatMessages.push(["lastplayed0", ":notes: This is the 1st time this song has been played! :notes:"]);
    botChat.chatMessages.push(["lastplayed1", ":notes: This song has only been played one other time. [first time: %%LASTPLAYED%% ago] :notes:"]);
@@ -3141,10 +3142,11 @@ var BOTCOMMANDS = {
                         var magicResponse = EIGHTBALL.eightBallSelect();
                         if (msg.length === cmd.length)  return API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse2"), {name: chat.un, response: magicResponse }));
                         var myQuestion = msg.substring(cmd.length + 1);
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("eightballquestion"), {name: chat.un, question: myQuestion}));
-                        setTimeout(function () {
+						//Since we don't delete comments yet repeating the question is pointless.
+                        //API.sendChat(botChat.subChat(botChat.getChatMessage("eightballquestion"), {name: chat.un, question: myQuestion}));
+                        //setTimeout(function () {
                             API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse1"), {response: magicResponse}));
-                        }, 500);
+                        //}, 500);
                     }
                     catch(err) {
                         UTIL.logException("eightballCommand: " + err.message);
@@ -3527,7 +3529,7 @@ var BOTCOMMANDS = {
 					var name = msg.substr(cmd.length + 2);
 					var user = USERS.lookupUserName(name);
 					if (typeof usre !== "object") {
-					  else API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
+					  API.sendChat(botChat.subChat(botChat.getChatMessage("removenotinwl"), {name: chat.un, username: name}));
 					  return;
 					}
 					//todoer AFK:  AFK.resetDC(user);
