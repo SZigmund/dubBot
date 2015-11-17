@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002.6900",
+  version: "Version 1.01.0002.6901",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -462,7 +462,7 @@ var SETTINGS = {
 		opLink: null,
 		rulesLink: "http://tinyurl.com/TastyTunesRules",
 		themeLink: null,
-		fbLink: null,
+		fbLink: "https://www.facebook.com/groups/226222424234128/",
 		youtubeLink: null,
 		website: null,
 		intervalMessages: [],
@@ -3292,6 +3292,9 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         if(chat.message.length === cmd.length) return API.sendChat('No user specified.');
+						botDebug.debugMessage(true, "============================= MEH? =============================");
+						botDebug.debugMessage(true, "cmd: " + cmd);
+						botDebug.debugMessage(true, "chat.message: " + chat.message);
                         var name = chat.message.substring(cmd.length + 2);
                         var roomUser = USERS.lookupUserName(name);
                         if(typeof roomUser === 'boolean') return API.sendChat('Invalid user specified.');
