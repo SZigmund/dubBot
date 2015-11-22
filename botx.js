@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002.6901",
+  version: "Version 1.01.0002.6902",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -62,8 +62,6 @@ var botVar = {
 //SECTION ROOM: All room settings:
 var dubBot = {
   room: {
-	users: [],
-	usersImport: [],
 	debug: true,
 	afkList: [],
 	mutedUsers: [],
@@ -140,6 +138,7 @@ String.prototype.splitBetween = function (a, b) {
 
 //SECTION USERS: All User data
 var USERS = {
+  usersImport: [],
   users: [],
   loadUserInterval: null,
   getLastActivity: function (user) {
@@ -195,18 +194,18 @@ var USERS = {
 	},
 	importUserList: function() { // userlistimport << command
 		try {
-			dubBot.room.usersImport = [];
+			USERS.usersImport = [];
 			$.get(CONST.userlistLink, function (json) {
 				if (json !== null && typeof json !== "undefined") {
 					UTIL.logObject(json, "USR");
 					for (var idx in json) {
 						var newUser = json[idx];
-						//dubBot.room.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
-						dubBot.room.usersImport.push(newUser);
+						//USERS.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
+						USERS.usersImport.push(newUser);
 					}
 				}
 			});
-			botDebug.debugMessage(true, "LIST COUNT: " + dubBot.room.usersImport.length);
+			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
 		}
 		catch(err) { UTIL.logException("importBlackList: " + err.message); }
 	},
@@ -473,12 +472,15 @@ var SETTINGS = {
 	},
 
     retrieveSettings: function () {
+	  try {
         var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
         if (settings !== null) {
             for (var prop in settings) {
                 SETTINGS.settings[prop] = settings[prop];
             }
         }
+	  }
+      catch(err) { UTIL.logException("retrieveSettings: " + err.message); }
     },
 
     retrieveFromStorage: function () {
@@ -488,7 +490,8 @@ var SETTINGS = {
         else {
             var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
             var room = JSON.parse(localStorage.getItem("dubBotRoom"));
-            botDebug.debugMessage(true, "room.users.length: " + room.users.length);
+            USERS.users = JSON.parse(localStorage.getItem("dubBotUsers"));
+            botDebug.debugMessage(true, "users.length: " + USERS.users.length);
             if (localStorage.getItem("BLACKLIST") !== null) {
               var myBLList = localStorage["BLACKLIST"];
               var myBLIDs = localStorage["BLACKLISTIDS"];
@@ -506,9 +509,7 @@ var SETTINGS = {
             dubBot.room.blacklistLoaded = true;
             botDebug.debugMessage(true, "BL LOADED: TRUE");
             var elapsed = Date.now() - JSON.parse(info).time;
-            dubBot.room.users = room.users;
             dubBot.room.historyList = room.historyList;
-            botDebug.debugMessage(true, "dubBot.room.users.length: " + dubBot.room.users.length + " TIME: " + JSON.parse(info).time);
             if ((elapsed < 1 * 60 * 60 * 1000)) {
                 API.chatLog(botChat.getChatMessage("retrievingdata"));
                 for (var prop in settings) {
@@ -532,13 +533,15 @@ var SETTINGS = {
         botDebug.debugMessage(true, "START: storeToStorage");
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
         localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
+		localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
+
         botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
             version: botVar.version
         };
-        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + dubBot.room.users.length + " TIME: " + dubBotStorageInfo.time);
+        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + USERS.users.length + " TIME: " + dubBotStorageInfo.time);
         localStorage.setItem("dubBotStorageInfo", JSON.stringify(dubBotStorageInfo));
         }
         catch(err) {
@@ -601,15 +604,15 @@ var COMMANDS = {
 		try {
 			var cmd;
 		botDebug.debugMessage(false, "STEP 201");
-			if (chat.message.substring(0,1) === CONST.commandLiteral) {
-				var space = chat.message.indexOf(' ');
-				if (space === -1) {
-					cmd = chat.message.toLowerCase();
-				}
-				else cmd = chat.message.substring(0, space).toLowerCase();
+			if (chat.message.substring(0,1) != CONST.commandLiteral) return false;
+			
+			var space = chat.message.indexOf(' ');
+			if (space === -1) {
+				cmd = chat.message.toLowerCase();
 			}
-			else return false;
-		botDebug.debugMessage(false, "STEP 202");
+			else cmd = chat.message.substring(0, space).toLowerCase();
+
+			botDebug.debugMessage(false, "STEP 202");
 			var userPerm = API.getPermission(chat.uid);
 			if (chat.message.toLowerCase() !== ".join" && chat.message.toLowerCase() !== ".leave" && (!TASTY.bopCommand(cmd))) {
 				if (userPerm === 0 && !botVar.room.usercommand) return void (0);
@@ -1511,7 +1514,8 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands'];
+					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+					  'hellyeah','420','toke','fatty','blunt','joint'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -2385,7 +2389,7 @@ var AI = {
     if (chatmsg.indexOf("FUCKYOULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("SCREWULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("SCREWYOULARRY") > -1) fuComment = AI.fuComment();
-    if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 250);
+    if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 100);
     }
     catch(err) {
       UTIL.logException("larryAI: " + err.message);
@@ -2917,6 +2921,7 @@ var CONST = {
                 "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you.",
                 "Did your parents have any children that lived %%FU%%?",
                 "OK, but I'll be on the top %%FU%%.",
+				"%%FU%%, I fart in your general direction! Your mother was a hamster and your father smelt of elderberries!",
                 "Do you kiss your mother with that mouth %%FU%%.",
                 "%%FU%%, You daydreaming again, sweetheart?",
                 "Get in the queue %%FU%%.",
@@ -3132,7 +3137,8 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands'],
+                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+                          'hellyeah'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3387,7 +3393,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        USERS.users = dubBot.room.usersImport;
+                        USERS.users = USERS.usersImport;
                     }
                     catch (err) { UTIL.logException("userlistxfer: " + err.message); }
                 }
@@ -3400,7 +3406,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        API.logInfo("I've got " + dubBot.room.usersImport.length + " users in the new list.");
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         setTimeout(function () {
                             API.logInfo("I've got " + USERS.users.length + " users in the old list.")
                         }, 1 * 1000);
@@ -3417,7 +3423,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
                         USERS.importUserList();
-                        API.logInfo("I've got " + dubBot.room.usersImport.length + " users in the new list.");
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
                         if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
@@ -3460,6 +3466,21 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("whycommand: " + err.message);
+                    }
+                }
+            },
+            roomCommand: {
+                command: 'room',
+                rank: 'bouncer',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Hey @bcav wanna get a hotel room together?");
+                    }
+                    catch(err) {
+                        UTIL.logException("roomcommand: " + err.message);
                     }
                 }
             },
@@ -6117,6 +6138,7 @@ if (!window.APIisRunning) {
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 //TODO:
+// • Test .larry, <<question>>
 // • /me comments to not trigger AI detection
 // • USER PERMISSIONS
 // • Load UID from chat and update/remove users as needed
