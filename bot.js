@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002",
+  version: "Version 1.01.0003",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -62,8 +62,6 @@ var botVar = {
 //SECTION ROOM: All room settings:
 var dubBot = {
   room: {
-	users: [],
-	usersImport: [],
 	debug: true,
 	afkList: [],
 	mutedUsers: [],
@@ -140,6 +138,7 @@ String.prototype.splitBetween = function (a, b) {
 
 //SECTION USERS: All User data
 var USERS = {
+  usersImport: [],
   users: [],
   loadUserInterval: null,
   getLastActivity: function (user) {
@@ -178,6 +177,7 @@ var USERS = {
   },
 
   lookupUserName: function (username) {
+    botDebug.debugMessage(false, "username: [" + username + "]");
 	for (var i = 0; i < USERS.users.length; i++) {
 	  if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
 	}
@@ -194,18 +194,18 @@ var USERS = {
 	},
 	importUserList: function() { // userlistimport << command
 		try {
-			dubBot.room.usersImport = [];
+			USERS.usersImport = [];
 			$.get(CONST.userlistLink, function (json) {
 				if (json !== null && typeof json !== "undefined") {
 					UTIL.logObject(json, "USR");
 					for (var idx in json) {
 						var newUser = json[idx];
-						//dubBot.room.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
-						dubBot.room.usersImport.push(newUser);
+						//USERS.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
+						USERS.usersImport.push(newUser);
 					}
 				}
 			});
-			botDebug.debugMessage(true, "LIST COUNT: " + dubBot.room.usersImport.length);
+			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
 		}
 		catch(err) { UTIL.logException("importBlackList: " + err.message); }
 	},
@@ -397,7 +397,7 @@ var USERS = {
 		// clearInterval(USERS.loadUserInterval);
         if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
-		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
+		botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
 		roomUser.userRole = userRole;
 		if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
 		  API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
@@ -461,7 +461,7 @@ var SETTINGS = {
 		opLink: null,
 		rulesLink: "http://tinyurl.com/TastyTunesRules",
 		themeLink: null,
-		fbLink: null,
+		fbLink: "https://www.facebook.com/groups/226222424234128/",
 		youtubeLink: null,
 		website: null,
 		intervalMessages: [],
@@ -472,13 +472,23 @@ var SETTINGS = {
 	},
 
     retrieveSettings: function () {
+	  try {
         var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
         if (settings !== null) {
             for (var prop in settings) {
                 SETTINGS.settings[prop] = settings[prop];
             }
         }
+	  }
+      catch(err) { UTIL.logException("retrieveSettings: " + err.message); }
     },
+
+//[DEBUG]: STORED DATA: {"debug":true,"afkList":[],"mutedUsers":[],"bannedUsers":[],"skippable":true,"usercommand":true,"allcommand":true,"blacklistInterval":null,"queueing":0,"queueable":true,"currentDJID":null,"currentMediaCid":999,"currentMediaStart":999,"historyList":[],"cycleTimer":85,"queue":{"id":[],"position":[]},"newBlacklist":[],"newBlacklistIDs":[],"blacklistLoaded":true} botx.js:1553:5
+//[DEBUG]: DONE: storeToStorage - UserCnt: 2 TIME: 1448225383912 botx.js:1553:5
+//[DEBUG]: username: [levis_homer] botx.js:1553:5
+//[DEBUG]: USERS IN THE ROOM: levis_homer botx.js:1553:5
+//[DEBUG]: username: [dexter_nix] botx.js:1553:5
+//[DEBUG]: USERS IN THE ROOM: dexter_nix botx.js:1553:5
 
     retrieveFromStorage: function () {
         try {
@@ -487,7 +497,8 @@ var SETTINGS = {
         else {
             var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
             var room = JSON.parse(localStorage.getItem("dubBotRoom"));
-            botDebug.debugMessage(true, "room.users.length: " + room.users.length);
+            USERS.users = JSON.parse(localStorage.getItem("dubBotUsers"));
+            botDebug.debugMessage(true, "users.length: " + USERS.users.length);
             if (localStorage.getItem("BLACKLIST") !== null) {
               var myBLList = localStorage["BLACKLIST"];
               var myBLIDs = localStorage["BLACKLISTIDS"];
@@ -505,9 +516,7 @@ var SETTINGS = {
             dubBot.room.blacklistLoaded = true;
             botDebug.debugMessage(true, "BL LOADED: TRUE");
             var elapsed = Date.now() - JSON.parse(info).time;
-            dubBot.room.users = room.users;
             dubBot.room.historyList = room.historyList;
-            botDebug.debugMessage(true, "dubBot.room.users.length: " + dubBot.room.users.length + " TIME: " + JSON.parse(info).time);
             if ((elapsed < 1 * 60 * 60 * 1000)) {
                 API.chatLog(botChat.getChatMessage("retrievingdata"));
                 for (var prop in settings) {
@@ -531,13 +540,16 @@ var SETTINGS = {
         botDebug.debugMessage(true, "START: storeToStorage");
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
         localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
+		localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
+
         botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
+		botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
             version: botVar.version
         };
-        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + dubBot.room.users.length + " TIME: " + dubBotStorageInfo.time);
+        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + USERS.users.length + " TIME: " + dubBotStorageInfo.time);
         localStorage.setItem("dubBotStorageInfo", JSON.stringify(dubBotStorageInfo));
         }
         catch(err) {
@@ -600,15 +612,15 @@ var COMMANDS = {
 		try {
 			var cmd;
 		botDebug.debugMessage(false, "STEP 201");
-			if (chat.message.substring(0,1) === CONST.commandLiteral) {
-				var space = chat.message.indexOf(' ');
-				if (space === -1) {
-					cmd = chat.message.toLowerCase();
-				}
-				else cmd = chat.message.substring(0, space).toLowerCase();
+			if (chat.message.substring(0,1) != CONST.commandLiteral) return false;
+			
+			var space = chat.message.indexOf(' ');
+			if (space === -1) {
+				cmd = chat.message.toLowerCase();
 			}
-			else return false;
-		botDebug.debugMessage(false, "STEP 202");
+			else cmd = chat.message.substring(0, space).toLowerCase();
+
+			botDebug.debugMessage(false, "STEP 202");
 			var userPerm = API.getPermission(chat.uid);
 			if (chat.message.toLowerCase() !== ".join" && chat.message.toLowerCase() !== ".leave" && (!TASTY.bopCommand(cmd))) {
 				if (userPerm === 0 && !botVar.room.usercommand) return void (0);
@@ -1067,18 +1079,30 @@ var botChat = {
 	  COMMANDS.checkCommands(chat);
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
   },
+  getChatId: function(className) {
+    try{
+	  // SAMPLE:
+	  //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+	  //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
+	  var  instr 
+      var idx = className.indexOf("chat-id-");
+	  if (idx <= 0) return null;
+	  return className.substring(idx + 8)
+    } catch (err) { UTIL.logException("getChatId: " + err.message); }
+  },
   processChatItems: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;                // ignore empty items
-      botDebug.debugMessage(false, "Item ID: " + liItem.id);
-      if (liItem.id.length < 10) return;                        // ignore chat without IDs
-      var itemHistory = botChat.findChatItem(liItem.id);
-      botDebug.debugMessage(false, "Hist Item count: " + itemHistory.chatCount);
+	  var chatId = botChat.getChatId(liItem.className);
+      botDebug.debugMessage(true, "CHAT - Item ID: " + chatId);
+      if (chatId.length < 10) return;                        // ignore chat without IDs
+      var itemHistory = botChat.findChatItem(chatId);
+      botDebug.debugMessage(true, "CHAT - Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
-      botDebug.debugMessage(false, "chat Items count: " + chatItems.length);
+      botDebug.debugMessage(true, "CHAT - Items count: " + chatItems.length);
       if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-      botDebug.debugMessage(false, "User: " + username);
+      botDebug.debugMessage(true, "CHAT - User: " + username);
 	  var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
 	  
@@ -1087,11 +1111,10 @@ var botChat = {
           var node = chatItems[i];
           var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
           chatMsg = chatMsg.replace(username, "");
+          botDebug.debugMessage(true, "CHAT - MSG: " + chatMsg);
           botChat.processChatItem(chatMsg, username);
       }
-      } catch (err) {
-        UTIL.logException("processChatItems: " + err.message);
-      }
+      } catch (err) { UTIL.logException("processChatItems: " + err.message); }
     },
   chatMessages: []
 };
@@ -1510,7 +1533,8 @@ var TASTY = {
 					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'];
+					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+					  'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -1527,7 +1551,7 @@ var TASTY = {
 			var arrayCount = CONST.tastyCommentArray.length;
 			var arrayID = Math.floor(Math.random() * arrayCount);
 			if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
-			var tastyCmt = "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
+			var tastyCmt = "[ " + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
 			var djName = API.currentDjName();
 			if (djName.length > 0) tastyCmt += " @"  + djName;
 			return tastyCmt;
@@ -1538,7 +1562,7 @@ var TASTY = {
 //SECTION Debug: All Debug functionality:
 var botDebug = {
   settings: {
-    debugHighLevel: false,
+    debugHighLevel: true,
     debugLowLevel: false
   },
 
@@ -2305,6 +2329,7 @@ var AI = {
     if (chatmsg.indexOf("MISSYOULITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("MISSYALITTLEBUDDY") > -1) fuComment = "I'll miss you too %%FU%%!";
     if (chatmsg.indexOf("ILOVEYOULARRY") > -1) fuComment = " :kiss: %%FU%%";
+    if (chatmsg.indexOf("ILOVELARRY") > -1) fuComment = " :kiss: %%FU%%";
     if (chatmsg.indexOf("IHATEYOULARRY") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("LARRYIHATEYOU") > -1) fuComment = "I don't exactly hate you %%FU%%, but if you were on fire and I had water, I'd drink it!";
     if (chatmsg.indexOf("HATESLARRY") > -1) fuComment = "Well rest assured the feeling is mutual %%FU%%!  :kiss:";
@@ -2317,6 +2342,7 @@ var AI = {
     if (chatmsg.indexOf("LARRYHATESME") > -1) fuComment = "If you were you, wouldn't you hate you too %%FU%%?";
     if (chatmsg.indexOf("LARRYLIKESME") > -1) fuComment = "I tolerate you %%FU%%. It's not the same thing.";
     if (chatmsg.indexOf("LARRYLOVESME") > -1) fuComment = "BAHAHAHA, You must be new around here %%FU%%?  You're killin me!!";
+    if (chatmsg.indexOf("LARRYUNDERSTANSSME") > -1) fuComment = "BAHAHAHA, I'm merely acting %%FU%%";
     if (chatmsg.indexOf("DOYOUHATEMELARRY") > -1) fuComment = "Does the tin-man have a sheet metal cock %%FU%%?";
     if (chatmsg === "LARRY?") fuComment = "WHAT??!?!??";
     if (chatmsg.indexOf("LARRYSTILLHATESME") > -1) fuComment = "You make it too easy %%FU%%!";
@@ -2382,7 +2408,7 @@ var AI = {
     if (chatmsg.indexOf("FUCKYOULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("SCREWULARRY") > -1) fuComment = AI.fuComment();
     if (chatmsg.indexOf("SCREWYOULARRY") > -1) fuComment = AI.fuComment();
-    if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 250);
+    if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 100);
     }
     catch(err) {
       UTIL.logException("larryAI: " + err.message);
@@ -2738,11 +2764,14 @@ var API = {
     },
     EVENT_NEW_CHAT: function() {
       try {
+	    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li").length;
+		botDebug.debugMessage(true, "============================= NEW CHAT =============================");
         var mainChat = document.getElementsByClassName("chat-main");
         var LiItems = mainChat[0].getElementsByTagName("li");
 		var startCounter = 0;
 		if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
 		botChat.lastMessageCount = LiItems.length;
+		botDebug.debugMessage(true, "CHAT - LOOP: " + startCounter + " - " + LiItems.length);
         for (var i = startCounter; i < LiItems.length; i++) {
           botChat.processChatItems(LiItems[i]);
         }
@@ -2914,6 +2943,7 @@ var CONST = {
                 "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you.",
                 "Did your parents have any children that lived %%FU%%?",
                 "OK, but I'll be on the top %%FU%%.",
+				"%%FU%%, I fart in your general direction! Your mother was a hamster and your father smelt of elderberries!",
                 "Do you kiss your mother with that mouth %%FU%%.",
                 "%%FU%%, You daydreaming again, sweetheart?",
                 "Get in the queue %%FU%%.",
@@ -3129,7 +3159,8 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge'],
+                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+                          'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3289,6 +3320,9 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         if(chat.message.length === cmd.length) return API.sendChat('No user specified.');
+						botDebug.debugMessage(true, "============================= MEH? =============================");
+						botDebug.debugMessage(true, "cmd: " + cmd);
+						botDebug.debugMessage(true, "chat.message: " + chat.message);
                         var name = chat.message.substring(cmd.length + 2);
                         var roomUser = USERS.lookupUserName(name);
                         if(typeof roomUser === 'boolean') return API.sendChat('Invalid user specified.');
@@ -3381,7 +3415,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        USERS.users = dubBot.room.usersImport;
+                        USERS.users = USERS.usersImport;
                     }
                     catch (err) { UTIL.logException("userlistxfer: " + err.message); }
                 }
@@ -3394,7 +3428,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        API.logInfo("I've got " + dubBot.room.usersImport.length + " users in the new list.");
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         setTimeout(function () {
                             API.logInfo("I've got " + USERS.users.length + " users in the old list.")
                         }, 1 * 1000);
@@ -3411,7 +3445,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
                         USERS.importUserList();
-                        API.logInfo("I've got " + dubBot.room.usersImport.length + " users in the new list.");
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
                         if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
@@ -3454,6 +3488,21 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("whycommand: " + err.message);
+                    }
+                }
+            },
+            roomCommand: {
+                command: 'room',
+                rank: 'bouncer',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Hey @bcav wanna get a hotel room together?");
+                    }
+                    catch(err) {
+                        UTIL.logException("roomcommand: " + err.message);
                     }
                 }
             },
@@ -3559,7 +3608,83 @@ var BOTCOMMANDS = {
               }
             },
 
-            /*
+            commandsCommand: {
+                command: 'commands',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+				  try {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    API.sendChat(botChat.subChat(botChat.getChatMessage("commandslink"), {botname: botVar.botName, link: CONST.cmdLink}));
+				  }
+                  catch (err) { UTIL.logException("cookieCommand: " + err.message); }
+                }
+            },
+
+            cookieCommand: {
+                command: 'cookie',
+                rank: 'user',
+                type: 'startsWith',
+                cookies: ['has given you a chocolate chip cookie!',
+                    'has given you a soft homemade oatmeal cookie!',
+                    'has given you a plain, dry, old cookie. It was the last one in the bag. Gross.',
+                    'gives you a sugar cookie. What, no frosting and sprinkles? 0/10 would not touch.',
+                    'gives you a chocolate chip cookie. Oh wait, those are raisins. Bleck!',
+                    'gives you an enormous cookie. Poking it gives you more cookies. Weird.',
+                    'gives you a fortune cookie. It reads "Why aren\'t you working on any projects?"',
+                    'gives you a fortune cookie. It reads "Give that special someone a compliment"',
+                    'gives you a fortune cookie. It reads "Take a risk!"',
+                    'gives you a fortune cookie. It reads "Go outside."',
+                    'gives you a fortune cookie. It reads "Don\'t forget to eat your veggies!"',
+                    'gives you a fortune cookie. It reads "Do you even lift?"',
+                    'gives you a fortune cookie. It reads "m808 pls"',
+                    'gives you a fortune cookie. It reads "If you move your hips, you\'ll get all the ladies."',
+                    'gives you a fortune cookie. It reads "I love you."',
+                    'gives you a Golden Cookie. You can\'t eat it because it is made of gold. Dammit.',
+                    'gives you an Oreo cookie with a glass of milk!',
+                    'gives you a rainbow cookie made with love :heart:',
+                    'gives you an old cookie that was left out in the rain, it\'s moldy.',
+                    'bakes you fresh cookies, it smells amazing.'
+                ],
+                getCookie: function () {
+                    var c = Math.floor(Math.random() * this.cookies.length);
+                    return this.cookies[c];
+                },
+                functionality: function (chat, cmd) {
+				  try {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					var msg = chat.message;
+					var space = msg.indexOf(' ');
+					if (space === -1) return API.sendChat(botChat.getChatMessage("eatcookie"));
+					var name = msg.substring(space + 2);
+					var user = USERS.lookupUserName(name);
+					if (user === false || !user.inRoom)
+						return API.sendChat(botChat.subChat(botChat.getChatMessage("nousercookie"), {name: name}));
+					if (user.username === chat.un) 
+						return API.sendChat(botChat.subChat(botChat.getChatMessage("selfcookie"), {name: name}));
+					return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
+				  }
+                  catch (err) { UTIL.logException("cookieCommand: " + err.message); }
+                }
+            },
+
+            fbCommand: {
+                command: 'fb',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (typeof SETTINGS.settings.fbLink === "string")
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("facebook"), {link: SETTINGS.settings.fbLink}));
+                    }
+                }
+            },
+
+            /* basic
             activeCommand: {
                 command: 'active',
                 rank: 'bouncer',
@@ -3707,9 +3832,7 @@ var BOTCOMMANDS = {
                         if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         API.moderateBanUser(user.id, 1, API.BAN.PERMA);
                     }
-                    catch (err) {
-                        UTIL.logException("trollCommand: " + err.message);
-                    }
+                    catch (err) { UTIL.logException("trollCommand: " + err.message); }
                 }
             },
             afkresetCommand: {
@@ -3852,76 +3975,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            commandsCommand: {
-                command: 'commands',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("commandslink"), {botname: botVar.botName, link: CONST.cmdLink}));
-                    }
-                }
-            },
-
-            cookieCommand: {
-                command: 'cookie',
-                rank: 'user',
-                type: 'startsWith',
-                cookies: ['has given you a chocolate chip cookie!',
-                    'has given you a soft homemade oatmeal cookie!',
-                    'has given you a plain, dry, old cookie. It was the last one in the bag. Gross.',
-                    'gives you a sugar cookie. What, no frosting and sprinkles? 0/10 would not touch.',
-                    'gives you a chocolate chip cookie. Oh wait, those are raisins. Bleck!',
-                    'gives you an enormous cookie. Poking it gives you more cookies. Weird.',
-                    'gives you a fortune cookie. It reads "Why aren\'t you working on any projects?"',
-                    'gives you a fortune cookie. It reads "Give that special someone a compliment"',
-                    'gives you a fortune cookie. It reads "Take a risk!"',
-                    'gives you a fortune cookie. It reads "Go outside."',
-                    'gives you a fortune cookie. It reads "Don\'t forget to eat your veggies!"',
-                    'gives you a fortune cookie. It reads "Do you even lift?"',
-                    'gives you a fortune cookie. It reads "m808 pls"',
-                    'gives you a fortune cookie. It reads "If you move your hips, you\'ll get all the ladies."',
-                    'gives you a fortune cookie. It reads "I love you."',
-                    'gives you a Golden Cookie. You can\'t eat it because it is made of gold. Dammit.',
-                    'gives you an Oreo cookie with a glass of milk!',
-                    'gives you a rainbow cookie made with love :heart:',
-                    'gives you an old cookie that was left out in the rain, it\'s moldy.',
-                    'bakes you fresh cookies, it smells amazing.'
-                ],
-                getCookie: function () {
-                    var c = Math.floor(Math.random() * this.cookies.length);
-                    return this.cookies[c];
-                },
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-
-                        var space = msg.indexOf(' ');
-                        if (space === -1) {
-                            API.sendChat(botChat.getChatMessage("eatcookie"));
-                            return false;
-                        }
-                        else {
-                            var name = msg.substring(space + 2);
-                            var user = USERS.lookupUserName(name);
-                            if (user === false || !user.inRoom) {
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("nousercookie"), {name: name}));
-                            }
-                            else if (user.username === chat.un) {
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("selfcookie"), {name: name}));
-                            }
-                            else {
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
-                            }
-                        }
-                    }
-                }
-            },
-
             voteskipCommand: {
                 command: 'voteskip',
                 rank: 'manager',
@@ -4026,20 +4079,6 @@ var BOTCOMMANDS = {
                         var estimateMS = ((pos * 4 * 60) + timeRemaining) * 1000;
                         var estimateString = UTIL.msToStr(estimateMS);
                         API.sendChat(botChat.subChat(botChat.getChatMessage("eta"), {name: name, time: estimateString}));
-                    }
-                }
-            },
-
-            fbCommand: {
-                command: 'fb',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        if (typeof SETTINGS.settings.fbLink === "string")
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("facebook"), {link: SETTINGS.settings.fbLink}));
                     }
                 }
             },
@@ -6121,10 +6160,14 @@ if (!window.APIisRunning) {
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 //TODO:
-// • tasty comments too long!
+// • Test .larry, <<question>>
+// • /me comments to not trigger AI detection
+// • USER PERMISSIONS
 // • Load UID from chat and update/remove users as needed
 // • roll/tasty stats
 // • Save/Load users
+// • afk Monitor
+// • .nsfw
 // • Skip songs played in last 90 mins
 // • Delete comments
 // • ban list, 
@@ -6137,3 +6180,4 @@ if (!window.APIisRunning) {
 // • song stat
 // • Skip if > 8 Min
 // • Skip if 4 Mehs
+// • tasty comments too long!
