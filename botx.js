@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002.6902",
+  version: "Version 1.01.0002.6903",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -177,7 +177,7 @@ var USERS = {
   },
 
   lookupUserName: function (username) {
-    botDebug.debugMessage(true, "username: [" + username + "]");
+    botDebug.debugMessage(false, "username: [" + username + "]");
 	for (var i = 0; i < USERS.users.length; i++) {
 	  if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
 	}
@@ -397,7 +397,7 @@ var USERS = {
 		// clearInterval(USERS.loadUserInterval);
         if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
 		roomUser.inRoom = true;
-		botDebug.debugMessage(true, "USERS IN THE ROOM: " + roomUser.username);
+		botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
 		roomUser.userRole = userRole;
 		if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
 		  API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
@@ -483,6 +483,13 @@ var SETTINGS = {
       catch(err) { UTIL.logException("retrieveSettings: " + err.message); }
     },
 
+//[DEBUG]: STORED DATA: {"debug":true,"afkList":[],"mutedUsers":[],"bannedUsers":[],"skippable":true,"usercommand":true,"allcommand":true,"blacklistInterval":null,"queueing":0,"queueable":true,"currentDJID":null,"currentMediaCid":999,"currentMediaStart":999,"historyList":[],"cycleTimer":85,"queue":{"id":[],"position":[]},"newBlacklist":[],"newBlacklistIDs":[],"blacklistLoaded":true} botx.js:1553:5
+[DEBUG]: DONE: storeToStorage - UserCnt: 2 TIME: 1448225383912 botx.js:1553:5
+[DEBUG]: username: [levis_homer] botx.js:1553:5
+[DEBUG]: USERS IN THE ROOM: levis_homer botx.js:1553:5
+[DEBUG]: username: [dexter_nix] botx.js:1553:5
+[DEBUG]: USERS IN THE ROOM: dexter_nix botx.js:1553:5
+
     retrieveFromStorage: function () {
         try {
         var info = localStorage.getItem("dubBotStorageInfo");
@@ -536,6 +543,7 @@ var SETTINGS = {
 		localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
 
         botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
+		botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
@@ -1074,15 +1082,15 @@ var botChat = {
   processChatItems: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;                // ignore empty items
-      botDebug.debugMessage(false, "Item ID: " + liItem.id);
+      botDebug.debugMessage(true, "CHAT - Item ID: " + liItem.id);
       if (liItem.id.length < 10) return;                        // ignore chat without IDs
       var itemHistory = botChat.findChatItem(liItem.id);
-      botDebug.debugMessage(false, "Hist Item count: " + itemHistory.chatCount);
+      botDebug.debugMessage(true, "CHAT - Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
-      botDebug.debugMessage(false, "chat Items count: " + chatItems.length);
+      botDebug.debugMessage(true, "CHAT - Items count: " + chatItems.length);
       if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-      botDebug.debugMessage(false, "User: " + username);
+      botDebug.debugMessage(true, "CHAT - User: " + username);
 	  var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
 	  
@@ -1091,6 +1099,7 @@ var botChat = {
           var node = chatItems[i];
           var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
           chatMsg = chatMsg.replace(username, "");
+          botDebug.debugMessage(true, "CHAT - MSG: " + chatMsg);
           botChat.processChatItem(chatMsg, username);
       }
       } catch (err) {
@@ -1515,7 +1524,7 @@ var TASTY = {
 					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
 					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
 					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-					  'hellyeah','420','toke','fatty','blunt','joint'];
+					  'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly'];
 			// If a command if passed in validate it and return true if it is a Tasty command:
 			if (cmd.length > 0) {
 				if (commandList.indexOf(cmd) < 0) return true;
@@ -2745,11 +2754,13 @@ var API = {
     },
     EVENT_NEW_CHAT: function() {
       try {
+		botDebug.debugMessage(true, "============================= NEW CHAT =============================");
         var mainChat = document.getElementsByClassName("chat-main");
         var LiItems = mainChat[0].getElementsByTagName("li");
 		var startCounter = 0;
 		if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
 		botChat.lastMessageCount = LiItems.length;
+		botDebug.debugMessage(true, "CHAT - LOOP: " + startCounter + " - " + LiItems.length);
         for (var i = startCounter; i < LiItems.length; i++) {
           botChat.processChatItems(LiItems[i]);
         }
@@ -3138,7 +3149,7 @@ var BOTCOMMANDS = {
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-                          'hellyeah'],
+                          'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
