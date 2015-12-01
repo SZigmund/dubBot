@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002.6903",
+  version: "Version 1.01.0002.6904",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -484,11 +484,11 @@ var SETTINGS = {
     },
 
 //[DEBUG]: STORED DATA: {"debug":true,"afkList":[],"mutedUsers":[],"bannedUsers":[],"skippable":true,"usercommand":true,"allcommand":true,"blacklistInterval":null,"queueing":0,"queueable":true,"currentDJID":null,"currentMediaCid":999,"currentMediaStart":999,"historyList":[],"cycleTimer":85,"queue":{"id":[],"position":[]},"newBlacklist":[],"newBlacklistIDs":[],"blacklistLoaded":true} botx.js:1553:5
-[DEBUG]: DONE: storeToStorage - UserCnt: 2 TIME: 1448225383912 botx.js:1553:5
-[DEBUG]: username: [levis_homer] botx.js:1553:5
-[DEBUG]: USERS IN THE ROOM: levis_homer botx.js:1553:5
-[DEBUG]: username: [dexter_nix] botx.js:1553:5
-[DEBUG]: USERS IN THE ROOM: dexter_nix botx.js:1553:5
+//[DEBUG]: DONE: storeToStorage - UserCnt: 2 TIME: 1448225383912 botx.js:1553:5
+//[DEBUG]: username: [levis_homer] botx.js:1553:5
+//[DEBUG]: USERS IN THE ROOM: levis_homer botx.js:1553:5
+//[DEBUG]: username: [dexter_nix] botx.js:1553:5
+//[DEBUG]: USERS IN THE ROOM: dexter_nix botx.js:1553:5
 
     retrieveFromStorage: function () {
         try {
