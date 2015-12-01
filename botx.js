@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002.6904",
+  version: "Version 1.01.0002.6905",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1079,12 +1079,24 @@ var botChat = {
 	  COMMANDS.checkCommands(chat);
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
   },
+  getChatId: function(className) {
+    try{
+	  // SAMPLE:
+	  //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+	  //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
+	  var  instr 
+      var idx = className.indexOf("chat-id-");
+	  if (idx <= 0) return null;
+	  return className.substring(idx + 8)
+    } catch (err) { UTIL.logException("getChatId: " + err.message); }
+  },
   processChatItems: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;                // ignore empty items
-      botDebug.debugMessage(true, "CHAT - Item ID: " + liItem.id);
-      if (liItem.id.length < 10) return;                        // ignore chat without IDs
-      var itemHistory = botChat.findChatItem(liItem.id);
+	  var chatId = getChatId(liItem.className);
+      botDebug.debugMessage(true, "CHAT - Item ID: " + chatId);
+      if (chatId.length < 10) return;                        // ignore chat without IDs
+      var itemHistory = botChat.findChatItem(chatId);
       botDebug.debugMessage(true, "CHAT - Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
       botDebug.debugMessage(true, "CHAT - Items count: " + chatItems.length);
@@ -1102,9 +1114,7 @@ var botChat = {
           botDebug.debugMessage(true, "CHAT - MSG: " + chatMsg);
           botChat.processChatItem(chatMsg, username);
       }
-      } catch (err) {
-        UTIL.logException("processChatItems: " + err.message);
-      }
+      } catch (err) { UTIL.logException("processChatItems: " + err.message); }
     },
   chatMessages: []
 };
@@ -2754,6 +2764,7 @@ var API = {
     },
     EVENT_NEW_CHAT: function() {
       try {
+	    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li").length;
 		botDebug.debugMessage(true, "============================= NEW CHAT =============================");
         var mainChat = document.getElementsByClassName("chat-main");
         var LiItems = mainChat[0].getElementsByTagName("li");
