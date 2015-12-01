@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0002.6905",
+  version: "Version 1.01.0002.6906",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1093,7 +1093,7 @@ var botChat = {
   processChatItems: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;                // ignore empty items
-	  var chatId = getChatId(liItem.className);
+	  var chatId = botChat.getChatId(liItem.className);
       botDebug.debugMessage(true, "CHAT - Item ID: " + chatId);
       if (chatId.length < 10) return;                        // ignore chat without IDs
       var itemHistory = botChat.findChatItem(chatId);
