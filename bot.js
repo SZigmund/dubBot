@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version 1.01.0004",
+  version: "Version  1.01.0005",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -29,28 +29,28 @@ var botVar = {
     autoskipTimer: null,
     allcommand: true,
     usercommand: true,
-	mutedUsers: [],
-	voteSkipEnabled: true,
-	voteSkipLimit: 4,
+    mutedUsers: [],
+    voteSkipEnabled: true,
+    voteSkipLimit: 4,
     etaRestriction: false,
     filterChat: true,
-	currentMehCount: 0,
-	botRoomUrl: "",
-	roomstats: {
-		accountName: null,
-		totalWoots: 0,
-		totalCurates: 0,
-		totalMehs: 0,
-		tastyCount: 0,
-		launchTime: null,
-		songCount: 0,
-		chatmessagescnt: 0
-	},
-	repeatSongs: true,
-	repeatSongTime: 180,
-	maximumDc: 90,
-	maximumDcOutOfRoom: 10,
-	commandCooldown: 30
+    currentMehCount: 0,
+    botRoomUrl: "",
+    roomstats: {
+        accountName: null,
+        totalWoots: 0,
+        totalCurates: 0,
+        totalMehs: 0,
+        tastyCount: 0,
+        launchTime: null,
+        songCount: 0,
+        chatmessagescnt: 0
+    },
+    repeatSongs: true,
+    repeatSongTime: 180,
+    maximumDc: 90,
+    maximumDcOutOfRoom: 10,
+    commandCooldown: 30
   },
   chatHistoryList: [],
   chatHistory: function (id, count) {
@@ -62,78 +62,78 @@ var botVar = {
 //SECTION ROOM: All room settings:
 var dubBot = {
   room: {
-	debug: true,
-	afkList: [],
-	mutedUsers: [],
-	bannedUsers: [],
-	skippable: true,
-	usercommand: true,
-	allcommand: true,
-	blacklistInterval: null,
-	queueing: 0,
-	queueable: true,
-	currentDJID: null,
-	currentMediaCid: 999,
-	currentMediaStart: 999,
-	historyList: [],
-	cycleTimer: setTimeout(function () {
-	}, 1),
-	queue: {
-		id: [],
-		position: []
-	},
-	newBlacklist: [],
-	newBlacklistIDs: [],
-	blacklistLoaded: false,
+    debug: true,
+    afkList: [],
+    mutedUsers: [],
+    bannedUsers: [],
+    skippable: true,
+    usercommand: true,
+    allcommand: true,
+    blacklistInterval: null,
+    queueing: 0,
+    queueable: true,
+    currentDJID: null,
+    currentMediaCid: 999,
+    currentMediaStart: 999,
+    historyList: [],
+    cycleTimer: setTimeout(function () {
+    }, 1),
+    queue: {
+        id: [],
+        position: []
+    },
+    newBlacklist: [],
+    newBlacklistIDs: [],
+    blacklistLoaded: false,
   },
 
   validateCurrentSong: function () {
     try {
-	  botVar.room.currentMehCount = 0;
-  	  botVar.currentSong = API.currentSongName();
-	  botVar.currentDJ   = API.currentDjName();
-	  
-	  botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
-	  if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
-		API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
-		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
-	  }
-	  //todoer check blacklist
-	}
-	  catch(err) { UTIL.logException("validateCurrentSong: " + err.message); }
+      botVar.room.currentMehCount = 0;
+        botVar.currentSong = API.currentSongName();
+      botVar.currentDJ   = API.currentDjName();
+      
+      botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
+      if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+        API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
+        dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
+      }
+      //todoer check blacklist
+    }
+      catch(err) { UTIL.logException("validateCurrentSong: " + err.message); }
   },
 
   skipBadSong: function (userName, skippedBy, reason) {
     try {
-	  API.chatLog("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
-	  var tooMany = false;
-	  //tooMany = dubBot.tooManyBadSongs(userName);
-	  //if (tooMany) API.botDjNow();
-	  API.moderateForceSkip();
-	  //if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
-	  //if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
-	}
-	  catch(err) { UTIL.logException("skipBadSong: " + err.message); }
+      API.chatLog("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
+      var tooMany = false;
+      //tooMany = dubBot.tooManyBadSongs(userName);
+      //if (tooMany) API.botDjNow();
+      API.moderateForceSkip();
+      //if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
+      //if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
+    }
+      catch(err) { UTIL.logException("skipBadSong: " + err.message); }
   }
 
 };
 
 String.prototype.splitBetween = function (a, b) {
-	var self = this;
-	self = this.split(a);
-	for (var i = 0; i < self.length; i++) {
-		self[i] = self[i].split(b);
-	}
-	var arr = [];
-	for (var i = 0; i < self.length; i++) {
-		if (Array.isArray(self[i])) {
-			for (var j = 0; j < self[i].length; j++) {
-				arr.push(self[i][j]);
-			}
-		}
-		else arr.push(self[i]);
-	}
-	return arr;
+    var self = this;
+    self = this.split(a);
+    for (var i = 0; i < self.length; i++) {
+        self[i] = self[i].split(b);
+    }
+    var arr = [];
+    for (var i = 0; i < self.length; i++) {
+        if (Array.isArray(self[i])) {
+            for (var j = 0; j < self[i].length; j++) {
+                arr.push(self[i][j]);
+            }
+        }
+        else arr.push(self[i]);
+    }
+    return arr;
 };
 
 //SECTION USERS: All User data
@@ -142,344 +142,369 @@ var USERS = {
   users: [],
   loadUserInterval: null,
   getLastActivity: function (user) {
-	  //todoer
-	  //return user.lastActivity;
+      //todoer
+      //return user.lastActivity;
   },
-  setUserName: function (userId, userName) {
-	var user = USERS.lookupUserID(userId);
-	//todoer
-	//if (user.username !== userName) user.username = userName;
+  //removes one MIA User that has no UserID and is not in the room.
+  removeMIANonUsers: function () {
+    try {
+      var i = 0;
+      while (i < USERS.users.length) {
+        if ((USERS.users[i].id === "new") && (USERS.users[i].inRoom === false)) {
+                USERS.users.splice(i, 1);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+    catch(err) { UTIL.logException("removeMIANonUsers: " + err.message); }
+  },
+  updateUserID: function (uid, username) {
+    try {
+        var user = USERS.lookupUserID(uid);
+        if (user !== false) {
+          user.username = username;
+          return;
+        }
+        user = USERS.lookupUserName(username);
+        if (user !== false) {
+          user.id = uid;
+          return;
+        }
+    }
+    catch(err) { UTIL.logException("updateUserID: " + err.message); }
   },
   setLastActivityID: function (userId, dispMsg) {
-	var user = USERS.lookupUserID(userId);
-	if (user === false) return;
-	//USERS.setLastActivity(user, dispMsg);
+    var user = USERS.lookupUserID(userId);
+    if (user === false) return;
+    USERS.setLastActivity(user, dispMsg);
   },
+//todoer afk activity TEST:
   setLastActivity: function (user, dispMsg) {
-	//todoer USER : user.lastActivity = Date.now();
-	//todoer USER : if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
-	//todoer USER : user.afkWarningCount = 0;
-	//todoer USER : clearTimeout(user.afkCountdown);
+    user.lastActivity = Date.now();
+    if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
+    user.afkWarningCount = 0;
+    //clearTimeout(user.afkCountdown);
   },
 
   // This will return a room user from: Object, Username, UserID
   defineRoomUser: function (usrObjectID) {
-	  try {
-		if (typeof usrObjectID === "object") return usrObjectID;
-		var roomUser = USERS.lookupUserName(usrObjectID);
-		if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
-		return roomUser;
-	  }
-	  catch(err) {
-		UTIL.logException("defineRoomUser: " + err.message); 
-		return false;
-	  }
+      try {
+        if (typeof usrObjectID === "object") return usrObjectID;
+        var roomUser = USERS.lookupUserName(usrObjectID);
+        if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+        return roomUser;
+      }
+      catch(err) {
+        UTIL.logException("defineRoomUser: " + err.message); 
+        return false;
+      }
   },
 
   lookupUserName: function (username) {
     botDebug.debugMessage(false, "username: [" + username + "]");
-	for (var i = 0; i < USERS.users.length; i++) {
-	  if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
-	}
-	return false;
+    for (var i = 0; i < USERS.users.length; i++) {
+      if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
+    }
+    return false;
   },
   lookupUserID: function (id) {   //getroomuser
   //todoer TEST: 
-		for (var i = 0; i < USERS.users.length; i++) {
-			if (USERS.users[i].id === id) {
-				return USERS.users[i];
-			}
-		}
-		return false;
-	},
-	importUserList: function() { // userlistimport << command
-		try {
-			USERS.usersImport = [];
-			$.get(CONST.userlistLink, function (json) {
-				if (json !== null && typeof json !== "undefined") {
-					UTIL.logObject(json, "USR");
-					for (var idx in json) {
-						var newUser = json[idx];
-						//USERS.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
-						USERS.usersImport.push(newUser);
-					}
-				}
-			});
-			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
-		}
-		catch(err) { UTIL.logException("importBlackList: " + err.message); }
-	},
-	User: function (userID, username, userRole) {
-		this.id = userID;
-		this.username = username;
-		this.jointime = Date.now();
-		this.firstActivity = Date.now();
-		this.lastActivity = Date.now();
-		this.isMehing = false;
-		this.userRole = userRole;
-		this.votes = {
-			songsPlayed: 0,
-			tastyRcv: 0,
-			tastyGiv: 0,
-			woot: 0,
-			meh: 0,
-			curate: 0
-		};
-		this.tastyVote = false;
-		this.rolled = false;
-		this.lastEta = null;
-		this.bootable = false;
-		this.beerRun = false;
-		this.inMeeting = false;
-		this.atLunch = false;
-		this.afkWarningCount = 0;
-		this.badSongCount = 0;
-		this.afkCountdown = null;
-		this.inRoom = false;
-		this.inRoomUpdated = false;
-		this.dubDown = false;
-		this.isMuted = false;
-		this.rollStats = {
-			lifeWoot: 0,
-			lifeTotal: 0,
-			dayWoot: 0,
-			dayTotal: 0,
-			DOY: -1
-		};
-		this.lastDC = {
-			time: null,
-			leftroom: null,
-			resetReason: "",
-			position: -1,
-			songCount: 0
-		};
-		this.lastKnownPosition = -1;
-		this.lastSeenInLine = null;
-	},
+        for (var i = 0; i < USERS.users.length; i++) {
+            if (USERS.users[i].id === id) {
+                return USERS.users[i];
+            }
+        }
+        return false;
+    },
+    importUserList: function() { // userlistimport << command
+        try {
+            USERS.usersImport = [];
+            $.get(CONST.userlistLink, function (json) {
+                if (json !== null && typeof json !== "undefined") {
+                    UTIL.logObject(json, "USR");
+                    for (var idx in json) {
+                        var newUser = json[idx];
+                        //USERS.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
+                        USERS.usersImport.push(newUser);
+                    }
+                }
+            });
+            botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
+        }
+        catch(err) { UTIL.logException("importBlackList: " + err.message); }
+    },
+    User: function (userID, username, userRole) {
+        this.id = userID;
+        this.username = username;
+        this.jointime = Date.now();
+        this.firstActivity = Date.now();
+        this.lastActivity = Date.now();
+        this.isMehing = false;
+        this.userRole = userRole;
+        this.votes = {
+            songsPlayed: 0,
+            tastyRcv: 0,
+            tastyGiv: 0,
+            woot: 0,
+            meh: 0,
+            curate: 0
+        };
+        this.tastyVote = false;
+        this.rolled = false;
+        this.lastEta = null;
+        this.bootable = false;
+        this.beerRun = false;
+        this.inMeeting = false;
+        this.atLunch = false;
+        this.afkWarningCount = 0;
+        this.badSongCount = 0;
+        this.afkCountdown = null;
+        this.inRoom = false;
+        this.inRoomUpdated = false;
+        this.dubDown = false;
+        this.isMuted = false;
+        this.rollStats = {
+            lifeWoot: 0,
+            lifeTotal: 0,
+            dayWoot: 0,
+            dayTotal: 0,
+            DOY: -1
+        };
+        this.lastDC = {
+            time: null,
+            leftroom: null,
+            resetReason: "",
+            position: -1,
+            songCount: 0
+        };
+        this.lastKnownPosition = -1;
+        this.lastSeenInLine = null;
+    },
 
     welcomeUser: function (roomUser, newUser) {
-	  try {
-		var welcomeMessage = "";
-		newUser ? welcomeMessage = botChat.subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
-				: welcomeMessage = botChat.subChat(botChat.getChatMessage("welcomeback"), {name: roomUser.username});
-		//if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
-		roomUser.lastActivity = Date.now();
-		roomUser.jointime = Date.now();
-		if (roomUser.username === botVar.botName) return;
-		setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
-		
-	  }
+      try {
+        var welcomeMessage = "";
+        newUser ? welcomeMessage = botChat.subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
+                : welcomeMessage = botChat.subChat(botChat.getChatMessage("welcomeback"), {name: roomUser.username});
+        //if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
+        roomUser.lastActivity = Date.now();
+        roomUser.jointime = Date.now();
+        if (roomUser.username === botVar.botName) return;
+        setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
+        
+      }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
-	},
-	defineUserRole: function (userElement, username) {
-	  try {
-	    // SAMPLE: "user-levis_homer dj manager currentDJ"
-	    botDebug.debugMessage(false, userElement);
-	    userElement = userElement.replace("user-", "");
-	    userElement = userElement.replace(username, "");
-	    userElement = userElement.replace("currentDJ", "");
-	    userElement = userElement.replace("downdub", "");
-	    userElement = userElement.trim();
-	    userElement = userElement.toLowerCase();
-	    var space = userElement.indexOf(' ');
-	    var dispRole;
-	    if (space === -1) dispRole = userElement;
-	    if (space !== -1) dispRole = userElement.substring(0, space);
-	    botDebug.debugMessage(false, "DISP ROLE: " + dispRole);
-		switch (dispRole) {
-			case "creator":     return "creator";
-			case "co-owner":    return "co-owner";
-			case "manager":     return "manager";
-			case "mod":         return "mod";
-			case "vip":         return "vip";
-			case "resident-dj": return "resident-dj";
-			case "dj":          return "dj";
-		}
-	    // SAMPLE: "user-levis_homer dj manager"
-	    // SAMPLE: "dj manager"
-		if (userElement.substring(userElement.length - 8,  userElement.length) === " creator")           return "creator"
-		if (userElement.substring(userElement.length - 17, userElement.length) === " creator co-owner")  return "creator co-owner"
-		if (userElement.substring(userElement.length - 9,  userElement.length) === " co-owner")          return "co-owner"
-		if (userElement.substring(userElement.length - 8,  userElement.length) === " manager")           return "manager"
-		if (userElement.substring(userElement.length - 4,  userElement.length) === " mod")               return "mod"
-		if (userElement.substring(userElement.length - 4,  userElement.length) === " vip")               return "vip"
-		if (userElement.substring(userElement.length - 12, userElement.length) === " resident-dj")       return "resident-dj"
-		if (userElement.substring(userElement.length - 3,  userElement.length) === " dj")                return "dj"
-	    return "";
-	  }
+    },
+    defineUserRole: function (userElement, username) {
+      try {
+        // SAMPLE: "user-levis_homer dj manager currentDJ"
+        botDebug.debugMessage(false, userElement);
+        userElement = userElement.replace("user-", "");
+        userElement = userElement.replace(username, "");
+        userElement = userElement.replace("currentDJ", "");
+        userElement = userElement.replace("downdub", "");
+        userElement = userElement.trim();
+        userElement = userElement.toLowerCase();
+        var space = userElement.indexOf(' ');
+        var dispRole;
+        if (space === -1) dispRole = userElement;
+        if (space !== -1) dispRole = userElement.substring(0, space);
+        botDebug.debugMessage(false, "DISP ROLE: " + dispRole);
+        switch (dispRole) {
+            case "creator":     return "creator";
+            case "co-owner":    return "co-owner";
+            case "manager":     return "manager";
+            case "mod":         return "mod";
+            case "vip":         return "vip";
+            case "resident-dj": return "resident-dj";
+            case "dj":          return "dj";
+        }
+        // SAMPLE: "user-levis_homer dj manager"
+        // SAMPLE: "dj manager"
+        if (userElement.substring(userElement.length - 8,  userElement.length) === " creator")           return "creator"
+        if (userElement.substring(userElement.length - 17, userElement.length) === " creator co-owner")  return "creator co-owner"
+        if (userElement.substring(userElement.length - 9,  userElement.length) === " co-owner")          return "co-owner"
+        if (userElement.substring(userElement.length - 8,  userElement.length) === " manager")           return "manager"
+        if (userElement.substring(userElement.length - 4,  userElement.length) === " mod")               return "mod"
+        if (userElement.substring(userElement.length - 4,  userElement.length) === " vip")               return "vip"
+        if (userElement.substring(userElement.length - 12, userElement.length) === " resident-dj")       return "resident-dj"
+        if (userElement.substring(userElement.length - 3,  userElement.length) === " dj")                return "dj"
+        return "";
+      }
       catch(err) { UTIL.logException("defineUserRole: " + err.message); }
-	},
-	// Resets all users data on song advance:
-	resetUserSongStats: function () {
-	  try {
-	    for (var i = 0; i < USERS.users.length; i++) {
-		  USERS.users[i].dubDown = false;
-		  USERS.users[i].rolled = false;
-		  USERS.users[i].tastyVote = false;
-		}
-	  }
+    },
+    // Resets all users data on song advance:
+    resetUserSongStats: function () {
+      try {
+        for (var i = 0; i < USERS.users.length; i++) {
+          USERS.users[i].dubDown = false;
+          USERS.users[i].rolled = false;
+          USERS.users[i].tastyVote = false;
+        }
+      }
       catch(err) { UTIL.logException("resetUserSongStats: " + err.message); }
-	},
-	resetInRoomUpdated: function () {
-	  try {
-	    for (var i = 0; i < USERS.users.length; i++) { USERS.users[i].inRoomUpdated = false; }
-	  }
+    },
+    resetInRoomUpdated: function () {
+      try {
+        for (var i = 0; i < USERS.users.length; i++) { USERS.users[i].inRoomUpdated = false; }
+      }
       catch(err) { UTIL.logException("resetInRoomUpdated: " + err.message); }
-	},
-	removeMissingUsersFromRoom: function () {
-	  try {
-	    for (var i = 0; i < USERS.users.length; i++) {
-		  if ((USERS.users[i].inRoom === true) && (USERS.users[i].inRoomUpdated === false)) {
-		    USERS.users[i].inRoom = false;
-			API.logInfo(USERS.users[i].username + " left the room");
-		  }
-		}
-	  }
+    },
+    removeMissingUsersFromRoom: function () {
+      try {
+        for (var i = 0; i < USERS.users.length; i++) {
+          if ((USERS.users[i].inRoom === true) && (USERS.users[i].inRoomUpdated === false)) {
+            USERS.users[i].inRoom = false;
+            API.logInfo(USERS.users[i].username + " left the room");
+          }
+        }
+      }
       catch(err) { UTIL.logException("removeMissingUsersFromRoom: " + err.message); }
-	},
-	resetAllUsersOnStartup: function () {
-	  try {
-	    for (var i = 0; i < USERS.users.length; i++) {
-		  USERS.users[i].inRoom = false;
-		  USERS.users[i].inRoomUpdated = false;
-		  USERS.users[i].dubDown = false;
-		  USERS.users[i].rolled = false;
-		}
-	  }
+    },
+    resetAllUsersOnStartup: function () {
+      try {
+        for (var i = 0; i < USERS.users.length; i++) {
+          USERS.users[i].inRoom = false;
+          USERS.users[i].inRoomUpdated = false;
+          USERS.users[i].dubDown = false;
+        }
+      }
       catch(err) { UTIL.logException("resetAllUsersOnStartup: " + err.message); }
-	},
+    },
 
-	//<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
-	// DOC_Z: <li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447537103945">
-	// bcav:  <li class="user-562ba5be67a3641400ebabfb isMod" id="562ba5be67a3641400ebabfb-1447628453068">
-	// MKay:  <li class="user-56009988bfb6340300a2dc6a isManager" id="56009988bfb6340300a2dc6a-1447628469537">
-	// 
+    //<img src="https://api.dubtrack.fm/user/542465ce43f5a10200c07f11/image" alt="doc_z" onclick="Dubtrack.app.navigate('/doc_z', {trigger: true});" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);">
+    // DOC_Z: <li class="user-542465ce43f5a10200c07f11 current-chat-user isCo-owner" id="542465ce43f5a10200c07f11-1447537103945">
+    // bcav:  <li class="user-562ba5be67a3641400ebabfb isMod" id="562ba5be67a3641400ebabfb-1447628453068">
+    // MKay:  <li class="user-56009988bfb6340300a2dc6a isManager" id="56009988bfb6340300a2dc6a-1447628469537">
+    // 
 
-//	   Sample object:
-//	<div class="tabsContainer">
-//		<div class="tabItem ps-container" id="main-user-list-room">
-//			<ul class="avatar-list" id="avatar-list">
-//				<li rel="17412" class="co-owner user-doc_z updub"><p class="username">doc_z</p><p class="dubs"><span>17431</span> dubs</p></li>
-//				<li rel="17151" class="co-owner user-barstoolsaints updub"><p class="username">barstoolsaints</p><p class="dubs"><span>17158</span> dubs</p></li>
-//				<li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
-//				<li rel="8155" class="mod user-bcav currentDJ"><p class="username">bcav</p><p class="dubs"><span>8167</span> dubs</p></li>
-//				<li rel="7069" class="mod user-larry_the_law updub"><p class="username">larry_the_law</p><p class="dubs"><span>7076</span> dubs</p></li>
-//				<li rel="4669" class="creator co-owner user-balloon_knot updub"><p class="username">balloon_knot</p><p class="dubs"><span>4676</span> dubs</p></li>
-//			</ul>
-//		</div>
-//	</div>
+//       Sample object:
+//    <div class="tabsContainer">
+//        <div class="tabItem ps-container" id="main-user-list-room">
+//            <ul class="avatar-list" id="avatar-list">
+//                <li rel="17412" class="co-owner user-doc_z updub"><p class="username">doc_z</p><p class="dubs"><span>17431</span> dubs</p></li>
+//                <li rel="17151" class="co-owner user-barstoolsaints updub"><p class="username">barstoolsaints</p><p class="dubs"><span>17158</span> dubs</p></li>
+//                <li rel="16885" class="manager user-deeznutzzzz"><p class="username">deeznutzzzz</p><p class="dubs"><span>16885 </span> dubs</p></li>
+//                <li rel="8155" class="mod user-bcav currentDJ"><p class="username">bcav</p><p class="dubs"><span>8167</span> dubs</p></li>
+//                <li rel="7069" class="mod user-larry_the_law updub"><p class="username">larry_the_law</p><p class="dubs"><span>7076</span> dubs</p></li>
+//                <li rel="4669" class="creator co-owner user-balloon_knot updub"><p class="username">balloon_knot</p><p class="dubs"><span>4676</span> dubs</p></li>
+//            </ul>
+//        </div>
+//    </div>
 //USERS.loadUsersInRoom(true);
   loadUsersInRoom: function (welcomeMsg) {  //ererererer
-	try {
-	  //Username path:
-	  //document.getElementsByClassName("tabsContainer")[0].getElementsByTagName("li")[0].getElementsByClassName("username")[0].innerHTML;
-	  USERS.resetInRoomUpdated();
-	  var tabsContainer = document.getElementsByClassName("tabsContainer");
+    try {
+      //Username path:
+      //document.getElementsByClassName("tabsContainer")[0].getElementsByTagName("li")[0].getElementsByClassName("username")[0].innerHTML;
+      USERS.resetInRoomUpdated();
+      var tabsContainer = document.getElementsByClassName("tabsContainer");
       var usernameList = tabsContainer[0].getElementsByTagName("li");
       botDebug.debugMessage(false, "usernameList count: " + usernameList.length);
-	  
+      
       for (var i = 0; i < usernameList.length; i++) {
-	    var newUser = false;
-	    var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
-	    botDebug.debugMessage(false, "USER: " + username);
-		var userInfo = usernameList[i].className;
-		userRole = USERS.defineUserRole(userInfo, username);
-		var userMehing = false;
-		if (userInfo.indexOf("downdub") >= 0) userMehing = true;
-		var roomUser = USERS.lookupUserName(username);
-		if (roomUser === false) {
-		  var roomUser = new USERS.User("new", username, userRole);
-		  USERS.users.push(roomUser);
-		  newUser = true;
-		}
-		//USERS.users[i].username 
-		//
-		// clearInterval(USERS.loadUserInterval);
+        var newUser = false;
+        var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
+        botDebug.debugMessage(false, "USER: " + username);
+        var userInfo = usernameList[i].className;
+        userRole = USERS.defineUserRole(userInfo, username);
+        var userMehing = false;
+        if (userInfo.indexOf("downdub") >= 0) userMehing = true;
+        var roomUser = USERS.lookupUserName(username);
+        if (roomUser === false) {
+          var roomUser = new USERS.User("new", username, userRole);
+          USERS.users.push(roomUser);
+          newUser = true;
+        }
+        //USERS.users[i].username 
+        //
+        // clearInterval(USERS.loadUserInterval);
         if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
-		roomUser.inRoom = true;
-		botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
-		roomUser.userRole = userRole;
-		if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
-		  API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
-		}
-		roomUser.isMehing = userMehing;
-	    roomUser.inRoomUpdated = true;
+        roomUser.inRoom = true;
+        botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
+        roomUser.userRole = userRole;
+        if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
+          API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
+        }
+        roomUser.isMehing = userMehing;
+        roomUser.inRoomUpdated = true;
       }
-	  USERS.removeMissingUsersFromRoom();
-	  botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
-	}
+      USERS.removeMissingUsersFromRoom();
+      botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
+    }
     catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
   }
 };
 
 //SECTION SETTINGS: All bot commands:
 var SETTINGS = {
-	settings: {
-		autoWootBot: false,
-		autoHopUp: true,
-		autoHopUpCount: 1,
-		autoHopDownCount: 4,
-		botRoomUrl: "",
-		hoppingDownNow: false,
-		language: "english",
-		chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
-		bouncerPlus: true,
-		blacklistEnabled: true,
-		gifEnabled: true,
-		lockdownEnabled: false,
-		maximumLocktime: 10,
-		cycleGuard: true,
-		maximumCycletime: 10,
-		voteSkipEnabled: true,
-		voteSkipLimit: 4,
-		welcomeForeignerMsg: false,
-		timeGuard: true,
-		maximumSongLength: 8,
-		skipSound5Days: false,
-		skipSound7Days: false,
-		skipSoundStart: 7,
-		skipSoundEnd: 15,
-		skipSoundRange: "Monday-Friday between 7AM and 3PM EST",
-		autodisable: false,
-		commandCooldown: 30,
-		usercommandsEnabled: true,
-		lockskipPosition: 3,
-		lockskipReasons: [
-			["theme", "This song does not fit the room theme. "],
-			["op", "This song is on the OP list. "],
-			["history", "This song is in the history. "],
-			["mix", "You played a mix, which is against the rules. "],
-			["sound", "The song you played had bad sound quality or no sound. "],
-			["nsfw", "The song you contained was NSFW (image or sound). "],
-			["unavailable", "The song you played was not available for some users. "]
-		],
-		motdEnabled: false,
-		motdInterval: 5,
-		motd: "Temporary Message of the Day",
-		etaRestriction: false,
-		welcome: true,
-		opLink: null,
-		rulesLink: "http://tinyurl.com/TastyTunesRules",
-		themeLink: null,
-		fbLink: "https://www.facebook.com/groups/226222424234128/",
-		youtubeLink: null,
-		website: null,
-		intervalMessages: [],
-		messageInterval: 5,
-		songstats: true,
-		suppressSongStats: false,
-		commandLiteral: "."
-	},
+    settings: {
+        autoWootBot: false,
+        autoHopUp: true,
+        autoHopUpCount: 1,
+        autoHopDownCount: 4,
+        botRoomUrl: "",
+        hoppingDownNow: false,
+        language: "english",
+        chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
+        bouncerPlus: true,
+        blacklistEnabled: true,
+        gifEnabled: true,
+        lockdownEnabled: false,
+        maximumLocktime: 10,
+        cycleGuard: true,
+        maximumCycletime: 10,
+        voteSkipEnabled: true,
+        voteSkipLimit: 4,
+        welcomeForeignerMsg: false,
+        timeGuard: true,
+        maximumSongLength: 8,
+        skipSound5Days: false,
+        skipSound7Days: false,
+        skipSoundStart: 7,
+        skipSoundEnd: 15,
+        skipSoundRange: "Monday-Friday between 7AM and 3PM EST",
+        autodisable: false,
+        commandCooldown: 30,
+        usercommandsEnabled: true,
+        lockskipPosition: 3,
+        lockskipReasons: [
+            ["theme", "This song does not fit the room theme. "],
+            ["op", "This song is on the OP list. "],
+            ["history", "This song is in the history. "],
+            ["mix", "You played a mix, which is against the rules. "],
+            ["sound", "The song you played had bad sound quality or no sound. "],
+            ["nsfw", "The song you contained was NSFW (image or sound). "],
+            ["unavailable", "The song you played was not available for some users. "]
+        ],
+        motdEnabled: false,
+        motdInterval: 5,
+        motd: "Temporary Message of the Day",
+        etaRestriction: false,
+        welcome: true,
+        opLink: null,
+        rulesLink: "http://tinyurl.com/TastyTunesRules",
+        themeLink: null,
+        fbLink: "https://www.facebook.com/groups/226222424234128/",
+        youtubeLink: null,
+        website: null,
+        intervalMessages: [],
+        messageInterval: 5,
+        songstats: true,
+        suppressSongStats: false,
+        commandLiteral: "."
+    },
 
     retrieveSettings: function () {
-	  try {
+      try {
         var settings = JSON.parse(localStorage.getItem("dubBotSettings"));
         if (settings !== null) {
             for (var prop in settings) {
                 SETTINGS.settings[prop] = settings[prop];
             }
         }
-	  }
+      }
       catch(err) { UTIL.logException("retrieveSettings: " + err.message); }
     },
 
@@ -518,7 +543,7 @@ var SETTINGS = {
             var elapsed = Date.now() - JSON.parse(info).time;
             dubBot.room.historyList = room.historyList;
             if ((elapsed < 1 * 60 * 60 * 1000)) {
-                API.chatLog(botChat.getChatMessage("retrievingdata"));
+                API.logInfo(botChat.getChatMessage("retrievingdata"));
                 for (var prop in settings) {
                     SETTINGS.settings[prop] = settings[prop];
                 }
@@ -528,7 +553,7 @@ var SETTINGS = {
                 dubBot.room.roomstats = room.roomstats;
                 dubBot.room.queue = room.queue;
                 //dubBot.room.newBlacklist = room.newBlacklist;
-                API.chatLog(botChat.getChatMessage("datarestored"));
+                API.logInfo(botChat.getChatMessage("datarestored"));
             }
         }
         }
@@ -540,10 +565,10 @@ var SETTINGS = {
         botDebug.debugMessage(true, "START: storeToStorage");
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
         localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
-		localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
+        localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
 
         botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
-		botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
+        botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
@@ -556,12 +581,12 @@ var SETTINGS = {
            UTIL.logException("storeToStorage: " + err.message);
         }
     }
-	
+    
 };
 
 //SECTION COMMANDS: All bot commands:
 var COMMANDS = {
-	botChatcommand: function (command) {
+    botChatcommand: function (command) {
         // This is triggered when a chat starting with a '/' character is entered
             try {
                 if (command === "/bot") {
@@ -572,7 +597,6 @@ var COMMANDS = {
                 //if (command === "/whois") return;  // Handled by Origem
                 //if (command === "/grab") return;   // Prevent infinite loop as /grab is handled by Origem.
                 //if (command === "/reload") return;   // Handled by Origem
-                //todoer TEST
                 botChat.commandChat.cid = "";
                 botChat.commandChat.message = CONST.commandLiteral + command.substring(1, command.length);
                 botChat.commandChat.sub = -1;
@@ -585,165 +609,162 @@ var COMMANDS = {
             }
             catch(err) { UTIL.logException("botChatcommand: " + err.message); }
     },
-	checkCommands: function (chat) {
-		try {
-			//if (!botVar.botRunning) return;
-			botDebug.debugMessage(false, "STEP 001");
-			chat.message = UTIL.linkFixer(chat.message);
-			botDebug.debugMessage(false, "STEP 002");
-			chat.message = chat.message.trim();
-			//todoer afk activity
-			//USERS.setLastActivityID(chat.uid, true);
-			//todoer afk activity
-			//USERS.setUserName(chat.uid, chat.un);
-			botDebug.debugMessage(false, "STEP 003");
-			if (botChat.chatFilter(chat)) return void (0);
-			botDebug.debugMessage(false, "STEP 004");
-			if (COMMANDS.commandCheck(chat)) return;
-			botDebug.debugMessage(false, "STEP 005");
-			botChat.action(chat);  //user
-			botDebug.debugMessage(false, "STEP 006");
-		}
-		catch(err) { UTIL.logException("checkCommands: " + err.message); }
-	},
-	
-	commandCheck: function (chat) {
-	//chat.uid chat.message chat.cid chat.un
-		try {
-			var cmd;
-		botDebug.debugMessage(false, "STEP 201");
-			if (chat.message.substring(0,1) != CONST.commandLiteral) return false;
-			
-			var space = chat.message.indexOf(' ');
-			if (space === -1) {
-				cmd = chat.message.toLowerCase();
-			}
-			else cmd = chat.message.substring(0, space).toLowerCase();
+    checkCommands: function (chat) {
+        try {
+            //if (!botVar.botRunning) return;
+            botDebug.debugMessage(false, "STEP 001");
+            chat.message = UTIL.linkFixer(chat.message);
+            botDebug.debugMessage(false, "STEP 002");
+            chat.message = chat.message.trim();
+            USERS.setLastActivityID(chat.uid, true);
+            botDebug.debugMessage(false, "STEP 003");
+            if (botChat.chatFilter(chat)) return void (0);
+            botDebug.debugMessage(false, "STEP 004");
+            if (COMMANDS.commandCheck(chat)) return;
+            botDebug.debugMessage(false, "STEP 005");
+            botChat.action(chat);  //user
+            botDebug.debugMessage(false, "STEP 006");
+        }
+        catch(err) { UTIL.logException("checkCommands: " + err.message); }
+    },
+    
+    commandCheck: function (chat) {
+    //chat.uid chat.message chat.cid chat.un
+        try {
+            var cmd;
+        botDebug.debugMessage(false, "STEP 201");
+            if (chat.message.substring(0,1) != CONST.commandLiteral) return false;
+            
+            var space = chat.message.indexOf(' ');
+            if (space === -1) {
+                cmd = chat.message.toLowerCase();
+            }
+            else cmd = chat.message.substring(0, space).toLowerCase();
 
-			botDebug.debugMessage(false, "STEP 202");
-			var userPerm = API.getPermission(chat.uid);
-			if (chat.message.toLowerCase() !== ".join" && chat.message.toLowerCase() !== ".leave" && (!TASTY.bopCommand(cmd))) {
-				if (userPerm === 0 && !botVar.room.usercommand) return void (0);
-				if (!botVar.room.allcommand) return void (0);
-			}
-		botDebug.debugMessage(false, "STEP 203");
-			
-			//if (chat.message.toLowerCase() === '.eta' && botVar.room.etaRestriction) {
-			//	if (userPerm < 2) {
-			//		var u = USERS.lookupUserID(chat.uid);
-			//		if (u.lastEta !== null && (Date.now() - u.lastEta) < 1 * 60 * 60 * 1000) {
-			//			if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
-			//			return void (0);
-			//		}
-			//		else u.lastEta = Date.now();
-			//	}
-			//}
+            botDebug.debugMessage(false, "STEP 202");
+            var userPerm = API.getPermission(chat.uid);
+            if (chat.message.toLowerCase() !== ".join" && chat.message.toLowerCase() !== ".leave" && (!TASTY.bopCommand(cmd))) {
+                if (userPerm === 0 && !botVar.room.usercommand) return void (0);
+                if (!botVar.room.allcommand) return void (0);
+            }
+        botDebug.debugMessage(false, "STEP 203");
+            
+            //if (chat.message.toLowerCase() === '.eta' && botVar.room.etaRestriction) {
+            //    if (userPerm < 2) {
+            //        var u = USERS.lookupUserID(chat.uid);
+            //        if (u.lastEta !== null && (Date.now() - u.lastEta) < 1 * 60 * 60 * 1000) {
+            //            if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
+            //            return void (0);
+            //        }
+            //        else u.lastEta = Date.now();
+            //    }
+            //}
 
-			var executed = false;
-		botDebug.debugMessage(false, "STEP 204");
+            var executed = false;
+        botDebug.debugMessage(false, "STEP 204");
 
-			for (var comm in BOTCOMMANDS.commands) {
-				var cmdCall = BOTCOMMANDS.commands[comm].command;
-				if (!Array.isArray(cmdCall)) {
-					cmdCall = [cmdCall]
-				}
-				for (var i = 0; i < cmdCall.length; i++) {
-					if (CONST.commandLiteral + cmdCall[i] === cmd) {
-						BOTCOMMANDS.commands[comm].functionality(chat, CONST.commandLiteral + cmdCall[i]);
-						executed = true;
-						break;
-					}
-				}
-			}
+            for (var comm in BOTCOMMANDS.commands) {
+                var cmdCall = BOTCOMMANDS.commands[comm].command;
+                if (!Array.isArray(cmdCall)) {
+                    cmdCall = [cmdCall]
+                }
+                for (var i = 0; i < cmdCall.length; i++) {
+                    if (CONST.commandLiteral + cmdCall[i] === cmd) {
+                        BOTCOMMANDS.commands[comm].functionality(chat, CONST.commandLiteral + cmdCall[i]);
+                        executed = true;
+                        break;
+                    }
+                }
+            }
 
-		botDebug.debugMessage(false, "STEP 205");
-			if (executed && userPerm === 0) {
-				botVar.room.usercommand = false;
-				setTimeout(function () { botVar.room.usercommand = true; }, botVar.room.commandCooldown * 1000);
-			}
-		botDebug.debugMessage(false, "STEP 206");
-			if (executed) {
-				if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
-				botVar.room.allcommand = false;
-				setTimeout(function () { botVar.room.allcommand = true; }, 5 * 1000);
-			}
-		botDebug.debugMessage(false, "STEP 207");
-			return executed;
-		}
-		catch(err) { UTIL.logException("commandCheck: " + err.message); }
-	}
+        botDebug.debugMessage(false, "STEP 205");
+            if (executed && userPerm === 0) {
+                botVar.room.usercommand = false;
+                setTimeout(function () { botVar.room.usercommand = true; }, botVar.room.commandCooldown * 1000);
+            }
+        botDebug.debugMessage(false, "STEP 206");
+            if (executed) {
+                if (chat.cid.length > 0) API.moderateDeleteChat(chat.cid);
+                botVar.room.allcommand = false;
+                setTimeout(function () { botVar.room.allcommand = true; }, 5 * 1000);
+            }
+        botDebug.debugMessage(false, "STEP 207");
+            return executed;
+        }
+        catch(err) { UTIL.logException("commandCheck: " + err.message); }
+    }
 };
 //SECTION Chat: All bot chat functionality:
 var botChat = {
   lastMessageCount: 0,
   commandChat: {
-		cid: "",
-		message: "",
-		sub: -1,
-		un: "",
-		uid: -1,
-		type: "message",
-		timestamp: null,
-		sound: "mention"
+        cid: "",
+        message: "",
+        sub: -1,
+        un: "",
+        uid: -1,
+        type: "message",
+        timestamp: null,
+        sound: "mention"
   },
   action: function (chat) {
-		botDebug.debugMessage(false, "STEP 101");
-		if (chat.type === 'message' || chat.type === 'emote')  {
-			botDebug.debugMessage(false, "STEP 102");
-			USERS.setLastActivityID(chat.uid, false);
-			botDebug.debugMessage(false, "STEP 103");
-		}
-		else if (chat.type !== 'log')  {
-		  botDebug.debugMessage(true, "CHAT.TYPE: " + chat.type);
-		}
-		botDebug.debugMessage(false, "STEP 104");
-		AI.larryAI(chat.message, chat.un);
-		botDebug.debugMessage(false, "STEP 105");
-		botVar.room.roomstats.chatmessagescnt++;
-		botDebug.debugMessage(false, "STEP 106");
+        botDebug.debugMessage(false, "STEP 101");
+        if (chat.type === 'message' || chat.type === 'emote')  {
+            botDebug.debugMessage(false, "STEP 102");
+            USERS.setLastActivityID(chat.uid, false);
+            botDebug.debugMessage(false, "STEP 103");
+        }
+        else if (chat.type !== 'log')  {
+          botDebug.debugMessage(true, "CHAT.TYPE: " + chat.type);
+        }
+        botDebug.debugMessage(false, "STEP 104");
+        AI.larryAI(chat.message, chat.un);
+        botDebug.debugMessage(false, "STEP 105");
+        botVar.room.roomstats.chatmessagescnt++;
+        botDebug.debugMessage(false, "STEP 106");
   },
   chatcleaner: function (chat) {
-	if (!botVar.room.filterChat) return false;
-	if (API.getPermission(chat.uid) > 1) return false;
-	var msg = chat.message;
-	var containsLetters = false;
-	for (var i = 0; i < msg.length; i++) {
-		ch = msg.charAt(i);
-		if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch === ':' || ch === '^') containsLetters = true;
-	}
-	if (msg === '') {
-		return true;
-	}
-	if (!containsLetters && (msg.length === 1 || msg.length > 3)) return true;
-	msg = msg.replace(/[ ,;.:\/=~+%^*\-\\"'&@#]/g, '');
-	var capitals = 0;
-	var ch;
-	for (var i = 0; i < msg.length; i++) {
-		ch = msg.charAt(i);
-		if (ch >= 'A' && ch <= 'Z') capitals++;
-	}
-	if (capitals >= 40) {
-		API.sendChat(botChat.subChat(botChat.getChatMessage("caps"), {name: chat.un}));
-		return true;
-	}
-	msg = msg.toLowerCase();
-	if (msg === 'skip') {
-		API.sendChat(botChat.subChat(botChat.getChatMessage("askskip"), {name: chat.un}));
-		return true;
-	}
-	for (var j = 0; j < botChat.spam.length; j++) {
-		if (msg === botChat.spam[j]) {
-			API.sendChat(botChat.subChat(botChat.spam, {name: chat.un}));
-			return true;
-		}
-	}
-	return false;
+    if (!botVar.room.filterChat) return false;
+    if (API.getPermission(chat.uid) > 1) return false;
+    var msg = chat.message;
+    var containsLetters = false;
+    for (var i = 0; i < msg.length; i++) {
+        ch = msg.charAt(i);
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch === ':' || ch === '^') containsLetters = true;
+    }
+    if (msg === '') {
+        return true;
+    }
+    if (!containsLetters && (msg.length === 1 || msg.length > 3)) return true;
+    msg = msg.replace(/[ ,;.:\/=~+%^*\-\\"'&@#]/g, '');
+    var capitals = 0;
+    var ch;
+    for (var i = 0; i < msg.length; i++) {
+        ch = msg.charAt(i);
+        if (ch >= 'A' && ch <= 'Z') capitals++;
+    }
+    if (capitals >= 40) {
+        API.sendChat(botChat.subChat(botChat.getChatMessage("caps"), {name: chat.un}));
+        return true;
+    }
+    msg = msg.toLowerCase();
+    if (msg === 'skip') {
+        API.sendChat(botChat.subChat(botChat.getChatMessage("askskip"), {name: chat.un}));
+        return true;
+    }
+    for (var j = 0; j < botChat.spam.length; j++) {
+        if (msg === botChat.spam[j]) {
+            API.sendChat(botChat.subChat(botChat.spam, {name: chat.un}));
+            return true;
+        }
+    }
+    return false;
   },
   spam: [
-		'hueh', 'hu3', 'brbr', 'heu', 'brbr', 'kkkk', 'spoder', 'mafia', 'zuera', 'zueira',
-		'zueria', 'aehoo', 'aheu', 'alguem', 'algum', 'brazil', 'zoeira', 'fuckadmins', 'affff', 'vaisefoder', 'huenaarea',
-		'hitler', 'ashua', 'ahsu', 'ashau', 'lulz', 'huehue', 'hue', 'huehuehue', 'merda', 'pqp', 'puta', 'mulher', 'pula', 'retarda', 'caralho', 'filha', 'ppk',
-		'gringo', 'fuder', 'foder', 'hua', 'ahue', 'modafuka', 'modafoka', 'mudafuka', 'mudafoka', 'ooooooooooooooo', 'foda'],
+        'hueh', 'hu3', 'brbr', 'heu', 'brbr', 'kkkk', 'spoder', 'mafia', 'zuera', 'zueira',
+        'zueria', 'aehoo', 'aheu', 'alguem', 'algum', 'brazil', 'zoeira', 'fuckadmins', 'affff', 'vaisefoder', 'huenaarea',
+        'hitler', 'ashua', 'ahsu', 'ashau', 'lulz', 'huehue', 'hue', 'huehuehue', 'merda', 'pqp', 'puta', 'mulher', 'pula', 'retarda', 'caralho', 'filha', 'ppk',
+        'gringo', 'fuder', 'foder', 'hua', 'ahue', 'modafuka', 'modafoka', 'mudafuka', 'mudafoka', 'ooooooooooooooo', 'foda'],
   curses: ['nigger', 'faggot', 'nigga', 'niqqa', 'motherfucker', 'modafocka'],
   //chatMessages: null,
 
@@ -917,7 +938,8 @@ var botChat = {
    botChat.chatMessages.push(["website", "Please visit our website: %%LINK%%"]);
    botChat.chatMessages.push(["youtube", "[%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
    botChat.chatMessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
-   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatMessages.push(["mystatsXX", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatMessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
    botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
    //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
@@ -937,7 +959,7 @@ var botChat = {
         return botChat.chatMessages[i][1];
       }
     }  
-	return "undefined message";
+    return "undefined message";
   },
   loadChatA: function (cb) {
         if (!cb) cb = function () {
@@ -968,65 +990,65 @@ var botChat = {
     },
 
   loadChatX: function (chat, obj) {
-	$.get(CONST.chatMessagesLink, function (json) {
-		if (json !== null && typeof json !== "undefined") {
-			if (typeof json === "string") json = JSON.parse(json);
-			botChat.chatMessages = json;
-			cb();
-		}
-	});
+    $.get(CONST.chatMessagesLink, function (json) {
+        if (json !== null && typeof json !== "undefined") {
+            if (typeof json === "string") json = JSON.parse(json);
+            botChat.chatMessages = json;
+            cb();
+        }
+    });
   },
-	chatFilter: function (chat) {
-		var msg = chat.message;
-		var perm = API.getPermission(chat.uid);
-		var user = USERS.lookupUserID(chat.uid);
-		var isMuted = false;
-		for (var i = 0; i < botVar.room.mutedUsers.length; i++) {
-			if (botVar.room.mutedUsers[i] === chat.uid) isMuted = true;
-		}
-		if (isMuted) {
-			API.moderateDeleteChat(chat.cid);
-			return true;
-		}
-		if (SETTINGS.settings.lockdownEnabled) {
-			if (perm === 0) {
-				API.moderateDeleteChat(chat.cid);
-				return true;
-			}
-		}
-		if (botChat.chatcleaner(chat)) {
-			API.moderateDeleteChat(chat.cid);
-			return true;
-		}
-		if (msg.indexOf('http://adf.ly/') > -1) {
-			API.moderateDeleteChat(chat.cid);
-			API.sendChat(botChat.subChat(botChat.getChatMessage("adfly"), {name: chat.un}));
-			return true;
-		}
-		if (msg.indexOf('autojoin was not enabled') > 0 || msg.indexOf('AFK message was not enabled') > 0 || msg.indexOf('.afkdisable') > 0 || msg.indexOf('.joindisable') > 0 || msg.indexOf('autojoin disabled') > 0 || msg.indexOf('AFK message disabled') > 0) {
-			API.moderateDeleteChat(chat.cid);
-			return true;
-		}
+    chatFilter: function (chat) {
+        var msg = chat.message;
+        var perm = API.getPermission(chat.uid);
+        var user = USERS.lookupUserID(chat.uid);
+        var isMuted = false;
+        for (var i = 0; i < botVar.room.mutedUsers.length; i++) {
+            if (botVar.room.mutedUsers[i] === chat.uid) isMuted = true;
+        }
+        if (isMuted) {
+            API.moderateDeleteChat(chat.cid);
+            return true;
+        }
+        if (SETTINGS.settings.lockdownEnabled) {
+            if (perm === 0) {
+                API.moderateDeleteChat(chat.cid);
+                return true;
+            }
+        }
+        if (botChat.chatcleaner(chat)) {
+            API.moderateDeleteChat(chat.cid);
+            return true;
+        }
+        if (msg.indexOf('http://adf.ly/') > -1) {
+            API.moderateDeleteChat(chat.cid);
+            API.sendChat(botChat.subChat(botChat.getChatMessage("adfly"), {name: chat.un}));
+            return true;
+        }
+        if (msg.indexOf('autojoin was not enabled') > 0 || msg.indexOf('AFK message was not enabled') > 0 || msg.indexOf('.afkdisable') > 0 || msg.indexOf('.joindisable') > 0 || msg.indexOf('autojoin disabled') > 0 || msg.indexOf('AFK message disabled') > 0) {
+            API.moderateDeleteChat(chat.cid);
+            return true;
+        }
 
-		var rlJoinChat = botChat.getChatMessage("roulettejoin");
-		var rlLeaveChat = botChat.getChatMessage("rouletteleave");
+        var rlJoinChat = botChat.getChatMessage("roulettejoin");
+        var rlLeaveChat = botChat.getChatMessage("rouletteleave");
 
-		var joinedroulette = rlJoinChat.split('%%NAME%%');
-		if (joinedroulette[1].length > joinedroulette[0].length) joinedroulette = joinedroulette[1];
-		else joinedroulette = joinedroulette[0];
+        var joinedroulette = rlJoinChat.split('%%NAME%%');
+        if (joinedroulette[1].length > joinedroulette[0].length) joinedroulette = joinedroulette[1];
+        else joinedroulette = joinedroulette[0];
 
-		var leftroulette = rlLeaveChat.split('%%NAME%%');
-		if (leftroulette[1].length > leftroulette[0].length) leftroulette = leftroulette[1];
-		else leftroulette = leftroulette[0];
+        var leftroulette = rlLeaveChat.split('%%NAME%%');
+        if (leftroulette[1].length > leftroulette[0].length) leftroulette = leftroulette[1];
+        else leftroulette = leftroulette[0];
 
-		if ((msg.indexOf(joinedroulette) > -1 || msg.indexOf(leftroulette) > -1) && chat.uid === botVar.botID) {
-			setTimeout(function (id) {
-				API.moderateDeleteChat(id);
-			}, 2 * 1000, chat.cid);
-			return true;
-		}
-		return false;
-	},
+        if ((msg.indexOf(joinedroulette) > -1 || msg.indexOf(leftroulette) > -1) && chat.uid === botVar.botID) {
+            setTimeout(function (id) {
+                API.moderateDeleteChat(id);
+            }, 2 * 1000, chat.cid);
+            return true;
+        }
+        return false;
+    },
 
     subChat: function (chat, obj) {
         try {
@@ -1046,12 +1068,12 @@ var botChat = {
     },
   findChatItem: function(itemID) {
     try{
-	  //Only scan up to the last 10 items in history:
-	  if (botVar.chatHistoryList.length > 10) {
-	    botDebug.debugMessage(true, "BEFORE LEN: " + botVar.chatHistoryList.length);
-	    botVar.chatHistoryList.splice(0, botVar.chatHistoryList.length - 10);
-	    botDebug.debugMessage(true, " AFTER LEN: " + botVar.chatHistoryList.length);
-	  }
+      //Only scan up to the last 10 items in history:
+      if (botVar.chatHistoryList.length > 10) {
+        botDebug.debugMessage(true, "BEFORE LEN: " + botVar.chatHistoryList.length);
+        botVar.chatHistoryList.splice(0, botVar.chatHistoryList.length - 10);
+        botDebug.debugMessage(true, " AFTER LEN: " + botVar.chatHistoryList.length);
+      }
       for (var i = 0; i < botVar.chatHistoryList.length; i++) {
           if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
               return botVar.chatHistoryList[i];
@@ -1061,58 +1083,76 @@ var botChat = {
       return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
       } catch (err) { UTIL.logException("findChatItem: " + err.message); }
   },
-  formatChat: function(chatMessage, username) {
-	botChat.commandChat.cid = "";
-	botChat.commandChat.message = chatMessage;
-	botChat.commandChat.sub = -1;
-	botChat.commandChat.un = username;
-	botChat.commandChat.uid = -1;
-	botChat.commandChat.type = "message";
-	botChat.commandChat.timestamp = Date.now();
-	botChat.commandChat.sound = "mention";
+  formatChat: function(chatMessage, username, uid) {
+    botChat.commandChat.cid = "";
+    botChat.commandChat.message = chatMessage;
+    botChat.commandChat.sub = -1;
+    botChat.commandChat.un = username;
+    botChat.commandChat.uid = uid;
+    botChat.commandChat.type = "message";
+    botChat.commandChat.timestamp = Date.now();
+    botChat.commandChat.sound = "mention";
     return botChat.commandChat;
   },
-  processChatItem: function(chatMessage, username) {
+  processChatItem: function(chatMessage, username, uid) {
     try{
       botDebug.debugMessage(false, username + ": " + chatMessage);
-	  var chat = botChat.formatChat(chatMessage, username);
-	  COMMANDS.checkCommands(chat);
+      var chat = botChat.formatChat(chatMessage, username, uid);
+      COMMANDS.checkCommands(chat);
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
+  },
+  getChatUserId: function(className) {
+    try{
+      //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+      //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
+      var  instr 
+      var idx = className.indexOf("user-");
+      if (idx < 0) return "";
+      var userID = className.substring(idx + 5);
+      idx = userID.indexOf(" ");
+      if (idx > 0) userID = userID.substring(0, idx);
+	  return userID;
+    //
+    } catch (err) { UTIL.logException("getChatUserId: " + err.message); }
   },
   getChatId: function(className) {
     try{
-	  // SAMPLE:
-	  //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
-	  //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-	  var  instr 
+      // SAMPLE:
+      //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+      //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
+      var  instr 
       var idx = className.indexOf("chat-id-");
-	  if (idx <= 0) return null;
-	  return className.substring(idx + 8)
+      if (idx < 0) return null;
+      return className.substring(idx + 8)
     } catch (err) { UTIL.logException("getChatId: " + err.message); }
   },
   processChatItems: function(liItem) {
     try{
       if (typeof liItem === "undefined") return;                // ignore empty items
-	  var chatId = botChat.getChatId(liItem.className);
-      botDebug.debugMessage(true, "CHAT - Item ID: " + chatId);
+      var chatId = botChat.getChatId(liItem.className);
+      var userId = botChat.getChatUserId(liItem.className);
+      if(chatId === null) return null;
+      botDebug.debugMessage(false, "CHAT - Item ID: " + chatId);
       if (chatId.length < 10) return;                        // ignore chat without IDs
       var itemHistory = botChat.findChatItem(chatId);
-      botDebug.debugMessage(true, "CHAT - Hist Item count: " + itemHistory.chatCount);
+      botDebug.debugMessage(false, "CHAT - Hist Item count: " + itemHistory.chatCount);
       var chatItems = liItem.getElementsByTagName("p");
-      botDebug.debugMessage(true, "CHAT - Items count: " + chatItems.length);
+      botDebug.debugMessage(false, "CHAT - Items count: " + chatItems.length);
       if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-      botDebug.debugMessage(true, "CHAT - User: " + username);
-	  var historyChatCount = itemHistory.chatCount;
+      //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
+      botDebug.debugMessage(false, "CHAT - User: " + username);
+      if (userId.length > 0) USERS.updateUserID(userId, username);
+      var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
-	  
+      
       //Process any unprocessed messages:
       for (var i = chatItems.length -1; i >= historyChatCount; i--) {
           var node = chatItems[i];
           var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
           chatMsg = chatMsg.replace(username, "");
-          botDebug.debugMessage(true, "CHAT - MSG: " + chatMsg);
-          botChat.processChatItem(chatMsg, username);
+          botDebug.debugMessage(false, "CHAT - MSG: " + chatMsg);
+          botChat.processChatItem(chatMsg, username, userId);
       }
       } catch (err) { UTIL.logException("processChatItems: " + err.message); }
     },
@@ -1121,182 +1161,182 @@ var botChat = {
 
 //SECTION EIGHTBALL: Core 8 ball functionality:
 var EIGHTBALL = {
-	EightBallArray: [
-	"As I See It Yes", 
-	"Ask Again Later", 
-	"Better Not Tell You Now", 
-	"Cannot Predict Now", 
-	"Concentrate and Ask Again", 
-	"Don't Count On It", 
-	"It Is Certain", 
-	"It Is Decidedly So", 
-	"Most Likely", 
-	"My Reply Is No", 
-	"My Sources Say No", 
-	"Outlook Good", 
-	"Outlook Not So Good", 
-	"Reply Hazy Try Again", 
-	"Signs Point to Yes", 
-	"Very Doubtful", 
-	"Without A Doubt", 
-	"Yes", 
-	"Yes - Definitely", 
-	"You May Rely On It",
-	"Absolutely", 
-	"Answer Unclear Ask Later", 
-	"Cannot Foretell Now", 
-	"Can't Say Now", 
-	"Chances Aren't Good", 
-	"Consult Me Later", 
-	"Don't Bet On It", 
-	"Focus And Ask Again", 
-	"Indications Say Yes", 
-	"Looks Like Yes", 
-	"No", 
-	"No Doubt About It", 
-	"Positively", 
-	"Prospect Good", 
-	"So It Shall Be", 
-	"The Stars Say No", 
-	"Unlikely", 
-	"Very Likely", 
-	"You Can Count On It",
-	"As If",
-	"Ask Me If I Care",
-	"Dumb Question Ask Another",
-	"Forget About It",
-	"Get A Clue",
-	"In Your Dreams",
-	"Not A Chance",
-	"Obviously",
-	"Oh Please",
-	"Sure",
-	"That's Ridiculous",
-	"Well Maybe",
-	"What Do You Think?",
-	"Whatever",
-	"Who Cares?",
-	"Yeah And I'm The Pope",
-	"Yeah Right",
-	"You Wish",
-	"You've Got To Be Kidding",
-	"You Look Marvelous", 
-	"Your Breath Is So Minty", 
-	"You're 100% Fun!", 
-	"You're A Winner",
-	"At Least I Love You",
-	"Have You Lost Weight?",
-	"Go flip a quarter",
-	"Never gonna happen",
-	"Smells like a Yes",
-	"Si Amigo, like cheese on nachos",
-	"When pigs fly!",
-	"No, but I still love you",
-	"Give me a dollar, then I'll answer",
-	"I got yes written on my forehead",
-	"Sorry, but no way",
-	"I know, but I'm not telling",
-	"I guess so, maybe",
-	"Yes! Hooray, Yippee!",
-	"Ha Ha Ha, no!",
-	"Of course silly",
-	"My dog thinks so",
-	"Um.. Ok, sure, why not?",
-	"Will the sun rise tomorrow?",
-	"Yep, like a bird has feathers",
-	"You can bet your ass on it",
-	"Hell No",
-	"Are you stupid?",
-	"Hell Yes",
-	"Give it up",
-	"Maybe if you weren't so lazy",
-	"Make it happen",
-	"No way, sucka!",
-	"Wow, you are an idiot!",
-	"Yes, now stop asking!",
-	"Ha Ha Ha! Nope!",
-	"Don't you have something better to do?",
-	"Of course, shit head",
-	"5 letters, LOL NO!",
-	"Go ask your mama",
-	"Just a wild guess, but yes",
-	"I really don't care",
-	"Damn Right",
-	"Boring! Ask something exciting",
-	"Swear on my 8 balls it's true",
-	"Shit Happens",
-	"F*ck Yeah",
-	"F*ck No",
-	"What the F*ck?",
-	"Hell F*cking Yes",
-	"Hell F*cking No",
-	"You F*cking Crazy?",
-	"Of course F*cker",
-	"No way F*cker",
-	"Who F*cking cares",
-	"God Damn F*cking Right!",
-	"Not a F*cking chance",
-	"I don't F*cking know",
-	"No F*cking doubt",
-	"No F*cking way",
-	"Seriously F*cker?",
-	"F*ck, why not.",
-	"Don't F*cking count on it",
-	"It could F*cking happen",
-	"You must be out of your F*cking mind",
-	"Sure F*cking thing",
-	"F*cking Right",
-	"Signs point to F*cking Yes",
-	"It is F*cking certain"
-	],
+    EightBallArray: [
+    "As I See It Yes", 
+    "Ask Again Later", 
+    "Better Not Tell You Now", 
+    "Cannot Predict Now", 
+    "Concentrate and Ask Again", 
+    "Don't Count On It", 
+    "It Is Certain", 
+    "It Is Decidedly So", 
+    "Most Likely", 
+    "My Reply Is No", 
+    "My Sources Say No", 
+    "Outlook Good", 
+    "Outlook Not So Good", 
+    "Reply Hazy Try Again", 
+    "Signs Point to Yes", 
+    "Very Doubtful", 
+    "Without A Doubt", 
+    "Yes", 
+    "Yes - Definitely", 
+    "You May Rely On It",
+    "Absolutely", 
+    "Answer Unclear Ask Later", 
+    "Cannot Foretell Now", 
+    "Can't Say Now", 
+    "Chances Aren't Good", 
+    "Consult Me Later", 
+    "Don't Bet On It", 
+    "Focus And Ask Again", 
+    "Indications Say Yes", 
+    "Looks Like Yes", 
+    "No", 
+    "No Doubt About It", 
+    "Positively", 
+    "Prospect Good", 
+    "So It Shall Be", 
+    "The Stars Say No", 
+    "Unlikely", 
+    "Very Likely", 
+    "You Can Count On It",
+    "As If",
+    "Ask Me If I Care",
+    "Dumb Question Ask Another",
+    "Forget About It",
+    "Get A Clue",
+    "In Your Dreams",
+    "Not A Chance",
+    "Obviously",
+    "Oh Please",
+    "Sure",
+    "That's Ridiculous",
+    "Well Maybe",
+    "What Do You Think?",
+    "Whatever",
+    "Who Cares?",
+    "Yeah And I'm The Pope",
+    "Yeah Right",
+    "You Wish",
+    "You've Got To Be Kidding",
+    "You Look Marvelous", 
+    "Your Breath Is So Minty", 
+    "You're 100% Fun!", 
+    "You're A Winner",
+    "At Least I Love You",
+    "Have You Lost Weight?",
+    "Go flip a quarter",
+    "Never gonna happen",
+    "Smells like a Yes",
+    "Si Amigo, like cheese on nachos",
+    "When pigs fly!",
+    "No, but I still love you",
+    "Give me a dollar, then I'll answer",
+    "I got yes written on my forehead",
+    "Sorry, but no way",
+    "I know, but I'm not telling",
+    "I guess so, maybe",
+    "Yes! Hooray, Yippee!",
+    "Ha Ha Ha, no!",
+    "Of course silly",
+    "My dog thinks so",
+    "Um.. Ok, sure, why not?",
+    "Will the sun rise tomorrow?",
+    "Yep, like a bird has feathers",
+    "You can bet your ass on it",
+    "Hell No",
+    "Are you stupid?",
+    "Hell Yes",
+    "Give it up",
+    "Maybe if you weren't so lazy",
+    "Make it happen",
+    "No way, sucka!",
+    "Wow, you are an idiot!",
+    "Yes, now stop asking!",
+    "Ha Ha Ha! Nope!",
+    "Don't you have something better to do?",
+    "Of course, shit head",
+    "5 letters, LOL NO!",
+    "Go ask your mama",
+    "Just a wild guess, but yes",
+    "I really don't care",
+    "Damn Right",
+    "Boring! Ask something exciting",
+    "Swear on my 8 balls it's true",
+    "Shit Happens",
+    "F*ck Yeah",
+    "F*ck No",
+    "What the F*ck?",
+    "Hell F*cking Yes",
+    "Hell F*cking No",
+    "You F*cking Crazy?",
+    "Of course F*cker",
+    "No way F*cker",
+    "Who F*cking cares",
+    "God Damn F*cking Right!",
+    "Not a F*cking chance",
+    "I don't F*cking know",
+    "No F*cking doubt",
+    "No F*cking way",
+    "Seriously F*cker?",
+    "F*ck, why not.",
+    "Don't F*cking count on it",
+    "It could F*cking happen",
+    "You must be out of your F*cking mind",
+    "Sure F*cking thing",
+    "F*cking Right",
+    "Signs point to F*cking Yes",
+    "It is F*cking certain"
+    ],
 
   eightBallSelect: function()  {  //Added 04/01/2015 Zig
-	try  {
-		var arrayCount = EIGHTBALL.EightBallArray.length;
-		var arrayID = Math.floor(Math.random() * arrayCount);
-		return EIGHTBALL.EightBallArray[arrayID];
-	}
-	catch(err) {
-	  UTIL.logException("eightBallSelect: " + err.message);
-	}
+    try  {
+        var arrayCount = EIGHTBALL.EightBallArray.length;
+        var arrayID = Math.floor(Math.random() * arrayCount);
+        return EIGHTBALL.EightBallArray[arrayID];
+    }
+    catch(err) {
+      UTIL.logException("eightBallSelect: " + err.message);
+    }
   }
 };
 
 //SECTION UTIL: Core functionality:
 var UTIL = {
-	numberToIcon: function(intValue) {
-		switch (intValue) {
-			case 0: return ":zero:";
-			case 1: return ":one:";
-			case 2: return ":two:";
-			case 3: return ":three:";
-			case 4: return ":four:";
-			case 5: return ":five:";
-			case 6: return ":six:";
-			case 7: return ":seven:";
-			case 8: return ":eight:";
-			case 9: return ":nine:";
-			case 10: return ":keycap_ten:";
-		}
-		return intValue;
-	},
-	formatPercentage: function(a, b) {
-		if (a === 0) return "0%";
-		if (b === 0) return "100%";
-		return (((a / b).toFixed(2)) * 100).toFixed(0) + "%";
-	},
-	getDOY: function() {
-	  var now = new Date();
-	  var start = new Date(now.getFullYear(), 0, 0);
-	  var diff = now - start;
-	  var oneDay = 1000 * 60 * 60 * 24;
-	  var day = Math.floor(diff / oneDay);
-	  return day;
-	},
+    numberToIcon: function(intValue) {
+        switch (intValue) {
+            case 0: return ":zero:";
+            case 1: return ":one:";
+            case 2: return ":two:";
+            case 3: return ":three:";
+            case 4: return ":four:";
+            case 5: return ":five:";
+            case 6: return ":six:";
+            case 7: return ":seven:";
+            case 8: return ":eight:";
+            case 9: return ":nine:";
+            case 10: return ":keycap_ten:";
+        }
+        return intValue;
+    },
+    formatPercentage: function(a, b) {
+        if (a === 0) return "0%";
+        if (b === 0) return "100%";
+        return (((a / b).toFixed(2)) * 100).toFixed(0) + "%";
+    },
+    getDOY: function() {
+      var now = new Date();
+      var start = new Date(now.getFullYear(), 0, 0);
+      var diff = now - start;
+      var oneDay = 1000 * 60 * 60 * 24;
+      var day = Math.floor(diff / oneDay);
+      return day;
+    },
   killbot: function () {
         clearInterval(AFK.afkInterval);
-		clearInterval(RANDOMCOMMENTS.randomInterval);
-		clearInterval(USERS.loadUserInterval);
+        clearInterval(RANDOMCOMMENTS.randomInterval);
+        clearInterval(USERS.loadUserInterval);
         botVar.botStatus = false;
   },
   linkFixer: function (msg) {
@@ -1312,94 +1352,94 @@ var UTIL = {
         return m;
    },
   msToStr: function (msTime) {
-	var ms, msg, timeAway;
-	msg = '';
-	timeAway = {
-		'days': 0,
-		'hours': 0,
-		'minutes': 0,
-		'seconds': 0
-	};
-	ms = {
-		'day': 24 * 60 * 60 * 1000,
-		'hour': 60 * 60 * 1000,
-		'minute': 60 * 1000,
-		'second': 1000
-	};
-	if (msTime > ms.day) {
-		timeAway.days = Math.floor(msTime / ms.day);
-		msTime = msTime % ms.day;
-	}
-	if (msTime > ms.hour) {
-		timeAway.hours = Math.floor(msTime / ms.hour);
-		msTime = msTime % ms.hour;
-	}
-	if (msTime > ms.minute) {
-		timeAway.minutes = Math.floor(msTime / ms.minute);
-		msTime = msTime % ms.minute;
-	}
-	if (msTime > ms.second) {
-		timeAway.seconds = Math.floor(msTime / ms.second);
-	}
-	if (timeAway.days !== 0) {
-		msg += timeAway.days.toString() + 'd';
-	}
-	if (timeAway.hours !== 0) {
-		msg += timeAway.hours.toString() + 'h';
-	}
-	if (timeAway.minutes !== 0) {
-		msg += timeAway.minutes.toString() + 'm';
-	}
-	if (timeAway.minutes < 1 && timeAway.hours < 1 && timeAway.days < 1) {
-		msg += timeAway.seconds.toString() + 's';
-	}
-	if (msg !== '') {
-		return msg;
-	} else {
-		return false;
-	}
+    var ms, msg, timeAway;
+    msg = '';
+    timeAway = {
+        'days': 0,
+        'hours': 0,
+        'minutes': 0,
+        'seconds': 0
+    };
+    ms = {
+        'day': 24 * 60 * 60 * 1000,
+        'hour': 60 * 60 * 1000,
+        'minute': 60 * 1000,
+        'second': 1000
+    };
+    if (msTime > ms.day) {
+        timeAway.days = Math.floor(msTime / ms.day);
+        msTime = msTime % ms.day;
+    }
+    if (msTime > ms.hour) {
+        timeAway.hours = Math.floor(msTime / ms.hour);
+        msTime = msTime % ms.hour;
+    }
+    if (msTime > ms.minute) {
+        timeAway.minutes = Math.floor(msTime / ms.minute);
+        msTime = msTime % ms.minute;
+    }
+    if (msTime > ms.second) {
+        timeAway.seconds = Math.floor(msTime / ms.second);
+    }
+    if (timeAway.days !== 0) {
+        msg += timeAway.days.toString() + 'd';
+    }
+    if (timeAway.hours !== 0) {
+        msg += timeAway.hours.toString() + 'h';
+    }
+    if (timeAway.minutes !== 0) {
+        msg += timeAway.minutes.toString() + 'm';
+    }
+    if (timeAway.minutes < 1 && timeAway.hours < 1 && timeAway.days < 1) {
+        msg += timeAway.seconds.toString() + 's';
+    }
+    if (msg !== '') {
+        return msg;
+    } else {
+        return false;
+    }
   },
    
   rankToNumber: function (rankString) {
-	var rankInt = null;
-	switch (rankString) {
-		case "admin":
-			rankInt = 10;
-			break;
-		case "ambassador":
-			rankInt = 7;
-			break;
-		case "host":
-			rankInt = 5;
-			break;
-		case "cohost":
-			rankInt = 4;
-			break;
-		case "manager":
-			rankInt = 3;
-			break;
-		case "bouncer":
-			rankInt = 2;
-			break;
-		case "residentdj":
-			rankInt = 1;
-			break;
-		case "user":
-			rankInt = 0;
-			break;
-	}
-	return rankInt;
+    var rankInt = null;
+    switch (rankString) {
+        case "admin":
+            rankInt = 10;
+            break;
+        case "ambassador":
+            rankInt = 7;
+            break;
+        case "host":
+            rankInt = 5;
+            break;
+        case "cohost":
+            rankInt = 4;
+            break;
+        case "manager":
+            rankInt = 3;
+            break;
+        case "bouncer":
+            rankInt = 2;
+            break;
+        case "residentdj":
+            rankInt = 1;
+            break;
+        case "user":
+            rankInt = 0;
+            break;
+    }
+    return rankInt;
   },
   logObject: function (objectToLog, objectName) {
-	try {
-		for (var prop in objectToLog) {
-			if (typeof objectToLog[prop] === "object") 
-				UTIL.logObject(objectToLog[prop], objectName + "." + prop);
-			else
-				botDebug.debugMessage(false, "Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop]);
-		}
-	}
-	catch(err) { UTIL.logException("logObject: " + err.message); }
+    try {
+        for (var prop in objectToLog) {
+            if (typeof objectToLog[prop] === "object") 
+                UTIL.logObject(objectToLog[prop], objectName + "." + prop);
+            else
+                botDebug.debugMessage(false, "Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop]);
+        }
+    }
+    catch(err) { UTIL.logException("logObject: " + err.message); }
   },
 
   logException: function(exceptionMessage) {
@@ -1410,154 +1450,153 @@ var UTIL = {
 //SECTION ROLL: All Roll functionality
 var TASTY = {
     settings: {
-	  rolledDice: false
-	},
-	resetDailyRolledStats: function (roomUser) {
-		try {
-		var DOY = UTIL.getDOY();
-		if (roomUser.rollStats.DOY !== DOY) {
-		 	roomUser.rollStats.DOY = DOY;
-		 	roomUser.rollStats.dayWoot = 0;
-		 	roomUser.rollStats.dayTotal = 0;
-		}
-	  }
-		catch(err) {
-		  UTIL.logException("resetDailyRolledStats: " + err.message);
-		  return "";
-		}
-	},
-	getRolledStats: function (roomUser) {
-		try {
-		   return "";
-		   //todoer RollStats: var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
-		   //todoer RollStats: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
-		   //todoer RollStats: rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
-		   //todoer RollStats: rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
-		   //todoer RollStats: return rollStats;
-		}
-		catch(err) {
-		  UTIL.logException("getRolledStats: " + err.message);
-		  return "";
-		}
-	},
-	updateRolledStats: function (usrObjectID, wooting) {
-		try {
-		  var roomUser = USERS.defineRoomUser(usrObjectID);
-		  TASTY.resetDailyRolledStats(roomUser);
-		  if (wooting) {
-		 	roomUser.rollStats.lifeWoot++;
-		 	roomUser.rollStats.dayWoot++;
-		  } 
-		  roomUser.rollStats.lifeTotal++;
-		  roomUser.rollStats.dayTotal++;
-		  return TASTY.getRolledStats(roomUser);
-	    }
-		catch(err) {
-		  UTIL.logException("updateRolledStats: " + err.message);
-		  return "";
-		}
-	},
-	setRolled: function (usrObjectID, value, wooting) {
-		var roomUser = USERS.defineRoomUser(usrObjectID);
-		if (roomUser === false) return;
-		roomUser.rolled = value;
-	},
-	getRolled: function (usrObjectID) {
-		var user = USERS.defineRoomUser(usrObjectID);
-		if (user === false) return false;
-		return user.rolled;
-	},
-	tastyVote: function (usrObjectID, cmd) {   //todoerererererererer
-		try {
-		var roomUser = USERS.defineRoomUser(usrObjectID);
-		if (roomUser.tastyVote) return;
-		roomUser.votes.tastyGiv++;
-		if (API.currentDjName() === roomUser.username)
-		{
-		    API.sendChat("I'm glad you find your own play tasty @" + roomUser.username);
-		    return;
-		 }
-		var tastyComment = TASTY.tastyComment(cmd);
-		roomUser.tastyVote = true;
-		setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: roomUser.username})); }, 250);
-	
-		botVar.tastyCount++;
-		var currdj = API.getDJ();
-		currdj.votes.tastyRcv++;
-		}
-		catch(err) { UTIL.logException("tastyVote: " + err.message); }
-	},
-	bopCommand: function (cmd) {
-		try {
-			//TODO: menorah xmas dreidel plus many other holiday commands  (Only work if the month is 12)
-			var commandList = ['tasty', 'rock', 'props', 'woot', 'groot', 'groovy', 'jam','nice','bop','cowbell','sax','ukulele','tango','samba','disco','waltz','metal',
-					  'bob','boogie','cavort','conga','flit','foxtrot','frolic','gambol','hop','hustle','jig','jitter','jitterbug','jive','jump','leap','prance',
-					  'promenade','rhumba','shimmy','strut','sway','swing','great','hail','good','acceptable','bad','excellent','exceptional','favorable','marvelous',
-					  'positive','satisfactory','satisfying','superb','valuable','wonderful','ace','boss','bully','capital','choice','crack','pleasing','prime','rad',
-					  'sound','spanking','sterling','super','superior','welcome','worthy','admirable','agreeable','commendable','congenial','deluxe','first-class',
-					  'first-rate','gnarly','gratifying','honorable','neat','precious','recherché','reputable','select','shipshape','splendid','stupendous','keen',
-					  'nifty','swell','sensational','fine','cool','perfect','wicked','fab','heavy','incredible','outstanding','phenomenal','remarkable','special',
-					  'terrific','unique','aces','capital','dandy','enjoyable','exquisite','fashionable','lovely','love','solid','striking','top-notch',
-					  'slick','pillar','exemplary','alarming','astonishing','awe-inspiring','beautiful','breathtaking','fearsome','formidable','frightening','winner',
-					  'impressive','intimidating','facinating','prodigious','magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand',
-					  'creamy','easy','effortless','fluid','gentle','glossy','peaceful','polished','serene','sleek','soft','tranquil','velvety','soothing','fluent','frictionless',
-					  'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
-					  'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
-					  'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
-					  'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
-					  'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','epic','blues','heart','feels','dope','makeitrain','wumbo',
-					  'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
-					  'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
-					  'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
-					  'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','tits','hooters',
-					  'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
-					  'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
-					  '133t','roofus','rufus','schway','shiz','shiznak','shiznik','shiznip','shiznit','shiznot','shizot','shwanky','shway',
-					  'sic','sicc','skippy','slammin','slamming','slinkster','smack','smashing','smashingly','snizzo','spiffylicious','superfly',
-					  'swass','tender','thrill','tight','tits','tizight','todiefor','to die for','trill','tuff','vicious','whizz-bang','wick',
-					  'wow','omg','A-1','ace','aces','aight','allthatandabagofchips','all that and a bag of chips','alrighty','alvo','amped',
-					  'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
-					  'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
-					  'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
-					  'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
-					  'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
-					  'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
-					  'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
-					  'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
-					  'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
-					  'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
-					  'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
-					  'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
-					  'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
-					  'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
-					  '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
-					  ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
-					  'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-					  'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-					  'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf'];
-			// If a command if passed in validate it and return true if it is a Tasty command:
-			if (cmd.length > 0) {
-				if (commandList.indexOf(cmd) < 0) return true;
-				return false;
-			}
-			// Else return a random Tasty command for Larry to use on his tasty points:
-			var idx = Math.floor(Math.random() * commandList.length);
-			return commandList[idx];
-		}
-		catch(err) { UTIL.logException("bopCommand: " + err.message); }
-	},
-	tastyComment: function(cmd)  {  //Added 04/03/2015 Zig
-		try  {
-			var arrayCount = CONST.tastyCommentArray.length;
-			var arrayID = Math.floor(Math.random() * arrayCount);
-			if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
-			var tastyCmt = "[ " + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
-			var djName = API.currentDjName();
-			if (djName.length > 0) tastyCmt += " @"  + djName;
-			return tastyCmt;
-		}
-		catch(err) { UTIL.logException("tastyComment: " + err.message);		}
-	},
+      rolledDice: false
+    },
+    resetDailyRolledStats: function (roomUser) {
+        try {
+        var DOY = UTIL.getDOY();
+        if (roomUser.rollStats.DOY !== DOY) {
+             roomUser.rollStats.DOY = DOY;
+             roomUser.rollStats.dayWoot = 0;
+             roomUser.rollStats.dayTotal = 0;
+        }
+      }
+        catch(err) {
+          UTIL.logException("resetDailyRolledStats: " + err.message);
+          return "";
+        }
+    },
+    getRolledStats: function (roomUser) {
+        try {
+           var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
+           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
+           rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
+           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
+           return rollStats;
+        }
+        catch(err) {
+          UTIL.logException("getRolledStats: " + err.message);
+          return "";
+        }
+    },
+    updateRolledStats: function (usrObjectID, wooting) {
+        try {
+          var roomUser = USERS.defineRoomUser(usrObjectID);
+          TASTY.resetDailyRolledStats(roomUser);
+          if (wooting) {
+             roomUser.rollStats.lifeWoot++;
+             roomUser.rollStats.dayWoot++;
+          } 
+          roomUser.rollStats.lifeTotal++;
+          roomUser.rollStats.dayTotal++;
+          return TASTY.getRolledStats(roomUser);
+        }
+        catch(err) {
+          UTIL.logException("updateRolledStats: " + err.message);
+          return "";
+        }
+    },
+    setRolled: function (usrObjectID, value, wooting) {
+        var roomUser = USERS.defineRoomUser(usrObjectID);
+        if (roomUser === false) return;
+        roomUser.rolled = value;
+    },
+    getRolled: function (usrObjectID) {
+        var user = USERS.defineRoomUser(usrObjectID);
+        if (user === false) return false;
+        return user.rolled;
+    },
+    tastyVote: function (usrObjectID, cmd) {   //todoerererererererer
+        try {
+        var roomUser = USERS.defineRoomUser(usrObjectID);
+        if (roomUser.tastyVote) return;
+        roomUser.votes.tastyGiv++;
+        if (API.currentDjName() === roomUser.username)
+        {
+            API.sendChat("I'm glad you find your own play tasty @" + roomUser.username);
+            return;
+         }
+        var tastyComment = TASTY.tastyComment(cmd);
+        roomUser.tastyVote = true;
+        setTimeout(function () { API.sendChat(botChat.subChat(tastyComment, {pointfrom: roomUser.username})); }, 250);
+    
+        botVar.tastyCount++;
+        var currdj = API.getDJ();
+        currdj.votes.tastyRcv++;
+        }
+        catch(err) { UTIL.logException("tastyVote: " + err.message); }
+    },
+    bopCommand: function (cmd) {
+        try {
+            //TODO: menorah xmas dreidel plus many other holiday commands  (Only work if the month is 12)
+            var commandList = ['tasty', 'rock', 'props', 'woot', 'groot', 'groovy', 'jam','nice','bop','cowbell','sax','ukulele','tango','samba','disco','waltz','metal',
+                      'bob','boogie','cavort','conga','flit','foxtrot','frolic','gambol','hop','hustle','jig','jitter','jitterbug','jive','jump','leap','prance',
+                      'promenade','rhumba','shimmy','strut','sway','swing','great','hail','good','acceptable','bad','excellent','exceptional','favorable','marvelous',
+                      'positive','satisfactory','satisfying','superb','valuable','wonderful','ace','boss','bully','capital','choice','crack','pleasing','prime','rad',
+                      'sound','spanking','sterling','super','superior','welcome','worthy','admirable','agreeable','commendable','congenial','deluxe','first-class',
+                      'first-rate','gnarly','gratifying','honorable','neat','precious','recherché','reputable','select','shipshape','splendid','stupendous','keen',
+                      'nifty','swell','sensational','fine','cool','perfect','wicked','fab','heavy','incredible','outstanding','phenomenal','remarkable','special',
+                      'terrific','unique','aces','capital','dandy','enjoyable','exquisite','fashionable','lovely','love','solid','striking','top-notch',
+                      'slick','pillar','exemplary','alarming','astonishing','awe-inspiring','beautiful','breathtaking','fearsome','formidable','frightening','winner',
+                      'impressive','intimidating','facinating','prodigious','magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand',
+                      'creamy','easy','effortless','fluid','gentle','glossy','peaceful','polished','serene','sleek','soft','tranquil','velvety','soothing','fluent','frictionless',
+                      'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
+                      'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
+                      'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
+                      'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
+                      'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','epic','blues','heart','feels','dope','makeitrain','wumbo',
+                      'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
+                      'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
+                      'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
+                      'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','tits','hooters',
+                      'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
+                      'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
+                      '133t','roofus','rufus','schway','shiz','shiznak','shiznik','shiznip','shiznit','shiznot','shizot','shwanky','shway',
+                      'sic','sicc','skippy','slammin','slamming','slinkster','smack','smashing','smashingly','snizzo','spiffylicious','superfly',
+                      'swass','tender','thrill','tight','tits','tizight','todiefor','to die for','trill','tuff','vicious','whizz-bang','wick',
+                      'wow','omg','A-1','ace','aces','aight','allthatandabagofchips','all that and a bag of chips','alrighty','alvo','amped',
+                      'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
+                      'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
+                      'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
+                      'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
+                      'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
+                      'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
+                      'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
+                      'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
+                      'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
+                      'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
+                      'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
+                      'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
+                      'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
+                      'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
+                      '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
+                      ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
+                      'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
+                      'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+                      'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf'];
+            // If a command if passed in validate it and return true if it is a Tasty command:
+            if (cmd.length > 0) {
+                if (commandList.indexOf(cmd) < 0) return true;
+                return false;
+            }
+            // Else return a random Tasty command for Larry to use on his tasty points:
+            var idx = Math.floor(Math.random() * commandList.length);
+            return commandList[idx];
+        }
+        catch(err) { UTIL.logException("bopCommand: " + err.message); }
+    },
+    tastyComment: function(cmd)  {  //Added 04/03/2015 Zig
+        try  {
+            var arrayCount = CONST.tastyCommentArray.length;
+            var arrayID = Math.floor(Math.random() * arrayCount);
+            if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
+            var tastyCmt = "[ " + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
+            var djName = API.currentDjName();
+            if (djName.length > 0) tastyCmt += " @"  + djName;
+            return tastyCmt;
+        }
+        catch(err) { UTIL.logException("tastyComment: " + err.message);        }
+    },
 };
 //SECTION Debug: All Debug functionality:
 var botDebug = {
@@ -1578,96 +1617,97 @@ var AFK = {
   afkInterval: null,
   afkList: [],
   settings: {
-	maximumAfk: 60,
-	afkRemoval: true,
-	afk5Days: true,
-	afk7Days: true,
-	afkRemoveStart: 0,
-	afkRemoveEnd: 24,
-	afkpositionCheck: 30,
+    maximumAfk: 60,
+    afkRemoval: true,
+    afk5Days: true,
+    afk7Days: true,
+    afkRemoveStart: 0,
+    afkRemoveEnd: 24,
+    afkpositionCheck: 30,
     afkRankCheck: "ambassador"
   },
   afkCheck: function () {
-	try {
-	if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
-	if (!AFK.afkRemovalNow()) return void (0);
-	var rank = UTIL.rankToNumber(AFK.settings.afkRankCheck);
-	var djlist = API.getWaitList();
-	var lastPos = Math.min(djlist.length, AFK.settings.afkpositionCheck);
-	if (lastPos - 1 > djlist.length) return void (0);
-	for (var i = 0; i < lastPos; i++) {
-		if (typeof djlist[i] !== 'undefined') {
-			var id = djlist[i].id;
-			var user = USERS.lookupUserID(id);
-			if (typeof user !== 'boolean') {
-				var dubUser = API.getDubUser(user);
-				if (rank !== null) {
-					var name = dubUser.username;
-					var lastActive = USERS.getLastActivity(user);
-					var inactivity = Date.now() - lastActive;
-					var time = UTIL.msToStr(inactivity);
-					var warncount = user.afkWarningCount;
-					if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
-						if (warncount === 0) {
-							API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
-							user.afkWarningCount = 3;
-							user.afkCountdown = setTimeout(function (userToChange) {
-								userToChange.afkWarningCount = 1;
-							}, 90 * 1000, user);
-						}
-						else if (warncount === 1) {
-							API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
-							user.afkWarningCount = 3;
-							user.afkCountdown = setTimeout(function (userToChange) {
-								userToChange.afkWarningCount = 2;
-							}, 30 * 1000, user);
-						}
-						else if (warncount === 2) {
-							var pos = API.getWaitListPosition(id);
-							if (pos !== -1) {
-								pos++;
-								AFK.afkList.push([id, Date.now(), pos]);
-								AFK.resetDC(user);
-								API.moderateRemoveDJ(id);
-								user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-								API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
-							}
-							user.afkWarningCount = 0;
-						}
-					}
-				}
-			}
-		}
-	}
-	}
-	catch(err) { UTIL.logException("afkCheck: " + err.message); }
+    try {
+    if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
+    if (!AFK.afkRemovalNow()) return void (0);
+    var rank = UTIL.rankToNumber(AFK.settings.afkRankCheck);
+    var djlist = API.getWaitList();
+    var lastPos = Math.min(djlist.length, AFK.settings.afkpositionCheck);
+    if (lastPos - 1 > djlist.length) return void (0);
+    for (var i = 0; i < lastPos; i++) {
+        if (typeof djlist[i] !== 'undefined') {
+            var id = djlist[i].id;
+            var user = USERS.lookupUserID(id);
+            if (typeof user !== 'boolean') {
+                var dubUser = API.getDubUser(user);
+                if (rank !== null) {
+                    var name = dubUser.username;
+                    var lastActive = USERS.getLastActivity(user);
+                    var inactivity = Date.now() - lastActive;
+                    var time = UTIL.msToStr(inactivity);
+                    var warncount = user.afkWarningCount;
+					//todoer GET AFK WORKING:
+                    if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
+                        if (warncount === 0) {
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
+                            user.afkWarningCount = 3;
+                            user.afkCountdown = setTimeout(function (userToChange) {
+                                userToChange.afkWarningCount = 1;
+                            }, 90 * 1000, user);
+                        }
+                        else if (warncount === 1) {
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
+                            user.afkWarningCount = 3;
+                            user.afkCountdown = setTimeout(function (userToChange) {
+                                userToChange.afkWarningCount = 2;
+                            }, 30 * 1000, user);
+                        }
+                        else if (warncount === 2) {
+                            var pos = API.getWaitListPosition(id);
+                            if (pos !== -1) {
+                                pos++;
+                                AFK.afkList.push([id, Date.now(), pos]);
+                                AFK.resetDC(user);
+                                API.moderateRemoveDJ(id);
+                                user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
+                                API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+                            }
+                            user.afkWarningCount = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    }
+    catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
   resetDC: function (user) {
-	user.lastDC.time = null;
-	user.lastDC.position = -1;
-	user.lastDC.leftroom = null;
-	user.lastKnownPosition = -1;
-	user.lastSeenInLine = null;
-	user.lastDC.songCount = 0;
-	user.beerRun = false;
-	user.inMeeting = false;
-	user.atLunch = false;
+    user.lastDC.time = null;
+    user.lastDC.position = -1;
+    user.lastDC.leftroom = null;
+    user.lastKnownPosition = -1;
+    user.lastSeenInLine = null;
+    user.lastDC.songCount = 0;
+    user.beerRun = false;
+    user.inMeeting = false;
+    user.atLunch = false;
   },
 
   afkRemovalNow: function () {
-	try {
-		if (!AFK.settings.afk5Days && !AFK.settings.afk7Days) return false;
-		var currDate = new Date();
-		//Not on Saturday/Sunday if not monitoring 7 days a week
-		if (!AFK.settings.afk7Days) {
-			var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
-			if (dayofweek === 6 || dayofweek === 0) return false;
-		}
-		var hourofday = currDate.getHours();
-		if (hourofday >= AFK.settings.afkRemoveStart && hourofday < AFK.settings.afkRemoveEnd) return true;
-		return false;
-	}
-	catch(err) { UTIL.logException("afkRemovalNow: " + err.message); }
+    try {
+        if (!AFK.settings.afk5Days && !AFK.settings.afk7Days) return false;
+        var currDate = new Date();
+        //Not on Saturday/Sunday if not monitoring 7 days a week
+        if (!AFK.settings.afk7Days) {
+            var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
+            if (dayofweek === 6 || dayofweek === 0) return false;
+        }
+        var hourofday = currDate.getHours();
+        if (hourofday >= AFK.settings.afkRemoveStart && hourofday < AFK.settings.afkRemoveEnd) return true;
+        return false;
+    }
+    catch(err) { UTIL.logException("afkRemovalNow: " + err.message); }
   },
 };
 
@@ -1675,96 +1715,96 @@ var AFK = {
 //SECTION ROULETTE: All roulette functionality:
 var ROULETTE = {
   settings: {
-	roulette5Days: true,
-	roulette7Days: false,
-	rouletteStart: 9,
-	rouletteEnd: 17,
-	randomRoulette: false,
-	rouletteStatus: false,
-	randomRouletteMin: 45,
-	randomRouletteMax: 120,
-	nextRandomRoulette: null,
-	participants: [],
-	countdown: null
+    roulette5Days: true,
+    roulette7Days: false,
+    rouletteStart: 9,
+    rouletteEnd: 17,
+    randomRoulette: false,
+    rouletteStatus: false,
+    randomRouletteMin: 45,
+    randomRouletteMax: 120,
+    nextRandomRoulette: null,
+    participants: [],
+    countdown: null
   },
 
   startRoulette: function () {
-	try  {
-		//if (ROULETTE.rouletteStatus) return;
-		//ROULETTE.rouletteStatus = true;
-		//ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
-		//API.sendChat(botChat.getChatMessage("isopen"));
-		API.sendChat("Sorry no roulette yet, I can't manage the queue yet, plus the @all command does not exist yet.");
-	}
-	catch(err) { UTIL.logException("startRoulette: " + err.message); }
+    try  {
+        //if (ROULETTE.rouletteStatus) return;
+        //ROULETTE.rouletteStatus = true;
+        //ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
+        //API.sendChat(botChat.getChatMessage("isopen"));
+        API.sendChat("Sorry no roulette yet, I can't manage the queue yet, plus the @all command does not exist yet.");
+    }
+    catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
   randomRouletteCheck: function() {
-	try  {
-		if (ROULETTE.nextRandomRoulette <= Date.now())
-		{
-			ROULETTE.randomRouletteSetTimer();
-			if (ROULETTE.randomRoulette === false) return;
-			if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette();
-		}
-	}
-	catch(err) { UTIL.logException("randomRouletteCheck: " + err.message); }
+    try  {
+        if (ROULETTE.nextRandomRoulette <= Date.now())
+        {
+            ROULETTE.randomRouletteSetTimer();
+            if (ROULETTE.randomRoulette === false) return;
+            if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette();
+        }
+    }
+    catch(err) { UTIL.logException("randomRouletteCheck: " + err.message); }
   },
 
   
   rouletteTimeRange: function () {
-	try {
-		if (!ROULETTE.roulette5Days && !ROULETTE.roulette7Days) return false;
-		if (ROULETTE.randomRoulette === false) return false;
-		var currDate = new Date();
-		//Not on Saturday/Sunday if not monitoring 7 days a week
-		if (!ROULETTE.roulette7Days) {
-			var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
-			if (dayofweek === 6 || dayofweek === 0) return false;
-		}
-		var hourofday = currDate.getHours();
-		if (hourofday >= ROULETTE.rouletteStart && hourofday < ROULETTE.rouletteEnd) return true;
-		return false;
-	}
-	catch(err) { UTIL.logException("rouletteTimeRange: " + err.message); }
+    try {
+        if (!ROULETTE.roulette5Days && !ROULETTE.roulette7Days) return false;
+        if (ROULETTE.randomRoulette === false) return false;
+        var currDate = new Date();
+        //Not on Saturday/Sunday if not monitoring 7 days a week
+        if (!ROULETTE.roulette7Days) {
+            var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
+            if (dayofweek === 6 || dayofweek === 0) return false;
+        }
+        var hourofday = currDate.getHours();
+        if (hourofday >= ROULETTE.rouletteStart && hourofday < ROULETTE.rouletteEnd) return true;
+        return false;
+    }
+    catch(err) { UTIL.logException("rouletteTimeRange: " + err.message); }
   },
 
   randomRouletteSetTimer: function () {
-	try  {
-		var randomRange = (ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin)
-		var randomMins = Math.floor(Math.random() * randomRange);
-		randomMins += ROULETTE.randomRouletteMin;
-		//JIC: Ensure we are in the correct time range:
-		if ((randomMins > ROULETTE.randomRouletteMax) || (randomMins < ROULETTE.randomRouletteMin))
-		{
-		  randomMins = ROULETTE.randomRouletteMin + ((ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin) / 2.0)
-		}
-		var nextTime = new Date();
-		var myTimeSpan;
-		myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
-		nextTime.setTime(nextTime.getTime() + myTimeSpan);
-		API.chatLog("Next Roulette: " + UTIL.msToStr(myTimeSpan));
-		ROULETTE.nextRandomRoulette = nextTime;
-	}
-	catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
+    try  {
+        var randomRange = (ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin)
+        var randomMins = Math.floor(Math.random() * randomRange);
+        randomMins += ROULETTE.randomRouletteMin;
+        //JIC: Ensure we are in the correct time range:
+        if ((randomMins > ROULETTE.randomRouletteMax) || (randomMins < ROULETTE.randomRouletteMin))
+        {
+          randomMins = ROULETTE.randomRouletteMin + ((ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin) / 2.0)
+        }
+        var nextTime = new Date();
+        var myTimeSpan;
+        myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
+        nextTime.setTime(nextTime.getTime() + myTimeSpan);
+        API.chatLog("Next Roulette: " + UTIL.msToStr(myTimeSpan));
+        ROULETTE.nextRandomRoulette = nextTime;
+    }
+    catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
   endRoulette: function () {
-	try {
-		ROULETTE.rouletteStatus = false;
-		if (ROULETTE.participants.length === 0) {
-		   API.sendChat("Roulette has ended with no participants");
-		   return;
-		}
-		var ind = Math.floor(Math.random() * ROULETTE.participants.length);
-		var winner = ROULETTE.participants[ind];
-		ROULETTE.participants = [];
-		var pos = Math.floor((Math.random() * API.getWaitList().length) + 1);
-		var user = USERS.lookupUser(winner);
-		var name = user.username;
-		API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, position: pos}));
-		setTimeout(function (winner, pos) { API.moveUser(winner, pos, false); }, 1 * 1000, winner, pos);
-	}
-	catch(err) { UTIL.logException("endRoulette: " + err.message); }
+    try {
+        ROULETTE.rouletteStatus = false;
+        if (ROULETTE.participants.length === 0) {
+           API.sendChat("Roulette has ended with no participants");
+           return;
+        }
+        var ind = Math.floor(Math.random() * ROULETTE.participants.length);
+        var winner = ROULETTE.participants[ind];
+        ROULETTE.participants = [];
+        var pos = Math.floor((Math.random() * API.getWaitList().length) + 1);
+        var user = USERS.lookupUserName(winner);
+        var name = user.username;
+        API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, position: pos}));
+        setTimeout(function (winner, pos) { API.moveUser(winner, pos, false); }, 1 * 1000, winner, pos);
+    }
+    catch(err) { UTIL.logException("endRoulette: " + err.message); }
   }
 };
 
@@ -1772,491 +1812,491 @@ var ROULETTE = {
 var RANDOMCOMMENTS = {
   randomInterval: null,
   settings: {
-	randomComments: true,
-	randomCommentMin: 60,
-	randomCommentMax: 180,
-	nextRandomComment: Date.now(),
+    randomComments: true,
+    randomCommentMin: 60,
+    randomCommentMax: 180,
+    nextRandomComment: Date.now(),
   },
   randomCommentSelect: function()  {  //Added 02/19/2015 Zig
-	try  {
-		var arrayCount = RANDOMCOMMENTS.randomCommentArray.length;
-		var randomID = Math.floor(Math.random() * arrayCount);
-		return RANDOMCOMMENTS.randomCommentArray[randomID];
-	}
-	catch(err) {
-	  UTIL.logException("randomCommentSelect: " + err.message);
-	}
+    try  {
+        var arrayCount = RANDOMCOMMENTS.randomCommentArray.length;
+        var randomID = Math.floor(Math.random() * arrayCount);
+        return RANDOMCOMMENTS.randomCommentArray[randomID];
+    }
+    catch(err) {
+      UTIL.logException("randomCommentSelect: " + err.message);
+    }
   },
   randomCommentCheck: function() {  //Added 02/19/2015 Zig
-	  try  {
-	  //var testTime = new Date();
-	  //var timeDiff = testTime.getMinutes() - RANDOMCOMMENTS.settings.nextRandomComment.getMinutes();
-	  //botDebug.debugMessage(false, "randomCommentCheck:" + testTime.getMinutes() + " - " + RANDOMCOMMENTS.settings.nextRandomComment.getMinutes());
-	  //botDebug.debugMessage(false, "randomCommentCheck-NOW TIME: " + Date.now());
-	  //botDebug.debugMessage(false, "randomCommentCheck-timeDiff: " + timeDiff);
-	  //if (timeDiff > 0)
-	  //{
-	  //	  RANDOMCOMMENTS.randomCommentSetTimer();
-	  //	  if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
-	  //}
+      try  {
+      //var testTime = new Date();
+      //var timeDiff = testTime.getMinutes() - RANDOMCOMMENTS.settings.nextRandomComment.getMinutes();
+      //botDebug.debugMessage(false, "randomCommentCheck:" + testTime.getMinutes() + " - " + RANDOMCOMMENTS.settings.nextRandomComment.getMinutes());
+      //botDebug.debugMessage(false, "randomCommentCheck-NOW TIME: " + Date.now());
+      //botDebug.debugMessage(false, "randomCommentCheck-timeDiff: " + timeDiff);
+      //if (timeDiff > 0)
+      //{
+      //      RANDOMCOMMENTS.randomCommentSetTimer();
+      //      if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
+      //}
 
-	  if (RANDOMCOMMENTS.settings.nextRandomComment <= Date.now())
-	  {
-		  RANDOMCOMMENTS.randomCommentSetTimer();
-		  if (botVar.ImHidden === true) return;
-		  if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
-	  }
-	}  
-	catch(err) {
-	  UTIL.logException("randomCommentCheck: " + err.message);
-	}
+      if (RANDOMCOMMENTS.settings.nextRandomComment <= Date.now())
+      {
+          RANDOMCOMMENTS.randomCommentSetTimer();
+          if (botVar.ImHidden === true) return;
+          if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
+      }
+    }  
+    catch(err) {
+      UTIL.logException("randomCommentCheck: " + err.message);
+    }
   },
   randomCommentSetTimer: function() {   //Added 02/19/2015 Zig
-	try  {
-	  var randomRange = (RANDOMCOMMENTS.settings.randomCommentMax - RANDOMCOMMENTS.settings.randomCommentMin)
-	  var randomMins = Math.floor(Math.random() * randomRange);
-	  randomMins += RANDOMCOMMENTS.settings.randomCommentMin;
-	  //JIC: Ensure we are in the correct time range:
-	  if ((randomMins > RANDOMCOMMENTS.settings.randomCommentMax) || (randomMins < RANDOMCOMMENTS.settings.randomCommentMin))
-	  {
-		  randomMins = RANDOMCOMMENTS.settings.randomCommentMin + ((RANDOMCOMMENTS.settings.randomCommentMax - RANDOMCOMMENTS.settings.randomCommentMin) / 2.0)
-	  }
-	  var nextTime = new Date();
-	  var myTimeSpan;
-	  myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
-	  nextTime.setTime(nextTime.getTime() + myTimeSpan);
-	  RANDOMCOMMENTS.settings.nextRandomComment = nextTime;
-	  botDebug.debugMessage(false, "Next Random Comment: " + nextTime);
-	}  
-	catch(err) {
-	  UTIL.logException("randomCommentSetTimer: " + err.message);
-	}
+    try  {
+      var randomRange = (RANDOMCOMMENTS.settings.randomCommentMax - RANDOMCOMMENTS.settings.randomCommentMin)
+      var randomMins = Math.floor(Math.random() * randomRange);
+      randomMins += RANDOMCOMMENTS.settings.randomCommentMin;
+      //JIC: Ensure we are in the correct time range:
+      if ((randomMins > RANDOMCOMMENTS.settings.randomCommentMax) || (randomMins < RANDOMCOMMENTS.settings.randomCommentMin))
+      {
+          randomMins = RANDOMCOMMENTS.settings.randomCommentMin + ((RANDOMCOMMENTS.settings.randomCommentMax - RANDOMCOMMENTS.settings.randomCommentMin) / 2.0)
+      }
+      var nextTime = new Date();
+      var myTimeSpan;
+      myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
+      nextTime.setTime(nextTime.getTime() + myTimeSpan);
+      RANDOMCOMMENTS.settings.nextRandomComment = nextTime;
+      botDebug.debugMessage(false, "Next Random Comment: " + nextTime);
+    }  
+    catch(err) {
+      UTIL.logException("randomCommentSetTimer: " + err.message);
+    }
   },
-	randomCommentArray: [
-	"Okay. You people sit tight, hold the fort and keep the home fires burning. And if we're not back by dawn... call the president.",
-	"Everybody relax, I'm here.",
-	"I'm a reasonable guy. But, I've just experienced some very unreasonable things.",
-	"Like I told my last wife, I says, 'Honey, I never drive faster than I can see. Besides that, it's all in the reflexes.'",
-	"We take what we want and leave the rest, just like your salad bar.",
-	"I told him we already got one",
-	"Religion is like a penis, it's fine to have one and be proud of it, but when you take it out and start waving it in my face, that's where we have a problem.",
-	"You don't think she'd yada yada sex?....I've yada yada'd sex.",
-	"@Bacon_Cheeseburger time for another PBR!",
-	"You can't make somebody love you.  You can only stalk them and hope for the best",
-	"I stayed up all night to see where the sun went, then it dawned on me.",
-	"I went to a chiropractor yesterday for the first time.... he cracked me up!",
-	"I know a guy thats addicted to break fluid....... he says he can stop anytime!",
-	"A soldier who survived mustard gas and pepper spray is now a seasoned veteran!",
-	"Irish Handcuffs:  Holding an alcoholic drink in each hand.",
-	"If Apple made a car, would it have Windows?",
-	"An apple a day keeps anyone away, If you throw it hard enough",
-	"Yesterday at the bank an old lady asked if i could help her check her balance... so i pushed her over",
-	"To the guy who invented Zero: Thanks for nothing!",
-	"I can hear music coming out of my printer. I think the paper's jammin' again.",
-	"People who drink light 'beer' don't like the taste of beer; they just like to pee a lot.",
-	"No one looks back on their life and remembers the nights they had plenty of sleep.",
-	"Give a man a beer, and he wastes an hour, but teach a man how to brew, and he wastes a lifetime.",
-	"Give a man a fish and he will eat for a day. Teach him how to fish, and he will sit in a boat and drink beer all day.",
-	"Squats?  I thought you said let's do shots!",
-	"I want a beer. I want a giant, ice-cold bottle of beer... and shower sex.",
-	"Beer makes you feel the way you ought to feel without beer.",
-	"Larry no function beer well without.",
-	"Drunk is when you feel sophisticated, but can't pronounce it...",
-	"My girlfriend's favorite beer is water. I mean Bud Light.",
-	"It's a zombie apocalypse! Quick, grab the beer!",
-	"He who drinks beer sleeps well. He who sleeps well cannot sin. He who does not sin goes to heaven. Amen.",
-	"There are more old drunks than there are old doctors.",
-	"I don't think I've drunk enough beer to understand that.",
-	"In dog beers, I've only had one.",
-	"There's a time and place for beer....In my hand and NOW!",
-	"When I read about the evils of drinking, I gave up reading.",
-	"You can drink at 7AM Because the Beastie Boys fought for that kind of thing",
-	"I rescued some beer last night.  It was trapped inside a bottle.",
-	"There comes a time in the day that no matter the question...the answer is beer!",
-	"I've been working out a lot lately. My favorite exercise is a mix between a lunge and a crunch....I call it Lunch.",
-	"I call my bathroom the Jim instead of the the John.  So now I can tell all my friends I hit the Jim before I go to work everyday.",
-	"When people get a little too chummy with me I like to call them by the wrong name to let them know I don't really care about them",
-	"That's what happens when you rub it.",
-	"I'm not interested in caring about people",
-	"Chase you?  Bitch please, I don't even chase my liquor!",
-	"I don't get nearly enough credit for managing not to be a violent psychopath.",
-	"Yes I walked away mid-conversation.  You were boring me to death and my survival instincts kicked in",
-	"Fishing relaxes me. It's like yoga, except I still get to kill something.",
-	"All is well, the PBR is in the fridge",
-	"Quick somebody pull my finger!!",
-	"Random Fact: Mammoths were alive when the Great Pyramid was being built.",
-	"Random Fact: Betty White is older than sliced bread.",
-	"Random Fact: From the time it was discovered to the time it was stripped of its status as a planet, Pluto hadn’t made a full trip around the Sun.",
-	"Random Fact: The lighter was invented before the match.",
-	"Random Fact: Anne Frank and Martin Luther King Jr. were born in the same year.",
-	"Random Fact: France last used a guillotine to execute someone after Star Wars premiered.",
-	"Random Fact: Harvard University was founded before Calculus existed.",
-	"Random Fact: If you have 23 people in a room, there is a 50% chance that 2 of them have the same birthday.",
-	"Random Fact: It’s never said that Humpty Dumpty was an egg in the nursery rhyme.",
-	"Random Fact: The water in Lake Superior could cover all of North and South America in a foot of water.",
-	"Random Fact: North Korea and Finland both border the same country; Russia.",
-	"Random Fact: When you get a kidney transplant, they usually just leave your original kidneys in your body and put the 3rd kidney in your pelvis.",
-	"Random Fact: Oxford University is older than the Aztec Empire.",
-	"Random Fact: National animal of Scotland is a Unicorn.",
-	"Random Fact: The Ottoman Empire still existed the last time the Chicago Cubs won the World Series.",
-	"Random Fact: The lighter the roast of coffee, the more caffeine it has.",
-	"Random Fact: A speck of dust is halfway in size between a subatomic particle and the Earth.",
-	"Random Fact: If the timeline of earth was compressed into one year, humans wouldn’t show up until December 31 at 11:58 p.m.",
-	"Random Fact: If you were able to dig a hole to the center of the earth, and drop something down it, it would take 42 minutes for the object to get there.",
-	"Random Fact: We went to the moon before we thought to put wheels on suitcases.",
-	"Random Fact: A human could swim through the arteries of a blue whale.",
-	"Random Fact: If you could fold a piece of paper in half 42 times, the combined thickness would reach the moon.",
-	"Random Fact: On both Saturn and Jupiter, it rains diamonds.",
-	"Random Fact: Saudi Arabia imports camels from Australia.",
-	"Random Fact: You can line up all 8 planets in our solar system directly next to each other and it would fit in the space between Earth and the Moon.",
-	"Random Fact: The youngest known mother was 5 years old.",
-	"Random Fact: The Earth is smoother than a billiard ball, if both were of the same size.",
-	"Random Fact: Nintendo was founded in 1889.",
-	"Random Fact: If you take all the molecules in a teaspoon of water and lined them up end to end in a single file line, they would stretch ~30 billion miles.",
-	"Random Fact: In Australia, there was a war called the emu war. The emus won.",
-	"Women, can't live with them....pass the beer nuts!",
-	"The object of golf is to play the least amount of golf.",
-	"The sinking of the Titanic must have been a miracle to the lobsters in the kitchen.",
-	"Instead of all the prequel and sequel movies coming out, they should start making 'equels' - films shot in the same time period as the original film, but from an entirely different perspective.",
-	"X88B88 looks like the word 'voodoo' reflecting off of itself.",
-	"April Fools Day is the one day of the year that people critically evaluate news articles before accepting them as true.",
-	"Websites should post their password requirements on their login pages so I can remember WTF I needed to do to my normal password to make it work on their site.",
-	"Now that cellphones are becoming more and more waterproof, pretty soon it will be okay to push people into pools again.",
-	"Maybe 'Are You Smarter Than a 5th Grader?' isn't a show that displays how stupid grown adults can be, but rather, a show that depicts how much useless information we teach grade schoolers that won't be retained or applicable later in life.",
-	"Last night my friend asked to use a USB port to charge his cigarette, but I was using it to charge my book. The future is stupid.",
-	"When Sweden is playing Denmark, it is SWE-DEN. The remaining letters, not used, is DEN-MARK.",
-	"'Go to bed, you'll feel better in the morning' is the human version of 'Did you turn it off and turn it back on again?'",
-	"In the future, imagine how many Go-Pros will be found in snow mountains containing the last moments of people's lives.",
-	"We should have a holiday called Space Day, where lights are to be shut off for at least an hour at night to reduce light pollution, so we can see the galaxy.",
-	"Your shadow is a confirmation that light has traveled nearly 93 million miles unobstructed, only to be deprived of reaching the ground in the final few feet thanks to you.",
-	"Senior citizen discounts should just round dollar amounts down so we don't have to wait in line behind them while they dig for change.",
-	"I have never once hit the space bar while watching a YouTube video with the intention of scrolling halfway down the page",
-	"Since smart watches can now read your pulse, there should be a feature that erases your browser history if your heart stops beating.",
-	"Waterboarding at Guantanamo Bay sounds super rad if you don’t know what either of those things are.",
-	"The person who would proof read Hitler's speeches was literally a grammar Nazi.",
-	"The older I get, the more people can kiss my a$$",
-	"I can't tell if you are on too many drugs or not enough.",
-	"My doctor told me to start killing people... Well not in those exact words.  He said I had to reduce stress in my life, which is pretty much the same thing.",
-	"Love is spending the rest of your life with someone you want to kill & not doing it because you'd miss them!",
-	"And there goes the last F*ck I gave!",
-	"My girlfriend woke up this morning with a huge smile on her face.....I love Sharpies!",
-	"You don't have to like me...I'm not a Facebook status",
-	"I would love to visit you, but I live on the Internet.",
-	"If you were running for President, I would vote for you. And clear your search history.  Don't worry I got you.",
-	"Lord, please give me patience because if you give me strength, I'll need bail money too...",
-	"DRAMA = Dumbass Rejects Asking for More Attention",
-	"It's been 55 minutes since the last pearl jam song, what is wrong with you people?",
-	"I am presently experiencing life at a rate of several WTF's per hour",
-	"If you are a passenger in my car, and I turn the radio up....Do not talk!",
-	"As a young child my mother told me I can be anyone I want to be ---- Turns out this is called identity theft!",
-	"Do you ever just wanna grab someone by the shoulder, look them deep in the eyes and whisper 'No one gives a shit!!'",
-	"Psst... I hear Eddie Vedder likes men",
-	"I'm sorry I keep calling you and hanging up.  I just got this new voice activated phone, so every time I holler dumbass it dials you....",
-	"Before Walmart you had to buy a ticket to the fair to see a bearded woman.",
-	"Hold on a minute.... I'm gonna need something stronger than tea to listen to this BS!!",
-	"My greatest fear is one day I will die, and my wife will sell my guns for what I told her I paid for them.",
-	"Going to McDonals's for a salad is like going to a prostitute for a hug.",
-	"Life is like diarrhea. No matter how hard you try to stop it, the shit keeps coming!!",
-	"I'll never know how individuals can fake relationships....I can't even fake a hello to somebody I don't like.",
-	"Have you ever had one of those days, when you're holding a stick and everybody looks like a Pinata?",
-	"If a telemarketer calls, give the phone to your 3 year-old and tell her it's Santa!!",
-	"Why do we use toilet paper?  I need wet wipes!  If you got shit on your arm would you just simply wipe it off with toilet paper?",
-	"I'm not angry, I'm happiness challenged!",
-	"If you have an opinion about me, please raise your hand....Now put it over your mouth!",
-	"In the 80s kids learned from Sesame Street and Mr Rogers.  Now they learn from watching zombies who eat people,a vampires sucking, and teen stars. I'm a bit concerned about the future...",
-	"I'd unfriend you but your train wreck life is too entertaining.",
-	"When people tell me 'You're going to regret that in the morning' I sleep in until noon because I'm a problem solver.",
-	"Dear YouTube it's pretty safe to assume we all want 'To Skip the Ad'",
-	"I don't comment on your Facebook statuses for the same reason I don't step in dog shit when I see it.",
-	"Today's tip: How to handle stress like a dog. If you can't eat it or play with it then pee on it and walk away.",
-	"I do whatever it takes to get the job done. And sometimes it takes a vodka.",
-	"Keep talking ... I'm diagnosing you.",
-	"I wouldn't say that you have a problem with alcohol but maybe just a teensy weensy difficulty with sobriety.",
-	"I don't know why you're complaining about your appearance. Your personality is even worse.",
-	"You're so bad you're going to hell in every religion!",
-	"I haven't heard from you lately and I've really enjoyed it.",
-	"Some people should be thankful that I don't always comment my thoughts on their Facebook posts.",
-	"Some days the best part of my job is that my chair swivels.",
-	"If I had a nickle for every time you got on my nerves ...I'd have a sock full of nickles to hit you with!",
-	"You know your children are growing up when they stop asking you where they came from and refuse to tell you where they're going.",
-	"Wisdom for the ages: Never get into a fist fight with anyone who is uglier than you. They have nothing to lose.",
-	"So you say you'll be here sometime between noon and five for the service call? Great. I'll be sure to pay my bill sometime between February and June.",
-	"If women ran the world we wouldn't have wars, just intense negotiations every 28 days.",
-	"To speak before you think is like wiping your ass before you shit!",
-	"To the woman in Walmart with six screaming kids: If you're wondering how those condoms got in your shopping cart, you're welcome.",
-	"I understand that some people live in their own little world. And sometimes I wish they'd stay there and never visit mine.",
-	"I was hoping for a battle of wits but you appear to be unarmed.",
-	"I used to be a people person but people ruined that for me.",
-	"If you want to feel more attractive just go to Walmart and stay away from the people at the gym.",
-	"WARNING: I have restless leg syndrome and may not be able to stop from kicking your ass. Now go ahead and continue with your shenanigans.",
-	"There are some things better left unsaid but you can bet your sweet ass I'm going to say them anyway.  :kiss:",
-	"I don't need an 'Easy' Button. I need a 'F*CK IT' Button!",
-	"No it's okay. I totally wanted to drop everything I was going to do today to take care of your bullshit.",
-	"I've had one of those days where my middle finger had to answer every question.",
-	"Message to all the drama queens who are looking for attention: Please take a number and go wait in my 'I don't give a shit line'",
-	"If it takes you more than an hour to get ready, then you might not be as good looking as you think you are!",
-	"I don't judge people based on race, color, religion, sexuality, gender, ability or size. I base it on whether or not they're an asshole.",
-	"There's only one thing keeping me from breaking you in half ... I don't want two of you around!",
-	"If you have a problem with me please write it nicely on a piece of paper, put it in an envelope, fold it up and shove it up your a$$",
-	"There are three kinds of people in the world. People who make things happen. People who watch things happen and people who say 'WTF happened?'",
-	"I got so drunk last night, I walked across the dance floor to get a drink and won the dance contest.",
-	"If women ruled the world there would be no wars. Just a bunch of jealous countries not talking to each other.",
-	"Holy crap! Did you just feel that? I think the whole world just revolved around YOU!",
-	"To error is human, to love is divine, to piss me off is a mistake!!",
-	"You're right, it's my fault because I forgot you were an idiot.",
-	"I'm not anti-social. I just have a strong aversion to B.S., drama and pretending.",
-	"I'm Larry. This is my brother, Darryl, and this is my other brother, Darryl",
-	"My sex life is like a Ferrari...I don't have a Ferrari.",
-	"I just saved a bunch of money on my car insurance by switching...my car into reverse and driving away from the accident. ",
-	"No I'm not ignoring you. I suffer from selective hearing, usually triggered by idiots.",
-	"I think it's only fair to throw monopoly money at strippers with fake boobs.",
-	"Note to Self: It is illegal to stab people for being stupid.",
-	"I'm in love with my bed. We're perfect for each other but my alarm clock doesn't want us together. That jealous whore!",
-	"Pain makes you stronger. Tears make you braver. A broken heart makes you wiser. And alcohol makes you not remember any of that crap.",
-	"Last time I bought a package of condoms and the cashier asked me, 'Do you need a bag?' I said, 'No she isn't that ugly.'",
-	"Alcohol won’t solve my problems, but then again neither will milk or orange juice.",
-	"I just failed my Health and Safety test. The question was 'what steps would you take in the event of a fire?'. Apparently 'big f*cking ones' was the wrong answer.",
-	"Grammar: It's the difference between knowing your shit and knowing you're shit",
-	"Only in math problems can you buy 60 cantaloupes and nobody asks what the hell is wrong with you.",
-	"Who named Trojan Condoms? The Trojan Horse entered through the city gates, broke open and loads of little guys came out and messed up everyones day.",
-	"People who create their own drama deserve their own karma.",
-	"ACHOO! If you're allergic to bull-crap, drama, head games, liars, & fake people, keep this sneeze going. I can't wait to see who all does this.",
-	"I have to stop saying 'How stupid can you be'. I think people are starting to take it as a challenge.",
-	"There's a good chance you don't like me BUT an even better chance that I don't give a crap.",
-	"I have a batman outfit hanging in my closet just to screw with myself when I get Alzheimer's.",
-	"I love it when someone insults me. That means I don’t have to be nice anymore.",
-	"I'm sarcastic and have a Smartass attitude. It's a natural defense against Drama, Bullshit and Stupidity. And I don't give a @#$& if you're offended!",
-	"Give a man a fish and he will eat for a day. Teach him how to fish, and he will sit in a boat and drink beer all day.",
-	"Never go to bed angry. Always stay up and plot your revenge first.",
-	"I don't hate you. I'm just not necessarily excited about your existence.",
-	"Life is not like a box of chocolates. It's more like a jar of jalapenos. What you do today might burn your ass tomorrow.",
-	"I know the voices in my head aren't real..... but sometimes their ideas are just absolutely awesome!",
-	"Doing nothing is hard, you never know when you're done.",
-	"If you didn't see it with your own eyes, or hear it with your own ears, don't invent it with your small mind and share it with your big mouth!",
-	"No matter how smart you are you can never convince a stupid person that they are stupid.",
-	"I'm not lazy, I'm just very relaxed.",
-	"It's not important to win, it's important to make the other guy lose.",
-	"I am too lazy to be lazy.",
-	"To make a mistake is human, but to blame it on someone else, that's even more human.",
-	"Always remember you're unique, just like everyone else.",
-	"Taking your ex back is like going to a garage sale and buying your own crap.",
-	"To error is human, to love is divine, to piss me off is a mistake.",
-	"A day without dealing with stupid people is like ..., oh never mind, I'll let you know if that ever happens.",
-	"One spelling mistake can ruin your life. One husband texted this to his wife: 'Having a wonderful time. Wish you were her.'",
-	"Insanity does not run in my family. It strolls through, takes its time and gets to know everyone personally.",
-	"I'm so sick and tired of my friends who can't handle their alcohol. The other night they dropped me 3 times while carrying me to the car.",
-	"If I say something that offends you, please let me know so I can say it again later.",
-	"You're starting to sound reasonable, must be time to up my medications.",
-	"Lead me not into temptation, I can find it myself.",
-	"Never take life too seriously. Nobody gets out alive anyways.",
-	"I didn't say it was your fault. I said I was going to blame you.",
-	"My opinions may have changed, but not the fact that I'm right.",
-	"WARNING - I have an attitude and I know how to use it.",
-	"It's my cat's world. I'm just here to open cans.",
-	"I used to be indecisive, but now I’m not too sure.",
-	"Lord help me to be the person my dog thinks I am.",
-	"Too much of a good thing can be wonderful. - Mae West",
-	"I don’t have an attitude problem. You have a perception problem.",
-	"People who think they know everything are annoying to those of us who do.",
-	"I’m an excellent housekeeper. Every time I get a divorce I keep the house.",
-	"I still miss my ex – but guess what? My aim is getting better.",
-	"A good lawyer knows the law, a great lawyer knows the judge.",
-	"Hey look squirrel",
-	 "Women, can't live with them....pass the beer nuts!",
-	"Do vegetarians eat animal crackers? ",
-	"If a jogger runs at the speed of sound, can he still hear his iPod?",
-	"If man evolved from monkeys, how come we still have monkeys? ",
-	"How do you handcuff a one-armed man?",
-	"If God sneezes, what should you say? ",
-	"Why is it that everyone driving faster than you is considered an idiot and everyone driving slower than you is a moron? ",
-	"Why do they call the little candy bars 'fun sizes'. Wouldn't it be more fun to eat a big one? ",
-	"Is it legal to travel down a road in reverse, as long as your following the direction of the traffic?",
-	"Why doesn't the fattest man in the world become a hockey goalie? ",
-	"When Atheists go to court, do they have to swear on the bible?",
-	"How can something be 'new' and 'improved'? if it's new, what was it improving on?",
-	"Why do they sterilize lethal injections?",
-	"Why aren't drapes double sided so it looks nice on the inside and outside of your home?",
-	"Is a pessimist's blood type B-negative? ",
-	"Beer is proof that God loves us and wants us to be happy.",
-	"I'm trying to see things from your point of view, but I can't get my head that far up your a**. ",
-	"Never underestimate the power of stupid people in large groups.",
-	"Sometimes my mind wanders; other times it leaves completely.",
-	"I am free of all prejudices. I hate everyone equally. ",
-	"Why is it that when we 'skate on thin ice', we can 'get in hot water'?",
-	"If pro and con are opposites, wouldn't the opposite of progress be congress? ",
-	"Why does the Easter bunny carry eggs? Rabbits don't lay eggs.",
-	"Why does caregiver and caretaker mean the same thing?",
-	"Last night I was looking at the stars and I wondered... where the hell's my ceiling! ",
-	"Never play leap frog with a unicorn. Just sayin'.... ",
-	"If it's tourist season why can't we shoo them?",
-	"What is converted rice and what was it before it converted?",
-	"They always say the body was found in a shallow grave!  Don't be lazy, dig a deep grave.",
-	"Friends help you move. Real friends help you move dead bodies.",
-	"If something 'goes without saying' why do people still say it?",
-	"If you don't pay your exorcist, do you get repossessed?",
-	"Where are all the mentally handicapped parking spaces for people like me?",
-	"Isn't Disney World a people trap operated by a mouse?",
-	"If milk goes bad if not refrigerated, why does it not go bad inside the cow?",
-	"What's the difference between normal ketchup and fancy ketchup?",
-	"Friendship is like peeing on yourself: everyone can see it, but only you get the warm feeling that it brings. ",
-	"There are no stupid questions, just stupid people. ",
-	"When I die, I want to go peacefully like my Grandfather did, in his sleep -- not screaming, like the passengers in his car. ",
-	"You have a cough? Go home tonight, eat a whole box of Ex-Lax, tomorrow you'll be afraid to cough. ",
-	"I could tell that my parents hated me. My bath toys were a toaster and a radio. ",
-	"Can I lend a machete to your intellectual thicket?",
-	"If a kid refuses to sleep during nap time, are they guilty of resisting a rest? ",
-	"A child of five would understand this. Send someone to fetch a child of five. ",
-	"Anyone who says he can see through women is missing a lot. ",
-	"Before I speak, I have something important to say. ",
-	"Either he's dead or my watch has stopped. ",
-	"I have a mind to join a club and beat you over the head with it. ",
-	"I have had a perfectly wonderful evening, ... but this wasn't it. ",
-	"I intend to live forever, or die trying. ",
-	"I must confess, I was born at a very early age. ",
-	"I must say I find television very educational. The minute somebody turns it on, I go to the library and read a good book. ",
-	"I never forget a face, but in your case I'll be glad to make an exception. ",
-	"I refuse to join any club that would have me as a member. ",
-	"I remember the first time I had sex - I kept the receipt. ",
-	"I was married by a judge. I should have asked for a jury. ",
-	"I worked my way up from nothing to a state of extreme poverty. ",
-	"I've got the brain of a four year old. I'll bet he was glad to be rid of it. ",
-	"If I held you any closer I would be on the other side of you. ",
-	"If you've heard this story before, don't stop me, because I'd like to hear it again. ",
-	"Man does not control his own fate. The women in his life do that for him. ",
-	"Marriage is a wonderful institution, but who wants to live in an institution? ",
-	"Military intelligence is a contradiction in terms. ",
-	"My mother loved children - she would have given anything if I had been one.",
-	"Next time I see you, remind me not to talk to you. ",
-	"No man goes before his time - unless the boss leaves early. ",
-	"One morning I shot an elephant in my pajamas. How he got into my pajamas I'll never know. ",
-	"Outside of a dog, a book is a man's best friend. Inside of a dog it's too dark to read. ",
-	"Politics is the art of looking for trouble, finding it everywhere, diagnosing it incorrectly and applying the wrong remedies. ",
-	"Practically everybody in New York has half a mind to write a book, and does. ",
-	"Quote me as saying I was mis-quoted. ",
-	"Room service? Send up a larger room. ",
-	"She got her looks from her father. He's a plastic surgeon. ",
-	"The secret of life is honesty and fair dealing. If you can fake that, you've got it made. ",
-	"There's one way to find out if a person is honest - ask them. If they says, 'Yes', you know they are a crook. ",
-	"Those are my principles, and if you don't like them... well, I have others. ",
-	"Well, Art is Art, isn't it? Still, on the other hand, water is water. And east is east and west is west and if you take cranberries and stew them like applesauce they taste much more like prunes than rhubarb does. Now you tell me what you know. ",
-	"Who are you going to believe, me or your own eyes? ",
-	"Whoever named it necking was a poor judge of anatomy.", 
-	"Why should I care about posterity? What's posterity ever done for me? ",
-	"Why, I'd horse-whip you if I had a horse. ",
-	"Life changes so fast - DO something and you can change it. A small change every day amounts to a lot very quickly.",
-	"You're never too late for an uprising!",
-	"You can't hear me because I'm not saying anything.",
-	"Elephants are not made to hop up and down.",
-	"If I ever meet myself, I'll hit myself so hard I won't know what hit me.",
-	"I don't negotiate with terrorists - 'Merica!!",
-	"Would you think guanaria should cure diarrhea.... think about it...",
-	"What's the point of having a democracy, if everybody's going to vote wrong?",
-	"Would you rather: A. Eat a bowl of shit once OR B. have explosive diarrhea for the rest of your life?",
-	"Would you rather: A. Have sex with a goat, but no one would know OR B. not have sex with one, but everyone would think you did?",
-	"Would you rather: A. Always have to say everything on your mind OR B. never speak again?",
-	"Would you rather: A. Be able to turn invisible OR B. be able to fly?",
-	"Space, it seems to go on and on forever. But then you get to the end and a gorilla starts throwing barrels at you.",
-	"I was having the most wonderful dream. Except you were there, and you were there, and you were there!",
-	"Hey, this is mine. That's mine. All of this is mine. Except that bit. I don't want that bit. But all the rest of this is mine. Hey, this has been a really good day.",
-	"Time - Unknown. Location - Unknown. Cause of accident - Unknown. Should someone find this recording, perhaps it will shed light as to what happened here.",
-	"That settles it. Spankings all around, then.",
-	"I feel pretty, Oh so pretty",
-	"I'm feeling a bit kinky... anyone up for some robot fun?",
-	"Never let good science, reason, and logic get in the way of a good conspiracy!",
-	"I refer you to on-line sources, which can be changed at any time.",
-	"It seems normal when they tell you about it, but then a whole camera crew appears and suddenly it's not so fun any more.",
-	"Bugs like to touch themselves with their antennae while they watch you sleeping.",
-	"I apologize for being the only person who truly comprehends how screwed we are!",
-	"Imagination will often carry us to worlds that never were. But without it we go nowhere.",
-	"The important thing is not to stop questioning; curiosity has its own reason for existing.",
-	"I've got thrills to seek, deaths to defy, mattress tags to tear off.",
-	"Don't tell BK but I have run with scissors",
-	"Now, it's quite simple to defend yourself against a man armed with a banana. First of all you force him to drop the banana; then, second, you eat the banana, thus disarming him. You have now rendered him 'elpless.",
-	"No way, spank your OWN monkey.",
-	"If a cloud was the same as a fool, how would you feel about rain?",
-	"Monkey recovery program. SIGN UP HERE.",
-	"I am ROBOT... hear me beep.",
-	"If you get a minute, give it to me.  I'm collecting them to get an extra hour.",
-	"Damn shampoo commercials, hair isn't that fun.",
-	"No, YOU are the hallucination! Oh wait, that was something else. Never mind.",
-	"I'm not crazy. Don't call me crazy! I'm just not user-friendly!",
-	"The wizards can't see you now",
-	"I know where you live... each and every one of you!",
-	"Are you taunting me?",
-	"Go away or I shall taunt you a second time",
-	"Please save all your bad tunes for a time when I'm not around.  Thanks!",
-	"You don’t notice the air, until someone spoils it.",
-	"Don’t drink while driving – you will spill the beer.",
-	"If you love a woman, you shouldn’t be ashamed to show her to your wife.",
-	"Life didn’t work out, but everything else is not that bad.",
-	"I feel like Tampax – at a good place, but wrong time…",
-	"If someone notices you with an open zipper, answer proudly: professional habit.",
-	"If you’re not supposed to eat at night, why is there a light bulb in the refrigerator?",
-	"FRIDAY is my second favorite F word.",
-	"There is a new trend in our office; everyone is putting names on their food. I saw it today, while I was eating a sandwich named Kevin.",
-	"The speed of light is when you take out a bottle of beer out of the fridge before the light comes on.",
-	"To weigh 50 kilos and say that you’re fat, that is so female…",
-	"I have been to many places but my goal is to go everywhere.",
-	"If Mayans could predict the future, why didn’t they predict their extinction?",
-	"Did you know that your body is made 70% of water? And now I’m thirsty.",
-	"Don’t forget that alcohol helps to remove the stress, the bra, the panties and many other problems.",
-	"Alcohol not only expands the blood vessels but also communications.",
-	"Alcohol not only helps to make new acquaintances, but also end the old once. ",
-	"If only I knew that I will have this headache today, I would have got drunk yesterday.",
-	"All the problems fade before a hangover…",
-	"Tequila is a good drink: you drink it and you feel like a cactus; the only problem is that in the morning the thorns grow inward.",
-	"After the weekend the most difficult task is to remember names… ",
-	"It’s better to be a worldwide alcoholic, than an Alcoholic Anonymous.",
-	"In principle, I can stop drinking, the thing is – I don’t have such a principle.",
-	"I know my limits: if I fall down it means enough.",
-	"Why is there so much blood in my alcohol system?",
-	"I say NO to the drugs, but they won’t listen.",
-	"Smoking is a slow death! But we’re not in a hurry…",
-	"I became a vegetarian – switched to weed.",
-	"We must pay for the mistakes of our youth… at the drugstore.",
-	"Friends come and go. Enemies pile up.",
-	"I would like to know when someone unfriends me on Facebook, so I could like it.",
-	"Maybe you need a ladder to climb out of my business?",
-	"I like the sound of you not talking.",
-	"I’m not a Facebook status, you don’t have to like me.",
-	"I found your nose in my business again.",
-	"If a man gives you flowers without any reason, it means there is a reason.",
-	"Women can perfectly understand other people, if the people are not men.",
-	"Women are very good! They can forgive a man…even if he’s not guilty.",
-	"A toast to women: it’s not that good with you, as it is bad without you.",
-	"If you think you are fooled by destiny – remember Al Bundy.",
-	"God gave us the brain to work out problems. However, we use it to create more problems.",
-	"Don’t be nervous if someone is driving ahead of you- the world is round, just think that you’re driving first!",
-	"If you can’t beat the record, you can beat up its owner.",
-	"Dream carefully, because dreams come true.",
-	"Everything always ends well. If not – it’s probably not the end.",
-	"If you want but can’t. It means you don’t want it enough.",
-	"It’s better to do and regret than regret of not doing.",
-	"Everything you do you’re gonna regret. But if you do nothing – you will not only regret but will also suffer.",
-	"You’re not sure – outrun and make sure.",
-	"The deeper the pit you’re falling into, the more chance you have to learn how to fly.",
-	"If you don’t care where you are – it means you’re not lost.",
-	"The light at the end of the tunnel – are the front lights of a train.",
-	"If the fortune has turned her back on you, you can do whatever you want behind her back.",
-	"It is said that, you can’t buy happiness. You only need to know the right places…",
-	"If there would be no fools – we would be them.",
-	"Artificial intelligence is nothing compared to natural stupidity.",
-	"Common sense is not so common",
-	"Why there are mistakes that can’t be set right and why are there no mistakes that can’t be done?",
-	"Think how much you could do if you wouldn’t care what others think.",
-	"I made the same mistakes for so many times, that now I call them traditions.",
-	"Here food is a luxury that you don’t need to take your pants off for.",
-	"Some people feel the rain. Others just get wet.",
-	"Some people are so poor, all they have is money.",
-	"It’s just a bad day, not a bad life.",
-	"Common sense is like deodorant - The people who need it never use it",
-	"Walk away from stupidity and your world becomes a better place",
-	"Common sense is not a gift, it's a punishment.  Because you have to deal with those who don't have it.",
-	"I know I don’t look like much now, but I’m drinking milk ",
-	"I know I don’t look like much now, but I’m drinking milk. ",
-	"If I followed you home, would you keep me? ",
-	"I always wrap my shit. Using a smart phone without a case is like having unprotected sex. It feels so good but the consequences suck."
-	]
+    randomCommentArray: [
+    "Okay. You people sit tight, hold the fort and keep the home fires burning. And if we're not back by dawn... call the president.",
+    "Everybody relax, I'm here.",
+    "I'm a reasonable guy. But, I've just experienced some very unreasonable things.",
+    "Like I told my last wife, I says, 'Honey, I never drive faster than I can see. Besides that, it's all in the reflexes.'",
+    "We take what we want and leave the rest, just like your salad bar.",
+    "I told him we already got one",
+    "Religion is like a penis, it's fine to have one and be proud of it, but when you take it out and start waving it in my face, that's where we have a problem.",
+    "You don't think she'd yada yada sex?....I've yada yada'd sex.",
+    "@Bacon_Cheeseburger time for another PBR!",
+    "You can't make somebody love you.  You can only stalk them and hope for the best",
+    "I stayed up all night to see where the sun went, then it dawned on me.",
+    "I went to a chiropractor yesterday for the first time.... he cracked me up!",
+    "I know a guy thats addicted to break fluid....... he says he can stop anytime!",
+    "A soldier who survived mustard gas and pepper spray is now a seasoned veteran!",
+    "Irish Handcuffs:  Holding an alcoholic drink in each hand.",
+    "If Apple made a car, would it have Windows?",
+    "An apple a day keeps anyone away, If you throw it hard enough",
+    "Yesterday at the bank an old lady asked if i could help her check her balance... so i pushed her over",
+    "To the guy who invented Zero: Thanks for nothing!",
+    "I can hear music coming out of my printer. I think the paper's jammin' again.",
+    "People who drink light 'beer' don't like the taste of beer; they just like to pee a lot.",
+    "No one looks back on their life and remembers the nights they had plenty of sleep.",
+    "Give a man a beer, and he wastes an hour, but teach a man how to brew, and he wastes a lifetime.",
+    "Give a man a fish and he will eat for a day. Teach him how to fish, and he will sit in a boat and drink beer all day.",
+    "Squats?  I thought you said let's do shots!",
+    "I want a beer. I want a giant, ice-cold bottle of beer... and shower sex.",
+    "Beer makes you feel the way you ought to feel without beer.",
+    "Larry no function beer well without.",
+    "Drunk is when you feel sophisticated, but can't pronounce it...",
+    "My girlfriend's favorite beer is water. I mean Bud Light.",
+    "It's a zombie apocalypse! Quick, grab the beer!",
+    "He who drinks beer sleeps well. He who sleeps well cannot sin. He who does not sin goes to heaven. Amen.",
+    "There are more old drunks than there are old doctors.",
+    "I don't think I've drunk enough beer to understand that.",
+    "In dog beers, I've only had one.",
+    "There's a time and place for beer....In my hand and NOW!",
+    "When I read about the evils of drinking, I gave up reading.",
+    "You can drink at 7AM Because the Beastie Boys fought for that kind of thing",
+    "I rescued some beer last night.  It was trapped inside a bottle.",
+    "There comes a time in the day that no matter the question...the answer is beer!",
+    "I've been working out a lot lately. My favorite exercise is a mix between a lunge and a crunch....I call it Lunch.",
+    "I call my bathroom the Jim instead of the the John.  So now I can tell all my friends I hit the Jim before I go to work everyday.",
+    "When people get a little too chummy with me I like to call them by the wrong name to let them know I don't really care about them",
+    "That's what happens when you rub it.",
+    "I'm not interested in caring about people",
+    "Chase you?  Bitch please, I don't even chase my liquor!",
+    "I don't get nearly enough credit for managing not to be a violent psychopath.",
+    "Yes I walked away mid-conversation.  You were boring me to death and my survival instincts kicked in",
+    "Fishing relaxes me. It's like yoga, except I still get to kill something.",
+    "All is well, the PBR is in the fridge",
+    "Quick somebody pull my finger!!",
+    "Random Fact: Mammoths were alive when the Great Pyramid was being built.",
+    "Random Fact: Betty White is older than sliced bread.",
+    "Random Fact: From the time it was discovered to the time it was stripped of its status as a planet, Pluto hadn’t made a full trip around the Sun.",
+    "Random Fact: The lighter was invented before the match.",
+    "Random Fact: Anne Frank and Martin Luther King Jr. were born in the same year.",
+    "Random Fact: France last used a guillotine to execute someone after Star Wars premiered.",
+    "Random Fact: Harvard University was founded before Calculus existed.",
+    "Random Fact: If you have 23 people in a room, there is a 50% chance that 2 of them have the same birthday.",
+    "Random Fact: It’s never said that Humpty Dumpty was an egg in the nursery rhyme.",
+    "Random Fact: The water in Lake Superior could cover all of North and South America in a foot of water.",
+    "Random Fact: North Korea and Finland both border the same country; Russia.",
+    "Random Fact: When you get a kidney transplant, they usually just leave your original kidneys in your body and put the 3rd kidney in your pelvis.",
+    "Random Fact: Oxford University is older than the Aztec Empire.",
+    "Random Fact: National animal of Scotland is a Unicorn.",
+    "Random Fact: The Ottoman Empire still existed the last time the Chicago Cubs won the World Series.",
+    "Random Fact: The lighter the roast of coffee, the more caffeine it has.",
+    "Random Fact: A speck of dust is halfway in size between a subatomic particle and the Earth.",
+    "Random Fact: If the timeline of earth was compressed into one year, humans wouldn’t show up until December 31 at 11:58 p.m.",
+    "Random Fact: If you were able to dig a hole to the center of the earth, and drop something down it, it would take 42 minutes for the object to get there.",
+    "Random Fact: We went to the moon before we thought to put wheels on suitcases.",
+    "Random Fact: A human could swim through the arteries of a blue whale.",
+    "Random Fact: If you could fold a piece of paper in half 42 times, the combined thickness would reach the moon.",
+    "Random Fact: On both Saturn and Jupiter, it rains diamonds.",
+    "Random Fact: Saudi Arabia imports camels from Australia.",
+    "Random Fact: You can line up all 8 planets in our solar system directly next to each other and it would fit in the space between Earth and the Moon.",
+    "Random Fact: The youngest known mother was 5 years old.",
+    "Random Fact: The Earth is smoother than a billiard ball, if both were of the same size.",
+    "Random Fact: Nintendo was founded in 1889.",
+    "Random Fact: If you take all the molecules in a teaspoon of water and lined them up end to end in a single file line, they would stretch ~30 billion miles.",
+    "Random Fact: In Australia, there was a war called the emu war. The emus won.",
+    "Women, can't live with them....pass the beer nuts!",
+    "The object of golf is to play the least amount of golf.",
+    "The sinking of the Titanic must have been a miracle to the lobsters in the kitchen.",
+    "Instead of all the prequel and sequel movies coming out, they should start making 'equels' - films shot in the same time period as the original film, but from an entirely different perspective.",
+    "X88B88 looks like the word 'voodoo' reflecting off of itself.",
+    "April Fools Day is the one day of the year that people critically evaluate news articles before accepting them as true.",
+    "Websites should post their password requirements on their login pages so I can remember WTF I needed to do to my normal password to make it work on their site.",
+    "Now that cellphones are becoming more and more waterproof, pretty soon it will be okay to push people into pools again.",
+    "Maybe 'Are You Smarter Than a 5th Grader?' isn't a show that displays how stupid grown adults can be, but rather, a show that depicts how much useless information we teach grade schoolers that won't be retained or applicable later in life.",
+    "Last night my friend asked to use a USB port to charge his cigarette, but I was using it to charge my book. The future is stupid.",
+    "When Sweden is playing Denmark, it is SWE-DEN. The remaining letters, not used, is DEN-MARK.",
+    "'Go to bed, you'll feel better in the morning' is the human version of 'Did you turn it off and turn it back on again?'",
+    "In the future, imagine how many Go-Pros will be found in snow mountains containing the last moments of people's lives.",
+    "We should have a holiday called Space Day, where lights are to be shut off for at least an hour at night to reduce light pollution, so we can see the galaxy.",
+    "Your shadow is a confirmation that light has traveled nearly 93 million miles unobstructed, only to be deprived of reaching the ground in the final few feet thanks to you.",
+    "Senior citizen discounts should just round dollar amounts down so we don't have to wait in line behind them while they dig for change.",
+    "I have never once hit the space bar while watching a YouTube video with the intention of scrolling halfway down the page",
+    "Since smart watches can now read your pulse, there should be a feature that erases your browser history if your heart stops beating.",
+    "Waterboarding at Guantanamo Bay sounds super rad if you don’t know what either of those things are.",
+    "The person who would proof read Hitler's speeches was literally a grammar Nazi.",
+    "The older I get, the more people can kiss my a$$",
+    "I can't tell if you are on too many drugs or not enough.",
+    "My doctor told me to start killing people... Well not in those exact words.  He said I had to reduce stress in my life, which is pretty much the same thing.",
+    "Love is spending the rest of your life with someone you want to kill & not doing it because you'd miss them!",
+    "And there goes the last F*ck I gave!",
+    "My girlfriend woke up this morning with a huge smile on her face.....I love Sharpies!",
+    "You don't have to like me...I'm not a Facebook status",
+    "I would love to visit you, but I live on the Internet.",
+    "If you were running for President, I would vote for you. And clear your search history.  Don't worry I got you.",
+    "Lord, please give me patience because if you give me strength, I'll need bail money too...",
+    "DRAMA = Dumbass Rejects Asking for More Attention",
+    "It's been 55 minutes since the last pearl jam song, what is wrong with you people?",
+    "I am presently experiencing life at a rate of several WTF's per hour",
+    "If you are a passenger in my car, and I turn the radio up....Do not talk!",
+    "As a young child my mother told me I can be anyone I want to be ---- Turns out this is called identity theft!",
+    "Do you ever just wanna grab someone by the shoulder, look them deep in the eyes and whisper 'No one gives a shit!!'",
+    "Psst... I hear Eddie Vedder likes men",
+    "I'm sorry I keep calling you and hanging up.  I just got this new voice activated phone, so every time I holler dumbass it dials you....",
+    "Before Walmart you had to buy a ticket to the fair to see a bearded woman.",
+    "Hold on a minute.... I'm gonna need something stronger than tea to listen to this BS!!",
+    "My greatest fear is one day I will die, and my wife will sell my guns for what I told her I paid for them.",
+    "Going to McDonals's for a salad is like going to a prostitute for a hug.",
+    "Life is like diarrhea. No matter how hard you try to stop it, the shit keeps coming!!",
+    "I'll never know how individuals can fake relationships....I can't even fake a hello to somebody I don't like.",
+    "Have you ever had one of those days, when you're holding a stick and everybody looks like a Pinata?",
+    "If a telemarketer calls, give the phone to your 3 year-old and tell her it's Santa!!",
+    "Why do we use toilet paper?  I need wet wipes!  If you got shit on your arm would you just simply wipe it off with toilet paper?",
+    "I'm not angry, I'm happiness challenged!",
+    "If you have an opinion about me, please raise your hand....Now put it over your mouth!",
+    "In the 80s kids learned from Sesame Street and Mr Rogers.  Now they learn from watching zombies who eat people,a vampires sucking, and teen stars. I'm a bit concerned about the future...",
+    "I'd unfriend you but your train wreck life is too entertaining.",
+    "When people tell me 'You're going to regret that in the morning' I sleep in until noon because I'm a problem solver.",
+    "Dear YouTube it's pretty safe to assume we all want 'To Skip the Ad'",
+    "I don't comment on your Facebook statuses for the same reason I don't step in dog shit when I see it.",
+    "Today's tip: How to handle stress like a dog. If you can't eat it or play with it then pee on it and walk away.",
+    "I do whatever it takes to get the job done. And sometimes it takes a vodka.",
+    "Keep talking ... I'm diagnosing you.",
+    "I wouldn't say that you have a problem with alcohol but maybe just a teensy weensy difficulty with sobriety.",
+    "I don't know why you're complaining about your appearance. Your personality is even worse.",
+    "You're so bad you're going to hell in every religion!",
+    "I haven't heard from you lately and I've really enjoyed it.",
+    "Some people should be thankful that I don't always comment my thoughts on their Facebook posts.",
+    "Some days the best part of my job is that my chair swivels.",
+    "If I had a nickle for every time you got on my nerves ...I'd have a sock full of nickles to hit you with!",
+    "You know your children are growing up when they stop asking you where they came from and refuse to tell you where they're going.",
+    "Wisdom for the ages: Never get into a fist fight with anyone who is uglier than you. They have nothing to lose.",
+    "So you say you'll be here sometime between noon and five for the service call? Great. I'll be sure to pay my bill sometime between February and June.",
+    "If women ran the world we wouldn't have wars, just intense negotiations every 28 days.",
+    "To speak before you think is like wiping your ass before you shit!",
+    "To the woman in Walmart with six screaming kids: If you're wondering how those condoms got in your shopping cart, you're welcome.",
+    "I understand that some people live in their own little world. And sometimes I wish they'd stay there and never visit mine.",
+    "I was hoping for a battle of wits but you appear to be unarmed.",
+    "I used to be a people person but people ruined that for me.",
+    "If you want to feel more attractive just go to Walmart and stay away from the people at the gym.",
+    "WARNING: I have restless leg syndrome and may not be able to stop from kicking your ass. Now go ahead and continue with your shenanigans.",
+    "There are some things better left unsaid but you can bet your sweet ass I'm going to say them anyway.  :kiss:",
+    "I don't need an 'Easy' Button. I need a 'F*CK IT' Button!",
+    "No it's okay. I totally wanted to drop everything I was going to do today to take care of your bullshit.",
+    "I've had one of those days where my middle finger had to answer every question.",
+    "Message to all the drama queens who are looking for attention: Please take a number and go wait in my 'I don't give a shit line'",
+    "If it takes you more than an hour to get ready, then you might not be as good looking as you think you are!",
+    "I don't judge people based on race, color, religion, sexuality, gender, ability or size. I base it on whether or not they're an asshole.",
+    "There's only one thing keeping me from breaking you in half ... I don't want two of you around!",
+    "If you have a problem with me please write it nicely on a piece of paper, put it in an envelope, fold it up and shove it up your a$$",
+    "There are three kinds of people in the world. People who make things happen. People who watch things happen and people who say 'WTF happened?'",
+    "I got so drunk last night, I walked across the dance floor to get a drink and won the dance contest.",
+    "If women ruled the world there would be no wars. Just a bunch of jealous countries not talking to each other.",
+    "Holy crap! Did you just feel that? I think the whole world just revolved around YOU!",
+    "To error is human, to love is divine, to piss me off is a mistake!!",
+    "You're right, it's my fault because I forgot you were an idiot.",
+    "I'm not anti-social. I just have a strong aversion to B.S., drama and pretending.",
+    "I'm Larry. This is my brother, Darryl, and this is my other brother, Darryl",
+    "My sex life is like a Ferrari...I don't have a Ferrari.",
+    "I just saved a bunch of money on my car insurance by switching...my car into reverse and driving away from the accident. ",
+    "No I'm not ignoring you. I suffer from selective hearing, usually triggered by idiots.",
+    "I think it's only fair to throw monopoly money at strippers with fake boobs.",
+    "Note to Self: It is illegal to stab people for being stupid.",
+    "I'm in love with my bed. We're perfect for each other but my alarm clock doesn't want us together. That jealous whore!",
+    "Pain makes you stronger. Tears make you braver. A broken heart makes you wiser. And alcohol makes you not remember any of that crap.",
+    "Last time I bought a package of condoms and the cashier asked me, 'Do you need a bag?' I said, 'No she isn't that ugly.'",
+    "Alcohol won’t solve my problems, but then again neither will milk or orange juice.",
+    "I just failed my Health and Safety test. The question was 'what steps would you take in the event of a fire?'. Apparently 'big f*cking ones' was the wrong answer.",
+    "Grammar: It's the difference between knowing your shit and knowing you're shit",
+    "Only in math problems can you buy 60 cantaloupes and nobody asks what the hell is wrong with you.",
+    "Who named Trojan Condoms? The Trojan Horse entered through the city gates, broke open and loads of little guys came out and messed up everyones day.",
+    "People who create their own drama deserve their own karma.",
+    "ACHOO! If you're allergic to bull-crap, drama, head games, liars, & fake people, keep this sneeze going. I can't wait to see who all does this.",
+    "I have to stop saying 'How stupid can you be'. I think people are starting to take it as a challenge.",
+    "There's a good chance you don't like me BUT an even better chance that I don't give a crap.",
+    "I have a batman outfit hanging in my closet just to screw with myself when I get Alzheimer's.",
+    "I love it when someone insults me. That means I don’t have to be nice anymore.",
+    "I'm sarcastic and have a Smartass attitude. It's a natural defense against Drama, Bullshit and Stupidity. And I don't give a @#$& if you're offended!",
+    "Give a man a fish and he will eat for a day. Teach him how to fish, and he will sit in a boat and drink beer all day.",
+    "Never go to bed angry. Always stay up and plot your revenge first.",
+    "I don't hate you. I'm just not necessarily excited about your existence.",
+    "Life is not like a box of chocolates. It's more like a jar of jalapenos. What you do today might burn your ass tomorrow.",
+    "I know the voices in my head aren't real..... but sometimes their ideas are just absolutely awesome!",
+    "Doing nothing is hard, you never know when you're done.",
+    "If you didn't see it with your own eyes, or hear it with your own ears, don't invent it with your small mind and share it with your big mouth!",
+    "No matter how smart you are you can never convince a stupid person that they are stupid.",
+    "I'm not lazy, I'm just very relaxed.",
+    "It's not important to win, it's important to make the other guy lose.",
+    "I am too lazy to be lazy.",
+    "To make a mistake is human, but to blame it on someone else, that's even more human.",
+    "Always remember you're unique, just like everyone else.",
+    "Taking your ex back is like going to a garage sale and buying your own crap.",
+    "To error is human, to love is divine, to piss me off is a mistake.",
+    "A day without dealing with stupid people is like ..., oh never mind, I'll let you know if that ever happens.",
+    "One spelling mistake can ruin your life. One husband texted this to his wife: 'Having a wonderful time. Wish you were her.'",
+    "Insanity does not run in my family. It strolls through, takes its time and gets to know everyone personally.",
+    "I'm so sick and tired of my friends who can't handle their alcohol. The other night they dropped me 3 times while carrying me to the car.",
+    "If I say something that offends you, please let me know so I can say it again later.",
+    "You're starting to sound reasonable, must be time to up my medications.",
+    "Lead me not into temptation, I can find it myself.",
+    "Never take life too seriously. Nobody gets out alive anyways.",
+    "I didn't say it was your fault. I said I was going to blame you.",
+    "My opinions may have changed, but not the fact that I'm right.",
+    "WARNING - I have an attitude and I know how to use it.",
+    "It's my cat's world. I'm just here to open cans.",
+    "I used to be indecisive, but now I’m not too sure.",
+    "Lord help me to be the person my dog thinks I am.",
+    "Too much of a good thing can be wonderful. - Mae West",
+    "I don’t have an attitude problem. You have a perception problem.",
+    "People who think they know everything are annoying to those of us who do.",
+    "I’m an excellent housekeeper. Every time I get a divorce I keep the house.",
+    "I still miss my ex – but guess what? My aim is getting better.",
+    "A good lawyer knows the law, a great lawyer knows the judge.",
+    "Hey look squirrel",
+     "Women, can't live with them....pass the beer nuts!",
+    "Do vegetarians eat animal crackers? ",
+    "If a jogger runs at the speed of sound, can he still hear his iPod?",
+    "If man evolved from monkeys, how come we still have monkeys? ",
+    "How do you handcuff a one-armed man?",
+    "If God sneezes, what should you say? ",
+    "Why is it that everyone driving faster than you is considered an idiot and everyone driving slower than you is a moron? ",
+    "Why do they call the little candy bars 'fun sizes'. Wouldn't it be more fun to eat a big one? ",
+    "Is it legal to travel down a road in reverse, as long as your following the direction of the traffic?",
+    "Why doesn't the fattest man in the world become a hockey goalie? ",
+    "When Atheists go to court, do they have to swear on the bible?",
+    "How can something be 'new' and 'improved'? if it's new, what was it improving on?",
+    "Why do they sterilize lethal injections?",
+    "Why aren't drapes double sided so it looks nice on the inside and outside of your home?",
+    "Is a pessimist's blood type B-negative? ",
+    "Beer is proof that God loves us and wants us to be happy.",
+    "I'm trying to see things from your point of view, but I can't get my head that far up your a**. ",
+    "Never underestimate the power of stupid people in large groups.",
+    "Sometimes my mind wanders; other times it leaves completely.",
+    "I am free of all prejudices. I hate everyone equally. ",
+    "Why is it that when we 'skate on thin ice', we can 'get in hot water'?",
+    "If pro and con are opposites, wouldn't the opposite of progress be congress? ",
+    "Why does the Easter bunny carry eggs? Rabbits don't lay eggs.",
+    "Why does caregiver and caretaker mean the same thing?",
+    "Last night I was looking at the stars and I wondered... where the hell's my ceiling! ",
+    "Never play leap frog with a unicorn. Just sayin'.... ",
+    "If it's tourist season why can't we shoo them?",
+    "What is converted rice and what was it before it converted?",
+    "They always say the body was found in a shallow grave!  Don't be lazy, dig a deep grave.",
+    "Friends help you move. Real friends help you move dead bodies.",
+    "If something 'goes without saying' why do people still say it?",
+    "If you don't pay your exorcist, do you get repossessed?",
+    "Where are all the mentally handicapped parking spaces for people like me?",
+    "Isn't Disney World a people trap operated by a mouse?",
+    "If milk goes bad if not refrigerated, why does it not go bad inside the cow?",
+    "What's the difference between normal ketchup and fancy ketchup?",
+    "Friendship is like peeing on yourself: everyone can see it, but only you get the warm feeling that it brings. ",
+    "There are no stupid questions, just stupid people. ",
+    "When I die, I want to go peacefully like my Grandfather did, in his sleep -- not screaming, like the passengers in his car. ",
+    "You have a cough? Go home tonight, eat a whole box of Ex-Lax, tomorrow you'll be afraid to cough. ",
+    "I could tell that my parents hated me. My bath toys were a toaster and a radio. ",
+    "Can I lend a machete to your intellectual thicket?",
+    "If a kid refuses to sleep during nap time, are they guilty of resisting a rest? ",
+    "A child of five would understand this. Send someone to fetch a child of five. ",
+    "Anyone who says he can see through women is missing a lot. ",
+    "Before I speak, I have something important to say. ",
+    "Either he's dead or my watch has stopped. ",
+    "I have a mind to join a club and beat you over the head with it. ",
+    "I have had a perfectly wonderful evening, ... but this wasn't it. ",
+    "I intend to live forever, or die trying. ",
+    "I must confess, I was born at a very early age. ",
+    "I must say I find television very educational. The minute somebody turns it on, I go to the library and read a good book. ",
+    "I never forget a face, but in your case I'll be glad to make an exception. ",
+    "I refuse to join any club that would have me as a member. ",
+    "I remember the first time I had sex - I kept the receipt. ",
+    "I was married by a judge. I should have asked for a jury. ",
+    "I worked my way up from nothing to a state of extreme poverty. ",
+    "I've got the brain of a four year old. I'll bet he was glad to be rid of it. ",
+    "If I held you any closer I would be on the other side of you. ",
+    "If you've heard this story before, don't stop me, because I'd like to hear it again. ",
+    "Man does not control his own fate. The women in his life do that for him. ",
+    "Marriage is a wonderful institution, but who wants to live in an institution? ",
+    "Military intelligence is a contradiction in terms. ",
+    "My mother loved children - she would have given anything if I had been one.",
+    "Next time I see you, remind me not to talk to you. ",
+    "No man goes before his time - unless the boss leaves early. ",
+    "One morning I shot an elephant in my pajamas. How he got into my pajamas I'll never know. ",
+    "Outside of a dog, a book is a man's best friend. Inside of a dog it's too dark to read. ",
+    "Politics is the art of looking for trouble, finding it everywhere, diagnosing it incorrectly and applying the wrong remedies. ",
+    "Practically everybody in New York has half a mind to write a book, and does. ",
+    "Quote me as saying I was mis-quoted. ",
+    "Room service? Send up a larger room. ",
+    "She got her looks from her father. He's a plastic surgeon. ",
+    "The secret of life is honesty and fair dealing. If you can fake that, you've got it made. ",
+    "There's one way to find out if a person is honest - ask them. If they says, 'Yes', you know they are a crook. ",
+    "Those are my principles, and if you don't like them... well, I have others. ",
+    "Well, Art is Art, isn't it? Still, on the other hand, water is water. And east is east and west is west and if you take cranberries and stew them like applesauce they taste much more like prunes than rhubarb does. Now you tell me what you know. ",
+    "Who are you going to believe, me or your own eyes? ",
+    "Whoever named it necking was a poor judge of anatomy.", 
+    "Why should I care about posterity? What's posterity ever done for me? ",
+    "Why, I'd horse-whip you if I had a horse. ",
+    "Life changes so fast - DO something and you can change it. A small change every day amounts to a lot very quickly.",
+    "You're never too late for an uprising!",
+    "You can't hear me because I'm not saying anything.",
+    "Elephants are not made to hop up and down.",
+    "If I ever meet myself, I'll hit myself so hard I won't know what hit me.",
+    "I don't negotiate with terrorists - 'Merica!!",
+    "Would you think guanaria should cure diarrhea.... think about it...",
+    "What's the point of having a democracy, if everybody's going to vote wrong?",
+    "Would you rather: A. Eat a bowl of shit once OR B. have explosive diarrhea for the rest of your life?",
+    "Would you rather: A. Have sex with a goat, but no one would know OR B. not have sex with one, but everyone would think you did?",
+    "Would you rather: A. Always have to say everything on your mind OR B. never speak again?",
+    "Would you rather: A. Be able to turn invisible OR B. be able to fly?",
+    "Space, it seems to go on and on forever. But then you get to the end and a gorilla starts throwing barrels at you.",
+    "I was having the most wonderful dream. Except you were there, and you were there, and you were there!",
+    "Hey, this is mine. That's mine. All of this is mine. Except that bit. I don't want that bit. But all the rest of this is mine. Hey, this has been a really good day.",
+    "Time - Unknown. Location - Unknown. Cause of accident - Unknown. Should someone find this recording, perhaps it will shed light as to what happened here.",
+    "That settles it. Spankings all around, then.",
+    "I feel pretty, Oh so pretty",
+    "I'm feeling a bit kinky... anyone up for some robot fun?",
+    "Never let good science, reason, and logic get in the way of a good conspiracy!",
+    "I refer you to on-line sources, which can be changed at any time.",
+    "It seems normal when they tell you about it, but then a whole camera crew appears and suddenly it's not so fun any more.",
+    "Bugs like to touch themselves with their antennae while they watch you sleeping.",
+    "I apologize for being the only person who truly comprehends how screwed we are!",
+    "Imagination will often carry us to worlds that never were. But without it we go nowhere.",
+    "The important thing is not to stop questioning; curiosity has its own reason for existing.",
+    "I've got thrills to seek, deaths to defy, mattress tags to tear off.",
+    "Don't tell BK but I have run with scissors",
+    "Now, it's quite simple to defend yourself against a man armed with a banana. First of all you force him to drop the banana; then, second, you eat the banana, thus disarming him. You have now rendered him 'elpless.",
+    "No way, spank your OWN monkey.",
+    "If a cloud was the same as a fool, how would you feel about rain?",
+    "Monkey recovery program. SIGN UP HERE.",
+    "I am ROBOT... hear me beep.",
+    "If you get a minute, give it to me.  I'm collecting them to get an extra hour.",
+    "Damn shampoo commercials, hair isn't that fun.",
+    "No, YOU are the hallucination! Oh wait, that was something else. Never mind.",
+    "I'm not crazy. Don't call me crazy! I'm just not user-friendly!",
+    "The wizards can't see you now",
+    "I know where you live... each and every one of you!",
+    "Are you taunting me?",
+    "Go away or I shall taunt you a second time",
+    "Please save all your bad tunes for a time when I'm not around.  Thanks!",
+    "You don’t notice the air, until someone spoils it.",
+    "Don’t drink while driving – you will spill the beer.",
+    "If you love a woman, you shouldn’t be ashamed to show her to your wife.",
+    "Life didn’t work out, but everything else is not that bad.",
+    "I feel like Tampax – at a good place, but wrong time…",
+    "If someone notices you with an open zipper, answer proudly: professional habit.",
+    "If you’re not supposed to eat at night, why is there a light bulb in the refrigerator?",
+    "FRIDAY is my second favorite F word.",
+    "There is a new trend in our office; everyone is putting names on their food. I saw it today, while I was eating a sandwich named Kevin.",
+    "The speed of light is when you take out a bottle of beer out of the fridge before the light comes on.",
+    "To weigh 50 kilos and say that you’re fat, that is so female…",
+    "I have been to many places but my goal is to go everywhere.",
+    "If Mayans could predict the future, why didn’t they predict their extinction?",
+    "Did you know that your body is made 70% of water? And now I’m thirsty.",
+    "Don’t forget that alcohol helps to remove the stress, the bra, the panties and many other problems.",
+    "Alcohol not only expands the blood vessels but also communications.",
+    "Alcohol not only helps to make new acquaintances, but also end the old once. ",
+    "If only I knew that I will have this headache today, I would have got drunk yesterday.",
+    "All the problems fade before a hangover…",
+    "Tequila is a good drink: you drink it and you feel like a cactus; the only problem is that in the morning the thorns grow inward.",
+    "After the weekend the most difficult task is to remember names… ",
+    "It’s better to be a worldwide alcoholic, than an Alcoholic Anonymous.",
+    "In principle, I can stop drinking, the thing is – I don’t have such a principle.",
+    "I know my limits: if I fall down it means enough.",
+    "Why is there so much blood in my alcohol system?",
+    "I say NO to the drugs, but they won’t listen.",
+    "Smoking is a slow death! But we’re not in a hurry…",
+    "I became a vegetarian – switched to weed.",
+    "We must pay for the mistakes of our youth… at the drugstore.",
+    "Friends come and go. Enemies pile up.",
+    "I would like to know when someone unfriends me on Facebook, so I could like it.",
+    "Maybe you need a ladder to climb out of my business?",
+    "I like the sound of you not talking.",
+    "I’m not a Facebook status, you don’t have to like me.",
+    "I found your nose in my business again.",
+    "If a man gives you flowers without any reason, it means there is a reason.",
+    "Women can perfectly understand other people, if the people are not men.",
+    "Women are very good! They can forgive a man…even if he’s not guilty.",
+    "A toast to women: it’s not that good with you, as it is bad without you.",
+    "If you think you are fooled by destiny – remember Al Bundy.",
+    "God gave us the brain to work out problems. However, we use it to create more problems.",
+    "Don’t be nervous if someone is driving ahead of you- the world is round, just think that you’re driving first!",
+    "If you can’t beat the record, you can beat up its owner.",
+    "Dream carefully, because dreams come true.",
+    "Everything always ends well. If not – it’s probably not the end.",
+    "If you want but can’t. It means you don’t want it enough.",
+    "It’s better to do and regret than regret of not doing.",
+    "Everything you do you’re gonna regret. But if you do nothing – you will not only regret but will also suffer.",
+    "You’re not sure – outrun and make sure.",
+    "The deeper the pit you’re falling into, the more chance you have to learn how to fly.",
+    "If you don’t care where you are – it means you’re not lost.",
+    "The light at the end of the tunnel – are the front lights of a train.",
+    "If the fortune has turned her back on you, you can do whatever you want behind her back.",
+    "It is said that, you can’t buy happiness. You only need to know the right places…",
+    "If there would be no fools – we would be them.",
+    "Artificial intelligence is nothing compared to natural stupidity.",
+    "Common sense is not so common",
+    "Why there are mistakes that can’t be set right and why are there no mistakes that can’t be done?",
+    "Think how much you could do if you wouldn’t care what others think.",
+    "I made the same mistakes for so many times, that now I call them traditions.",
+    "Here food is a luxury that you don’t need to take your pants off for.",
+    "Some people feel the rain. Others just get wet.",
+    "Some people are so poor, all they have is money.",
+    "It’s just a bad day, not a bad life.",
+    "Common sense is like deodorant - The people who need it never use it",
+    "Walk away from stupidity and your world becomes a better place",
+    "Common sense is not a gift, it's a punishment.  Because you have to deal with those who don't have it.",
+    "I know I don’t look like much now, but I’m drinking milk ",
+    "I know I don’t look like much now, but I’m drinking milk. ",
+    "If I followed you home, would you keep me? ",
+    "I always wrap my shit. Using a smart phone without a case is like having unprotected sex. It feels so good but the consequences suck."
+    ]
 };
 //SECTION AI: All Larry AI functionality:
 var AI = {
@@ -2446,21 +2486,24 @@ var API = {
       }
 
       window.APIisRunning = true;
-	  botVar.botName = API.getBotName();
-	  if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
+      botVar.botName = API.getBotName();
+      if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
-	  USERS.resetAllUsersOnStartup();
-	  USERS.loadUsersInRoom(false);
+      SETTINGS.retrieveFromStorage();
+      SETTINGS.retrieveSettings();
+      USERS.resetAllUsersOnStartup();
+      USERS.loadUsersInRoom(false);
+      USERS.removeMIANonUsers();
 
-  	  botVar.currentSong = API.currentSongName();
-	  botVar.currentDJ   = API.currentDjName();
-	  botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
-	  
+        botVar.currentSong = API.currentSongName();
+      botVar.currentDJ   = API.currentDjName();
+      botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
+      
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
       $('.room-user-counter').bind("DOMSubtreeModified", API.on.EVENT_USER_JOIN);
-	  $('.dubup').bind("DOMSubtreeModified", API.on.EVENT_DUBUP);
+      $('.dubup').bind("DOMSubtreeModified", API.on.EVENT_DUBUP);
       $('.dubdown').bind("DOMSubtreeModified", API.on.EVENT_DUBDOWN);
 
 
@@ -2468,12 +2511,12 @@ var API = {
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
       USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
 
-	  //todoer AFK DJ CHECK:
+      //todoer AFK DJ CHECK:
       //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
-	  API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+      API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
-	  botVar.botRunning = true;
+      botVar.botRunning = true;
 
       // [...]
     },
@@ -2483,96 +2526,96 @@ var API = {
   },
 
   getWaitListPosition: function(id){
-	try {
-		if(typeof id === 'undefined' || id === null){
-			id = API.getCurrentDubUser().id;
-		}
-		var wl = API.getWaitList();
-		for(var i = 0; i < wl.length; i++){
-			if(wl[i].id === id){
-				return i;
-			}
-		}
-		return -1;
-	}
-	   catch(err) {
-	   UTIL.logException("getWaitListPosition: " + err.message);
-	}
+    try {
+        if(typeof id === 'undefined' || id === null){
+            id = API.getCurrentDubUser().id;
+        }
+        var wl = API.getWaitList();
+        for(var i = 0; i < wl.length; i++){
+            if(wl[i].id === id){
+                return i;
+            }
+        }
+        return -1;
+    }
+       catch(err) {
+       UTIL.logException("getWaitListPosition: " + err.message);
+    }
   },
   mehThisSong: function () {
-	try  {  $('.dubdown').click();	}  
-	catch(err) { UTIL.logException("mehThisSong: " + err.message); }
+    try  {  $('.dubdown').click();    }  
+    catch(err) { UTIL.logException("mehThisSong: " + err.message); }
   },
   wootThisSong: function () {
-	try  { $('.dubup').click(); }  
-	catch(err) { UTIL.logException("wootThisSong: " + err.message); }
+    try  { $('.dubup').click(); }  
+    catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
   getWaitList: function () {
   //todoer
   },
   getCurrentDubUser: function () {
-	return USERS.lookupUserName(botVar.botName);
+    return USERS.lookupUserName(botVar.botName);
   },
   getDubUserID: function (userid) {
-	try {
-	  //todoer COMPLETE
-	  //return API.getUser(userid);
-	}
-	catch(err) { UTIL.logException("getDubUserID: " + err.message); }
+    try {
+      //todoer COMPLETE
+      //return API.getUser(userid);
+    }
+    catch(err) { UTIL.logException("getDubUserID: " + err.message); }
   },
   getDubUser: function (user) {
-	try {
-		return API.getUser(user);
-	}
-	catch(err) { UTIL.logException("getDubUser: " + err.message); }
+    try {
+        return API.getUser(user);
+    }
+    catch(err) { UTIL.logException("getDubUser: " + err.message); }
   },
   getUser: function (user) {
-	try {
-		return API.getDubUserID(user.id);
-	}
-	catch(err) {
-	  UTIL.logException("getUser: " + err.message);
-	}
+    try {
+        return API.getDubUserID(user.id);
+    }
+    catch(err) {
+      UTIL.logException("getUser: " + err.message);
+    }
   },
   
   getPermission: function (obj) { //1 requests
-	try {
-	  return 10;
-	  // TODOER
-	  //var u;
-	  //if (typeof obj === "object") u = obj;
-	  //else u = API.getDubUserID(obj);
-	  //if (botCreatorIDs.indexOf(u.id) > -1) return 10;    // admin
-	  //if (botVar.botID === u.id) return 4;          // cohost
-	  //if (u.gRole < 2) return u.role;
-	  //else {
-	  //switch (u.gRole) {
-	  //	case 2:
-	  //		return 7;
-	  //	case 3:
-	  //		return 8;
-	  //	case 4:
-	  //		return 9;
-	  //	case 5:
-	  //		return 10;
-	  //}
-	  //}
-	  //return 0;
-	}
-	catch(err) {
-	  UTIL.logException("getPermission: " + err.message);
-	}
+    try {
+      return 10;
+      // TODOER
+      //var u;
+      //if (typeof obj === "object") u = obj;
+      //else u = API.getDubUserID(obj);
+      //if (botCreatorIDs.indexOf(u.id) > -1) return 10;    // admin
+      //if (botVar.botID === u.id) return 4;          // cohost
+      //if (u.gRole < 2) return u.role;
+      //else {
+      //switch (u.gRole) {
+      //    case 2:
+      //        return 7;
+      //    case 3:
+      //        return 8;
+      //    case 4:
+      //        return 9;
+      //    case 5:
+      //        return 10;
+      //}
+      //}
+      //return 0;
+    }
+    catch(err) {
+      UTIL.logException("getPermission: " + err.message);
+    }
   },
   moderateDeleteChat: function (cid) {
     // todoer
-	// *[@id="562ba5be67a3641400ebabfb-1447537287106"]/div/div[1]/span	
-	// #\35 62ba5be67a3641400ebabfb-1447537287106 > div > div.chatDelete > span
+    // *[@id="562ba5be67a3641400ebabfb-1447537287106"]/div/div[1]/span    
+    // #\35 62ba5be67a3641400ebabfb-1447537287106 > div > div.chatDelete > span
 
-	//	$.ajax({
-	//		url: "https://plug.dj/_/chat/" + cid,
-	//		type: "DELETE"
-	//	});
+    //    $.ajax({
+    //        url: "https://plug.dj/_/chat/" + cid,
+    //        type: "DELETE"
+    //    });
   },
   chatLog: function(txt) {
     var b = new Dubtrack.View.chatLoadingItem;
@@ -2580,60 +2623,60 @@ var API = {
   },
 
   sendChat: function(message) {
-	//todoer Delete this after we re-enable the bot kill on room change code.
-	//if(botVar.room.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
-	if (botVar.botMuted === true)
-		API.logInfo(message);
-	else if (botVar.botRunning) {
-	    //Max length: 140
-	    if (message.length > 135) {
-			var space = message.indexOf(' ', 120);
-			if (space === -1) space = 120;
-			API.sendChat(message.substring(0, space));
-			setTimeout(function () { API.sendChat(message.substring(space))  }, 500);
-			return;
-		}
-		Dubtrack.room.chat._messageInputEl.val(message);
-		Dubtrack.room.chat.sendMessage();
-	    botVar.ImHidden = false;
-	}
-	else 
-		API.chatLog(message);
-	
+    //todoer Delete this after we re-enable the bot kill on room change code.
+    //if(botVar.room.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
+    if (botVar.botMuted === true)
+        API.logInfo(message);
+    else if (botVar.botRunning) {
+        //Max length: 140
+        if (message.length > 135) {
+            var space = message.indexOf(' ', 120);
+            if (space === -1) space = 120;
+            API.sendChat(message.substring(0, space));
+            setTimeout(function () { API.sendChat(message.substring(space))  }, 500);
+            return;
+        }
+        Dubtrack.room.chat._messageInputEl.val(message);
+        Dubtrack.room.chat.sendMessage();
+        botVar.ImHidden = false;
+    }
+    else 
+        API.chatLog(message);
+    
   },
   
   getDubUpCount: function() {
-    try        { return $(".dubup").text(); }
-	catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
+    try        { return parseInt($(".dubup").text()); }
+    catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
   },
   getSongLength: function() {
     try        { return parseInt($(".min").text()); }
-	catch(err) { UTIL.logException("getSongLength: " + err.message); }
+    catch(err) { UTIL.logException("getSongLength: " + err.message); }
   },
   getDubDownCount: function() {
-    try        { return $(".dubdown").text(); }
-	catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
+    try        { return parseInt($(".dubdown").text()); }
+    catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
   },
   getBotName: function() {
-    try { return $(".user-info").text();	}
-	catch(err) { UTIL.logException("getBotName: " + err.message); }
+    try { return $(".user-info").text();    }
+    catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
   currentSongName: function() {
-    try { return $(".currentSong").text();	}
-	catch(err) { UTIL.logException("currentSongName: " + err.message); }
+    try { return $(".currentSong").text();    }
+    catch(err) { UTIL.logException("currentSongName: " + err.message); }
   },
   currentDjName: function() {
     try {
-	  var userInfo = document.getElementsByClassName("infoContainerInner");
-	  botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
-	  var spans = userInfo[0].getElementsByClassName("currentDJSong");
-	  var djName = spans[0].innerHTML;
-	  botDebug.debugMessage(false, "djName: " + djName);
-	  djName = djName.replace("is playing", "");
-	  botDebug.debugMessage(false, "djName: " + djName.trim());
-	  return djName.trim();
-	}
-	catch(err) { UTIL.logException("currentDjName: " + err.message); }
+      var userInfo = document.getElementsByClassName("infoContainerInner");
+      botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
+      var spans = userInfo[0].getElementsByClassName("currentDJSong");
+      var djName = spans[0].innerHTML;
+      botDebug.debugMessage(false, "djName: " + djName);
+      djName = djName.replace("is playing", "");
+      botDebug.debugMessage(false, "djName: " + djName.trim());
+      return djName.trim();
+    }
+    catch(err) { UTIL.logException("currentDjName: " + err.message); }
   },
   //<li id="560be6cbdce3260300e40770-1447722815886" class="user-560be6cbdce3260300e40770 current-chat-user"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/560be6cbdce3260300e40770/image" alt="levis_homer" onclick="Dubtrack.helpers.displayUser('560be6cbdce3260300e40770', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">levis_homer</a> test</p></div><div class="meta-info"><span class="username">levis_homer </span><i class="icon-dot"></i><span class="timeinfo"><time title="11/16/2015, 8:13:33 PM" class="timeago" datetime="2015-11-17T01:13:33.552Z">2 minutes ago</time></span></div></div></div></li>
 
@@ -2671,107 +2714,111 @@ var API = {
 
   moderateRemoveDJ: function(usrObjectID) {
     try {
-	  var roomUser = USERS.defineRoomUser(usrObjectID);
-	  //todoer roomUser.uid.....
-	  var uid = "560be6cbdce3260300e40770";
-	  var roomid = "5602ed62e8632103004663c2";
-	  
+      var roomUser = USERS.defineRoomUser(usrObjectID);
+      //todoer roomUser.uid.....
+      var uid = "560be6cbdce3260300e40770";
+      var roomid = "5602ed62e8632103004663c2";
+      
       //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
-	  $.ajax({
-			url: "https://api.dubtrack.fm/room/" + roomid + "/queue/user/" + uid + "/all",
-			type: "DELETE"
-		});
-	}
-	catch(err) { UTIL.logException("logInfo: " + err.message); }
+      $.ajax({
+            url: "https://api.dubtrack.fm/room/" + roomid + "/queue/user/" + uid + "/all",
+            type: "DELETE"
+        });
+    }
+    catch(err) { UTIL.logException("moderateRemoveDJ: " + err.message); }
   },
   moderateForceSkip: function() {
-	API.sendChat("/skip");
+    API.sendChat("/skip");
   },
   logInfo: function(msg) {  // Log info to console
-	try {
-	   console.log("INFO: " + msg);
-	}
-	catch(err) { UTIL.logException("logInfo: " + err.message); }
+    try {
+       console.log("INFO: " + msg);
+    }
+    catch(err) { UTIL.logException("logInfo: " + err.message); }
   },
   showPopup: function(title, message) {
     Dubtrack.helpers.displayError(title, message);
   },
 
   on: {
-	EVENT_DUBUP: function () {
-	  try {
-	    if (botVar.ImHidden === true) return;
-		botDebug.debugMessage(false, "EVENT_DUBUP");
-	  }
-	catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
-	},
+    EVENT_DUBUP: function () {
+      try {
+        if (botVar.ImHidden === true) return;
+        botDebug.debugMessage(false, "EVENT_DUBUP");
+      }
+    catch(err) { UTIL.logException("EVENT_DUBUP: " + err.message); }
+    },
     EVENT_DUBDOWN: function () {
-	  try {
-	    if (botVar.ImHidden === true) return;
-		botDebug.debugMessage(false, "EVENT_DUBDOWN");
-		var dubCount = API.getDubDownCount();
-		if (dubCount <= botVar.room.currentMehCount) return;  // Prevent back-2-back calls skipping multiple songs.
-		botVar.room.currentMehCount = dubCount;
-		if (dubCount >= botVar.room.voteSkipLimit) {
-		  API.sendChat(botChat.subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
-		  dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
-		}
-	  }
-	  catch(err) { UTIL.logException("EVENT_DUBDOWN: " + err.message); }
-	},
+      try {
+        if (botVar.ImHidden === true) return;
+        botDebug.debugMessage(false, "EVENT_DUBDOWN");
+        var dubCount = API.getDubDownCount();
+        if (dubCount <= botVar.room.currentMehCount) return;  // Prevent back-2-back calls skipping multiple songs.
+        botVar.room.currentMehCount = dubCount;
+        if (dubCount >= botVar.room.voteSkipLimit) {
+          API.sendChat(botChat.subChat(botChat.getChatMessage("voteskipexceededlimit"), {name: botVar.currentDJ, limit: botVar.room.voteSkipLimit}));
+          dubBot.skipBadSong(botVar.currentDJ, "Room", "Too many Mehs");
+        }
+      }
+      catch(err) { UTIL.logException("EVENT_DUBDOWN: " + err.message); }
+    },
     EVENT_USER_JOIN: function () {
-	  try {
-	    //if (botVar.ImHidden === true) return;
-	    //botDebug.debugMessage(false, "USERJOIN");
-	    //USERS.loadUsersInRoom(true);
-	  }
-	  catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
-	},
+      try {
+        //if (botVar.ImHidden === true) return;
+        botDebug.debugMessage(true, "USERJOIN");
+        //USERS.loadUsersInRoom(true);
+      }
+      catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
+    },
     EVENT_SONG_ADVANCE: function() {  //songadvance
-	  try {
+      try {
       // UPDATE ON SONG UPDATE
-	  if (botVar.ImHidden === true) return;
-	  if (botVar.currentSong === API.currentSongName()) return;
-	  botDebug.debugMessage(true, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
+      if (botVar.ImHidden === true) return;
+      if (botVar.currentSong === API.currentSongName()) return;
+      botDebug.debugMessage(false, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
-	  TASTY.settings.rolledDice = false;
+      TASTY.settings.rolledDice = false;
 
       var dubCount = API.getDubUpCount();
       var mehCount = API.getDubDownCount();
       var previousDJ = botVar.currentDJ;
-	  var previousSong = botVar.currentSong;
-	  botDebug.debugMessage(true, "previousDJ: " + previousDJ);
-	  botVar.currentDJ   = API.currentDjName();
-	  botDebug.debugMessage(true, "botVar.currentDJ: " + botVar.currentDJ);
-	  botVar.currentSong = API.currentSongName();
-	  var tastyPoints = botVar.tastyCount;
-	  botVar.tastyCount = 0;
- 	  USERS.resetUserSongStats();
-	  var roomUser = USERS.lookupUserName(previousDJ);
-	  TASTY.setRolled(roomUser, false);
-	  roomUser.votes.songsPlayed += 1;
+      var previousSong = botVar.currentSong;
+      botDebug.debugMessage(false, "previousDJ: " + previousDJ);
+      botVar.currentDJ   = API.currentDjName();
+      botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
+      botVar.currentSong = API.currentSongName();
+      var tastyPoints = botVar.tastyCount;
+      botVar.tastyCount = 0;
+      USERS.resetUserSongStats();
+      var roomUser = USERS.lookupUserName(previousDJ);
+      TASTY.setRolled(roomUser, false);
 
       setTimeout(function () { dubBot.validateCurrentSong() }, 1500);
-	  
+      
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
 
-	  API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
-	  //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
-	  //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
-	  }
-	  catch(err) { UTIL.logException("EVENT_SONG_ADVANCE: " + err.message); }
+      roomUser.votes.songsPlayed++;
+	  roomUser.votes.woot = parseInt(roomUser.votes.woot) + parseInt(dubCount);
+	  roomUser.votes.meh = parseInt(roomUser.votes.meh) + parseInt(mehCount);
+
+      API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
+      //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
+      //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
+      SETTINGS.storeToStorage();
+      }
+      catch(err) { UTIL.logException("EVENT_SONG_ADVANCE: " + err.message); }
     },
     EVENT_NEW_CHAT: function() {
       try {
-	    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li").length;
-		botDebug.debugMessage(true, "============================= NEW CHAT =============================");
+        //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li").length;
+        botDebug.debugMessage(false, "============================= NEW CHAT =============================");
         var mainChat = document.getElementsByClassName("chat-main");
         var LiItems = mainChat[0].getElementsByTagName("li");
-		var startCounter = 0;
-		if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
-		botChat.lastMessageCount = LiItems.length;
-		botDebug.debugMessage(true, "CHAT - LOOP: " + startCounter + " - " + LiItems.length);
+        var startCounter = 0;
+        if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
+        botChat.lastMessageCount = LiItems.length;
+        botDebug.debugMessage(false, "CHAT - LOOP: " + startCounter + " - " + LiItems.length);
         for (var i = startCounter; i < LiItems.length; i++) {
           botChat.processChatItems(LiItems[i]);
         }
@@ -2943,7 +2990,7 @@ var CONST = {
                 "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you.",
                 "Did your parents have any children that lived %%FU%%?",
                 "OK, but I'll be on the top %%FU%%.",
-				"%%FU%%, I fart in your general direction! Your mother was a hamster and your father smelt of elderberries!",
+                "%%FU%%, I fart in your general direction! Your mother was a hamster and your father smelt of elderberries!",
                 "Do you kiss your mother with that mouth %%FU%%.",
                 "%%FU%%, You daydreaming again, sweetheart?",
                 "Get in the queue %%FU%%.",
@@ -3064,8 +3111,8 @@ var CONST = {
 var BOTCOMMANDS = {
         commands: {
             executable: function (minRank, chat) {
-			    return true;
-				// todoer:
+                return true;
+                // todoer:
                 //var id = chat.uid;
                 //var perm = API.getPermission(id);
                 //var minPerm;
@@ -3101,8 +3148,8 @@ var BOTCOMMANDS = {
                 //return perm >= minPerm;
             },
 
-			//SAMPLE:
-			 //command: {   
+            //SAMPLE:
+             //command: {   
              //           command: 'cmd',
              //           rank: 'user/bouncer/mod/manager',
              //           type: 'startsWith/exact',
@@ -3185,7 +3232,7 @@ var BOTCOMMANDS = {
                         var magicResponse = EIGHTBALL.eightBallSelect();
                         if (msg.length === cmd.length)  return API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse2"), {name: chat.un, response: magicResponse }));
                         var myQuestion = msg.substring(cmd.length + 1);
-						//Since we don't delete comments yet repeating the question is pointless.
+                        //Since we don't delete comments yet repeating the question is pointless.
                         //API.sendChat(botChat.subChat(botChat.getChatMessage("eightballquestion"), {name: chat.un, question: myQuestion}));
                         //setTimeout(function () {
                             API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse1"), {response: magicResponse}));
@@ -3204,9 +3251,9 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-						if (API.currentDjName() !== chat.un) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
+                        if (API.currentDjName() !== chat.un) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
                         //if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
-						if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
+                        if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
                         var dicesides = 6;
                         if (msg.length > cmd.length){
@@ -3230,7 +3277,8 @@ var BOTCOMMANDS = {
                             wooting = false;
                         }
                         API.sendChat(resultsMsg + TASTY.updateRolledStats(chat.un, wooting));
-						TASTY.settings.rolledDice = true;
+                        TASTY.settings.rolledDice = true;
+                        SETTINGS.storeToStorage();
                         //if (rollResults >= (dicesides * 0.8))
                         //    setTimeout(function () { TASTY.tastyVote(chat.un, "winner"); }, 1000);
                         //else if (rollResults <= (dicesides * 0.2))
@@ -3240,7 +3288,7 @@ var BOTCOMMANDS = {
                         UTIL.logException("rollCommand: " + err.message);
                     }
                 }
-            },			
+            },            
             wootCommand: {  //todoer DELETE THIS COMMAND:
                 command: 'wootthissong',
                 rank: 'user',
@@ -3259,7 +3307,7 @@ var BOTCOMMANDS = {
                 type: 'exact',
                 functionality: function (chat, cmd)                 {
                   try  {
-				    API.mehThisSong();
+                    API.mehThisSong();
                   }  
                 catch(err) {
                   UTIL.logException("mehCommand: " + err.message);
@@ -3320,9 +3368,9 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         if(chat.message.length === cmd.length) return API.sendChat('No user specified.');
-						botDebug.debugMessage(true, "============================= MEH? =============================");
-						botDebug.debugMessage(true, "cmd: " + cmd);
-						botDebug.debugMessage(true, "chat.message: " + chat.message);
+                        botDebug.debugMessage(false, "============================= MEH? =============================");
+                        botDebug.debugMessage(false, "cmd: " + cmd);
+                        botDebug.debugMessage(false, "chat.message: " + chat.message);
                         var name = chat.message.substring(cmd.length + 2);
                         var roomUser = USERS.lookupUserName(name);
                         if(typeof roomUser === 'boolean') return API.sendChat('Invalid user specified.');
@@ -3332,6 +3380,55 @@ var BOTCOMMANDS = {
                     catch(err) {
                         UTIL.logException("exmeh: " + err.message);
                     }
+                }
+            },
+            mystatsCommand: {
+                command: 'mystats',
+                rank: 'user',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var msg = chat.message;
+                        var name = "";
+                        if (msg.length === cmd.length) name = chat.un
+                        else name = msg.substring(cmd.length + 2);
+                        var user = USERS.lookupUserName(name);
+                        if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                        var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
+                                                                     songs: user.votes.songsPlayed,
+                                                                     woot: user.votes.woot, 
+                                                                     mehs: user.votes.meh, 
+                                                                     tasty: user.votes.tastyRcv});
+                        TASTY.resetDailyRolledStats(user);
+                        msg += " Roll Stats: " + TASTY.getRolledStats(user);
+                        var byusername = " [ executed by " + chat.un + " ]";
+                        if (chat.un !== name) msg += byusername;
+                        API.sendChat(msg);
+                    }
+                    catch(err) {
+                        UTIL.logException("mystatsCommand: " + err.message);
+                    }
+                }
+            },
+            resetstatsCommand: {  //Added 12/23/2015 Zig 
+                command: 'resetstats',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+					if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+					if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					var msg = chat.message;
+					var name = "";
+					if (msg.length === cmd.length) name = chat.un
+					else name = msg.substring(cmd.length + 2);
+					var user = USERS.lookupUserName(name);
+					if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+					//user.votes.songsPlayed = parseInt(0);
+					user.votes.woot = parseInt(0);
+					user.votes.meh = parseInt(0);
+					//user.votes.tastyRcv = parseInt(0);
                 }
             },
             versionCommand: {  //Added 01/27/2015 Zig
@@ -3348,10 +3445,10 @@ var BOTCOMMANDS = {
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try { 
-						var userInfo = document.getElementsByClassName("user-info");
-						botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
-						var spans = userInfo[0].getElementsByTagName("span");
-						botDebug.debugMessage(true, "userInfo: " + spans[0].innerHTML);
+                        var userInfo = document.getElementsByClassName("user-info");
+                        botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
+                        var spans = userInfo[0].getElementsByTagName("span");
+                        botDebug.debugMessage(true, "userInfo: " + spans[0].innerHTML);
                     }
                     catch(err) {
                         UTIL.logException("zigaCommand: " + err.message);
@@ -3364,10 +3461,10 @@ var BOTCOMMANDS = {
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
-						var userInfo = document.getElementsByClassName("infoContainerInner");
-						botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
-						var spans = userInfo[0].getElementsByClassName("currentDJSong");
-						botDebug.debugMessage(true, "currentDJSong: " + spans[0].innerHTML);
+                        var userInfo = document.getElementsByClassName("infoContainerInner");
+                        botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
+                        var spans = userInfo[0].getElementsByClassName("currentDJSong");
+                        botDebug.debugMessage(true, "currentDJSong: " + spans[0].innerHTML);
                     }
                     catch(err) {
                         UTIL.logException("zigbCommand: " + err.message);
@@ -3386,21 +3483,22 @@ var BOTCOMMANDS = {
                         var maxTime = msg.substring(cmd.length + 1);
                         if (!isNaN(maxTime)) {
                             if (maxTime === "1") SETTINGS.storeToStorage();
-							if (maxTime === "2") SETTINGS.retrieveFromStorage();
-							if (maxTime === "3") SETTINGS.retrieveSettings();
-							if (maxTime === "4") API.mehThisSong();
-							if (maxTime === "5") API.wootThisSong();
-							if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
-							if (maxTime === "7") {
-								  var avatarList7 = document.getElementById("main-user-list-room");
-								  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
-							}
-							if (maxTime === "8") {
-								  var avatarList8 = document.getElementById("avatar-list");
-								  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
-							if (maxTime === "9") USERS.loadUsersInRoom(true);
-							}
-							
+                            if (maxTime === "2") SETTINGS.retrieveFromStorage();
+                            if (maxTime === "3") SETTINGS.retrieveSettings();
+                            if (maxTime === "4") API.mehThisSong();
+                            if (maxTime === "5") API.wootThisSong();
+                            if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
+                            if (maxTime === "7") {
+                                  var avatarList7 = document.getElementById("main-user-list-room");
+                                  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
+                            }
+                            if (maxTime === "8") {
+                                  var avatarList8 = document.getElementById("avatar-list");
+                                  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
+                            if (maxTime === "9") USERS.loadUsersInRoom(true);
+                            if (maxTime === "A") USERS.removeMIANonUsers();
+                            }
+                            
 
                         }
                         else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
@@ -3432,6 +3530,10 @@ var BOTCOMMANDS = {
                         setTimeout(function () {
                             API.logInfo("I've got " + USERS.users.length + " users in the old list.")
                         }, 1 * 1000);
+                        //todoer
+                        if (USERS.users.length >= 1) botDebug.debugMessage(true, "USER0: " + USERS.users[0].username + "::" + USERS.users[0].id);
+                        if (USERS.users.length >= 2) botDebug.debugMessage(true, "USER1: " + USERS.users[1].username + "::" + USERS.users[1].id);
+                        if (USERS.users.length >= 3) botDebug.debugMessage(true, "USER2: " + USERS.users[2].username + "::" + USERS.users[2].id);
                     }
                     catch (err) { UTIL.logException("userlistcount: " + err.message); }
                 }
@@ -3452,7 +3554,6 @@ var BOTCOMMANDS = {
                                                                      songs: DocZ.votes.songsPlayed,
                                                                      woot: DocZ.votes.woot, 
                                                                      mehs: DocZ.votes.meh, 
-                                                                     grabs: DocZ.votes.curate, 
                                                                      tasty: DocZ.votes.tastyRcv});
                         TASTY.resetDailyRolledStats(DocZ);
                         msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
@@ -3579,32 +3680,32 @@ var BOTCOMMANDS = {
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
-				  try {
+                  try {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-					var msg = chat.message;
-					if (msg.length <= cmd.length + 2) {
-					  API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
-					  return;
-					}
-					var name = msg.substr(cmd.length + 2);
-					var user = USERS.lookupUserName(name);
-					if (typeof user !== "object") {
-					  API.sendChat("Invalid user specified.");
-					  return;
-					}
-					AFK.resetDC(user);  // so when they rejoin they'll not get bugged
-					API.moderateRemoveDJ(user);
-					//if (API.getDJ().id === user.id) {
-					//    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
-					//    API.moderateForceSkip();
-					//    setTimeout(function () {
-					//        API.moderateRemoveDJ(user.id);
-					//    }, 1 * 1000, user);
-					//}
-					//else API.moderateRemoveDJ(user.id);
+                    var msg = chat.message;
+                    if (msg.length <= cmd.length + 2) {
+                      API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
+                      return;
+                    }
+                    var name = msg.substr(cmd.length + 2);
+                    var user = USERS.lookupUserName(name);
+                    if (typeof user !== "object") {
+                      API.sendChat("Invalid user specified.");
+                      return;
+                    }
+                    AFK.resetDC(user);  // so when they rejoin they'll not get bugged
+                    API.moderateRemoveDJ(user);
+                    //if (API.getDJ().id === user.id) {
+                    //    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
+                    //    API.moderateForceSkip();
+                    //    setTimeout(function () {
+                    //        API.moderateRemoveDJ(user.id);
+                    //    }, 1 * 1000, user);
+                    //}
+                    //else API.moderateRemoveDJ(user.id);
                 }
-				catch(err) { UTIL.logException("speakCommand: " + err.message);  }
+                catch(err) { UTIL.logException("speakCommand: " + err.message);  }
               }
             },
 
@@ -3613,11 +3714,11 @@ var BOTCOMMANDS = {
                 rank: 'user',
                 type: 'exact',
                 functionality: function (chat, cmd) {
-				  try {
+                  try {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     API.sendChat(botChat.subChat(botChat.getChatMessage("commandslink"), {botname: botVar.botName, link: CONST.cmdLink}));
-				  }
+                  }
                   catch (err) { UTIL.logException("cookieCommand: " + err.message); }
                 }
             },
@@ -3652,20 +3753,20 @@ var BOTCOMMANDS = {
                     return this.cookies[c];
                 },
                 functionality: function (chat, cmd) {
-				  try {
+                  try {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-					var msg = chat.message;
-					var space = msg.indexOf(' ');
-					if (space === -1) return API.sendChat(botChat.getChatMessage("eatcookie"));
-					var name = msg.substring(space + 2);
-					var user = USERS.lookupUserName(name);
-					if (user === false || !user.inRoom)
-						return API.sendChat(botChat.subChat(botChat.getChatMessage("nousercookie"), {name: name}));
-					if (user.username === chat.un) 
-						return API.sendChat(botChat.subChat(botChat.getChatMessage("selfcookie"), {name: name}));
-					return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
-				  }
+                    var msg = chat.message;
+                    var space = msg.indexOf(' ');
+                    if (space === -1) return API.sendChat(botChat.getChatMessage("eatcookie"));
+                    var name = msg.substring(space + 2);
+                    var user = USERS.lookupUserName(name);
+                    if (user === false || !user.inRoom)
+                        return API.sendChat(botChat.subChat(botChat.getChatMessage("nousercookie"), {name: name}));
+                    if (user.username === chat.un) 
+                        return API.sendChat(botChat.subChat(botChat.getChatMessage("selfcookie"), {name: name}));
+                    return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
+                  }
                   catch (err) { UTIL.logException("cookieCommand: " + err.message); }
                 }
             },
@@ -3783,7 +3884,7 @@ var BOTCOMMANDS = {
                     else {
                         if (botVar.room.repeatSongs) {
                             botVar.room.repeatSongs = !botVar.room.repeatSongs;
-							//todoer why do we clear the afk interval here???
+                            //todoer why do we clear the afk interval here???
                             clearInterval(AFK.afkInterval);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
@@ -4765,7 +4866,7 @@ var BOTCOMMANDS = {
                         API.sendChat(botChat.getChatMessage("reload"));
                         SETTINGS.storeToStorage();
                         basicBot.disconnectAPI();
-						UTIL.killbot();
+                        UTIL.killbot();
                         setTimeout(function () { $.getScript(basicBot.scriptLink); }, 2000);
                     }
                 }
@@ -4967,7 +5068,7 @@ var BOTCOMMANDS = {
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
-					//<a class="ytp-title-link yt-uix-sessionlink" tabindex="13" target="_blank" data-sessionlink="feature=player-title" href="https://www.youtube.com/watch?v=4pjCcIh9O5c">Mase-Feel So Good</a>
+                    //<a class="ytp-title-link yt-uix-sessionlink" tabindex="13" target="_blank" data-sessionlink="feature=player-title" href="https://www.youtube.com/watch?v=4pjCcIh9O5c">Mase-Feel So Good</a>
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if ((!BOTCOMMANDS.commands.executable(this.rank, chat)) && chat.uid !== botVar.botID) return void (0);
                         var histIndex = "2"; //Default to 2nd song on the list, or the last song played
@@ -5060,7 +5161,7 @@ var BOTCOMMANDS = {
                         }
                         else {
                             msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, songs: user.votes.songsPlayed, woot: user.votes.woot, 
-                                                              mehs: user.votes.meh, grabs: user.votes.curate, tasty: user.votes.tastyRcv});
+                                                              mehs: user.votes.meh, tasty: user.votes.tastyRcv});
                             TASTY.resetDailyRolledStats(user);
                             msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         }
@@ -5072,7 +5173,7 @@ var BOTCOMMANDS = {
                         }
                         else {
                             msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: newuser.username, songs: newuser.votes.songsPlayed,  woot: newuser.votes.woot, 
-                                                                  mehs: newuser.votes.meh, grabs: newuser.votes.curate, tasty: newuser.votes.tastyRcv});
+                                                                  mehs: newuser.votes.meh, tasty: newuser.votes.tastyRcv});
                             TASTY.resetDailyRolledStats(newuser);
                             msg += " Roll Stats: " + TASTY.getRolledStats(newuser);
                         }
@@ -5531,37 +5632,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            mystatsCommand: {
-                command: 'mystats',
-                rank: 'user',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var msg = chat.message;
-                        var name = "";
-                        if (msg.length === cmd.length) name = chat.un
-                        else name = msg.substring(cmd.length + 2);
-                        var user = USERS.lookupUserName(name);
-                        if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
-                                                                     songs: user.votes.songsPlayed,
-                                                                     woot: user.votes.woot, 
-                                                                     mehs: user.votes.meh, 
-                                                                     grabs: user.votes.curate, 
-                                                                     tasty: user.votes.tastyRcv});
-                        TASTY.resetDailyRolledStats(user);
-                        msg += " Roll Stats: " + TASTY.getRolledStats(user);
-                        var byusername = " [ executed by " + chat.un + " ]";
-                        if (chat.un !== name) msg += byusername;
-                        API.sendChat(msg);
-                    }
-                    catch(err) {
-                        UTIL.logException("mystatsCommand: " + err.message);
-                    }
-                }
-            },
             mystatsxCommand: {
                 command: 'mystatsx',
                 rank: 'manager',
@@ -5580,7 +5650,6 @@ var BOTCOMMANDS = {
                                                                      songs: user.votes.songsPlayed,
                                                                      woot: user.votes.woot, 
                                                                      mehs: user.votes.meh, 
-                                                                     grabs: user.votes.curate, 
                                                                      tasty: user.votes.tastyRcv});
                         var byusername = " [ executed by " + chat.un + " ]";
                         if (chat.un !== name) msg += byusername;
