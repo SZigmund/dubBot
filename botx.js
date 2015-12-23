@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0004",
+  version: "Version  1.01.0004.0005",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1113,11 +1113,9 @@ var botChat = {
       var idx = className.indexOf("user-");
       if (idx < 0) return null;
       var userID = className.substring(idx + 5);
-      botDebug.debugMessage(true, "TODOER-CHAT getChatUserId: USER ID: " + userID);
       idx = userID.indexOf(" ");
       if (idx < 0) return userID; 
 	  userID = userID.substring(0, idx);
-      botDebug.debugMessage(true, "TODOER-CHAT getChatUserId: USER ID: " + userID);
     //
     } catch (err) { UTIL.logException("getChatUserId: " + err.message); }
   },
@@ -1148,7 +1146,7 @@ var botChat = {
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
       //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
       botDebug.debugMessage(false, "CHAT - User: " + username);
-      USERS.UpdateUserID(username, userID);
+      USERS.UpdateUserID(username, userId);
       var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
       
