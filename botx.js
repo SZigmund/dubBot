@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0007",
+  version: "Version  1.01.0004.0008",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1112,11 +1112,11 @@ var botChat = {
       //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
       var  instr 
       var idx = className.indexOf("user-");
-      if (idx < 0) return null;
+      if (idx < 0) return "";
       var userID = className.substring(idx + 5);
       idx = userID.indexOf(" ");
-      if (idx < 0) return userID; 
-	  userID = userID.substring(0, idx);
+      if (idx > 0) userID = userID.substring(0, idx);
+	  return userID;
     //
     } catch (err) { UTIL.logException("getChatUserId: " + err.message); }
   },
@@ -1147,7 +1147,7 @@ var botChat = {
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
       //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
       botDebug.debugMessage(false, "CHAT - User: " + username);
-      USERS.updateUserID(username, userId);
+      if (userId.length > 0) USERS.updateUserID(userId, username);
       var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
       
@@ -2797,9 +2797,9 @@ var API = {
        USERS.resetUserSongStats();
       var roomUser = USERS.lookupUserName(previousDJ);
       TASTY.setRolled(roomUser, false);
-      roomUser.votes.songsPlayed += 1;
-	  roomUser.votes.woot += dubCount;
-	  roomUser.votes.meh += mehCount;
+      roomUser.votes.songsPlayed++;
+	  roomUser.votes.woot += parseInt(dubCount);
+	  roomUser.votes.meh += parseInt(mehCount);
 
       setTimeout(function () { dubBot.validateCurrentSong() }, 1500);
       
