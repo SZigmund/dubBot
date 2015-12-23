@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0003",
+  version: "Version  1.01.0004.0004",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -149,7 +149,7 @@ var USERS = {
   removeMIANonUsers: function () {
     try {
       var i = 0;
-      while (i < USERS.users.length;) {
+      while (i < USERS.users.length) {
         if ((USERS.users[i].id === "new") && (USERS.users[i].inRoom === false)) {
 				botDebug.debugMessage(true, "TODOER-removeMIANonUsers: Dropping " + USERS.users[i].username);
                 USERS.users.splice(i, 1);
