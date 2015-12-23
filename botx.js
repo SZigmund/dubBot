@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0005",
+  version: "Version  1.01.0004.0006",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -161,10 +161,10 @@ var USERS = {
     }
     catch(err) { UTIL.logException("removeMIANonUsers: " + err.message); }
   },
-  updateUserID: function (userId, username) {
+  updateUserID: function (uid, username) {
     try {
-        botDebug.debugMessage(true, "TODOER-updateUserID: " + username + "::" + userID);
-        var user = USERS.lookupUserID(userId);
+        botDebug.debugMessage(true, "TODOER-updateUserID: " + username + "::" + uid);
+        var user = USERS.lookupUserID(uid);
         if (user !== false) {
           botDebug.debugMessage(true, "TODOER-updateUserID: UPDATED username");
           user.username = username;
@@ -173,7 +173,7 @@ var USERS = {
         user = USERS.lookupUser(username);
         if (user !== false) {
           botDebug.debugMessage(true, "TODOER-updateUserID: UPDATED userId");
-          user.id = userId;
+          user.id = uid;
           return;
         }
     }
@@ -1146,7 +1146,7 @@ var botChat = {
       var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
       //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
       botDebug.debugMessage(false, "CHAT - User: " + username);
-      USERS.UpdateUserID(username, userId);
+      USERS.updateUserID(username, userId);
       var historyChatCount = itemHistory.chatCount;
       itemHistory.chatCount = chatItems.length;
       
