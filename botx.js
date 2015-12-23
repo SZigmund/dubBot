@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0009",
+  version: "Version  1.01.0004.0010",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3413,7 +3413,7 @@ var BOTCOMMANDS = {
                 }
             },
             resetstatsCommand: {  //Added 12/23/2015 Zig 
-                command: 'zig',
+                command: 'resetstats',
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
