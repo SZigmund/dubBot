@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0001",
+  version: "Version  1.01.0004.0002",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1562,7 +1562,7 @@ var TASTY = {
 //SECTION Debug: All Debug functionality:
 var botDebug = {
   settings: {
-    debugHighLevel: false,
+    debugHighLevel: true,
     debugLowLevel: false
   },
 
