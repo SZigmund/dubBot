@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0008",
+  version: "Version  1.01.0004.0009",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -151,7 +151,6 @@ var USERS = {
       var i = 0;
       while (i < USERS.users.length) {
         if ((USERS.users[i].id === "new") && (USERS.users[i].inRoom === false)) {
-				botDebug.debugMessage(true, "TODOER-removeMIANonUsers: Dropping " + USERS.users[i].username);
                 USERS.users.splice(i, 1);
         }
         else {
@@ -163,16 +162,13 @@ var USERS = {
   },
   updateUserID: function (uid, username) {
     try {
-        botDebug.debugMessage(true, "TODOER-updateUserID: " + username + "::" + uid);
         var user = USERS.lookupUserID(uid);
         if (user !== false) {
-          botDebug.debugMessage(true, "TODOER-updateUserID: UPDATED username");
           user.username = username;
           return;
         }
         user = USERS.lookupUserName(username);
         if (user !== false) {
-          botDebug.debugMessage(true, "TODOER-updateUserID: UPDATED userId");
           user.id = uid;
           return;
         }
@@ -2794,12 +2790,12 @@ var API = {
       botVar.currentSong = API.currentSongName();
       var tastyPoints = botVar.tastyCount;
       botVar.tastyCount = 0;
-       USERS.resetUserSongStats();
+      USERS.resetUserSongStats();
       var roomUser = USERS.lookupUserName(previousDJ);
       TASTY.setRolled(roomUser, false);
       roomUser.votes.songsPlayed++;
-	  roomUser.votes.woot += parseInt(dubCount);
-	  roomUser.votes.meh += parseInt(mehCount);
+	  roomUser.votes.woot = parseInt(roomUser.votes.woot) + parseInt(dubCount);
+	  roomUser.votes.meh = parseInt(roomUser.votes.meh) + parseInt(mehCount);
 
       setTimeout(function () { dubBot.validateCurrentSong() }, 1500);
       
@@ -3414,6 +3410,25 @@ var BOTCOMMANDS = {
                     catch(err) {
                         UTIL.logException("mystatsCommand: " + err.message);
                     }
+                }
+            },
+            resetstatsCommand: {  //Added 12/23/2015 Zig 
+                command: 'zig',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+					if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+					if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					var msg = chat.message;
+					var name = "";
+					if (msg.length === cmd.length) name = chat.un
+					else name = msg.substring(cmd.length + 2);
+					var user = USERS.lookupUserName(name);
+					if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+					//user.votes.songsPlayed = parseInt(0);
+					user.votes.woot = parseInt(0);
+					user.votes.meh = parseInt(0);
+					//user.votes.tastyRcv = parseInt(0);
                 }
             },
             versionCommand: {  //Added 01/27/2015 Zig
