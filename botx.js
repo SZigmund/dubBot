@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0010",
+  version: "Version  1.01.0004.0011",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2647,7 +2647,7 @@ var API = {
   },
   
   getDubUpCount: function() {
-    try        { return $(".dubup").text(); }
+    try        { return parseInt($(".dubup").text()); }
     catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
   },
   getSongLength: function() {
@@ -2655,7 +2655,7 @@ var API = {
     catch(err) { UTIL.logException("getSongLength: " + err.message); }
   },
   getDubDownCount: function() {
-    try        { return $(".dubdown").text(); }
+    try        { return parseInt($(".dubdown").text()); }
     catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
   },
   getBotName: function() {
@@ -2793,14 +2793,15 @@ var API = {
       USERS.resetUserSongStats();
       var roomUser = USERS.lookupUserName(previousDJ);
       TASTY.setRolled(roomUser, false);
-      roomUser.votes.songsPlayed++;
-	  roomUser.votes.woot = parseInt(roomUser.votes.woot) + parseInt(dubCount);
-	  roomUser.votes.meh = parseInt(roomUser.votes.meh) + parseInt(mehCount);
 
       setTimeout(function () { dubBot.validateCurrentSong() }, 1500);
       
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
+
+      roomUser.votes.songsPlayed++;
+	  roomUser.votes.woot = parseInt(roomUser.votes.woot) + parseInt(dubCount);
+	  roomUser.votes.meh = parseInt(roomUser.votes.meh) + parseInt(mehCount);
 
       API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
       //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
