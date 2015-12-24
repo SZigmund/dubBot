@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0004.0011",
+  version: "Version  1.01.0005.0001",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -597,7 +597,6 @@ var COMMANDS = {
                 //if (command === "/whois") return;  // Handled by Origem
                 //if (command === "/grab") return;   // Prevent infinite loop as /grab is handled by Origem.
                 //if (command === "/reload") return;   // Handled by Origem
-                //todoer TEST
                 botChat.commandChat.cid = "";
                 botChat.commandChat.message = CONST.commandLiteral + command.substring(1, command.length);
                 botChat.commandChat.sub = -1;
@@ -939,10 +938,10 @@ var botChat = {
    botChat.chatMessages.push(["website", "Please visit our website: %%LINK%%"]);
    botChat.chatMessages.push(["youtube", "[%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
    botChat.chatMessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
-   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatMessages.push(["mystatsXX", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatMessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
-   botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
+   botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
    //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatMessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
    botChat.chatMessages.push(["eightballresponse1", "%%RESPONSE%%"]);
@@ -2658,6 +2657,10 @@ var API = {
     try        { return parseInt($(".dubdown").text()); }
     catch(err) { UTIL.logException("getDubDownCount: " + err.message); }
   },
+  getGrabCount: function() {
+    try        { return parseInt($(".grab-counter").text()); }
+    catch(err) { UTIL.logException("getGrabCount: " + err.message); }
+  },
   getBotName: function() {
     try { return $(".user-info").text();    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
@@ -2782,6 +2785,7 @@ var API = {
 
       var dubCount = API.getDubUpCount();
       var mehCount = API.getDubDownCount();
+	  var grabCount = API.getGrabCount();
       var previousDJ = botVar.currentDJ;
       var previousSong = botVar.currentSong;
       botDebug.debugMessage(false, "previousDJ: " + previousDJ);
@@ -2802,8 +2806,9 @@ var API = {
       roomUser.votes.songsPlayed++;
 	  roomUser.votes.woot = parseInt(roomUser.votes.woot) + parseInt(dubCount);
 	  roomUser.votes.meh = parseInt(roomUser.votes.meh) + parseInt(mehCount);
+	  roomUser.votes.curate = parseInt(roomUser.votes.curate) + parseInt(grabCount);
 
-      API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
+      API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
       //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
       //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
       SETTINGS.storeToStorage();
@@ -3400,6 +3405,7 @@ var BOTCOMMANDS = {
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
                                                                      songs: user.votes.songsPlayed,
                                                                      woot: user.votes.woot, 
+                                                                     grabs: user.votes.curate, 
                                                                      mehs: user.votes.meh, 
                                                                      tasty: user.votes.tastyRcv});
                         TASTY.resetDailyRolledStats(user);
@@ -3554,6 +3560,7 @@ var BOTCOMMANDS = {
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
                                                                      songs: DocZ.votes.songsPlayed,
                                                                      woot: DocZ.votes.woot, 
+                                                                     grabs: DocZ.votes.curate, 
                                                                      mehs: DocZ.votes.meh, 
                                                                      tasty: DocZ.votes.tastyRcv});
                         TASTY.resetDailyRolledStats(DocZ);
@@ -5162,7 +5169,7 @@ var BOTCOMMANDS = {
                         }
                         else {
                             msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, songs: user.votes.songsPlayed, woot: user.votes.woot, 
-                                                              mehs: user.votes.meh, tasty: user.votes.tastyRcv});
+                                                                     grabs: user.votes.curate, mehs: user.votes.meh, tasty: user.votes.tastyRcv});
                             TASTY.resetDailyRolledStats(user);
                             msg += " Roll Stats: " + TASTY.getRolledStats(user);
                         }
@@ -5174,7 +5181,7 @@ var BOTCOMMANDS = {
                         }
                         else {
                             msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: newuser.username, songs: newuser.votes.songsPlayed,  woot: newuser.votes.woot, 
-                                                                  mehs: newuser.votes.meh, tasty: newuser.votes.tastyRcv});
+                                                                     grabs: newuser.votes.curate, mehs: newuser.votes.meh, tasty: newuser.votes.tastyRcv});
                             TASTY.resetDailyRolledStats(newuser);
                             msg += " Roll Stats: " + TASTY.getRolledStats(newuser);
                         }
@@ -5650,6 +5657,7 @@ var BOTCOMMANDS = {
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
                                                                      songs: user.votes.songsPlayed,
                                                                      woot: user.votes.woot, 
+                                                                     grabs: user.votes.curate, 
                                                                      mehs: user.votes.meh, 
                                                                      tasty: user.votes.tastyRcv});
                         var byusername = " [ executed by " + chat.un + " ]";
