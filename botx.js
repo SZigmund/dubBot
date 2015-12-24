@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0007.0001",
+  version: "Version  1.01.0007.0002",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3429,8 +3429,8 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-						 API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif");
-						 setTimeout(function () { TASTY.tastyVote(chat.un, cmd); }, 250);
+						 TASTY.tastyVote(chat.un, cmd);
+						 setTimeout(function () { API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif"); }, 250);
                     }
                     catch(err) {
                         UTIL.logException("elevenCommand: " + err.message);
