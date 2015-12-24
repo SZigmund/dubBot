@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0005.0001",
+  version: "Version  1.01.0007.0001",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -937,12 +937,12 @@ var botChat = {
    botChat.chatMessages.push(["voteratio", "[@%%NAME%%] @%%USERNAME%% ~ woots: %%WOOT%%, mehs: %%MEHS%%, ratio (w/m): %%RATIO%%."]);
    botChat.chatMessages.push(["website", "Please visit our website: %%LINK%%"]);
    botChat.chatMessages.push(["youtube", "[%%NAME%%] Subscribe to us on youtube: %%LINK%%"]);
-   botChat.chatMessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
-   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
-   botChat.chatMessages.push(["mystatsXX", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatMessages.push(["songstatistics", "[ :thumbsup: %%WOOTS%% :heart: %%GRABS%% :thumbsdown: %%MEHS%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
+   botChat.chatMessages.push(["mystats", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :heart: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
+   botChat.chatMessages.push(["mystatsXX", "%%NAME%% [ :musical_note: %%SONGS%% :thumbsup: %%WOOT%% :heart: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%]"]);
    botChat.chatMessages.push(["tastyvote", "[%%NAME%%  gave you a fake point for this tasty tune :cake:]"]);
-   botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
-   //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :star: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
+   botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :heart: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
+   //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :heart: %%GRABS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%ARTIST%% - %%TITLE%%]"]);
    botChat.chatMessages.push(["eightballquestion", "%%NAME%% Question: [%%QUESTION%%]"]);
    botChat.chatMessages.push(["eightballresponse1", "%%RESPONSE%%"]);
    //botChat.chatMessages.push(["eightballresponse1", "The all knowing Larry says: %%RESPONSE%%"]);
@@ -1571,9 +1571,10 @@ var TASTY = {
                       'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
                       '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                       ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
-                      'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
+                      'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-                      'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf'];
+                      'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
+                      'festive','srv'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -3211,9 +3212,10 @@ var BOTCOMMANDS = {
                           'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
-                          'nicefollow',':beer:',':beers:','niceplay','11','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
+                          'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-                          'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf'],
+                          'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
+                          'festive','srv'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3416,6 +3418,22 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("mystatsCommand: " + err.message);
+                    }
+                }
+            },
+            elevenCommand: {
+                command: ['eleven','11'],
+                rank: 'residentdj',
+                type: 'startsWith',
+                functionality: function (chat, cmd)  {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						 API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif");
+						 setTimeout(function () { TASTY.tastyVote(chat.un, cmd); }, 250);
+                    }
+                    catch(err) {
+                        UTIL.logException("elevenCommand: " + err.message);
                     }
                 }
             },
