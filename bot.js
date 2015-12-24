@@ -4,7 +4,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0008",
+  version: "Version  1.01.0009",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3421,6 +3421,21 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            nsfwCommand: {   //Added 04/22/2015 Zig
+                command: 'nsfw',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("NSFW Warning [" + chat.un + "]: @everyone");
+                    }
+                    catch(err) {
+                        UTIL.logException("nsfwCommand: " + err.message);
+                    }
+                }
+            },
             elevenCommand: {
                 command: ['eleven','11'],
                 rank: 'residentdj',
@@ -6074,21 +6089,6 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("rollpts: " + err.message);
-                    }
-                }
-            },
-            nsfwCommand: {   //Added 04/22/2015 Zig
-                command: 'nsfw',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("NSFW Warning [" + chat.un + "]: @djs @rdjs @bouncers @managers @hosts @staff");
-                    }
-                    catch(err) {
-                        UTIL.logException("nsfwCommand: " + err.message);
                     }
                 }
             },
