@@ -1,10 +1,16 @@
 // Written by: DocZ
 //[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
+//TODO LIST:
+// - Roll Stats
+// - Permissions
+// - AFK DJ
+// - Bot DJ
+// - Last Played
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0010",
+  version: "Version  1.01.0011",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1574,7 +1580,7 @@ var TASTY = {
                       'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
                       'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
-                      'festive','srv','motorhead'];
+                      'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -3215,7 +3221,7 @@ var BOTCOMMANDS = {
                           'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
                           'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
-                          'festive','srv','motorhead'],
+                          'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
