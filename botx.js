@@ -9,7 +9,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0013",
+  version: "Version  1.01.0014",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2752,8 +2752,7 @@ var API = {
   sendChat: function(message) {
     //todoer Delete this after we re-enable the bot kill on room change code.
     //if(botVar.room.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
-
-    message = message.replace("[:", "[ :");
+	message = message.split("[:").join("[ :");  // Replace ALL [: with [ :  (works better than replace for replacing all instances)
     if (botVar.botMuted === true)
         API.logInfo(message);
     else if (botVar.botRunning) {
