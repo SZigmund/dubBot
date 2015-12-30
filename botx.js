@@ -9,7 +9,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0009",
+  version: "Version  1.01.0012.0010",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1110,9 +1110,11 @@ var botChat = {
   },
   processChatItem: function(chatMessage, username, uid) {
     try{
-      botDebug.debugMessage(false, username + ": " + chatMessage);
+      botDebug.debugMessage(true, username + ": " + chatMessage);
       var chat = botChat.formatChat(chatMessage, username, uid);
+      botDebug.debugMessage(true, username + ": " + chat.message);
       COMMANDS.checkCommands(chat);
+      botDebug.debugMessage(true, username + ": " + chat.message);
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
   },
   getChatUserId: function(className) {
