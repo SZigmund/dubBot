@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0001",
+  version: "Version  1.01.0012.0002",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -210,8 +210,10 @@ var USERS = {
 
   lookupUserName: function (username) {
     botDebug.debugMessage(false, "username: [" + username + "]");
+	var finduser = username.trim().toLowerCase();
+	finduser = finduser.replace(/@/g, '');
     for (var i = 0; i < USERS.users.length; i++) {
-      if (USERS.users[i].username.trim() == username.trim()) return USERS.users[i];
+      if (USERS.users[i].finduser.trim().toLowerCase() == finduser) return USERS.users[i];
     }
     return false;
   },
@@ -1505,10 +1507,10 @@ var TASTY = {
 				if (loadingTop === false) rollPct = 101.00;
 				for (var userIdx = 0; userIdx < USERS.users.length; userIdx++) {
 					var skipUser = false;
-					var roomUser = USERS.users.length[userIdx];
+					var roomUser = USERS.users[userIdx];
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
-					//botDebug.debugMessage("Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
-					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
+					botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+					if (roomUser.rollStats.lifeTotal < 50) skipUser = true;  // Require 50 rolls to get on the leader board
 					if (!skipUser) {
 					  var UserPct = roomUser.rollStats.lifeWoot / roomUser.rollStats.lifeTotal;
 					// Skip user if higher or lower than the current high/low score:
@@ -1516,7 +1518,7 @@ var TASTY = {
 					  if (UserPct > rollPct && loadingTop === false) skipUser = true;
 					}
 					if (!skipUser) {
-						//botDebug.debugMessage("New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal + "-" + UserPct);
+						botDebug.debugMessage(true, "New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal + "-" + UserPct);
 						addUserIdx = userIdx;
 						rollPct = UserPct;
 					}
@@ -1528,13 +1530,13 @@ var TASTY = {
 						winCount: 0,
 						rollPct: ""
 					};
-					//botDebug.debugMessage("Adding User: " + USERS.users.length[addUserIdx].username + ": " + USERS.users.length[addUserIdx].rollStats.lifeTotal);
-					topStats.username = USERS.users.length[addUserIdx].username;
-					topStats.rollCount = USERS.users.length[addUserIdx].rollStats.lifeTotal;
-					topStats.winCount = USERS.users.length[addUserIdx].rollStats.lifeWoot;
-					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users.length[addUserIdx].rollStats.lifeWoot, USERS.users.length[addUserIdx].rollStats.lifeTotal);
+					botDebug.debugMessage(true, "Adding User: " + USERS.users[addUserIdx].username + ": " + USERS.users[addUserIdx].rollStats.lifeTotal);
+					topStats.username = USERS.users[addUserIdx].username;
+					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
+					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
+					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
 					leaderBoard.push(topStats);
-					userIDs.push(USERS.users.length[addUserIdx].id);
+					userIDs.push(USERS.users[addUserIdx].id);
 				}
 			}
 			return leaderBoard;
@@ -1549,18 +1551,18 @@ var TASTY = {
 				var rollCount = 0;
 				if (loadingTop === false) rollCount = 10000;
 				var addUserIdx = -1;
-				for (var userIdx = 0; userIdx < USERS.users.length.length; userIdx++) {
+				for (var userIdx = 0; userIdx < USERS.users.length; userIdx++) {
 					var skipUser = false;
-					var roomUser = USERS.users.length[userIdx];
-					//botDebug.debugMessage("Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+					var roomUser = USERS.users[userIdx];
+					botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
-					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
+					if (roomUser.rollStats.lifeTotal < 50) skipUser = true;  // Require 50 rolls to get on the leader board
 					// Skip user if higher or lower than the current high/low score:
 					if (roomUser.rollStats.lifeTotal < rollCount && loadingTop === true) skipUser = true;
 					if (roomUser.rollStats.lifeTotal > rollCount && loadingTop === false) skipUser = true;
 					if (!skipUser) {
 						addUserIdx = userIdx;
-						//botDebug.debugMessage("New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+						botDebug.debugMessage(true, "New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 						rollCount = roomUser.rollStats.lifeTotal;
 					}
 				}
@@ -1572,13 +1574,13 @@ var TASTY = {
 						winCount: 0,
 						rollPct: ""
 					};
-					//botDebug.debugMessage("Adding User: " + USERS.users.length[addUserIdx].username + ": " + USERS.users.length[addUserIdx].rollStats.lifeTotal);
-					topStats.username = USERS.users.length[addUserIdx].username;
-					topStats.rollCount = USERS.users.length[addUserIdx].rollStats.lifeTotal;
-					topStats.winCount = USERS.users.length[addUserIdx].rollStats.lifeWoot;
-					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users.length[addUserIdx].rollStats.lifeWoot, USERS.users.length[addUserIdx].rollStats.lifeTotal);
+					botDebug.debugMessage(true, "Adding User: " + USERS.users[addUserIdx].username + ": " + USERS.users[addUserIdx].rollStats.lifeTotal);
+					topStats.username = USERS.users[addUserIdx].username;
+					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
+					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
+					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
 					leaderBoard.push(topStats);
-					userIDs.push(USERS.users.length[addUserIdx].id);
+					userIDs.push(USERS.users[addUserIdx].id);
 				}
 			}
 			return leaderBoard;
