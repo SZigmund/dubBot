@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0005",
+  version: "Version  1.01.0012.0006",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1113,7 +1113,6 @@ var botChat = {
     try{
       //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
       //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-      var  instr 
       var idx = className.indexOf("user-");
       if (idx < 0) return "";
       var userID = className.substring(idx + 5);
@@ -1128,7 +1127,6 @@ var botChat = {
       // SAMPLE:
       //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
       //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-      var  instr 
       var idx = className.indexOf("chat-id-");
       if (idx < 0) return null;
       return className.substring(idx + 8)
@@ -1509,7 +1507,7 @@ var TASTY = {
 					var skipUser = false;
 					var roomUser = USERS.users[userIdx];
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
-					botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+					//botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
 					if (!skipUser) {
 					  var UserPct = roomUser.rollStats.lifeWoot / roomUser.rollStats.lifeTotal;
@@ -1518,7 +1516,7 @@ var TASTY = {
 					  if (UserPct > rollPct && loadingTop === false) skipUser = true;
 					}
 					if (!skipUser) {
-						botDebug.debugMessage(true, "New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal + "-" + UserPct);
+						//botDebug.debugMessage(true, "New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal + "-" + UserPct);
 						addUserIdx = userIdx;
 						rollPct = UserPct;
 					}
@@ -1530,7 +1528,7 @@ var TASTY = {
 						winCount: 0,
 						rollPct: ""
 					};
-					botDebug.debugMessage(true, "Adding User: " + USERS.users[addUserIdx].username + ": " + USERS.users[addUserIdx].rollStats.lifeTotal);
+					//botDebug.debugMessage(true, "Adding User: " + USERS.users[addUserIdx].username + ": " + USERS.users[addUserIdx].rollStats.lifeTotal);
 					topStats.username = USERS.users[addUserIdx].username;
 					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
 					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
@@ -1554,7 +1552,7 @@ var TASTY = {
 				for (var userIdx = 0; userIdx < USERS.users.length; userIdx++) {
 					var skipUser = false;
 					var roomUser = USERS.users[userIdx];
-					botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+					//botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
 					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
 					// Skip user if higher or lower than the current high/low score:
@@ -1562,7 +1560,7 @@ var TASTY = {
 					if (roomUser.rollStats.lifeTotal > rollCount && loadingTop === false) skipUser = true;
 					if (!skipUser) {
 						addUserIdx = userIdx;
-						botDebug.debugMessage(true, "New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+						//botDebug.debugMessage(true, "New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 						rollCount = roomUser.rollStats.lifeTotal;
 					}
 				}
@@ -1574,7 +1572,7 @@ var TASTY = {
 						winCount: 0,
 						rollPct: ""
 					};
-					botDebug.debugMessage(true, "Adding User: " + USERS.users[addUserIdx].username + ": " + USERS.users[addUserIdx].rollStats.lifeTotal);
+					//botDebug.debugMessage(true, "Adding User: " + USERS.users[addUserIdx].username + ": " + USERS.users[addUserIdx].rollStats.lifeTotal);
 					topStats.username = USERS.users[addUserIdx].username;
 					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
 					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
@@ -1712,7 +1710,7 @@ var TASTY = {
             var arrayCount = CONST.tastyCommentArray.length;
             var arrayID = Math.floor(Math.random() * arrayCount);
             if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
-            var tastyCmt = "[ " + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
+            var tastyCmt = "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
             var djName = API.currentDjName();
             if (djName.length > 0) tastyCmt += " @"  + djName;
             return tastyCmt;
@@ -2747,6 +2745,8 @@ var API = {
   sendChat: function(message) {
     //todoer Delete this after we re-enable the bot kill on room change code.
     //if(botVar.room.botRoomUrl != window.location.pathname) return;  // If we leave the room where we started the bot stop displaying messages.
+
+    message = message.replace("[:", "[ :");
     if (botVar.botMuted === true)
         API.logInfo(message);
     else if (botVar.botRunning) {
