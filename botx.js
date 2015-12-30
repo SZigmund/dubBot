@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0006",
+  version: "Version  1.01.0012.0007",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -209,13 +209,19 @@ var USERS = {
   },
 
   lookupUserName: function (username) {
-    botDebug.debugMessage(false, "username: [" + username + "]");
-	var usermatch = username.trim().toLowerCase();
-	usermatch = usermatch.replace(/@/g, '');
-    for (var i = 0; i < USERS.users.length; i++) {
-      if (USERS.users[i].trim().toLowerCase() == usermatch) return USERS.users[i];
-    }
-    return false;
+    try {
+      botDebug.debugMessage(false, "username: [" + username + "]");
+	  var usermatch = username.trim().toLowerCase();
+	  usermatch = usermatch.replace(/@/g, '');
+      for (var i = 0; i < USERS.users.length; i++) {
+        if (USERS.users[i].username.trim().toLowerCase() == usermatch) return USERS.users[i];
+      }
+      return false;
+	}
+    catch(err) {
+		UTIL.logException("lookupUserName: " + err.message); 
+		return false;
+	  }
   },
   lookupUserID: function (id) {   //getroomuser
   //todoer TEST: 
