@@ -9,7 +9,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0008",
+  version: "Version  1.01.0012.0009",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3527,8 +3527,12 @@ var BOTCOMMANDS = {
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         var msg = chat.message;
                         var name = "";
+						botDebug.debugMessage(true, "msg: [" + msg + "]");
+						botDebug.debugMessage(true, "cmd: [" + cmd + "]");
+						botDebug.debugMessage(true, "cmd.length: " + cmd.length);
                         if (msg.length === cmd.length) name = chat.un
                         else name = msg.substring(cmd.length + 2);
+						botDebug.debugMessage(true, "name: [" + name + "]");
                         var user = USERS.lookupUserName(name);
                         if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
