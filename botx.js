@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0004",
+  version: "Version  1.01.0012.0005",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -210,10 +210,10 @@ var USERS = {
 
   lookupUserName: function (username) {
     botDebug.debugMessage(false, "username: [" + username + "]");
-	var finduser = username.trim().toLowerCase();
-	finduser = finduser.replace(/@/g, '');
+	var usermatch = username.trim().toLowerCase();
+	usermatch = usermatch.replace(/@/g, '');
     for (var i = 0; i < USERS.users.length; i++) {
-      if (USERS.users[i].finduser.trim().toLowerCase() == finduser) return USERS.users[i];
+      if (USERS.users[i].trim().toLowerCase() == usermatch) return USERS.users[i];
     }
     return false;
   },
