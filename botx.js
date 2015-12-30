@@ -9,7 +9,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0010",
+  version: "Version  1.01.0013",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -209,9 +209,8 @@ var USERS = {
 
   lookupUserName: function (username) {
     try {
-      botDebug.debugMessage(true, "username: [" + username + "]");
+      //botDebug.debugMessage(true, "username: [" + username + "]");
 	  var usermatch = username.trim().toLowerCase();
-      botDebug.debugMessage(true, "usermatch: [" + usermatch + "]");
 	  usermatch = usermatch.replace(/@/g, '');
       for (var i = 0; i < USERS.users.length; i++) {
         if (USERS.users[i].username.trim().toLowerCase() == usermatch) return USERS.users[i];
@@ -1084,9 +1083,9 @@ var botChat = {
     try{
       //Only scan up to the last 10 items in history:
       if (botVar.chatHistoryList.length > 10) {
-        botDebug.debugMessage(true, "BEFORE LEN: " + botVar.chatHistoryList.length);
+        botDebug.debugMessage(false, "BEFORE LEN: " + botVar.chatHistoryList.length);
         botVar.chatHistoryList.splice(0, botVar.chatHistoryList.length - 10);
-        botDebug.debugMessage(true, " AFTER LEN: " + botVar.chatHistoryList.length);
+        botDebug.debugMessage(false, " AFTER LEN: " + botVar.chatHistoryList.length);
       }
       for (var i = 0; i < botVar.chatHistoryList.length; i++) {
           if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
@@ -1110,11 +1109,11 @@ var botChat = {
   },
   processChatItem: function(chatMessage, username, uid) {
     try{
-      botDebug.debugMessage(true, username + ": " + chatMessage);
+      //botDebug.debugMessage(true, "processChatItem:: " + username + ": {" + chatMessage + "}");
       var chat = botChat.formatChat(chatMessage, username, uid);
-      botDebug.debugMessage(true, username + ": " + chat.message);
+      //botDebug.debugMessage(true, "processChatItem:: " + username + ": {" + chat.message + "}");
       COMMANDS.checkCommands(chat);
-      botDebug.debugMessage(true, username + ": " + chat.message);
+      //botDebug.debugMessage(true, "processChatItem:: " + username + ": {" + chat.message + "}");
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
   },
   getChatUserId: function(className) {
@@ -1516,7 +1515,7 @@ var TASTY = {
 					var roomUser = USERS.users[userIdx];
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
 					//botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
-					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
+					if (roomUser.rollStats.lifeTotal < 50) skipUser = true;  // Require 50 rolls to get on the leader board
 					if (!skipUser) {
 					  var UserPct = roomUser.rollStats.lifeWoot / roomUser.rollStats.lifeTotal;
 					// Skip user if higher or lower than the current high/low score:
@@ -1562,7 +1561,7 @@ var TASTY = {
 					var roomUser = USERS.users[userIdx];
 					//botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
-					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
+					if (roomUser.rollStats.lifeTotal < 50) skipUser = true;  // Require 50 rolls to get on the leader board
 					// Skip user if higher or lower than the current high/low score:
 					if (roomUser.rollStats.lifeTotal < rollCount && loadingTop === true) skipUser = true;
 					if (roomUser.rollStats.lifeTotal > rollCount && loadingTop === false) skipUser = true;
@@ -3529,12 +3528,12 @@ var BOTCOMMANDS = {
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         var msg = chat.message;
                         var name = "";
-						botDebug.debugMessage(true, "msg: [" + msg + "]");
-						botDebug.debugMessage(true, "cmd: [" + cmd + "]");
-						botDebug.debugMessage(true, "cmd.length: " + cmd.length);
+						//botDebug.debugMessage(true, "msg: [" + msg + "]");
+						//botDebug.debugMessage(true, "cmd: [" + cmd + "]");
+						//botDebug.debugMessage(true, "cmd.length: " + cmd.length);
                         if (msg.length === cmd.length) name = chat.un
                         else name = msg.substring(cmd.length + 2);
-						botDebug.debugMessage(true, "name: [" + name + "]");
+						//botDebug.debugMessage(true, "name: [" + name + "]");
                         var user = USERS.lookupUserName(name);
                         if (user === false) return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: user.username, 
