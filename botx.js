@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0002",
+  version: "Version  1.01.0012.0003",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1510,7 +1510,7 @@ var TASTY = {
 					var roomUser = USERS.users[userIdx];
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
 					botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
-					if (roomUser.rollStats.lifeTotal < 50) skipUser = true;  // Require 50 rolls to get on the leader board
+					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
 					if (!skipUser) {
 					  var UserPct = roomUser.rollStats.lifeWoot / roomUser.rollStats.lifeTotal;
 					// Skip user if higher or lower than the current high/low score:
@@ -1556,7 +1556,7 @@ var TASTY = {
 					var roomUser = USERS.users[userIdx];
 					botDebug.debugMessage(true, "Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
 					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
-					if (roomUser.rollStats.lifeTotal < 50) skipUser = true;  // Require 50 rolls to get on the leader board
+					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
 					// Skip user if higher or lower than the current high/low score:
 					if (roomUser.rollStats.lifeTotal < rollCount && loadingTop === true) skipUser = true;
 					if (roomUser.rollStats.lifeTotal > rollCount && loadingTop === false) skipUser = true;
