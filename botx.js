@@ -2,7 +2,6 @@
 //[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
-// - Roll Stats
 // - Permissions
 // - AFK DJ
 // - Bot DJ
@@ -10,7 +9,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0007",
+  version: "Version  1.01.0012.0008",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -210,8 +209,9 @@ var USERS = {
 
   lookupUserName: function (username) {
     try {
-      botDebug.debugMessage(false, "username: [" + username + "]");
+      botDebug.debugMessage(true, "username: [" + username + "]");
 	  var usermatch = username.trim().toLowerCase();
+      botDebug.debugMessage(true, "usermatch: [" + usermatch + "]");
 	  usermatch = usermatch.replace(/@/g, '');
       for (var i = 0; i < USERS.users.length; i++) {
         if (USERS.users[i].username.trim().toLowerCase() == usermatch) return USERS.users[i];
