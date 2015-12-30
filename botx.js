@@ -1,10 +1,16 @@
 // Written by: DocZ
 //[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
+//TODO LIST:
+// - Roll Stats
+// - Permissions
+// - AFK DJ
+// - Bot DJ
+// - Last Played
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0008.0001",
+  version: "Version  1.01.0012.0001",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1466,6 +1472,119 @@ var TASTY = {
           return "";
         }
     },
+	displayLeaderBoard: function(leaderBoard, username, dispPct, caption) {
+		try {
+			console.table(leaderBoard);
+			var MsgA = "";
+			var MsgB = "";
+			MsgA = caption;
+			for (var leaderIdx = 0; leaderIdx < leaderBoard.length; leaderIdx++) {
+				var strData = "[" + UTIL.numberToIcon(leaderIdx+1) + " " + leaderBoard[leaderIdx].username + " ";
+				if (dispPct)
+					strData += leaderBoard[leaderIdx].winCount + "/" + leaderBoard[leaderIdx].rollCount + " " + leaderBoard[leaderIdx].rollPct + "] "
+				else
+					strData += leaderBoard[leaderIdx].rollCount + "] "
+				if (leaderIdx < 5)
+					MsgA += strData;
+				else
+					MsgB += strData;
+			}
+			setTimeout(function () { API.sendChat(MsgA); }, 500);
+			setTimeout(function () { API.sendChat(MsgB); }, 1000);
+		}
+		catch(err) { UTIL.logException("displayLeaderBoard: " + err.message); }
+	},
+	loadRollPct: function(loadingTop) {
+		try {
+			userIDs = [];
+			leaderBoard = [];
+			var addUserIdx = -1;
+			for (var leaderIdx = 0; leaderIdx < 10; leaderIdx++) {
+				addUserIdx = -1;
+				var rollPct = 0.0;
+				if (loadingTop === false) rollPct = 101.00;
+				for (var userIdx = 0; userIdx < USERS.users.length; userIdx++) {
+					var skipUser = false;
+					var roomUser = USERS.users.length[userIdx];
+					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
+					//botDebug.debugMessage("Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
+					if (!skipUser) {
+					  var UserPct = roomUser.rollStats.lifeWoot / roomUser.rollStats.lifeTotal;
+					// Skip user if higher or lower than the current high/low score:
+					  if (UserPct < rollPct && loadingTop === true) skipUser = true;
+					  if (UserPct > rollPct && loadingTop === false) skipUser = true;
+					}
+					if (!skipUser) {
+						//botDebug.debugMessage("New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal + "-" + UserPct);
+						addUserIdx = userIdx;
+						rollPct = UserPct;
+					}
+				}
+				if (addUserIdx > -1) {
+					var topStats = {
+						username: "",
+						rollCount: 0,
+						winCount: 0,
+						rollPct: ""
+					};
+					//botDebug.debugMessage("Adding User: " + USERS.users.length[addUserIdx].username + ": " + USERS.users.length[addUserIdx].rollStats.lifeTotal);
+					topStats.username = USERS.users.length[addUserIdx].username;
+					topStats.rollCount = USERS.users.length[addUserIdx].rollStats.lifeTotal;
+					topStats.winCount = USERS.users.length[addUserIdx].rollStats.lifeWoot;
+					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users.length[addUserIdx].rollStats.lifeWoot, USERS.users.length[addUserIdx].rollStats.lifeTotal);
+					leaderBoard.push(topStats);
+					userIDs.push(USERS.users.length[addUserIdx].id);
+				}
+			}
+			return leaderBoard;
+		}
+		catch(err) { UTIL.logException("loadRollPct: " + err.message); }
+	},
+	loadRollPoints: function(loadingTop) {
+		try {
+			userIDs = [];
+			leaderBoard = [];
+			for (var leaderIdx = 0; leaderIdx < 10; leaderIdx++) {
+				var rollCount = 0;
+				if (loadingTop === false) rollCount = 10000;
+				var addUserIdx = -1;
+				for (var userIdx = 0; userIdx < USERS.users.length.length; userIdx++) {
+					var skipUser = false;
+					var roomUser = USERS.users.length[userIdx];
+					//botDebug.debugMessage("Scanning User: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+					if (userIDs.indexOf(roomUser.id) > -1) skipUser = true;  // Already in the leader list
+					if (roomUser.rollStats.lifeTotal < 1) skipUser = true;  // Require 50 rolls to get on the leader board
+					// Skip user if higher or lower than the current high/low score:
+					if (roomUser.rollStats.lifeTotal < rollCount && loadingTop === true) skipUser = true;
+					if (roomUser.rollStats.lifeTotal > rollCount && loadingTop === false) skipUser = true;
+					if (!skipUser) {
+						addUserIdx = userIdx;
+						//botDebug.debugMessage("New Leader: " + roomUser.username + ": " + roomUser.rollStats.lifeTotal);
+						rollCount = roomUser.rollStats.lifeTotal;
+					}
+				}
+				
+				if (addUserIdx > -1) {
+					var topStats = {
+						username: "",
+						rollCount: 0,
+						winCount: 0,
+						rollPct: ""
+					};
+					//botDebug.debugMessage("Adding User: " + USERS.users.length[addUserIdx].username + ": " + USERS.users.length[addUserIdx].rollStats.lifeTotal);
+					topStats.username = USERS.users.length[addUserIdx].username;
+					topStats.rollCount = USERS.users.length[addUserIdx].rollStats.lifeTotal;
+					topStats.winCount = USERS.users.length[addUserIdx].rollStats.lifeWoot;
+					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users.length[addUserIdx].rollStats.lifeWoot, USERS.users.length[addUserIdx].rollStats.lifeTotal);
+					leaderBoard.push(topStats);
+					userIDs.push(USERS.users.length[addUserIdx].id);
+				}
+			}
+			return leaderBoard;
+		}
+		catch(err) { UTIL.logException("loadRollPoints: " + err.message); }
+	},
     getRolledStats: function (roomUser) {
         try {
            var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
@@ -1574,7 +1693,7 @@ var TASTY = {
                       'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
                       'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
-                      'festive','srv'];
+                      'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -3215,7 +3334,7 @@ var BOTCOMMANDS = {
                           'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
                           'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
-                          'festive','srv'],
+                          'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3259,7 +3378,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if (API.currentDjName() !== chat.un) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
+                        if (API.currentDjName().toUpperCase() !== chat.un.toUpperCase()) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
                         //if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
@@ -3809,6 +3928,62 @@ var BOTCOMMANDS = {
                     return API.sendChat(botChat.subChat(botChat.getChatMessage("cookie"), {nameto: user.username, namefrom: chat.un, cookie: this.getCookie()}));
                   }
                   catch (err) { UTIL.logException("cookieCommand: " + err.message); }
+                }
+            },
+            lowrollpctCommand: {   //Added 07/03/2015 Zig
+                command: 'lowrollpct',
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var leaderBoard = TASTY.loadRollPct(false);
+                        TASTY.displayLeaderBoard(leaderBoard, chat.un, true, "Low Roll Percentages: ");
+                    }
+                    catch(err) { UTIL.logException("lowrollpct: " + err.message); }
+                }
+            },
+            lowrollptsCommand: {   //Added 07/03/2015 Zig
+                command: 'lowrollpts',
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var leaderBoard = TASTY.loadRollPoints(false);
+                        TASTY.displayLeaderBoard(leaderBoard, chat.un, false, "Low Roll Points: ");
+                    }
+                    catch(err) { UTIL.logException("lowrollpts: " + err.message); }
+                }
+            },
+            rollpctCommand: {   //Added 07/03/2015 Zig
+                command: 'rollpct',
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var leaderBoard = TASTY.loadRollPct(true);
+                        TASTY.displayLeaderBoard(leaderBoard, chat.un, true, "Top Roll Percentages: ");
+                    }
+                    catch(err) { UTIL.logException("rollpct: " + err.message); }
+                }
+            },
+            rollptsCommand: {   //Added 07/03/2015 Zig
+                command: 'rollpts',
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var leaderBoard = TASTY.loadRollPoints(true);
+                        TASTY.displayLeaderBoard(leaderBoard, chat.un, false, "Top Roll Points: ");
+                    }
+                    catch(err) { UTIL.logException("rollpts: " + err.message); }
                 }
             },
 
@@ -6026,70 +6201,6 @@ var BOTCOMMANDS = {
                         }
                     }
                     catch(err) { UTIL.logException("loguserCommand: " + err.message); }
-                }
-            },
-            lowrollpctCommand: {   //Added 07/03/2015 Zig
-                command: 'lowrollpct',
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var leaderBoard = basicBot.userUtilities.loadRollPct(false);
-                        basicBot.userUtilities.displayLeaderBoard(leaderBoard, chat.un, true, "Low Roll Percentages: ");
-                    }
-                    catch(err) {
-                        UTIL.logException("lowrollpct: " + err.message);
-                    }
-                }
-            },
-            lowrollptsCommand: {   //Added 07/03/2015 Zig
-                command: 'lowrollpts',
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var leaderBoard = basicBot.userUtilities.loadRollPoints(false);
-                        basicBot.userUtilities.displayLeaderBoard(leaderBoard, chat.un, false, "Low Roll Points: ");
-                    }
-                    catch(err) {
-                        UTIL.logException("lowrollpts: " + err.message);
-                    }
-                }
-            },
-            rollpctCommand: {   //Added 07/03/2015 Zig
-                command: 'rollpct',
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var leaderBoard = basicBot.userUtilities.loadRollPct(true);
-                        basicBot.userUtilities.displayLeaderBoard(leaderBoard, chat.un, true, "Top Roll Percentages: ");
-                    }
-                    catch(err) {
-                        UTIL.logException("rollpct: " + err.message);
-                    }
-                }
-            },
-            rollptsCommand: {   //Added 07/03/2015 Zig
-                command: 'rollpts',
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var leaderBoard = basicBot.userUtilities.loadRollPoints(true);
-                        basicBot.userUtilities.displayLeaderBoard(leaderBoard, chat.un, false, "Top Roll Points: ");
-                    }
-                    catch(err) {
-                        UTIL.logException("rollpts: " + err.message);
-                    }
                 }
             },
             zigbanCommand: {
