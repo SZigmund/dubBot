@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0012.0003",
+  version: "Version  1.01.0012.0004",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1534,7 +1534,7 @@ var TASTY = {
 					topStats.username = USERS.users[addUserIdx].username;
 					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
 					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
-					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
+					topStats.rollPct = UTIL.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
 					leaderBoard.push(topStats);
 					userIDs.push(USERS.users[addUserIdx].id);
 				}
@@ -1578,7 +1578,7 @@ var TASTY = {
 					topStats.username = USERS.users[addUserIdx].username;
 					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
 					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
-					topStats.rollPct = basicBot.roomUtilities.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
+					topStats.rollPct = UTIL.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
 					leaderBoard.push(topStats);
 					userIDs.push(USERS.users[addUserIdx].id);
 				}
