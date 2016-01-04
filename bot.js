@@ -9,7 +9,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0015",
+  version: "Version  1.01.0016",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1501,7 +1501,7 @@ var TASTY = {
 			}
 			setTimeout(function () { API.sendChat(MsgA); }, 100);
 			setTimeout(function () { API.sendChat(MsgB); }, 400);
-			setTimeout(function () { API.sendChat(MsgB); }, 700);
+			setTimeout(function () { API.sendChat(MsgC); }, 700);
 		}
 		catch(err) { UTIL.logException("displayLeaderBoard: " + err.message); }
 	},
