@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0017",
+  version: "Version  1.01.0018",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1693,8 +1693,8 @@ var TASTY = {
                       'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                       'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                       'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
-                      'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
-                      'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
+                      'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
+                      'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                       'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
                       'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                       'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
@@ -1706,7 +1706,7 @@ var TASTY = {
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
                       'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
-                      'boppin','bopping','jammin','jamming','tuba','powerballad'];
+                      'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -3336,8 +3336,8 @@ var BOTCOMMANDS = {
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                           'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                           'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
-                          'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
-                          'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
+                          'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
+                          'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                           'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
                           'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                           'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
@@ -3349,7 +3349,7 @@ var BOTCOMMANDS = {
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
                           'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
-                          'boppin','bopping','jammin','jamming','tuba','powerballad'],
+                          'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
