@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0018",
+  version: "Version  1.01.0019",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -4031,6 +4031,22 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            //todoer delete after having fun with this:
+            autorollCommand: {
+                command: 'autoroll',
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Auto-Roll feature enabled for: " + chat.un);
+                    }
+                    catch(err) {
+                        UTIL.logException("autoroll: " + err.message);
+                    }
+                }
+            },
 
             /* basic
             activeCommand: {
@@ -6148,22 +6164,6 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("lastplayed: " + err.message);
-                    }
-                }
-            },
-            //todoer delete after having fun with this:
-            autorollCommand: {
-                command: 'autoroll',
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("Auto-Roll feature enabled for: " + chat.un);
-                    }
-                    catch(err) {
-                        UTIL.logException("autoroll: " + err.message);
                     }
                 }
             },
