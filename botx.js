@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0069",
+  version: "Version  1.01.0020.0070",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2668,7 +2668,7 @@ var API = {
 
       var roomUser = USERS.defineRoomUser(usrObjectID);
 	  botDebug.debugMessage("UserID: " + roomUser.id);
-	  if (roomUser.id <> "564933a1d4dcab140021cdeb") roomUser.id = "564933a1d4dcab140021cdeb";     //todoerererererererer DELETE
+	  if (roomUser.id !== "564933a1d4dcab140021cdeb") roomUser.id = "564933a1d4dcab140021cdeb";     //todoerererererererer DELETE
       $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + roomUser.id + "/pause"
             type: "PUT"
