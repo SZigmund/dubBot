@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0071",
+  version: "Version  1.01.0020.0072",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3742,29 +3742,24 @@ var BOTCOMMANDS = {
                     else {
                         var msg = chat.message;
                         var maxTime = msg.substring(cmd.length + 1);
-                        if (!isNaN(maxTime)) {
-                            if (maxTime === "1") SETTINGS.storeToStorage();
-                            if (maxTime === "2") SETTINGS.retrieveFromStorage();
-                            if (maxTime === "3") SETTINGS.retrieveSettings();
-                            if (maxTime === "4") API.mehThisSong();
-                            if (maxTime === "5") API.wootThisSong();
-                            if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
-                            if (maxTime === "7") {
-                                  var avatarList7 = document.getElementById("main-user-list-room");
-                                  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
-                            }
-                            if (maxTime === "8") {
-                                  var avatarList8 = document.getElementById("avatar-list");
-                                  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
-                            if (maxTime === "9") USERS.loadUsersInRoom(true);
-                            if (maxTime === "A") USERS.removeMIANonUsers();
-							if (maxTime === "B") API.getRoomQueue();
-							if (maxTime === "C") API.pauseUserQueue("dexter_nix");
-                            }
-                            
-
-                        }
-                        else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
+						if (maxTime === "1") SETTINGS.storeToStorage();
+						if (maxTime === "2") SETTINGS.retrieveFromStorage();
+						if (maxTime === "3") SETTINGS.retrieveSettings();
+						if (maxTime === "4") API.mehThisSong();
+						if (maxTime === "5") API.wootThisSong();
+						if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
+						if (maxTime === "7") {
+							  var avatarList7 = document.getElementById("main-user-list-room");
+							  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
+						}
+						if (maxTime === "8") {
+							  var avatarList8 = document.getElementById("avatar-list");
+							  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
+						}
+						if (maxTime === "9") USERS.loadUsersInRoom(true);
+						if (maxTime === "A") USERS.removeMIANonUsers();
+						if (maxTime === "B") API.getRoomQueue();
+						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
                     }
                 }
             },
