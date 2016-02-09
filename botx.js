@@ -2,6 +2,7 @@
 //[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
+// - Record all Bans/Unbans
 // - Permissions
 // - AFK DJ
 // - Bot DJ
@@ -9,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0014",
+  version: "Version  1.01.0020.0069",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -520,13 +521,6 @@ var SETTINGS = {
       }
       catch(err) { UTIL.logException("retrieveSettings: " + err.message); }
     },
-
-//[DEBUG]: STORED DATA: {"debug":true,"afkList":[],"mutedUsers":[],"bannedUsers":[],"skippable":true,"usercommand":true,"allcommand":true,"blacklistInterval":null,"queueing":0,"queueable":true,"currentDJID":null,"currentMediaCid":999,"currentMediaStart":999,"historyList":[],"cycleTimer":85,"queue":{"id":[],"position":[]},"newBlacklist":[],"newBlacklistIDs":[],"blacklistLoaded":true} botx.js:1553:5
-//[DEBUG]: DONE: storeToStorage - UserCnt: 2 TIME: 1448225383912 botx.js:1553:5
-//[DEBUG]: username: [levis_homer] botx.js:1553:5
-//[DEBUG]: USERS IN THE ROOM: levis_homer botx.js:1553:5
-//[DEBUG]: username: [dexter_nix] botx.js:1553:5
-//[DEBUG]: USERS IN THE ROOM: dexter_nix botx.js:1553:5
 
     retrieveFromStorage: function () {
         try {
@@ -1484,6 +1478,7 @@ var TASTY = {
 			console.table(leaderBoard);
 			var MsgA = "";
 			var MsgB = "";
+			var MsgC = "";
 			MsgA = caption;
 			for (var leaderIdx = 0; leaderIdx < leaderBoard.length; leaderIdx++) {
 				var strData = "[" + UTIL.numberToIcon(leaderIdx+1) + " " + leaderBoard[leaderIdx].username + " ";
@@ -1491,13 +1486,16 @@ var TASTY = {
 					strData += leaderBoard[leaderIdx].winCount + "/" + leaderBoard[leaderIdx].rollCount + " " + leaderBoard[leaderIdx].rollPct + "] "
 				else
 					strData += leaderBoard[leaderIdx].rollCount + "] "
-				if (leaderIdx < 5)
+				if (leaderIdx < 3)
 					MsgA += strData;
-				else
+				else if (leaderIdx < 7)
 					MsgB += strData;
+				else
+					MsgC += strData;
 			}
-			setTimeout(function () { API.sendChat(MsgA); }, 500);
-			setTimeout(function () { API.sendChat(MsgB); }, 1000);
+			API.sendChat(MsgA);
+			setTimeout(function () { API.sendChat(MsgB); }, 500);
+			setTimeout(function () { API.sendChat(MsgC); }, 1000);
 		}
 		catch(err) { UTIL.logException("displayLeaderBoard: " + err.message); }
 	},
@@ -1632,7 +1630,7 @@ var TASTY = {
         if (user === false) return false;
         return user.rolled;
     },
-    tastyVote: function (usrObjectID, cmd) {   //todoerererererererer
+    tastyVote: function (usrObjectID, cmd) {
         try {
         var roomUser = USERS.defineRoomUser(usrObjectID);
         if (roomUser.tastyVote) return;
@@ -1658,23 +1656,23 @@ var TASTY = {
             var commandList = ['tasty', 'rock', 'props', 'woot', 'groot', 'groovy', 'jam','nice','bop','cowbell','sax','ukulele','tango','samba','disco','waltz','metal',
                       'bob','boogie','cavort','conga','flit','foxtrot','frolic','gambol','hop','hustle','jig','jitter','jitterbug','jive','jump','leap','prance',
                       'promenade','rhumba','shimmy','strut','sway','swing','great','hail','good','acceptable','bad','excellent','exceptional','favorable','marvelous',
-                      'positive','satisfactory','satisfying','superb','valuable','wonderful','ace','boss','bully','capital','choice','crack','pleasing','prime','rad',
+                      'positive','satisfactory','satisfying','superb','valuable','wonderful','ace','boss','bully','choice','crack','pleasing','prime','rad',
                       'sound','spanking','sterling','super','superior','welcome','worthy','admirable','agreeable','commendable','congenial','deluxe','first-class',
                       'first-rate','gnarly','gratifying','honorable','neat','precious','recherché','reputable','select','shipshape','splendid','stupendous','keen',
                       'nifty','swell','sensational','fine','cool','perfect','wicked','fab','heavy','incredible','outstanding','phenomenal','remarkable','special',
                       'terrific','unique','aces','capital','dandy','enjoyable','exquisite','fashionable','lovely','love','solid','striking','top-notch',
                       'slick','pillar','exemplary','alarming','astonishing','awe-inspiring','beautiful','breathtaking','fearsome','formidable','frightening','winner',
-                      'impressive','intimidating','facinating','prodigious','magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand',
+                      'impressive','intimidating','facinating','prodigious','magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand','velvet','icecream',
                       'creamy','easy','effortless','fluid','gentle','glossy','peaceful','polished','serene','sleek','soft','tranquil','velvety','soothing','fluent','frictionless',
                       'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
                       'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
                       'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
                       'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
-                      'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','epic','blues','heart','feels','dope','makeitrain','wumbo',
+                      'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
                       'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                       'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
                       'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
-                      'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','tits','hooters',
+                      'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','hooters',
                       'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
                       'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
                       '133t','roofus','rufus','schway','shiz','shiznak','shiznik','shiznip','shiznit','shiznot','shizot','shwanky','shway',
@@ -1688,8 +1686,8 @@ var TASTY = {
                       'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                       'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                       'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
-                      'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
-                      'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
+                      'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
+                      'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                       'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
                       'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                       'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
@@ -1699,8 +1697,9 @@ var TASTY = {
                       ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                       'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-                      'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
-                      'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion'];
+                      'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
+                      'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
+                      'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -2614,6 +2613,7 @@ var API = {
 
       window.APIisRunning = true;
       botVar.botName = API.getBotName();
+	  botVar.roomID = API.getRoomID();
       if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
       SETTINGS.retrieveFromStorage();
@@ -2648,6 +2648,36 @@ var API = {
       // [...]
     },
   },
+
+  //todoerererererererer
+  reorderQueue: function(usrObjectID, queuePos){
+    try {
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
+  //560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+    }
+    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
+  },
+
+  //todoerererererererer
+  pauseUserQueue: function(usrObjectID){
+    try {
+	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/pause
+	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+	  //542465ce43f5a10200c07f11 - Doc_Z
+
+      var roomUser = USERS.defineRoomUser(usrObjectID);
+	  botDebug.debugMessage("UserID: " + roomUser.id);
+	  if (roomUser.id <> "564933a1d4dcab140021cdeb") roomUser.id = "564933a1d4dcab140021cdeb";     //todoerererererererer DELETE
+      $.ajax({
+            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + roomUser.id + "/pause"
+            type: "PUT"
+        });
+		
+    }
+    catch(err) {UTIL.logException("pauseUserQueue: " + err.message); }
+  },
+
   getDJ: function(){
     return USERS.lookupUserName(API.currentDjName());
   },
@@ -2793,6 +2823,65 @@ var API = {
     try { return $(".user-info").text();    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
+
+  //todoerererererererer
+  getRoomQueue: function() {
+    try {
+	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
+      var dubQueue = JSON.parse(
+        $.ajax({
+            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
+            type: "GET"
+        }));
+		botDebug.debugMessage(true, "Room Queue Count: " + dubQueue.data.length);
+		if (dubQueue.data.length === 0) return;
+		for (var i = 0; i < dubQueue.data.length; i++) {
+			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubQueue.data[i].roomid);
+			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubQueue.data[i].userid);
+			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubQueue.data[i].songLength);
+		}
+
+	}
+    catch(err) { UTIL.logException("getRoomQueue: " + err.message); }
+	},
+	
+  /*
+{  
+   "data":[  
+      {  
+         "roomid":"5602ed62e8632103004663c2",
+         "songLength":166000,
+         "userid":"560be6cbdce3260300e40770",
+         "_user":{  
+            "_id":"560be6cbdce3260300e40770",
+            "username":"Levis_Homer",
+            "roleid":1,
+         },
+         "_song":{  
+            "_id":"560c5fd23ba1f50300a418e4",
+            "name":"The Living End - I've Just Seen A Face (Acoustic - Live at Visions MAG)",
+            "description":"The Living End performed afew songs for Visions MAG in Germany. This is one of them.\r\n\r\nI've Just Seen A Face is a great Beatles song, and a fantastic cover...though Chris screwed up the solo a bit lol.",
+            "type":"youtube",
+            "fkid":"AcEyKsNjYcw",
+            "songLength":166000,
+         },
+      }
+   ]
+}  */
+
+  //todoerererererererer
+  getRoomID: function() {
+    //      var roomid = "5602ed62e8632103004663c2";
+	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
+	//        RGT Room ID: 5602ed62e8632103004663c2
+    try { return "5602ed62e8632103004663c2";    }
+    catch(err) { UTIL.logException("getBotName: " + err.message); }
+  },
+
+  getBotName: function() {
+    try { return $(".user-info").text();    }
+    catch(err) { UTIL.logException("getBotName: " + err.message); }
+  },
   currentSongName: function() {
     try { return $(".currentSong").text();    }
     catch(err) { UTIL.logException("currentSongName: " + err.message); }
@@ -2844,16 +2933,16 @@ var API = {
   //Accept-Language: en-US,en;q=0.8
   //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
 
+  //todoerererererererer
   moderateRemoveDJ: function(usrObjectID) {
     try {
       var roomUser = USERS.defineRoomUser(usrObjectID);
       //todoer roomUser.uid.....
       var uid = "560be6cbdce3260300e40770";
-      var roomid = "5602ed62e8632103004663c2";
       
       //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
       $.ajax({
-            url: "https://api.dubtrack.fm/room/" + roomid + "/queue/user/" + uid + "/all",
+            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + uid + "/all",
             type: "DELETE"
         });
     }
@@ -3300,23 +3389,23 @@ var BOTCOMMANDS = {
                 command: ['tasty', 'rock', 'props', 'woot', 'groot', 'groovy', 'jam','nice','bop','cowbell','sax','ukulele','tango','samba','disco','waltz','metal',
                           'bob','boogie','cavort','conga','flit','foxtrot','frolic','gambol','hop','hustle','jig','jitter','jitterbug','jive','jump','leap','prance','promenade','rhumba',
                           'shimmy','strut','sway','swing','great','hail','good','acceptable','bad','excellent','exceptional','favorable','marvelous','positive','satisfactory','satisfying',
-                          'superb','valuable','wonderful','ace','boss','bully','capital','choice','crack','pleasing','prime','rad','sound','spanking','sterling','super','superior',
+                          'superb','valuable','wonderful','ace','boss','bully','choice','crack','pleasing','prime','rad','sound','spanking','sterling','super','superior',
                           'welcome','worthy','admirable','agreeable','commendable','congenial','deluxe','first-class','first-rate','gnarly','gratifying','honorable','neat','precious',
                           'recherché','reputable','select','shipshape','splendid','stupendous','keen','nifty','swell','sensational','fine','cool','perfect','wicked','fab','heavy',
                           'incredible','outstanding','phenomenal','remarkable','special','terrific','unique','aces','capital','dandy','enjoyable','exquisite',
                           'fashionable','lovely','love','solid','striking','top-notch','slick','pillar','exemplary','alarming','astonishing','awe-inspiring',
                           'beautiful','breathtaking','fearsome','formidable','frightening','winner','impressive','intimidating','facinating','prodigious',
-                          'magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand',
+                          'magnificent','overwhelming','shocking','stunning','stupefying','majestic','grand','velvet','icecream',
                           'creamy','easy','effortless','fluid','gentle','glossy','peaceful','polished','serene','sleek','soft','tranquil','velvety','soothing','fluent','frictionless',
                           'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
                           'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
                           'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
                           'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
-                          'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','epic','blues','heart','feels','dope','makeitrain','wumbo',
+                          'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
                           'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                           'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
                           'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
-                          'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','tits','hooters',
+                          'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','hooters',
                           'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
                           'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
                           '133t','roofus','rufus','schway','shiz','shiznak','shiznik','shiznip','shiznit','shiznot','shizot','shwanky','shway',
@@ -3330,8 +3419,8 @@ var BOTCOMMANDS = {
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                           'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                           'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
-                          'gansta','gold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
-                          'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','legendary',
+                          'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
+                          'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                           'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
                           'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                           'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
@@ -3341,8 +3430,9 @@ var BOTCOMMANDS = {
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
-                          'hellyeah','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
-                          'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion'],
+                          'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
+                          'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
+                          'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3379,7 +3469,7 @@ var BOTCOMMANDS = {
                 }
             },
             rollCommand: {   //Added 03/30/2015 Zig
-                command: 'roll',
+                command: ['roll','spin','throw','dice','rollem','toss','fling','pitch'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3555,7 +3645,7 @@ var BOTCOMMANDS = {
             nsfwCommand: {   //Added 04/22/2015 Zig
                 command: 'nsfw',
                 rank: 'user',
-                type: 'exact',
+                type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3668,6 +3758,8 @@ var BOTCOMMANDS = {
                                   botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
                             if (maxTime === "9") USERS.loadUsersInRoom(true);
                             if (maxTime === "A") USERS.removeMIANonUsers();
+							if (maxTime === "B") API.getRoomQueue();
+							if (maxTime === "C") API.pauseUserQueue("dexter_nix");
                             }
                             
 
@@ -3761,6 +3853,18 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("whycommand: " + err.message);
+                    }
+                }
+            },
+            hypsterCommand: {  //hipsterCommand
+                command: 'hypster',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        API.sendChat("I know @whitewidow is singing along with this hypster track");
                     }
                 }
             },
@@ -4009,6 +4113,22 @@ var BOTCOMMANDS = {
                     else {
                         if (typeof SETTINGS.settings.fbLink === "string")
                             API.sendChat(botChat.subChat(botChat.getChatMessage("facebook"), {link: SETTINGS.settings.fbLink}));
+                    }
+                }
+            },
+            //todoer delete after having fun with this:
+            autorollCommand: {
+                command: 'autoroll',
+                rank: 'residentdj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("Auto-Roll feature enabled for: " + chat.un);
+                    }
+                    catch(err) {
+                        UTIL.logException("autoroll: " + err.message);
                     }
                 }
             },
@@ -5053,18 +5173,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            hypsterCommand: {  //hipsterCommand
-                command: 'hypster',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.sendChat("I know @DJWhiteWidow is singing along with this hypster track");
-                    }
-                }
-            },
             refreshbrowserCommand: {
                 command: 'refreshbrowser',
                 rank: 'cohost',
@@ -6141,22 +6249,6 @@ var BOTCOMMANDS = {
                     }
                     catch(err) {
                         UTIL.logException("lastplayed: " + err.message);
-                    }
-                }
-            },
-            //todoer delete after having fun with this:
-            autorollCommand: {
-                command: 'autoroll',
-                rank: 'residentdj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("Auto-Roll feature enabled for: " + chat.un);
-                    }
-                    catch(err) {
-                        UTIL.logException("autoroll: " + err.message);
                     }
                 }
             },
