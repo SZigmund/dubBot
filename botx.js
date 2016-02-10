@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0073",
+  version: "Version  1.01.0020.0074",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2828,12 +2828,12 @@ var API = {
   getRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
-      response = $.ajax({
+      var dubQueue = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
-	  botDebug.debugMessage(true, "response Len: " + response.length);
-	  botDebug.debugMessage(true, "response: (" + response + ")");
-      var dubQueue = JSON.parse(response);
+	  //botDebug.debugMessage(true, "response Len: " + response.length);
+	  //botDebug.debugMessage(true, "response: (" + response + ")");
+      //var dubQueue = JSON.parse(response);
 	  botDebug.debugMessage(true, "Room Queue Count: " + dubQueue.data.length);
 	  if (dubQueue.data.length === 0) return;
 	  for (var i = 0; i < dubQueue.data.length; i++) {
