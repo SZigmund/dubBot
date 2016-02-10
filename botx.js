@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0104",
+  version: "Version  1.01.0020.0105",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1706,9 +1706,10 @@ var AFK = {
     try {
 	botDebug.debugMessage(true, "=====================================================================================");
 	botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
-	
+
     for (var i = 0; i < djlist.length; i++) {
-        if (typeof djlist[i] !== 'undefined') {
+        botDebug.debugMessage(true, "AFK: TYPEOF: " + (typeof djlist[i]));
+        //if (typeof djlist[i] !== 'undefined') {
             botDebug.debugMessage(true, "AFK: DJ Defined");
             var id = djlist[i].id;
             botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
@@ -1745,7 +1746,7 @@ var AFK = {
 					}
 				}
             }
-        }
+        //}
     }
     }
     catch(err) { UTIL.logException("afkCheckCallback: " + err.message); }
@@ -2770,28 +2771,8 @@ var API = {
     try { return $(".user-info").text();    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
-  //todoerer DELETE if not needed:
-  loadRoomQueue: function(responseText) {
-    try {
-	  botDebug.debugMessage(true, "LOADING RESPONSE");
-      botDebug.debugMessage(true, "DA RESPONSE: " + responseText);
-	  botDebug.debugMessage(true, "LOADING RESPONSE-1");
-      dubBot.queue.dubQueue = JSON.parse(responseText);
-	  botDebug.debugMessage(true, "LOADING RESPONSE-2");
 
-	  UTIL.logObject(dubBot.queue.dubQueue, "QUEUE");
-	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.queue.dubQueue.data.length);
-	  if (dubBot.queue.dubQueue.data.length === 0) return;
-	  for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
-			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].roomid);
-			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].userid);
-			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.queue.dubQueue.data[i].songLength);
-	  }
-	}
-    catch(err) { UTIL.logException("loadRoomQueue: " + err.message); }
-	},
-
-	//todoer COMPLETE
+//todoer COMPLETE
   waitListItem: function (dubQueueItem) {
     try {
         this.id = dubQueueItem.userid;
@@ -2803,14 +2784,6 @@ var API = {
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
 
-  getWaitListTODOER: function () {
-    try {
-      for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
-	    waitlist.push(API.waitListItem(dubBot.queue.dubQueue.data[i]));
-	  }
-	}
-    catch(err) { UTIL.logException("getWaitList: " + err.message); }
-  },
   //todoerlind
   getWaitList: function(cb) {
     try {
@@ -2823,6 +2796,7 @@ var API = {
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
+		dubBot.queue.dubQueue = waitlist;
         cb(waitlist);
 	  });
 	}
