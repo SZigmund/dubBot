@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0083",
+  version: "Version  1.01.0020.0084",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -152,12 +152,13 @@ var USERS = {
   usersImport: [],
   users: [],
   loadUserInterval: null,
+  //todoerer
   getLastActivity: function (usrObjectID) {
       try {
         if (typeof usrObjectID === "object") return usrObjectID;
         var roomUser = USERS.lookupUserName(usrObjectID);
         if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
-        roomuser.lastActivity;
+        return roomUser.lastActivity;
 	  }
       catch(err) { UTIL.logException("getLastActivity: " + err.message); }
   },
@@ -191,16 +192,18 @@ var USERS = {
     }
     catch(err) { UTIL.logException("updateUserID: " + err.message); }
   },
+  //todoerer
   setLastActivityID: function (userId, dispMsg) {
     var user = USERS.lookupUserID(userId);
     if (user === false) return;
     USERS.setLastActivity(user, dispMsg);
   },
-//todoer afk activity TEST:
+//todoerer afk activity TEST:
   setLastActivity: function (user, dispMsg) {
     user.lastActivity = Date.now();
     if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
     user.afkWarningCount = 0;
+	botDebug.debugMessage(true, "RESET: " + user.username + " " + user.lastActivity);
     //clearTimeout(user.afkCountdown);
   },
 
@@ -2759,34 +2762,31 @@ var API = {
     try {
         return API.getDubUserID(user.id);
     }
-    catch(err) {
-      UTIL.logException("getUser: " + err.message);
-    }
+    catch(err) { UTIL.logException("getUser: " + err.message); }
   },
-  
-  getPermission: function (obj) { //1 requests
+  displayRoleToRoleNumber: function (displayRole) {
     try {
-      return 10;
-      // TODOER
-      //var u;
-      //if (typeof obj === "object") u = obj;
-      //else u = API.getDubUserID(obj);
-      //if (botCreatorIDs.indexOf(u.id) > -1) return 10;    // admin
-      //if (botVar.botID === u.id) return 4;          // cohost
-      //if (u.gRole < 2) return u.role;
-      //else {
-      //switch (u.gRole) {
-      //    case 2:
-      //        return 7;
-      //    case 3:
-      //        return 8;
-      //    case 4:
-      //        return 9;
-      //    case 5:
-      //        return 10;
-      //}
-      //}
-      //return 0;
+	  //todoerer
+	  switch (dispRole) {
+			case "creator":     return 7;
+			case "co-owner":    return 6;
+			case "manager":     return 5;
+			case "mod":         return 4;
+			case "vip":         return 3;
+			case "resident-dj": return 2;
+			case "dj":          return 1;
+			else return 0;
+	  }
+    }
+    catch(err) { UTIL.logException("displayRoleToRoleNumber: " + err.message); }
+  },
+  getPermission: function (usrObjectID) { //1 requests
+    try {
+	  //Dubtrack.room.users.getRoleType(Dubtrack.session.id)
+	  //Dubtrack.room.users.getRoleType("542465ce43f5a10200c07f11")
+      var roomUser = USERS.defineRoomUser(usrObjectID);
+	  var dispRole = Dubtrack.room.users.getRoleType(roomUser.id);
+	  return API.displayRoleToRoleNumber(dispRole);
     }
     catch(err) {
       UTIL.logException("getPermission: " + err.message);
@@ -2851,6 +2851,7 @@ var API = {
     try { return $(".user-info").text();    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
+  //todoerer DELETE if not needed:
   loadRoomQueue: function(responseText) {
     try {
 	  botDebug.debugMessage(true, "LOADING RESPONSE");
@@ -2876,13 +2877,8 @@ var API = {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
       dubBot.queue.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
-            type: "GET",   
-            onComplete: function(transport){
-            if (200 == transport.status) {
-                result = transport.responseText;
-                callback(result);
-				} 
-			  }
+            type: "POST",
+            async: !1
 			});
 	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
 	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
@@ -2947,7 +2943,29 @@ var API = {
     //      var roomid = "5602ed62e8632103004663c2";
 	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
 	//        RGT Room ID: 5602ed62e8632103004663c2
-    try { return "5602ed62e8632103004663c2";    }
+    try { 
+        Dubtrack.cache.users.get(a, this.renderUser, this), this.userActive = !1, 
+		Dubtrack.session && Dubtrack.room && Dubtrack.room.users ? 
+		Dubtrack.session.get("_id") == a ? (this.$(".global-actions").hide(), this.$(".actions").hide()) : (this.$(".global-actions").show(), this.$(".actions a").hide(), (
+		Dubtrack.room.users.getIfHasRole(Dubtrack.session.id) || 
+		Dubtrack.room.model.get("userid") == Dubtrack.session.id) && (this.$(".actions").show(), this.$(".actions a.send-pm-message").show(), 
+
+Dubtrack.helpers.isDubtrackAdmin(Dubtrack.session.id)
+Dubtrack.room.users.getIfOwner(Dubtrack.session.id)
+Dubtrack.room.users.getIfMod(Dubtrack.session.id)
+Dubtrack.room.users.getIfVIP(Dubtrack.session.id)
+Dubtrack.room.users.getIfManager(Dubtrack.session.id) 
+Dubtrack.room.users.getIfResidentDJ(Dubtrack.session.id)
+Dubtrack.room.users.getIfDJ(a)
+
+		Dubtrack.room.users.getIfmuted(a) ? (this.$(".actions a.mute").hide(), this.$(".actions a.unmute").show()) : (this.$(".actions a.mute").show(), this.$(".actions a.unmute").hide()), this.$(".actions a.kick").show(), this.$(".actions a.ban").show()), (
+		Dubtrack.room.model.get("userid") == Dubtrack.session.id && (
+		Dubtrack.room.model.get("userid") == a) && this.$(".actions").hide(), (
+		Dubtrack.room.users.getIfHasRole(a)) && (this.$(".actions a.mute").hide(), this.$(".actions a.kick").hide(), this.$(".actions a.ban").hide());
+
+	  //return "5602ed62e8632103004663c2";    
+	  return Dubtrack.room.model.get("_id");
+	}
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
 
@@ -3831,7 +3849,7 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") API.defineRoomQueue(API.loadRoomQueue());
+						if (maxTime === "B") API.defineRoomQueue();
 						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
