@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0098",
+  version: "Version  1.01.0020.0099",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -529,7 +529,6 @@ var SETTINGS = {
                 for (var prop in settings) {
                     SETTINGS.settings[prop] = settings[prop];
                 }
-                dubBot.room.afkList = room.afkList;
                 dubBot.room.mutedUsers = room.mutedUsers;
                 dubBot.room.autoskip = room.autoskip;
                 dubBot.room.roomstats = room.roomstats;
@@ -1686,68 +1685,65 @@ var botDebug = {
 //SECTION AFK: All AFK functionality:
 var AFK = {
   afkInterval: null,
-  afkList: [],
   settings: {
     maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
     afk7Days: true,
     afkRemoveStart: 0,
-    afkRemoveEnd: 24,
-    afkpositionCheck: 30
+    afkRemoveEnd: 24
   },
   afkCheck: function () {
     try {
+	botDebug.debugMessage(true, "AFK: afkCheckCallback");
     if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
     if (!AFK.afkRemovalNow()) return void (0);
-    var djlist = API.getWaitList();
-    var lastPos = Math.min(djlist.length, AFK.settings.afkpositionCheck);
-    if (lastPos - 1 > djlist.length) return void (0);
-    for (var i = 0; i < lastPos; i++) {
+    API.getWaitList(API.afkCheckCallback);
+	}
+    catch(err) { UTIL.logException("afkCheck: " + err.message); }
+  },
+//todoerlind
+  afkCheckCallback: function (djlist) {
+    try {
+	botDebug.debugMessage(true, "AFK: afkCheckCallback");
+    for (var i = 0; i < djlist.length; i++) {
         if (typeof djlist[i] !== 'undefined') {
             var id = djlist[i].id;
-            var user = USERS.lookupUserID(id);
-            if (typeof user !== 'boolean') {
-                var dubUser = API.getDubUser(user);
-				var name = dubUser.username;
-				var lastActive = USERS.getLastActivity(user);
+            var roomUser = USERS.lookupUserID(id);
+            if (typeof roomUser !== 'boolean') {
+				var name = djlist[i].username;
+				var lastActive = USERS.getLastActivity(roomUser);
 				var inactivity = Date.now() - lastActive;
 				var time = UTIL.msToStr(inactivity);
-				var warncount = user.afkWarningCount;
-				//todoer GET AFK WORKING:
+				var warncount = roomUser.afkWarningCount;
 				if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
-						user.afkWarningCount = 3;
-						user.afkCountdown = setTimeout(function (userToChange) {
+						roomUser.afkWarningCount = 3;
+						roomUser.afkCountdown = setTimeout(function (userToChange) {
 							userToChange.afkWarningCount = 1;
-						}, 90 * 1000, user);
+						}, 90 * 1000, roomUser);
 					}
 					else if (warncount === 1) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
-						user.afkWarningCount = 3;
-						user.afkCountdown = setTimeout(function (userToChange) {
+						roomUser.afkWarningCount = 3;
+						roomUser.afkCountdown = setTimeout(function (userToChange) {
 							userToChange.afkWarningCount = 2;
 						}, 30 * 1000, user);
 					}
 					else if (warncount === 2) {
-						var pos = API.getWaitListPosition(id);
-						if (pos !== -1) {
-							pos++;
-							AFK.afkList.push([id, Date.now(), pos]);
-							AFK.resetDC(user);
-							API.moderateRemoveDJ(id);
-							user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-							API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
-						}
-						user.afkWarningCount = 0;
+						AFK.resetDC(roomUser);
+						API.moderateRemoveDJ(id);
+						roomUser.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
+						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+						roomUser.afkWarningCount = 0;
 					}
 				}
             }
         }
     }
     }
-    catch(err) { UTIL.logException("afkCheck: " + err.message); }
+    catch(err) { UTIL.logException("afkCheckCallback: " + err.message); }
   },
   resetDC: function (user) {
     user.lastDC.time = null;
@@ -2579,8 +2575,7 @@ var API = {
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
       USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
 
-      //todoer AFK DJ CHECK:
-      //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
+      AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
       API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
@@ -2600,7 +2595,9 @@ var API = {
   },
 
   //todoerererererererer
-  pauseUserQueue: function(usrObjectID){
+  //moderateRemoveDJTODOER 
+  // This will pause the users queue:
+  moderateRemoveDJ: function(usrObjectID){
     try {
 	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/pause
 	  //564933a1d4dcab140021cdeb - dexter_nix
@@ -2616,7 +2613,7 @@ var API = {
         });
 		
     }
-    catch(err) {UTIL.logException("pauseUserQueue: " + err.message); }
+    catch(err) {UTIL.logException("moderateRemoveDJ: " + err.message); }
   },
 
   getDJ: function(){
@@ -2810,7 +2807,7 @@ var API = {
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
   },
   //todoerlind
-  getWaitList: function() {
+  getWaitList: function(callback) {
     try {
 	  $.when(API.defineRoomQueue()).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
@@ -2822,7 +2819,7 @@ var API = {
 	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
 		botDebug.debugMessage(true, "Returning Waitlist");
-        return waitlist;
+        callback(waitlist);
 	  });
 	botDebug.debugMessage(true, "Returning NO Waitlist");
 	}
@@ -2997,8 +2994,8 @@ var API = {
   //Accept-Language: en-US,en;q=0.8
   //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
 
-  //todoerererererererer
-  moderateRemoveDJ: function(usrObjectID) {
+  //todoerererererererer DELETE:
+  moderateRemoveDJTODOER: function(usrObjectID) {
     try {
       var roomUser = USERS.defineRoomUser(usrObjectID);
       //todoer roomUser.uid.....
@@ -3010,7 +3007,7 @@ var API = {
             type: "DELETE"
         });
     }
-    catch(err) { UTIL.logException("moderateRemoveDJ: " + err.message); }
+    catch(err) { UTIL.logException("moderateRemoveDJTODOER: " + err.message); }
   },
   moderateForceSkip: function() {
     API.sendChat("/skip");
@@ -3822,8 +3819,8 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList();
-						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
+						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(API.afkCheckCallback);
+						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
 						if (maxTime === "F") botDebug.debugMessage(true, API.getPermission("dexter_nix"));
@@ -5734,7 +5731,6 @@ var BOTCOMMANDS = {
                         if (AFK.settings.afkRemoval) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
-                        msg += botChat.getChatMessage("afksremoved") + ": " + AFK.afkList.length + '. ';
                         msg += botChat.getChatMessage("afklimit") + ': ' + AFK.settings.maximumAfk + '. ';
 
                         msg += botChat.getChatMessage("repeatSongs") + ': ';
