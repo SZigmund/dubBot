@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0082",
+  version: "Version  1.01.0020.0083",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1695,7 +1695,7 @@ var TASTY = {
                       'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                       'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                       'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
-                      'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
+                      'epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
                       'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
                       'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                       'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
@@ -2851,15 +2851,39 @@ var API = {
     try { return $(".user-info").text();    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
+  loadRoomQueue: function(responseText) {
+    try {
+	  botDebug.debugMessage(true, "LOADING RESPONSE");
+      botDebug.debugMessage(true, "DA RESPONSE: " + responseText);
+	  botDebug.debugMessage(true, "LOADING RESPONSE-1");
+      dubBot.queue.dubQueue = JSON.parse(responseText);
+	  botDebug.debugMessage(true, "LOADING RESPONSE-2");
 
+	  UTIL.logObject(dubBot.queue.dubQueue, "QUEUE");
+	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.queue.dubQueue.data.length);
+	  if (dubBot.queue.dubQueue.data.length === 0) return;
+	  for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
+			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].roomid);
+			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].userid);
+			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.queue.dubQueue.data[i].songLength);
+	  }
+	}
+    catch(err) { UTIL.logException("loadRoomQueue: " + err.message); }
+	},
   //todoerererererererer
-  defineRoomQueue: function() {
+  defineRoomQueue: function(callback) {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
       dubBot.queue.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET",   
-            async: false });
+            onComplete: function(transport){
+            if (200 == transport.status) {
+                result = transport.responseText;
+                callback(result);
+				} 
+			  }
+			});
 	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
 	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
@@ -3467,7 +3491,7 @@ var BOTCOMMANDS = {
                           'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                           'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
-                          'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
+                          'epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
                           'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
                           'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                           'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
@@ -3807,7 +3831,7 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") API.defineRoomQueue();
+						if (maxTime === "B") API.defineRoomQueue(API.loadRoomQueue());
 						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
