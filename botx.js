@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0103",
+  version: "Version  1.01.0020.0104",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1695,7 +1695,6 @@ var AFK = {
   },
   afkCheck: function () {
     try {
-	botDebug.debugMessage(true, "AFK: afkCheck");
     if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
     if (!AFK.afkRemovalNow()) return void (0);
     API.getWaitList(AFK.afkCheckCallback);
@@ -1705,17 +1704,23 @@ var AFK = {
 //todoerlind
   afkCheckCallback: function (djlist) {
     try {
-	botDebug.debugMessage(true, "AFK: afkCheckCallback");
+	botDebug.debugMessage(true, "=====================================================================================");
+	botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
+	
     for (var i = 0; i < djlist.length; i++) {
         if (typeof djlist[i] !== 'undefined') {
+            botDebug.debugMessage(true, "AFK: DJ Defined");
             var id = djlist[i].id;
+            botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
             var roomUser = USERS.lookupUserID(id);
             if (typeof roomUser !== 'boolean') {
+	            botDebug.debugMessage(true, "AFK: User Defined");
 				var name = djlist[i].username;
 				var lastActive = USERS.getLastActivity(roomUser);
 				var inactivity = Date.now() - lastActive;
 				var time = UTIL.msToStr(inactivity);
 				var warncount = roomUser.afkWarningCount;
+				botDebug.debugMessage(true, "AFK: Checking: " + name + " time: " + inactivity + " Targ: " + (AFK.settings.maximumAfk * 60 * 1000));
 				if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
@@ -2818,11 +2823,8 @@ var API = {
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
-		botDebug.debugMessage(true, "Returning Waitlist");
-		botDebug.debugMessage(true, "Typeof: " + (typeof cb));
         cb(waitlist);
 	  });
-	botDebug.debugMessage(true, "Returning NO Waitlist");
 	}
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
