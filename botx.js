@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0099",
+  version: "Version  1.01.0020.0100",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1695,10 +1695,10 @@ var AFK = {
   },
   afkCheck: function () {
     try {
-	botDebug.debugMessage(true, "AFK: afkCheckCallback");
+	botDebug.debugMessage(true, "AFK: afkCheck");
     if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
     if (!AFK.afkRemovalNow()) return void (0);
-    API.getWaitList(API.afkCheckCallback);
+    API.getWaitList(API.afkCheckCallback());
 	}
     catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
