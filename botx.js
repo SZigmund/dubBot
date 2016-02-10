@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0108",
+  version: "Version  1.01.0020.0109",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1705,23 +1705,23 @@ var AFK = {
   afkCheckCallback: function (djlist) {
     try {
 	botDebug.debugMessage(true, "=====================================================================================");
-	//botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
+	botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
 
     for (var i = 0; i < djlist.length; i++) {
         if (typeof djlist[i] !== 'undefined') {
-            //botDebug.debugMessage(true, "AFK: DJ Defined");
+            botDebug.debugMessage(true, "AFK: DJ Defined");
             var id = djlist[i].id;
-            //botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
+            botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
             var roomUser = USERS.lookupUserID(id);
             if (typeof roomUser !== 'boolean') {
-	            //botDebug.debugMessage(true, "AFK: User Defined");
+	            botDebug.debugMessage(true, "AFK: User Defined");
 				var name = djlist[i].username;
 				var lastActive = USERS.getLastActivity(roomUser);
 				var inactivity = Date.now();
 				inactivity -= lastActive;
 				var time = UTIL.msToStr(inactivity);
 				var warncount = roomUser.afkWarningCount;
-				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Targ: " + (AFK.settings.maximumAfk * 60 * 1000));
+				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + String(lastActive) + " time: " + String(inactivity) + " Targ: " + (AFK.settings.maximumAfk * 60 * 1000));
 				if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
