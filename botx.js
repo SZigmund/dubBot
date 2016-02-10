@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0074",
+  version: "Version  1.01.0020.0075",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2834,6 +2834,7 @@ var API = {
 	  //botDebug.debugMessage(true, "response Len: " + response.length);
 	  //botDebug.debugMessage(true, "response: (" + response + ")");
       //var dubQueue = JSON.parse(response);
+	  UTIL.logObject(dubQueue, "QUEUE");
 	  botDebug.debugMessage(true, "Room Queue Count: " + dubQueue.data.length);
 	  if (dubQueue.data.length === 0) return;
 	  for (var i = 0; i < dubQueue.data.length; i++) {
