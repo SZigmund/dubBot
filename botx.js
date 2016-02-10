@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0078",
+  version: "Version  1.01.0020.0079",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2857,9 +2857,28 @@ var API = {
       dubBot.room.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
+	  dubBot.room.dubQueueResp.responseText
+	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
+	  if (typeof dubBot === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
+	  if (typeof dubBot.room === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.room");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 3");
+	  if (typeof dubBot.room.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.room.dubQueueResp");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 4");
+	  if (typeof dubBot.room.dubQueueResp.responseText === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.room.dubQueueResp.responseText");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 5");
+	  
 	  botDebug.debugMessage(true, "response Len: " + dubBot.room.dubQueueResp.responseText.length);
+	  botDebug.debugMessage(true, "IS OBJECT: Step 6");
 	  botDebug.debugMessage(true, "response: (" + dubBot.room.dubQueueResp.responseText + ")");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 7");
       dubBot.room.dubQueue = JSON.parse(dubBot.room.dubQueueResp.responseText);
+	  botDebug.debugMessage(true, "IS OBJECT: Step 8");
+	  //dubBot.room.dubQueueResp.responseText
+	  //dubBot.room.dubQueueResp.responseText
+	  //dubBot.room.dubQueueResp.responseText is undefined botx.js:1461:5
+	  //dubBot.room.dubQueueResp.responseText
+
 	  UTIL.logObject(dubBot.room.dubQueue, "QUEUE");
 	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.room.dubQueue.data.length);
 	  if (dubBot.room.dubQueue.data.length === 0) return;
