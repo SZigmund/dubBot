@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0109",
+  version: "Version  1.01.0020.0110",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2786,7 +2786,7 @@ var API = {
         //botDebug.debugMessage(true, "UID3: " + dubQueueItem.songLength);
         //botDebug.debugMessage(true, "UID4: " + dubQueueItem.songid);
 		//botDebug.debugMessage(true, "UID5: " + dubQueueItem._song.name);
-		return this;
+		//return this;
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
@@ -2801,7 +2801,7 @@ var API = {
 		dubBot.queue.dubQueueResp = a1;
 	    var waitlist = [];
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
-	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
+	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
 		dubBot.queue.dubQueue = waitlist;
         cb(waitlist);
