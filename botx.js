@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0105",
+  version: "Version  1.01.0020.0107",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1709,7 +1709,7 @@ var AFK = {
 
     for (var i = 0; i < djlist.length; i++) {
         botDebug.debugMessage(true, "AFK: TYPEOF: " + (typeof djlist[i]));
-        //if (typeof djlist[i] !== 'undefined') {
+        if (typeof djlist[i] !== 'undefined') {
             botDebug.debugMessage(true, "AFK: DJ Defined");
             var id = djlist[i].id;
             botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
@@ -1746,7 +1746,7 @@ var AFK = {
 					}
 				}
             }
-        //}
+        }
     }
     }
     catch(err) { UTIL.logException("afkCheckCallback: " + err.message); }
@@ -2773,13 +2773,20 @@ var API = {
   },
 
 //todoer COMPLETE
-  waitListItem: function (dubQueueItem) {
+ waitListItem: function (dubQueueItem) {
     try {
         this.id = dubQueueItem.userid;
         this.username = dubQueueItem._user.username;
         this.songlength = dubQueueItem.songLength;
         this.songid = dubQueueItem.songid;
 		this.songname = dubQueueItem._song.name;
+        botDebug.debugMessage(true, "-------------------------------------------------------------");
+        botDebug.debugMessage(true, "UID1: " + dubQueueItem.userid);
+        botDebug.debugMessage(true, "UID2: " + dubQueueItem._user.username);
+        botDebug.debugMessage(true, "UID3: " + dubQueueItem.songLength);
+        botDebug.debugMessage(true, "UID4: " + dubQueueItem.songid);
+		botDebug.debugMessage(true, "UID5: " + dubQueueItem._song.name);
+		return this;
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
