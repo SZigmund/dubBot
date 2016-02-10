@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0096",
+  version: "Version  1.01.0020.0097",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2820,9 +2820,9 @@ var API = {
 	    var waitlist = [];
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
+		}
         return waitlist;
-	});
-	
+	  });
 	}
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
