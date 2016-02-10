@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0094",
+  version: "Version  1.01.0020.0095",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2814,6 +2814,8 @@ var API = {
 	  $.when(API.defineRoomQueue()).done(function(a1)
 	    {
 		dubBot.queue.dubQueueResp = a1;
+		botDebug.debugMessage(true, "USER NAME: " + dubBot.queue.dubQueueResp.data[0]._user.username);
+		botDebug.debugMessage(true, "SONG NAME: " + dubBot.queue.dubQueueResp.data[0]._song.description);
     // the code here will be executed when all four ajax requests resolve.
     // a1, a2, a3 and a4 are lists of length 3 containing the response text,
     // status, and jqXHR object for each of the four ajax calls respectively.
