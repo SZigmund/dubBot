@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0084",
+  version: "Version  1.01.0020.0085",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -253,7 +253,7 @@ var USERS = {
                     UTIL.logObject(json, "USR");
                     for (var idx in json) {
                         var newUser = json[idx];
-                        //USERS.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
+                        //USERS.usersImport.push(new USERS.User(user.id, user.username));
                         USERS.usersImport.push(newUser);
                     }
                 }
@@ -262,14 +262,14 @@ var USERS = {
         }
         catch(err) { UTIL.logException("importBlackList: " + err.message); }
     },
-    User: function (userID, username, userRole) {
+    User: function (userID, username) {
         this.id = userID;
         this.username = username;
         this.jointime = Date.now();
         this.firstActivity = Date.now();
         this.lastActivity = Date.now();
         this.isMehing = false;
-        this.userRole = userRole;
+        this.userRole = 0;
         this.votes = {
             songsPlayed: 0,
             tastyRcv: 0,
@@ -324,44 +324,7 @@ var USERS = {
       }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
     },
-    defineUserRole: function (userElement, username) {
-      try {
-        // SAMPLE: "user-levis_homer dj manager currentDJ"
-        botDebug.debugMessage(false, userElement);
-        userElement = userElement.replace("user-", "");
-        userElement = userElement.replace(username, "");
-        userElement = userElement.replace("currentDJ", "");
-        userElement = userElement.replace("downdub", "");
-        userElement = userElement.trim();
-        userElement = userElement.toLowerCase();
-        var space = userElement.indexOf(' ');
-        var dispRole;
-        if (space === -1) dispRole = userElement;
-        if (space !== -1) dispRole = userElement.substring(0, space);
-        botDebug.debugMessage(false, "DISP ROLE: " + dispRole);
-        switch (dispRole) {
-            case "creator":     return "creator";
-            case "co-owner":    return "co-owner";
-            case "manager":     return "manager";
-            case "mod":         return "mod";
-            case "vip":         return "vip";
-            case "resident-dj": return "resident-dj";
-            case "dj":          return "dj";
-        }
-        // SAMPLE: "user-levis_homer dj manager"
-        // SAMPLE: "dj manager"
-        if (userElement.substring(userElement.length - 8,  userElement.length) === " creator")           return "creator"
-        if (userElement.substring(userElement.length - 17, userElement.length) === " creator co-owner")  return "creator co-owner"
-        if (userElement.substring(userElement.length - 9,  userElement.length) === " co-owner")          return "co-owner"
-        if (userElement.substring(userElement.length - 8,  userElement.length) === " manager")           return "manager"
-        if (userElement.substring(userElement.length - 4,  userElement.length) === " mod")               return "mod"
-        if (userElement.substring(userElement.length - 4,  userElement.length) === " vip")               return "vip"
-        if (userElement.substring(userElement.length - 12, userElement.length) === " resident-dj")       return "resident-dj"
-        if (userElement.substring(userElement.length - 3,  userElement.length) === " dj")                return "dj"
-        return "";
-      }
-      catch(err) { UTIL.logException("defineUserRole: " + err.message); }
-    },
+
     // Resets all users data on song advance:
     resetUserSongStats: function () {
       try {
@@ -435,12 +398,11 @@ var USERS = {
         var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
         botDebug.debugMessage(false, "USER: " + username);
         var userInfo = usernameList[i].className;
-        userRole = USERS.defineUserRole(userInfo, username);
         var userMehing = false;
         if (userInfo.indexOf("downdub") >= 0) userMehing = true;
         var roomUser = USERS.lookupUserName(username);
         if (roomUser === false) {
-          var roomUser = new USERS.User("new", username, userRole);
+          var roomUser = new USERS.User("new", username);
           USERS.users.push(roomUser);
           newUser = true;
         }
@@ -450,7 +412,7 @@ var USERS = {
         if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
         roomUser.inRoom = true;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
-        roomUser.userRole = userRole;
+        roomUser.userRole = 0;
         if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
           API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
         }
@@ -1420,36 +1382,6 @@ var UTIL = {
     }
   },
    
-  rankToNumber: function (rankString) {
-    var rankInt = null;
-    switch (rankString) {
-        case "admin":
-            rankInt = 10;
-            break;
-        case "ambassador":
-            rankInt = 7;
-            break;
-        case "host":
-            rankInt = 5;
-            break;
-        case "cohost":
-            rankInt = 4;
-            break;
-        case "manager":
-            rankInt = 3;
-            break;
-        case "bouncer":
-            rankInt = 2;
-            break;
-        case "residentdj":
-            rankInt = 1;
-            break;
-        case "user":
-            rankInt = 0;
-            break;
-    }
-    return rankInt;
-  },
   logObject: function (objectToLog, objectName) {
     try {
         for (var prop in objectToLog) {
@@ -1762,14 +1694,12 @@ var AFK = {
     afk7Days: true,
     afkRemoveStart: 0,
     afkRemoveEnd: 24,
-    afkpositionCheck: 30,
-    afkRankCheck: "ambassador"
+    afkpositionCheck: 30
   },
   afkCheck: function () {
     try {
     if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
     if (!AFK.afkRemovalNow()) return void (0);
-    var rank = UTIL.rankToNumber(AFK.settings.afkRankCheck);
     var djlist = API.getWaitList();
     var lastPos = Math.min(djlist.length, AFK.settings.afkpositionCheck);
     if (lastPos - 1 > djlist.length) return void (0);
@@ -1779,42 +1709,40 @@ var AFK = {
             var user = USERS.lookupUserID(id);
             if (typeof user !== 'boolean') {
                 var dubUser = API.getDubUser(user);
-                if (rank !== null) {
-                    var name = dubUser.username;
-                    var lastActive = USERS.getLastActivity(user);
-                    var inactivity = Date.now() - lastActive;
-                    var time = UTIL.msToStr(inactivity);
-                    var warncount = user.afkWarningCount;
-					//todoer GET AFK WORKING:
-                    if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
-                        if (warncount === 0) {
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
-                            user.afkWarningCount = 3;
-                            user.afkCountdown = setTimeout(function (userToChange) {
-                                userToChange.afkWarningCount = 1;
-                            }, 90 * 1000, user);
-                        }
-                        else if (warncount === 1) {
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
-                            user.afkWarningCount = 3;
-                            user.afkCountdown = setTimeout(function (userToChange) {
-                                userToChange.afkWarningCount = 2;
-                            }, 30 * 1000, user);
-                        }
-                        else if (warncount === 2) {
-                            var pos = API.getWaitListPosition(id);
-                            if (pos !== -1) {
-                                pos++;
-                                AFK.afkList.push([id, Date.now(), pos]);
-                                AFK.resetDC(user);
-                                API.moderateRemoveDJ(id);
-                                user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-                                API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
-                            }
-                            user.afkWarningCount = 0;
-                        }
-                    }
-                }
+				var name = dubUser.username;
+				var lastActive = USERS.getLastActivity(user);
+				var inactivity = Date.now() - lastActive;
+				var time = UTIL.msToStr(inactivity);
+				var warncount = user.afkWarningCount;
+				//todoer GET AFK WORKING:
+				if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
+					if (warncount === 0) {
+						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
+						user.afkWarningCount = 3;
+						user.afkCountdown = setTimeout(function (userToChange) {
+							userToChange.afkWarningCount = 1;
+						}, 90 * 1000, user);
+					}
+					else if (warncount === 1) {
+						API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
+						user.afkWarningCount = 3;
+						user.afkCountdown = setTimeout(function (userToChange) {
+							userToChange.afkWarningCount = 2;
+						}, 30 * 1000, user);
+					}
+					else if (warncount === 2) {
+						var pos = API.getWaitListPosition(id);
+						if (pos !== -1) {
+							pos++;
+							AFK.afkList.push([id, Date.now(), pos]);
+							AFK.resetDC(user);
+							API.moderateRemoveDJ(id);
+							user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
+							API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+						}
+						user.afkWarningCount = 0;
+					}
+				}
             }
         }
     }
@@ -2775,8 +2703,18 @@ var API = {
 			case "vip":         return 3;
 			case "resident-dj": return 2;
 			case "dj":          return 1;
-			else return 0;
+			default:            return 0;
 	  }
+	  /*        switch (dispRole) {
+            case "creator":     return "creator";
+            case "co-owner":    return "co-owner";
+            case "manager":     return "manager";
+            case "mod":         return "mod";
+            case "vip":         return "vip";
+            case "resident-dj": return "resident-dj";
+            case "dj":          return "dj";
+        }
+.userrole*/
     }
     catch(err) { UTIL.logException("displayRoleToRoleNumber: " + err.message); }
   },
@@ -2786,7 +2724,8 @@ var API = {
 	  //Dubtrack.room.users.getRoleType("542465ce43f5a10200c07f11")
       var roomUser = USERS.defineRoomUser(usrObjectID);
 	  var dispRole = Dubtrack.room.users.getRoleType(roomUser.id);
-	  return API.displayRoleToRoleNumber(dispRole);
+	  roomUser.userRole = API.displayRoleToRoleNumber(dispRole);
+	  return roomUser.userRole;
     }
     catch(err) {
       UTIL.logException("getPermission: " + err.message);
@@ -3853,6 +3792,8 @@ var BOTCOMMANDS = {
 						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
+						if (maxTime === "F") botDebug.debugMessage(true, API.getPermission("dexter_nix"));
+						if (maxTime === "G") botDebug.debugMessage(true, API.getPermission("Levis_Homer"));
                     }
                 }
             },
