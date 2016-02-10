@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0085",
+  version: "Version  1.01.0020.0086",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2883,24 +2883,37 @@ var API = {
 	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
 	//        RGT Room ID: 5602ed62e8632103004663c2
     try { 
-        Dubtrack.cache.users.get(a, this.renderUser, this), this.userActive = !1, 
-		Dubtrack.session && Dubtrack.room && Dubtrack.room.users ? 
-		Dubtrack.session.get("_id") == a ? (this.$(".global-actions").hide(), this.$(".actions").hide()) : (this.$(".global-actions").show(), this.$(".actions a").hide(), (
-		Dubtrack.room.users.getIfHasRole(Dubtrack.session.id) || 
-		Dubtrack.room.model.get("userid") == Dubtrack.session.id) && (this.$(".actions").show(), this.$(".actions a.send-pm-message").show(), 
+//Dubtrack.cache.users.get(a, this.renderUser, this), this.userActive = !1, 
+//Dubtrack.session && Dubtrack.room && Dubtrack.room.users ? 
+//Dubtrack.session.get("_id") == a ? (this.$(".global-actions").hide(), this.$(".actions").hide()) : (this.$(".global-actions").show(), this.$(".actions a").hide(), (
+//Dubtrack.room.users.getIfHasRole(Dubtrack.session.id) || 
+//Dubtrack.room.model.get("userid") == Dubtrack.session.id) && (this.$(".actions").show(), this.$(".actions a.send-pm-message").show(), 
 
-Dubtrack.helpers.isDubtrackAdmin(Dubtrack.session.id)
-Dubtrack.room.users.getIfOwner(Dubtrack.session.id)
-Dubtrack.room.users.getIfMod(Dubtrack.session.id)
-Dubtrack.room.users.getIfVIP(Dubtrack.session.id)
-Dubtrack.room.users.getIfManager(Dubtrack.session.id) 
-Dubtrack.room.users.getIfResidentDJ(Dubtrack.session.id)
-Dubtrack.room.users.getIfDJ(a)
+//Dubtrack.helpers.isDubtrackAdmin(Dubtrack.session.id)
+//Dubtrack.room.users.getIfOwner(Dubtrack.session.id)
+//Dubtrack.room.users.getIfMod(Dubtrack.session.id)
+//Dubtrack.room.users.getIfVIP(Dubtrack.session.id)
+//Dubtrack.room.users.getIfManager(Dubtrack.session.id) 
+//Dubtrack.room.users.getIfResidentDJ(Dubtrack.session.id)
+//Dubtrack.room.users.getIfDJ(a)
+//Dubtrack.room.users.getIfmuted(a) ? (this.$(".actions a.mute").hide(), this.$(".actions a.unmute").show()) : (this.$(".actions a.mute").show(), this.$(".actions a.unmute").hide()), this.$(".actions a.kick").show(), this.$(".actions a.ban").show()), (
+//Dubtrack.room.model.get("userid") == Dubtrack.session.id && (
+//Dubtrack.room.model.get("userid") == a) && this.$(".actions").hide(), (
+//Dubtrack.room.users.getIfHasRole(a)) && (this.$(".actions a.mute").hide(), this.$(".actions a.kick").hide(), this.$(".actions a.ban").hide());
 
-		Dubtrack.room.users.getIfmuted(a) ? (this.$(".actions a.mute").hide(), this.$(".actions a.unmute").show()) : (this.$(".actions a.mute").show(), this.$(".actions a.unmute").hide()), this.$(".actions a.kick").show(), this.$(".actions a.ban").show()), (
-		Dubtrack.room.model.get("userid") == Dubtrack.session.id && (
-		Dubtrack.room.model.get("userid") == a) && this.$(".actions").hide(), (
-		Dubtrack.room.users.getIfHasRole(a)) && (this.$(".actions a.mute").hide(), this.$(".actions a.kick").hide(), this.$(".actions a.ban").hide());
+//Dubtrack.room.users.getRoleType("5405f2be8f36d9020046ee09")
+//Dubtrack.room.users.getRoleType("560b14838b4f900300cc69cf")
+//Dubtrack.room.users.getRoleType("5600a9dcde199903001ae7c0")
+//Dubtrack.room.users.getRoleType("5600c3382d5038030094c236")
+//Dubtrack.room.users.getRoleType("5601b85e4693ff0300c75cfd")
+//Dubtrack.room.users.getRoleType("5601bbc8bb481503002ffcd3")
+//Dubtrack.room.users.getRoleType("5602d0c7813abe030055d036")
+//Dubtrack.room.users.getRoleType("542465ce43f5a10200c07f11")
+//Dubtrack.room.users.getRoleType("56095bb74d12b50300c13252")
+//Dubtrack.room.users.getRoleType("560378a3b585d003001b587e")
+//Dubtrack.room.users.getRoleType("5601611d2e803803000ffead")
+//Dubtrack.room.users.getRoleType("5609515e516f700300cd22dd")
+//Dubtrack.room.users.getRoleType("5609614781c87803009b9629")
 
 	  //return "5602ed62e8632103004663c2";    
 	  return Dubtrack.room.model.get("_id");
