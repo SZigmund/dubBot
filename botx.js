@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0077",
+  version: "Version  1.01.0020.0078",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -83,6 +83,8 @@ var dubBot = {
     currentMediaStart: 999,
     historyList: [],
 	dubQueue: null,
+	dubQueueResp: null,
+	tastyQueue: null,
     cycleTimer: setTimeout(function () {
     }, 1),
     queue: {
@@ -148,9 +150,14 @@ var USERS = {
   usersImport: [],
   users: [],
   loadUserInterval: null,
-  getLastActivity: function (user) {
-      //todoer
-      //return user.lastActivity;
+  getLastActivity: function (usrObjectID) {
+      try {
+        if (typeof usrObjectID === "object") return usrObjectID;
+        var roomUser = USERS.lookupUserName(usrObjectID);
+        if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+        roomuser.lastActivity;
+	  }
+      catch(err) { UTIL.logException("getLastActivity: " + err.message); }
   },
   //removes one MIA User that has no UserID and is not in the room.
   removeMIANonUsers: function () {
@@ -1838,7 +1845,7 @@ var AFK = {
   },
 };
 
-// Will not currently work as Larry cannot move people in the line AND the @all mention doesn't work.
+// Will not currently work as Larry cannot move people in the line
 //SECTION ROULETTE: All roulette functionality:
 var ROULETTE = {
   settings: {
@@ -1861,7 +1868,7 @@ var ROULETTE = {
         //ROULETTE.rouletteStatus = true;
         //ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
         //API.sendChat(botChat.getChatMessage("isopen"));
-        API.sendChat("Sorry no roulette yet, I can't manage the queue yet, plus the @all command does not exist yet.");
+        API.sendChat("Roulette is not functional yet.... But...it's COMING SOON!!!");
     }
     catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
@@ -2709,8 +2716,26 @@ var API = {
     catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
+  //todoer COMPLETE
+  waitListItem: function (dubQueueItem) {
+    try {
+        this.id = dubQueueItem.userid;
+        this.username = dubQueueItem._user.username;
+        this.songlength = dubQueueItem.songLength;
+        this.songid = dubQueueItem.songid;
+		this.songname = dubQueueItem._song.name;
+	}
+    catch(err) { UTIL.logException("waitListItem: " + err.message); }
+  },
+  
   getWaitList: function () {
-  //todoer
+    try {
+	  API.defineRoomQueue();
+      for (var i = 0; i < dubBot.room.dubQueue.data.length; i++) {
+	    waitlist.push(API.waitListItem(dubBot.room.dubQueue.data[i]));
+	  }
+	}
+    catch(err) { UTIL.logException("getWaitList: " + err.message); }
   },
   getCurrentDubUser: function () {
     return USERS.lookupUserName(botVar.botName);
@@ -2826,15 +2851,15 @@ var API = {
   },
 
   //todoerererererererer
-  getRoomQueue: function() {
+  defineRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
-      var response = $.ajax({
+      dubBot.room.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
-	  botDebug.debugMessage(true, "response Len: " + response.responseText.length);
-	  botDebug.debugMessage(true, "response: (" + response.responseText + ")");
-      dubBot.room.dubQueue = JSON.parse(response.responseText);
+	  botDebug.debugMessage(true, "response Len: " + dubBot.room.dubQueueResp.responseText.length);
+	  botDebug.debugMessage(true, "response: (" + dubBot.room.dubQueueResp.responseText + ")");
+      dubBot.room.dubQueue = JSON.parse(dubBot.room.dubQueueResp.responseText);
 	  UTIL.logObject(dubBot.room.dubQueue, "QUEUE");
 	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.room.dubQueue.data.length);
 	  if (dubBot.room.dubQueue.data.length === 0) return;
@@ -2845,7 +2870,7 @@ var API = {
 	  }
 
 	}
-    catch(err) { UTIL.logException("getRoomQueue: " + err.message); }
+    catch(err) { UTIL.logException("defineRoomQueue: " + err.message); }
 	},
 	
   /*
@@ -3761,8 +3786,10 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") API.getRoomQueue();
+						if (maxTime === "B") API.defineRoomQueue();
 						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
+						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
+						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
                     }
                 }
             },
