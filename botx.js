@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0095",
+  version: "Version  1.01.0020.0096",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2649,27 +2649,6 @@ var API = {
     catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
-  //todoer COMPLETE
-  waitListItem: function (dubQueueItem) {
-    try {
-        this.id = dubQueueItem.userid;
-        this.username = dubQueueItem._user.username;
-        this.songlength = dubQueueItem.songLength;
-        this.songid = dubQueueItem.songid;
-		this.songname = dubQueueItem._song.name;
-	}
-    catch(err) { UTIL.logException("waitListItem: " + err.message); }
-  },
-  
-  getWaitList: function () {
-    try {
-	  API.defineRoomQueue();
-      for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
-	    waitlist.push(API.waitListItem(dubBot.queue.dubQueue.data[i]));
-	  }
-	}
-    catch(err) { UTIL.logException("getWaitList: " + err.message); }
-  },
   getCurrentDubUser: function () {
     return USERS.lookupUserName(botVar.botName);
   },
@@ -2809,20 +2788,43 @@ var API = {
 	}
     catch(err) { UTIL.logException("loadRoomQueue: " + err.message); }
 	},
-  loadTastyQueue: function() {
+
+	//todoer COMPLETE
+  waitListItem: function (dubQueueItem) {
     try {
-	  $.when(API.defineRoomQueue()).done(function(a1)
-	    {
+        this.id = dubQueueItem.userid;
+        this.username = dubQueueItem._user.username;
+        this.songlength = dubQueueItem.songLength;
+        this.songid = dubQueueItem.songid;
+		this.songname = dubQueueItem._song.name;
+	}
+    catch(err) { UTIL.logException("waitListItem: " + err.message); }
+  },
+
+  getWaitListTODOER: function () {
+    try {
+      for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
+	    waitlist.push(API.waitListItem(dubBot.queue.dubQueue.data[i]));
+	  }
+	}
+    catch(err) { UTIL.logException("getWaitList: " + err.message); }
+  },
+  //todoerlind
+  getWaitList: function() {
+    try {
+	  $.when(API.defineRoomQueue()).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
 		dubBot.queue.dubQueueResp = a1;
-		botDebug.debugMessage(true, "USER NAME: " + dubBot.queue.dubQueueResp.data[0]._user.username);
-		botDebug.debugMessage(true, "SONG NAME: " + dubBot.queue.dubQueueResp.data[0]._song.description);
-    // the code here will be executed when all four ajax requests resolve.
-    // a1, a2, a3 and a4 are lists of length 3 containing the response text,
-    // status, and jqXHR object for each of the four ajax calls respectively.
-});
+	    var waitlist = [];
+        for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
+	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
+        return waitlist;
+	});
 	
 	}
-    catch(err) { UTIL.logException("loadTastyQueue: " + err.message); }
+    catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
   //todoerererererererer
   defineRoomQueue: function() {
@@ -3818,7 +3820,7 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") API.loadTastyQueue();
+						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList();
 						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
