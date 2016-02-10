@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0102",
+  version: "Version  1.01.0020.0103",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1698,7 +1698,7 @@ var AFK = {
 	botDebug.debugMessage(true, "AFK: afkCheck");
     if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
     if (!AFK.afkRemovalNow()) return void (0);
-    API.getWaitList(API.afkCheckCallback);
+    API.getWaitList(AFK.afkCheckCallback);
 	}
     catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
@@ -3820,7 +3820,7 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(API.afkCheckCallback);
+						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
