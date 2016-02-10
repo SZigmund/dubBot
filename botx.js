@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0101",
+  version: "Version  1.01.0020.0102",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2807,7 +2807,7 @@ var API = {
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
   },
   //todoerlind
-  getWaitList: function(callback) {
+  getWaitList: function(cb) {
     try {
 	  $.when(API.defineRoomQueue()).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
@@ -2819,7 +2819,8 @@ var API = {
 	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
 		botDebug.debugMessage(true, "Returning Waitlist");
-        callback(waitlist);
+		botDebug.debugMessage(true, "Typeof: " + (typeof cb));
+        cb(waitlist);
 	  });
 	botDebug.debugMessage(true, "Returning NO Waitlist");
 	}
