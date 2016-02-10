@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0075",
+  version: "Version  1.01.0020.0076",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -82,6 +82,7 @@ var dubBot = {
     currentMediaCid: 999,
     currentMediaStart: 999,
     historyList: [],
+	dubQueue: null,
     cycleTimer: setTimeout(function () {
     }, 1),
     queue: {
@@ -2828,19 +2829,19 @@ var API = {
   getRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
-      var dubQueue = $.ajax({
+      dubBot.room.dubQueue = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
 	  //botDebug.debugMessage(true, "response Len: " + response.length);
 	  //botDebug.debugMessage(true, "response: (" + response + ")");
       //var dubQueue = JSON.parse(response);
-	  UTIL.logObject(dubQueue, "QUEUE");
-	  botDebug.debugMessage(true, "Room Queue Count: " + dubQueue.data.length);
-	  if (dubQueue.data.length === 0) return;
-	  for (var i = 0; i < dubQueue.data.length; i++) {
-			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubQueue.data[i].roomid);
-			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubQueue.data[i].userid);
-			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubQueue.data[i].songLength);
+	  UTIL.logObject(dubBot.room.dubQueue, "QUEUE");
+	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.room.dubQueue.data.length);
+	  if (dubBot.room.dubQueue.data.length === 0) return;
+	  for (var i = 0; i < dubBot.room.dubQueue.data.length; i++) {
+			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubBot.room.dubQueue.data[i].roomid);
+			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.room.dubQueue.data[i].userid);
+			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.room.dubQueue.data[i].songLength);
 	  }
 
 	}
