@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0097",
+  version: "Version  1.01.0020.0098",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2821,8 +2821,10 @@ var API = {
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
+		botDebug.debugMessage(true, "Returning Waitlist");
         return waitlist;
 	  });
+	botDebug.debugMessage(true, "Returning NO Waitlist");
 	}
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
@@ -2834,7 +2836,7 @@ var API = {
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
 
-	  dubBot.queue.dubQueueResp = $.ajax({
+/*	  dubBot.queue.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
 	  while (typeof dubBot.queue.dubQueueResp.responseText == "undefined") {}
@@ -2867,7 +2869,7 @@ var API = {
 			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].userid);
 			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.queue.dubQueue.data[i].songLength);
 	  }
-
+*/
 	}
     catch(err) { UTIL.logException("defineRoomQueue: " + err.message); }
 	},
