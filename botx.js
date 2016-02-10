@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0079",
+  version: "Version  1.01.0020.0080",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -82,9 +82,6 @@ var dubBot = {
     currentMediaCid: 999,
     currentMediaStart: 999,
     historyList: [],
-	dubQueue: null,
-	dubQueueResp: null,
-	tastyQueue: null,
     cycleTimer: setTimeout(function () {
     }, 1),
     queue: {
@@ -94,6 +91,11 @@ var dubBot = {
     newBlacklist: [],
     newBlacklistIDs: [],
     blacklistLoaded: false,
+  },
+  queue: {
+	dubQueue: null,
+	dubQueueResp: null,
+	tastyQueue: null,
   },
 
   validateCurrentSong: function () {
@@ -2731,8 +2733,8 @@ var API = {
   getWaitList: function () {
     try {
 	  API.defineRoomQueue();
-      for (var i = 0; i < dubBot.room.dubQueue.data.length; i++) {
-	    waitlist.push(API.waitListItem(dubBot.room.dubQueue.data[i]));
+      for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
+	    waitlist.push(API.waitListItem(dubBot.queue.dubQueue.data[i]));
 	  }
 	}
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
@@ -2854,38 +2856,38 @@ var API = {
   defineRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
-      dubBot.room.dubQueueResp = $.ajax({
+      dubBot.queue.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
-	  dubBot.room.dubQueueResp.responseText
+	  dubBot.queue.dubQueueResp.responseText
 	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
 	  if (typeof dubBot === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
-	  if (typeof dubBot.room === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.room");
+	  if (typeof dubBot.queue === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 3");
-	  if (typeof dubBot.room.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.room.dubQueueResp");
+	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 4");
-	  if (typeof dubBot.room.dubQueueResp.responseText === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.room.dubQueueResp.responseText");
+	  if (typeof dubBot.queue.dubQueueResp.responseText === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp.responseText");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 5");
 	  
-	  botDebug.debugMessage(true, "response Len: " + dubBot.room.dubQueueResp.responseText.length);
+	  botDebug.debugMessage(true, "response Len: " + dubBot.queue.dubQueueResp.responseText.length);
 	  botDebug.debugMessage(true, "IS OBJECT: Step 6");
-	  botDebug.debugMessage(true, "response: (" + dubBot.room.dubQueueResp.responseText + ")");
+	  botDebug.debugMessage(true, "response: (" + dubBot.queue.dubQueueResp.responseText + ")");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 7");
-      dubBot.room.dubQueue = JSON.parse(dubBot.room.dubQueueResp.responseText);
+      dubBot.queue.dubQueue = JSON.parse(dubBot.queue.dubQueueResp.responseText);
 	  botDebug.debugMessage(true, "IS OBJECT: Step 8");
-	  //dubBot.room.dubQueueResp.responseText
-	  //dubBot.room.dubQueueResp.responseText
-	  //dubBot.room.dubQueueResp.responseText is undefined botx.js:1461:5
-	  //dubBot.room.dubQueueResp.responseText
+	  //dubBot.queue.dubQueueResp.responseText
+	  //dubBot.queue.dubQueueResp.responseText
+	  //dubBot.queue.dubQueueResp.responseText is undefined botx.js:1461:5
+	  //dubBot.queue.dubQueueResp.responseText
 
-	  UTIL.logObject(dubBot.room.dubQueue, "QUEUE");
-	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.room.dubQueue.data.length);
-	  if (dubBot.room.dubQueue.data.length === 0) return;
-	  for (var i = 0; i < dubBot.room.dubQueue.data.length; i++) {
-			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubBot.room.dubQueue.data[i].roomid);
-			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.room.dubQueue.data[i].userid);
-			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.room.dubQueue.data[i].songLength);
+	  UTIL.logObject(dubBot.queue.dubQueue, "QUEUE");
+	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.queue.dubQueue.data.length);
+	  if (dubBot.queue.dubQueue.data.length === 0) return;
+	  for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
+			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].roomid);
+			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].userid);
+			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.queue.dubQueue.data[i].songLength);
 	  }
 
 	}
