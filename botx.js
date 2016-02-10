@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0093",
+  version: "Version  1.01.0020.0094",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2809,14 +2809,30 @@ var API = {
 	}
     catch(err) { UTIL.logException("loadRoomQueue: " + err.message); }
 	},
+  loadTastyQueue: function() {
+    try {
+	  $.when(API.defineRoomQueue()).done(function(a1)
+	    {
+		dubBot.queue.dubQueueResp = a1;
+    // the code here will be executed when all four ajax requests resolve.
+    // a1, a2, a3 and a4 are lists of length 3 containing the response text,
+    // status, and jqXHR object for each of the four ajax calls respectively.
+});
+	
+	}
+    catch(err) { UTIL.logException("loadTastyQueue: " + err.message); }
+	},
   //todoerererererererer
-  defineRoomQueue: function(callback) {
+  defineRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
-      dubBot.queue.dubQueueResp = $.ajax({
+	  return $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
-            type: "GET"
-    		});
+            type: "GET" });
+
+	  dubBot.queue.dubQueueResp = $.ajax({
+            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
+            type: "GET" });
 	  while (typeof dubBot.queue.dubQueueResp.responseText == "undefined") {}
 	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
 	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
@@ -3800,7 +3816,7 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") API.defineRoomQueue();
+						if (maxTime === "B") API.loadTastyQueue();
 						if (maxTime === "C") API.pauseUserQueue("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
