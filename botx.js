@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0080",
+  version: "Version  1.01.0020.0081",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2859,17 +2859,16 @@ var API = {
       dubBot.queue.dubQueueResp = $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
-	  dubBot.queue.dubQueueResp.responseText
 	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
-	  if (typeof dubBot === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
-	  if (typeof dubBot.queue === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 3");
 	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 4");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
 	  if (typeof dubBot.queue.dubQueueResp.responseText === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp.responseText");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 3");
+	  UTIL.logObject(dubBot.queue.dubQueueResp, "RESP");
+	  botDebug.debugMessage(true, "IS OBJECT: Step 4");
+	  botDebug.debugMessage(true, "TYPE OF: " + (typeof dubBot.queue.dubQueueResp.responseText));
 	  botDebug.debugMessage(true, "IS OBJECT: Step 5");
-	  
+
 	  botDebug.debugMessage(true, "response Len: " + dubBot.queue.dubQueueResp.responseText.length);
 	  botDebug.debugMessage(true, "IS OBJECT: Step 6");
 	  botDebug.debugMessage(true, "response: (" + dubBot.queue.dubQueueResp.responseText + ")");
