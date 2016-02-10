@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0086",
+  version: "Version  1.01.0020.0087",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2695,7 +2695,7 @@ var API = {
   displayRoleToRoleNumber: function (displayRole) {
     try {
 	  //todoerer
-	  switch (dispRole) {
+	  switch (displayRole) {
 			case "creator":     return 7;
 			case "co-owner":    return 6;
 			case "manager":     return 5;
@@ -2705,16 +2705,15 @@ var API = {
 			case "dj":          return 1;
 			default:            return 0;
 	  }
-	  /*        switch (dispRole) {
-            case "creator":     return "creator";
-            case "co-owner":    return "co-owner";
-            case "manager":     return "manager";
-            case "mod":         return "mod";
-            case "vip":         return "vip";
-            case "resident-dj": return "resident-dj";
-            case "dj":          return "dj";
-        }
-.userrole*/
+//        switch (displayRole) {
+//            case "creator":     return "creator";
+//            case "co-owner":    return "co-owner";
+//            case "manager":     return "manager";
+//            case "mod":         return "mod";
+//            case "vip":         return "vip";
+//            case "resident-dj": return "resident-dj";
+//            case "dj":          return "dj";
+//        }
     }
     catch(err) { UTIL.logException("displayRoleToRoleNumber: " + err.message); }
   },
@@ -2723,8 +2722,8 @@ var API = {
 	  //Dubtrack.room.users.getRoleType(Dubtrack.session.id)
 	  //Dubtrack.room.users.getRoleType("542465ce43f5a10200c07f11")
       var roomUser = USERS.defineRoomUser(usrObjectID);
-	  var dispRole = Dubtrack.room.users.getRoleType(roomUser.id);
-	  roomUser.userRole = API.displayRoleToRoleNumber(dispRole);
+	  var displayRole = Dubtrack.room.users.getRoleType(roomUser.id);
+	  roomUser.userRole = API.displayRoleToRoleNumber(displayRole);
 	  return roomUser.userRole;
     }
     catch(err) {
