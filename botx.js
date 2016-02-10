@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0091",
+  version: "Version  1.01.0020.0092",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2817,6 +2817,7 @@ var API = {
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET"
     		});
+	  while (dubBot.queue.dubQueueResp.responseText == "undefined") {}
 	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
 	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
 	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
