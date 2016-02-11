@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0121",
+  version: "Version  1.01.0020.0124",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1886,6 +1886,7 @@ var ROULETTE = {
 		    ROULETTE.settings.participants.splice(ind, 1);
 		  }
 		}
+		if (ROULETTE.settings.participants.length === 0) return API.sendChat("Roulette has ended with no participants");
         ROULETTE.settings.participants = [];
         var pos = Math.floor((Math.random() * djlist.length) + 1);
         var name = user.username;
@@ -2623,6 +2624,17 @@ var API = {
   },
 
   //todoerererererererer
+  reorderQueue: function(newlist){
+    try {
+	  $.ajax({
+            url: "//https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/order",
+			type: "PUT",
+			data: newlist
+        });
+    }
+    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
+  },
+
   moderateMoveDJ: function(userID, queuePos, djlist){
     try {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
@@ -2633,14 +2645,15 @@ var API = {
 	    if (newlist.length > 0) newlist += "&order%5B%5D="
 	    if (i + 1 === queuePos) {
 		  newlist += userID;
-		  idx--;
 		}
-		else if(djlist[idx].id !== userID) {
+		else {
+		  if(djlist[idx].id === userID) idx++;
 		  newlist += djlist[idx].id;
 		}
 	    idx++;
 	  }
 	  botDebug.debugMessage(true, "New List: " + newlist);
+	  API.reorderQueue(newlist);
     }
     catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
   },
@@ -2789,6 +2802,11 @@ var API = {
   getDubUpCount: function() {
     try        { return parseInt($(".dubup").text()); }
     catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
+  },
+  //
+  getSongLengthZ: function() {
+    try        { return (parseInt(Dubtrack.room.player.activeSong.get("song").songLength) / 1000); }
+    catch(err) { UTIL.logException("getSongLengthZ: " + err.message); }
   },
   getSongLength: function() {
     try        { return parseInt($(".min").text()); }
@@ -3722,8 +3740,8 @@ var BOTCOMMANDS = {
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
-						if (maxTime === "F") botDebug.debugMessage(true, API.getPermission("dexter_nix"));
-						if (maxTime === "G") botDebug.debugMessage(true, API.getPermission("Levis_Homer"));
+						if (maxTime === "F") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = ", (API.getSongLengthZ() / 60.0));
+						if (maxTime === "G") botDebug.debugMessage(true, "[  API.getSongLength() ] = ", API.getSongLength());
                     }
                 }
             },
