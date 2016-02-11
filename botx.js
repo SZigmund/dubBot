@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0126",
+  version: "Version  1.01.0020.0127",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2640,7 +2640,9 @@ var API = {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
   //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
   ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
-      var idx = 0;
+ 	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+     var idx = 0;
 	  var newlist = "";
 	  for(var i = 0; i < djlist.length; i++){
 	    if (newlist.length > 0) newlist += String.fromCharCode(13)
@@ -2652,7 +2654,6 @@ var API = {
 		  newlist += "order[]=" + djlist[idx].id;
 		}
 	    botDebug.debugMessage(true, "New List[" + i + "," + idx + "] "  + newlist);
-	    idx++;
 	  }
 	  botDebug.debugMessage(true, "New List: " + newlist);
 	  API.reorderQueue(newlist);
