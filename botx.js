@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0119",
+  version: "Version  1.01.0020.0120",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1684,7 +1684,7 @@ var botDebug = {
 var AFK = {
   afkInterval: null,
   settings: {
-    maximumAfk: 5,
+    maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
     afk7Days: true,
@@ -1864,13 +1864,23 @@ var ROULETTE = {
   selectRouletteWinner: function (djlist) {
     try {
 		var djpos = -1;
-		while (djpos = -1 && ROULETTE.settings.participants.length > 0) {
-          var ind = Math.floor(Math.random() * ROULETTE.settings.participants.length);
+		var looping = 0;
+		while (djpos === -1 && ROULETTE.settings.participants.length > 0 && looping < 3) {
+          looping++;
+		  botDebug.debugMessage(true, "-------------------------------------------------------");
+		  botDebug.debugMessage(true, "LEN: " + ROULETTE.settings.participants.length);
+		  var ind = Math.floor(Math.random() * ROULETTE.settings.participants.length);
+		  botDebug.debugMessage(true, "IND: " + ind);
           var winner = ROULETTE.settings.participants[ind];
+		  botDebug.debugMessage(true, "WINNER: " + winner);
           var user = USERS.lookupUserName(winner);
+		  botDebug.debugMessage(true, "WINNERID: " + user.id);
 		  var djpos = API.getWaitListPosition(user.id, djlist);
 		  // Remove if winner is not in the waitlist:
-		  if (djpos < 0) ROULETTE.settings.participants.splice(ind, 1);
+		  if (djpos < 0) {
+		    botDebug.debugMessage(true, "ROULETTE: Removing " + user.id);
+		    ROULETTE.settings.participants.splice(ind, 1);
+		  }
 		}
         ROULETTE.settings.participants = [];
         var pos = Math.floor((Math.random() * djlist.length) + 1);
