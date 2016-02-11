@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0120",
+  version: "Version  1.01.0020.0121",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1699,7 +1699,7 @@ var AFK = {
 	}
     catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
-//todoerlind
+
   afkCheckCallback: function (djlist) {
     try {
 	//botDebug.debugMessage(true, "=====================================================================================");
@@ -1863,8 +1863,12 @@ var ROULETTE = {
 
   selectRouletteWinner: function (djlist) {
     try {
+	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+	  //542465ce43f5a10200c07f11 - Doc_Z
 		var djpos = -1;
 		var looping = 0;
+		//todoerlind
 		while (djpos === -1 && ROULETTE.settings.participants.length > 0 && looping < 3) {
           looping++;
 		  botDebug.debugMessage(true, "-------------------------------------------------------");
@@ -1873,7 +1877,7 @@ var ROULETTE = {
 		  botDebug.debugMessage(true, "IND: " + ind);
           var winner = ROULETTE.settings.participants[ind];
 		  botDebug.debugMessage(true, "WINNER: " + winner);
-          var user = USERS.lookupUserName(winner);
+          var user = USERS.lookupUserID(winner);
 		  botDebug.debugMessage(true, "WINNERID: " + user.id);
 		  var djpos = API.getWaitListPosition(user.id, djlist);
 		  // Remove if winner is not in the waitlist:
@@ -1885,7 +1889,7 @@ var ROULETTE = {
         ROULETTE.settings.participants = [];
         var pos = Math.floor((Math.random() * djlist.length) + 1);
         var name = user.username;
-        API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, oldpos: (djpos + 1), position: pos}));
+        API.sendChat(botChat.subChat(botChat.getChatMessage("winnerpicked"), {name: name, oldpos: (djpos + 1), position: pos}));
         API.moderateMoveDJ(user.id, pos, djlist);
     }
     catch(err) { UTIL.logException("selectRouletteWinner: " + err.message); }
