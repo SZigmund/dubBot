@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0115",
+  version: "Version  1.01.0020.0116",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -94,9 +94,7 @@ var dubBot = {
   },
   queue: {
 	dubQueue: null,
-	dubQueueResp: null,
-	tastyValLastAct: 0,
-	tastyValInact: 0
+	dubQueueResp: null
   },
 
   validateCurrentSong: function () {
@@ -153,7 +151,6 @@ var USERS = {
   usersImport: [],
   users: [],
   loadUserInterval: null,
-  //todoerer
   getLastActivity: function (usrObjectID) {
       try {
         if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
@@ -193,13 +190,13 @@ var USERS = {
     }
     catch(err) { UTIL.logException("updateUserID: " + err.message); }
   },
-  //todoerer
+
   setLastActivityID: function (userId, dispMsg) {
     var user = USERS.lookupUserID(userId);
     if (user === false) return;
     USERS.setLastActivity(user, dispMsg);
   },
-//todoerer afk activity TEST:
+
   setLastActivity: function (user, dispMsg) {
     user.lastActivity = Date.now();
 	var resetAFK = false;
@@ -240,7 +237,6 @@ var USERS = {
 	  }
   },
   lookupUserID: function (id) {   //getroomuser
-  //todoer TEST: 
         for (var i = 0; i < USERS.users.length; i++) {
             if (USERS.users[i].id === id) {
                 return USERS.users[i];
@@ -780,8 +776,7 @@ var botChat = {
    botChat.chatMessages.push(["ghosting", "[%%NAME1%%] %%NAME2%% is either ghosting or not here."]);
 
    botChat.chatMessages.push(["isopen", " @djs - The roulette is now open! Type .join to participate!"]);
-   botChat.chatMessages.push(["winnerpicked", " A winner has been picked! @%%NAME%% to position %%POSITION%%."]);
-
+   botChat.chatMessages.push(["winnerpicked", " A winner has been picked! @%%NAME%% moves from %%OLDPOS%% to position %%POSITION%%."]);
 
    botChat.chatMessages.push(["alreadyadding", " User is already being added! Changed the desired position to %%POSITION%%."]);
    botChat.chatMessages.push(["adding", " Added @%%NAME%% to the queue. Current queue: %%POSITION%%."]);
@@ -1707,7 +1702,7 @@ var AFK = {
 //todoerlind
   afkCheckCallback: function (djlist) {
     try {
-	botDebug.debugMessage(true, "=====================================================================================");
+	//botDebug.debugMessage(true, "=====================================================================================");
 	//botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
 
     for (var i = 0; i < djlist.length; i++) {
@@ -1724,10 +1719,8 @@ var AFK = {
 				inactivity -= lastActive;
 				var time = UTIL.msToStr(inactivity);
 				var warncount = roomUser.afkWarningCount;
-				dubBot.queue.tastyValLastAct = lastActive;
-				dubBot.queue.tastyValInact = inactivity;
-				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Warn: " + warncount);
-				botDebug.debugMessage(true, "A: " + roomUser.id + " B: " + botVar.botID);
+				//botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Warn: " + warncount);
+				//botDebug.debugMessage(true, "A: " + roomUser.id + " B: " + botVar.botID);
 				if ((inactivity > (AFK.settings.maximumAfk * 60 * 1000)) && (roomUser.id !== botVar.botID)) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
@@ -1807,11 +1800,14 @@ var ROULETTE = {
 
   startRoulette: function () {
     try  {
-        //if (ROULETTE.rouletteStatus) return;
-        //ROULETTE.rouletteStatus = true;
-        //ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
-        //API.sendChat(botChat.getChatMessage("isopen"));
-        API.sendChat("Roulette is not functional yet.... But...it's COMING SOON!!!");
+	  if (botVar.botID === "560be6cbdce3260300e40770") {
+        if (ROULETTE.rouletteStatus) return;
+        ROULETTE.rouletteStatus = true;
+        ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
+        API.sendChat(botChat.getChatMessage("isopen"));
+		return;
+	  }
+      API.sendChat("Roulette is not functional yet.... But...it's COMING SOON!!!");
     }
     catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
@@ -1865,6 +1861,23 @@ var ROULETTE = {
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
+  selectRouletteWinner: function (djlist) {
+    try {
+		var djpos = -1;
+		while (djpos = -1 && ROULETTE.participants.length > 0) {
+          var ind = Math.floor(Math.random() * ROULETTE.participants.length);
+          var winner = ROULETTE.participants[ind];
+          var user = USERS.lookupUserName(winner);
+		  var djpos = API.getWaitListPosition(user.id, djlist);
+		}
+        ROULETTE.participants = [];
+        var pos = Math.floor((Math.random() * djlist.length) + 1);
+        var name = user.username;
+        API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, oldpos: (djpos + 1), position: pos}));
+        API.moderateMoveDJ(user.id, pos, djlist);
+    }
+    catch(err) { UTIL.logException("selectRouletteWinner: " + err.message); }
+  },
   endRoulette: function () {
     try {
         ROULETTE.rouletteStatus = false;
@@ -1872,14 +1885,7 @@ var ROULETTE = {
            API.sendChat("Roulette has ended with no participants");
            return;
         }
-        var ind = Math.floor(Math.random() * ROULETTE.participants.length);
-        var winner = ROULETTE.participants[ind];
-        ROULETTE.participants = [];
-        var pos = Math.floor((Math.random() * API.getWaitList().length) + 1);
-        var user = USERS.lookupUserName(winner);
-        var name = user.username;
-        API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, position: pos}));
-        setTimeout(function (winner, pos) { API.moveUser(winner, pos, false); }, 1 * 1000, winner, pos);
+	    API.getWaitList(ROULETTE.selectRouletteWinner);
     }
     catch(err) { UTIL.logException("endRoulette: " + err.message); }
   }
@@ -2601,16 +2607,28 @@ var API = {
   },
 
   //todoerererererererer
-  reorderQueue: function(usrObjectID, queuePos){
+  moderateMoveDJ: function(userID, queuePos, djlist){
     try {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
   //560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+      var idx = 0;
+	  var newlist = "";
+	  for(var i = 0; i < djlist.length; i++){
+	    if (newlist.length > 0) newlist += "&order%5B%5D="
+	    if (i + 1 === queuePos) {
+		  newlist += userID;
+		  idx--;
+		}
+		else if(djlist[idx].id !== userID) {
+		  newlist += djlist[idx].id;
+		}
+	    idx++;
+	  }
+	  botDebug.debugMessage(true, "New List: " + newlist);
     }
-    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
+    catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
   },
 
-  //todoerererererererer
-  //moderateRemoveDJTODOER 
   // This will pause the users queue:
   moderateRemoveDJ: function(usrObjectID){
     try {
@@ -2620,8 +2638,7 @@ var API = {
 	  //542465ce43f5a10200c07f11 - Doc_Z
 
       var roomUser = USERS.defineRoomUser(usrObjectID);
-	  botDebug.debugMessage(true, "Removing UserID: " + roomUser.id + " Username: " + roomUser.username + " Room: " + botVar.roomID);
-	  //if (roomUser.id !== "564933a1d4dcab140021cdeb") roomUser.id = "564933a1d4dcab140021cdeb";     //todoerererererererer DELETE
+	  //botDebug.debugMessage(true, "Removing UserID: " + roomUser.id + " Username: " + roomUser.username + " Room: " + botVar.roomID);
       $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + roomUser.id + "/pause",
             type: "PUT"
@@ -2635,11 +2652,19 @@ var API = {
     return USERS.lookupUserName(API.currentDjName());
   },
 
-  getWaitListPosition: function(id){
+  getWaitListPosition: function(id, djlist){
     try {
-        if(typeof id === 'undefined' || id === null){
-            id = API.getCurrentDubUser().id;
+        if(typeof id === 'undefined' || id === null) id = botVar.botID;
+        for(var i = 0; i < djlist.length; i++){
+            if(djlist[i].id === id) return i;
         }
+        return -1;
+    }
+    catch(err) { UTIL.logException("getWaitListPosition: " + err.message); }
+  },
+  getWaitListPositionOld: function(id){
+    try {
+        if(typeof id === 'undefined' || id === null) id = botVar.botID;
         var wl = API.getWaitList();
         for(var i = 0; i < wl.length; i++){
             if(wl[i].id === id){
@@ -2648,9 +2673,7 @@ var API = {
         }
         return -1;
     }
-       catch(err) {
-       UTIL.logException("getWaitListPosition: " + err.message);
-    }
+    catch(err) { UTIL.logException("getWaitListPositionOld: " + err.message); }
   },
   mehThisSong: function () {
     try  {  $('.dubdown').click();    }  
@@ -2661,9 +2684,6 @@ var API = {
     catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
-  getCurrentDubUser: function () {
-    return USERS.lookupUserName(botVar.botName);
-  },
   getDubUserID: function (userid) {
     try {
       //todoer COMPLETE
@@ -2685,7 +2705,6 @@ var API = {
   },
   displayRoleToRoleNumber: function (displayRole) {
     try {
-	  //todoerer
 	  switch (displayRole) {
 			case "creator":     return 7;
 			case "co-owner":    return 6;
@@ -2696,15 +2715,6 @@ var API = {
 			case "dj":          return 1;
 			default:            return 0;
 	  }
-//        switch (displayRole) {
-//            case "creator":     return "creator";
-//            case "co-owner":    return "co-owner";
-//            case "manager":     return "manager";
-//            case "mod":         return "mod";
-//            case "vip":         return "vip";
-//            case "resident-dj": return "resident-dj";
-//            case "dj":          return "dj";
-//        }
     }
     catch(err) { UTIL.logException("displayRoleToRoleNumber: " + err.message); }
   },
@@ -2781,11 +2791,11 @@ var API = {
     catch(err) { UTIL.logException("getBotID: " + err.message); }
   },
   getBotName: function() {
-    try { return $(".user-info").text();    }
+    //try { return $(".user-info").text();    }
+    try { return Dubtrack.session.get("username");    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
 
-//todoer COMPLETE
  waitListItem: function (dubQueueItem) {
     try {
         this.id = dubQueueItem.userid;
@@ -2804,7 +2814,6 @@ var API = {
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
 
-  //todoerlind
   getWaitList: function(cb) {
     try {
 	  $.when(API.defineRoomQueue()).done(function(a1) {
@@ -2822,77 +2831,17 @@ var API = {
 	}
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
-  //todoerererererererer
+
   defineRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
 	  return $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
-
-/*	  dubBot.queue.dubQueueResp = $.ajax({
-            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
-            type: "GET" });
-	  while (typeof dubBot.queue.dubQueueResp.responseText == "undefined") {}
-	  botDebug.debugMessage(true, "IS OBJECT: Step 1");
-	  if (typeof dubBot.queue.dubQueueResp === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 2");
-	  if (typeof dubBot.queue.dubQueueResp.responseText === "object") botDebug.debugMessage(true, "IS OBJECT: dubBot.queue.dubQueueResp.responseText");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 3");
-	  UTIL.logObject(dubBot.queue.dubQueueResp, "RESP");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 4");
-	  botDebug.debugMessage(true, "TYPE OF: " + (typeof dubBot.queue.dubQueueResp.responseText));
-	  botDebug.debugMessage(true, "IS OBJECT: Step 5");
-
-	  botDebug.debugMessage(true, "response Len: " + dubBot.queue.dubQueueResp.responseText.length);
-	  botDebug.debugMessage(true, "IS OBJECT: Step 6");
-	  botDebug.debugMessage(true, "response: (" + dubBot.queue.dubQueueResp.responseText + ")");
-	  botDebug.debugMessage(true, "IS OBJECT: Step 7");
-      dubBot.queue.dubQueue = JSON.parse(dubBot.queue.dubQueueResp.responseText);
-	  botDebug.debugMessage(true, "IS OBJECT: Step 8");
-	  //dubBot.queue.dubQueueResp.responseText
-	  //dubBot.queue.dubQueueResp.responseText
-	  //dubBot.queue.dubQueueResp.responseText is undefined botx.js:1461:5
-	  //dubBot.queue.dubQueueResp.responseText
-
-	  UTIL.logObject(dubBot.queue.dubQueue, "QUEUE");
-	  botDebug.debugMessage(true, "Room Queue Count: " + dubBot.queue.dubQueue.data.length);
-	  if (dubBot.queue.dubQueue.data.length === 0) return;
-	  for (var i = 0; i < dubBot.queue.dubQueue.data.length; i++) {
-			botDebug.debugMessage(true, "RoomID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].roomid);
-			botDebug.debugMessage(true, "UserID Item[" + i + "]" + dubBot.queue.dubQueue.data[i].userid);
-			botDebug.debugMessage(true, "Song Length Item[" + i + "]" + dubBot.queue.dubQueue.data[i].songLength);
-	  }
-*/
 	}
     catch(err) { UTIL.logException("defineRoomQueue: " + err.message); }
 	},
 	
-  /*
-{  
-   "data":[  
-      {  
-         "roomid":"5602ed62e8632103004663c2",
-         "songLength":166000,
-         "userid":"560be6cbdce3260300e40770",
-         "_user":{  
-            "_id":"560be6cbdce3260300e40770",
-            "username":"Levis_Homer",
-            "roleid":1,
-         },
-         "_song":{  
-            "_id":"560c5fd23ba1f50300a418e4",
-            "name":"The Living End - I've Just Seen A Face (Acoustic - Live at Visions MAG)",
-            "description":"The Living End performed afew songs for Visions MAG in Germany. This is one of them.\r\n\r\nI've Just Seen A Face is a great Beatles song, and a fantastic cover...though Chris screwed up the solo a bit lol.",
-            "type":"youtube",
-            "fkid":"AcEyKsNjYcw",
-            "songLength":166000,
-         },
-      }
-   ]
-}  */
-
-  //todoerererererererer
   getRoomID: function() {
     //      var roomid = "5602ed62e8632103004663c2";
 	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
@@ -2916,21 +2865,6 @@ var API = {
 //Dubtrack.room.model.get("userid") == a) && this.$(".actions").hide(), (
 //Dubtrack.room.users.getIfHasRole(a)) && (this.$(".actions a.mute").hide(), this.$(".actions a.kick").hide(), this.$(".actions a.ban").hide());
 
-//Dubtrack.room.users.getRoleType("5405f2be8f36d9020046ee09")
-//Dubtrack.room.users.getRoleType("560b14838b4f900300cc69cf")
-//Dubtrack.room.users.getRoleType("5600a9dcde199903001ae7c0")
-//Dubtrack.room.users.getRoleType("5600c3382d5038030094c236")
-//Dubtrack.room.users.getRoleType("5601b85e4693ff0300c75cfd")
-//Dubtrack.room.users.getRoleType("5601bbc8bb481503002ffcd3")
-//Dubtrack.room.users.getRoleType("5602d0c7813abe030055d036")
-//Dubtrack.room.users.getRoleType("542465ce43f5a10200c07f11")
-//Dubtrack.room.users.getRoleType("56095bb74d12b50300c13252")
-//Dubtrack.room.users.getRoleType("560378a3b585d003001b587e")
-//Dubtrack.room.users.getRoleType("5601611d2e803803000ffead")
-//Dubtrack.room.users.getRoleType("5609515e516f700300cd22dd")
-//Dubtrack.room.users.getRoleType("5609614781c87803009b9629")
-
-	  //return "5602ed62e8632103004663c2";    
 	  return Dubtrack.room.model.get("_id");
 	}
     catch(err) { UTIL.logException("getRoomID: " + err.message); }
@@ -2987,21 +2921,6 @@ var API = {
   //Accept-Language: en-US,en;q=0.8
   //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
 
-  //todoerererererererer DELETE:
-  moderateRemoveDJTODOER: function(usrObjectID) {
-    try {
-      var roomUser = USERS.defineRoomUser(usrObjectID);
-      //todoer roomUser.uid.....
-      var uid = "560be6cbdce3260300e40770";
-      
-      //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
-      $.ajax({
-            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + uid + "/all",
-            type: "DELETE"
-        });
-    }
-    catch(err) { UTIL.logException("moderateRemoveDJTODOER: " + err.message); }
-  },
   moderateForceSkip: function() {
     API.sendChat("/skip");
   },
@@ -4285,13 +4204,10 @@ var BOTCOMMANDS = {
                     else {
                         if (botVar.room.repeatSongs) {
                             botVar.room.repeatSongs = !botVar.room.repeatSongs;
-                            //todoer why do we clear the afk interval here???
-                            clearInterval(AFK.afkInterval);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
                         else {
                             botVar.room.repeatSongs = !botVar.room.repeatSongs;
-                            AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 2 * 1000);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
                     }
@@ -4575,7 +4491,7 @@ var BOTCOMMANDS = {
                         } else name = chat.un;
                         var user = USERS.lookupUserName(name);
                         if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        var pos = API.getWaitListPosition(user.id);
+                        var pos = API.getWaitListPositionOld(user.id);
                         if (pos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
                         var timeRemaining = API.getTimeRemaining();
                         var estimateMS = ((pos * 4 * 60) + timeRemaining) * 1000;
@@ -4951,7 +4867,7 @@ var BOTCOMMANDS = {
                                         dubBot.room.skippable = true
                                     }, 5 * 1000);
                                     setTimeout(function (id) {
-                                        basicBot.userUtilities.moveUser(id, SETTINGS.settings.lockskipPosition, false);
+                                        API.moderateMoveDJ(id, SETTINGS.settings.lockskipPosition, null); // wont work need djlist
                                         dubBot.room.queueable = true;
                                         setTimeout(function () {
                                             basicBot.roomUtilities.booth.unlockBooth();
@@ -4982,7 +4898,7 @@ var BOTCOMMANDS = {
                                         dubBot.room.skippable = true
                                     }, 5 * 1000);
                                     setTimeout(function (id) {
-                                        basicBot.userUtilities.moveUser(id, SETTINGS.settings.lockskipPosition, false);
+                                        API.moderateMoveDJ(id, SETTINGS.settings.lockskipPosition, null); // wont work need djlist
                                         dubBot.room.queueable = true;
                                         setTimeout(function () {
                                             basicBot.roomUtilities.booth.unlockBooth();
@@ -5118,7 +5034,7 @@ var BOTCOMMANDS = {
                         if (user.id === botVar.botID) return API.sendChat(botChat.subChat(botChat.getChatMessage("addbotwaitlist"), {name: chat.un}));
                         if (!isNaN(pos)) {
                             API.sendChat(botChat.subChat(botChat.getChatMessage("move"), {name: chat.un}));
-                            basicBot.userUtilities.moveUser(user.id, pos, false);
+                            API.moderateMoveDJ(user.id, pos, null); // wont work need djlist
                         } else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidpositionspecified"), {name: chat.un}));
                     }
                 }
@@ -5786,20 +5702,20 @@ var BOTCOMMANDS = {
                         var user2 = USERS.lookupUserName(name2);
                         if (typeof user1 === 'boolean' || typeof user2 === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("swapinvalid"), {name: chat.un}));
                         if (user1.id === botVar.botID || user2.id === botVar.botID) return API.sendChat(botChat.subChat(botChat.getChatMessage("addbottowaitlist"), {name: chat.un}));
-                        var p1 = API.getWaitListPosition(user1.id) + 1;
-                        var p2 = API.getWaitListPosition(user2.id) + 1;
+                        var p1 = API.getWaitListPositionOld(user1.id) + 1;
+                        var p2 = API.getWaitListPositionOld(user2.id) + 1;
                         if (p1 < 0 || p2 < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("swapwlonly"), {name: chat.un}));
                         API.sendChat(botChat.subChat(botChat.getChatMessage("swapping"), {'name1': name1, 'name2': name2}));
                         if (p1 < p2) {
-                            basicBot.userUtilities.moveUser(user2.id, p1, false);
+                            API.moderateMoveDJ(user2.id, p1, null); // wont work need djlist
                             setTimeout(function (user1, p2) {
-                                basicBot.userUtilities.moveUser(user1.id, p2, false);
+                                API.moderateMoveDJ(user1.id, p2, null); // wont work need djlist
                             }, 2000, user1, p2);
                         }
                         else {
-                            basicBot.userUtilities.moveUser(user1.id, p2, false);
+                            API.moderateMoveDJ(user1.id, p2, null); // wont work need djlist
                             setTimeout(function (user2, p1) {
-                                basicBot.userUtilities.moveUser(user2.id, p1, false);
+                                API.moderateMoveDJ(user2.id, p1, null); // wont work need djlist
                             }, 2000, user2, p1);
                         }
                     }
@@ -6262,7 +6178,7 @@ var BOTCOMMANDS = {
                             byusername = " [ executed by " + chat.un + " ]";
                         }
                         var user = USERS.lookupUserName(name);
-                        var currPos = API.getWaitListPosition(user.id) + 1;
+                        var currPos = API.getWaitListPositionOld(user.id) + 1;
                         if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
                         user.lastKnownPosition = currPos;
                         user.lastSeenInLine = Date.now();
