@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0114",
+  version: "Version  1.01.0020.0115",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -362,6 +362,7 @@ var USERS = {
           USERS.users[i].inRoom = false;
           USERS.users[i].inRoomUpdated = false;
           USERS.users[i].dubDown = false;
+		  USERS.users[i].afkWarningCount = 0;
         }
       }
       catch(err) { UTIL.logException("resetAllUsersOnStartup: " + err.message); }
@@ -546,19 +547,19 @@ var SETTINGS = {
     },
     storeToStorage: function () {
         try {
-        botDebug.debugMessage(true, "START: storeToStorage");
+        //botDebug.debugMessage(true, "START: storeToStorage");
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
         localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
         localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
 
-        botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
-        botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
+        //botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
+        //botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
             version: botVar.version
         };
-        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + USERS.users.length + " TIME: " + dubBotStorageInfo.time);
+        //botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + USERS.users.length + " TIME: " + dubBotStorageInfo.time);
         localStorage.setItem("dubBotStorageInfo", JSON.stringify(dubBotStorageInfo));
         }
         catch(err) {
@@ -2776,7 +2777,7 @@ var API = {
     catch(err) { UTIL.logException("getGrabCount: " + err.message); }
   },
   getBotID: function() {
-    try { return Dubtrack.room.users.getRoleType(Dubtrack.session.id);    }
+    try { return Dubtrack.session.id;    }
     catch(err) { UTIL.logException("getBotID: " + err.message); }
   },
   getBotName: function() {
