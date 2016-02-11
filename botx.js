@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0112",
+  version: "Version  1.01.0020.0113",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1687,7 +1687,7 @@ var botDebug = {
 var AFK = {
   afkInterval: null,
   settings: {
-    maximumAfk: 60,
+    maximumAfk: 5,
     afkRemoval: true,
     afk5Days: true,
     afk7Days: true,
@@ -1725,7 +1725,7 @@ var AFK = {
 				dubBot.queue.tastyValLastAct = lastActive;
 				dubBot.queue.tastyValInact = inactivity;
 				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Warn: " + warncount);
-				if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
+				if ((inactivity > (AFK.settings.maximumAfk * 60 * 1000)) && (roomUser.id !== botVar.botID)) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
 						roomUser.afkWarningCount = 3;
@@ -1738,7 +1738,7 @@ var AFK = {
 						roomUser.afkWarningCount = 3;
 						roomUser.afkCountdown = setTimeout(function (userToChange) {
 							userToChange.afkWarningCount = 2;
-						}, 30 * 1000, user);
+						}, 30 * 1000, roomUser);
 					}
 					else if (warncount === 2) {
 						AFK.resetDC(roomUser);
