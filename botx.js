@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0113",
+  version: "Version  1.01.0020.0114",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -202,10 +202,12 @@ var USERS = {
 //todoerer afk activity TEST:
   setLastActivity: function (user, dispMsg) {
     user.lastActivity = Date.now();
-    if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
+	var resetAFK = false;
+    if (user.afkWarningCount > 0) resetAFK = true;
+    if (resetAFK && dispMsg) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
     user.afkWarningCount = 0;
-	//botDebug.debugMessage(true, "RESET: " + user.username + " " + user.lastActivity);
     clearTimeout(user.afkCountdown);
+	if (resetAFK) SETTINGS.storeToStorage();
   },
 
   // This will return a room user from: Object, Username, UserID
@@ -796,12 +798,11 @@ var botChat = {
    botChat.chatMessages.push(["lunchleave", " @%%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)"]);
    botChat.chatMessages.push(["beerrunleave", " @%%NAME%% Going to get some :beer:. (Position: %%POS%%)"]);
 
-
    botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
    botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
-   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkremoveXXX", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
    botChat.chatMessages.push(["afkUserReset", "Thanks @%%NAME%% your afk status has been reset. "]);
-
 
    botChat.chatMessages.push(["caps", "@%%NAME%% unglue your capslock button please."]);
    botChat.chatMessages.push(["askskip", "@%%NAME%% don't ask for skips."]);
@@ -1725,6 +1726,7 @@ var AFK = {
 				dubBot.queue.tastyValLastAct = lastActive;
 				dubBot.queue.tastyValInact = inactivity;
 				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Warn: " + warncount);
+				botDebug.debugMessage(true, "A: " + roomUser.id + " B: " + botVar.botID);
 				if ((inactivity > (AFK.settings.maximumAfk * 60 * 1000)) && (roomUser.id !== botVar.botID)) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
@@ -1744,8 +1746,10 @@ var AFK = {
 						AFK.resetDC(roomUser);
 						API.moderateRemoveDJ(id);
 						roomUser.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+						//API.sendChat(botChat.subChat(botChat.getChatMessage("afkremoveXXX"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, maximumafk: AFK.settings.maximumAfk}));
 						roomUser.afkWarningCount = 0;
+						SETTINGS.storeToStorage();
 					}
 				}
             }
@@ -2559,6 +2563,7 @@ var API = {
 
       window.APIisRunning = true;
       botVar.botName = API.getBotName();
+	  botVar.botID = API.getBotID();
 	  botVar.roomID = API.getRoomID();
       if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
@@ -2770,6 +2775,10 @@ var API = {
     try        { return parseInt($(".grab-counter").text()); }
     catch(err) { UTIL.logException("getGrabCount: " + err.message); }
   },
+  getBotID: function() {
+    try { return Dubtrack.room.users.getRoleType(Dubtrack.session.id);    }
+    catch(err) { UTIL.logException("getBotID: " + err.message); }
+  },
   getBotName: function() {
     try { return $(".user-info").text();    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
@@ -2923,13 +2932,9 @@ var API = {
 	  //return "5602ed62e8632103004663c2";    
 	  return Dubtrack.room.model.get("_id");
 	}
-    catch(err) { UTIL.logException("getBotName: " + err.message); }
+    catch(err) { UTIL.logException("getRoomID: " + err.message); }
   },
 
-  getBotName: function() {
-    try { return $(".user-info").text();    }
-    catch(err) { UTIL.logException("getBotName: " + err.message); }
-  },
   currentSongName: function() {
     try { return $(".currentSong").text();    }
     catch(err) { UTIL.logException("currentSongName: " + err.message); }
