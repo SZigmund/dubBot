@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0117",
+  version: "Version  1.01.0020.0119",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1801,8 +1801,8 @@ var ROULETTE = {
   startRoulette: function () {
     try  {
 	  if (botVar.botID === "560be6cbdce3260300e40770") {
-        if (ROULETTE.rouletteStatus) return;
-        ROULETTE.rouletteStatus = true;
+        if (ROULETTE.settings.rouletteStatus) return;
+        ROULETTE.settings.rouletteStatus = true;
         ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
         API.sendChat(botChat.getChatMessage("isopen"));
 		return;
@@ -1813,10 +1813,10 @@ var ROULETTE = {
   },
   randomRouletteCheck: function() {
     try  {
-        if (ROULETTE.nextRandomRoulette <= Date.now())
+        if (ROULETTE.settings.nextRandomRoulette <= Date.now())
         {
             ROULETTE.randomRouletteSetTimer();
-            if (ROULETTE.randomRoulette === false) return;
+            if (ROULETTE.settings.randomRoulette === false) return;
             if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette();
         }
     }
@@ -1826,16 +1826,16 @@ var ROULETTE = {
   
   rouletteTimeRange: function () {
     try {
-        if (!ROULETTE.roulette5Days && !ROULETTE.roulette7Days) return false;
-        if (ROULETTE.randomRoulette === false) return false;
+        if (!ROULETTE.settings.roulette5Days && !ROULETTE.settings.roulette7Days) return false;
+        if (ROULETTE.settings.randomRoulette === false) return false;
         var currDate = new Date();
         //Not on Saturday/Sunday if not monitoring 7 days a week
-        if (!ROULETTE.roulette7Days) {
+        if (!ROULETTE.settings.roulette7Days) {
             var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
             if (dayofweek === 6 || dayofweek === 0) return false;
         }
         var hourofday = currDate.getHours();
-        if (hourofday >= ROULETTE.rouletteStart && hourofday < ROULETTE.rouletteEnd) return true;
+        if (hourofday >= ROULETTE.settings.rouletteStart && hourofday < ROULETTE.settings.rouletteEnd) return true;
         return false;
     }
     catch(err) { UTIL.logException("rouletteTimeRange: " + err.message); }
@@ -1843,20 +1843,20 @@ var ROULETTE = {
 
   randomRouletteSetTimer: function () {
     try  {
-        var randomRange = (ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin)
+        var randomRange = (ROULETTE.settings.randomRouletteMax - ROULETTE.settings.randomRouletteMin)
         var randomMins = Math.floor(Math.random() * randomRange);
-        randomMins += ROULETTE.randomRouletteMin;
+        randomMins += ROULETTE.settings.randomRouletteMin;
         //JIC: Ensure we are in the correct time range:
-        if ((randomMins > ROULETTE.randomRouletteMax) || (randomMins < ROULETTE.randomRouletteMin))
+        if ((randomMins > ROULETTE.settings.randomRouletteMax) || (randomMins < ROULETTE.settings.randomRouletteMin))
         {
-          randomMins = ROULETTE.randomRouletteMin + ((ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin) / 2.0)
+          randomMins = ROULETTE.settings.randomRouletteMin + ((ROULETTE.settings.randomRouletteMax - ROULETTE.settings.randomRouletteMin) / 2.0)
         }
         var nextTime = new Date();
         var myTimeSpan;
         myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
         nextTime.setTime(nextTime.getTime() + myTimeSpan);
         API.chatLog("Next Roulette: " + UTIL.msToStr(myTimeSpan));
-        ROULETTE.nextRandomRoulette = nextTime;
+        ROULETTE.settings.nextRandomRoulette = nextTime;
     }
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
@@ -1864,13 +1864,15 @@ var ROULETTE = {
   selectRouletteWinner: function (djlist) {
     try {
 		var djpos = -1;
-		while (djpos = -1 && ROULETTE.participants.length > 0) {
-          var ind = Math.floor(Math.random() * ROULETTE.participants.length);
-          var winner = ROULETTE.participants[ind];
+		while (djpos = -1 && ROULETTE.settings.participants.length > 0) {
+          var ind = Math.floor(Math.random() * ROULETTE.settings.participants.length);
+          var winner = ROULETTE.settings.participants[ind];
           var user = USERS.lookupUserName(winner);
 		  var djpos = API.getWaitListPosition(user.id, djlist);
+		  // Remove if winner is not in the waitlist:
+		  if (djpos < 0) ROULETTE.settings.participants.splice(ind, 1);
 		}
-        ROULETTE.participants = [];
+        ROULETTE.settings.participants = [];
         var pos = Math.floor((Math.random() * djlist.length) + 1);
         var name = user.username;
         API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, oldpos: (djpos + 1), position: pos}));
@@ -1880,8 +1882,8 @@ var ROULETTE = {
   },
   endRoulette: function () {
     try {
-        ROULETTE.rouletteStatus = false;
-        if (ROULETTE.participants.length === 0) {
+        ROULETTE.settings.rouletteStatus = false;
+        if (ROULETTE.settings.participants.length === 0) {
            API.sendChat("Roulette has ended with no participants");
            return;
         }
@@ -3308,7 +3310,7 @@ var BOTCOMMANDS = {
         commands: {
             executable: function (minRank, chat) {
 			  try {
-			    //valid ranks: 'creator' 'co-owner' 'manager' 'mod' 'vip' 'resident-dj' 'dj'
+			    //valid ranks: 'creator' 'co-owner' 'manager' 'mod' 'vip' 'resident-dj' 'dj' ( 'user' allows ALL dub users )
                 var id = chat.uid;
                 var perm = API.getPermission(id);
                 var minPerm = API.displayRoleToRoleNumber(minRank);
@@ -3414,7 +3416,7 @@ var BOTCOMMANDS = {
             },
             rollCommand: {   //Added 03/30/2015 Zig
                 command: ['roll','spin','throw','dice','rollem','toss','fling','pitch'],
-                rank: 'dj',
+                rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3460,7 +3462,7 @@ var BOTCOMMANDS = {
             },            
             wootCommand: {  //todoer DELETE THIS COMMAND:
                 command: 'wootthissong',
-                rank: 'dj',
+                rank: 'manager',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3553,7 +3555,7 @@ var BOTCOMMANDS = {
             },
             mystatsCommand: {
                 command: 'mystats',
-                rank: 'dj',
+                rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3873,7 +3875,7 @@ var BOTCOMMANDS = {
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    if (ROULETTE.rouletteStatus) return void (0);
+                    if (ROULETTE.settings.rouletteStatus) return void (0);
                     if (ROULETTE.rouletteTimeRange()) {
                         API.sendChat("The LAW runs the Roulette weekdays 9AM-5PM EST");
                         return;
@@ -3883,7 +3885,7 @@ var BOTCOMMANDS = {
             },
             rulesCommand: {
                 command: 'rules',
-                rank: 'dj',
+                rank: 'user',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3930,7 +3932,7 @@ var BOTCOMMANDS = {
 
             commandsCommand: {
                 command: 'commands',
-                rank: 'dj',
+                rank: 'user',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                   try {
@@ -3944,7 +3946,7 @@ var BOTCOMMANDS = {
 
             cookieCommand: {
                 command: 'cookie',
-                rank: 'dj',
+                rank: 'user',
                 type: 'startsWith',
                 cookies: ['has given you a chocolate chip cookie!',
                     'has given you a soft homemade oatmeal cookie!',
@@ -4075,19 +4077,49 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-            joinCommand: {
-                command: 'join',
-                rank: 'dj',
+            leaveCommand: {
+                command: 'leave',
+                rank: 'user',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (ROULETTE.rouletteStatus && ROULETTE.participants.indexOf(chat.uid) < 0) {
-                            ROULETTE.participants.push(chat.uid);
+                        var ind = ROULETTE.settings.participants.indexOf(chat.uid);
+                        if (ind > -1) {
+                            ROULETTE.settings.participants.splice(ind, 1);
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("rouletteleave"), {name: chat.un}));
+                        }
+                    }
+                }
+            },
+            joinCommand: {
+                command: 'join',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (ROULETTE.settings.rouletteStatus && ROULETTE.settings.participants.indexOf(chat.uid) < 0) {
+                            ROULETTE.settings.participants.push(chat.uid);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
                         }
                     }
+                }
+            },
+            skipCommand: {
+                command: 'skip',
+                rank: 'vip',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					//API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
+					API.moderateForceSkip();
+					//dubBot.room.skippable = false;
+					//setTimeout(function () { dubBot.room.skippable = true }, 5 * 1000);
                 }
             },
 
@@ -4733,23 +4765,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            leaveCommand: {
-                command: 'leave',
-                rank: 'dj',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var ind = ROULETTE.participants.indexOf(chat.uid);
-                        if (ind > -1) {
-                            ROULETTE.participants.splice(ind, 1);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("rouletteleave"), {name: chat.un}));
-                        }
-                    }
-                }
-            },
-
             linkCommand: {
                 command: 'link',
                 rank: 'dj',
@@ -5197,26 +5212,6 @@ var BOTCOMMANDS = {
                         var mehs = dubBot.room.roomstats.totalMehs;
                         var grabs = dubBot.room.roomstats.totalCurates;
                         API.sendChat(botChat.subChat(botChat.getChatMessage("sessionstats"), {name: from, woots: woots, mehs: mehs, grabs: grabs}));
-                    }
-                }
-            },
-
-            skipCommand: {
-                command: 'skip',
-                rank: 'mod',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
-                        API.moderateForceSkip();
-                        dubBot.room.skippable = false;
-                        setTimeout(function () {
-                            dubBot.room.skippable = true
-                        }, 5 * 1000);
-
                     }
                 }
             },
