@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0116",
+  version: "Version  1.01.0020.0117",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3307,41 +3307,14 @@ var CONST = {
 var BOTCOMMANDS = {
         commands: {
             executable: function (minRank, chat) {
-                return true;
-                // todoer:
-                //var id = chat.uid;
-                //var perm = API.getPermission(id);
-                //var minPerm;
-                //switch (minRank) {
-                //    case 'admin':
-                //        minPerm = 10;
-                //        break;
-                //    case 'ambassador':
-                //        minPerm = 7;
-                //        break;
-                //    case 'host':
-                //        minPerm = 5;
-                //        break;
-                //    case 'cohost':
-                //        minPerm = 4;
-                //        break;
-                //    case 'manager':
-                //        minPerm = 3;
-                //        break;
-                //    //case 'vip': todoer
-                //    case 'bouncer':
-                //        minPerm = 2;
-                //        break;
-                //    case 'residentdj':
-                //        minPerm = 1;
-                //        break;
-                //    case 'user':
-                //        minPerm = 0;
-                //        break;
-                //    default:
-                //        API.chatLog('error assigning minimum permission');
-                //}
-                //return perm >= minPerm;
+			  try {
+			    //valid ranks: 'creator' 'co-owner' 'manager' 'mod' 'vip' 'resident-dj' 'dj'
+                var id = chat.uid;
+                var perm = API.getPermission(id);
+                var minPerm = API.displayRoleToRoleNumber(minRank);
+			    return (perm >= minPerm);
+			  }
+              catch(err) { UTIL.logException("executable: " + err.message); }
             },
 
             //SAMPLE:
@@ -3412,15 +3385,13 @@ var BOTCOMMANDS = {
                     try {
                         TASTY.tastyVote(chat.un, cmd);
                     }
-                    catch(err) {
-                        UTIL.logException("tastyCommand: " + err.message);
-                    }
+                    catch(err) { UTIL.logException("tastyCommand: " + err.message); }
                 }
             },
 
             eightballCommand: {   //Added 04/01/2015 Zig
                 command: ['8ball', 'eightball', 'larry'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3443,7 +3414,7 @@ var BOTCOMMANDS = {
             },
             rollCommand: {   //Added 03/30/2015 Zig
                 command: ['roll','spin','throw','dice','rollem','toss','fling','pitch'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3489,7 +3460,7 @@ var BOTCOMMANDS = {
             },            
             wootCommand: {  //todoer DELETE THIS COMMAND:
                 command: 'wootthissong',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3514,7 +3485,7 @@ var BOTCOMMANDS = {
             },
             exrouletteCommand: {
                 command: ['exroulette','roulette?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3529,7 +3500,7 @@ var BOTCOMMANDS = {
             },
             extastyCommand: {
                 command: ['extasty','tasty?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3544,7 +3515,7 @@ var BOTCOMMANDS = {
             },
             exmeetingCommand: {
                 command: ['exmeeting', 'exlunch', 'exbeerrun','meeting?', 'lunch?', 'beerrun?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3559,7 +3530,7 @@ var BOTCOMMANDS = {
             },
             exmehCommand: {
                 command: ['exmeh','meh?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3582,7 +3553,7 @@ var BOTCOMMANDS = {
             },
             mystatsCommand: {
                 command: 'mystats',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3617,7 +3588,7 @@ var BOTCOMMANDS = {
             },
             nsfwCommand: {   //Added 04/22/2015 Zig
                 command: 'nsfw',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3632,7 +3603,7 @@ var BOTCOMMANDS = {
             },
             elevenCommand: {
                 command: ['eleven','11'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd)  {
                     try {
@@ -3675,7 +3646,7 @@ var BOTCOMMANDS = {
             },
             zigaCommand: {
                 command: 'ziga',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try { 
@@ -3691,7 +3662,7 @@ var BOTCOMMANDS = {
             },
             zigbCommand: {
                 command: 'zigb',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -3800,7 +3771,7 @@ var BOTCOMMANDS = {
             },
             exrollCommand: {
                 command: ['exroll','roll?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3815,7 +3786,7 @@ var BOTCOMMANDS = {
             },
             whyCommand: {
                 command: 'why',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3842,7 +3813,7 @@ var BOTCOMMANDS = {
             },
             roomCommand: {
                 command: 'room',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3857,7 +3828,7 @@ var BOTCOMMANDS = {
             },
             ughCommand: {
                 command: 'ugh',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3885,7 +3856,7 @@ var BOTCOMMANDS = {
             },
             pingCommand: {
                 command: 'ping',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3912,7 +3883,7 @@ var BOTCOMMANDS = {
             },
             rulesCommand: {
                 command: 'rules',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3959,7 +3930,7 @@ var BOTCOMMANDS = {
 
             commandsCommand: {
                 command: 'commands',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                   try {
@@ -3973,7 +3944,7 @@ var BOTCOMMANDS = {
 
             cookieCommand: {
                 command: 'cookie',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 cookies: ['has given you a chocolate chip cookie!',
                     'has given you a soft homemade oatmeal cookie!',
@@ -4020,7 +3991,7 @@ var BOTCOMMANDS = {
             },
             lowrollpctCommand: {   //Added 07/03/2015 Zig
                 command: 'lowrollpct',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4034,7 +4005,7 @@ var BOTCOMMANDS = {
             },
             lowrollptsCommand: {   //Added 07/03/2015 Zig
                 command: 'lowrollpts',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4048,7 +4019,7 @@ var BOTCOMMANDS = {
             },
             rollpctCommand: {   //Added 07/03/2015 Zig
                 command: 'rollpct',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4062,7 +4033,7 @@ var BOTCOMMANDS = {
             },
             rollptsCommand: {   //Added 07/03/2015 Zig
                 command: 'rollpts',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4077,7 +4048,7 @@ var BOTCOMMANDS = {
 
             fbCommand: {
                 command: 'fb',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4091,7 +4062,7 @@ var BOTCOMMANDS = {
             //todoer delete after having fun with this:
             autorollCommand: {
                 command: 'autoroll',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4104,11 +4075,26 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            joinCommand: {
+                command: 'join',
+                rank: 'dj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (ROULETTE.rouletteStatus && ROULETTE.participants.indexOf(chat.uid) < 0) {
+                            ROULETTE.participants.push(chat.uid);
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
+                        }
+                    }
+                }
+            },
 
             /* basic
             activeCommand: {
                 command: 'active',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4236,7 +4222,7 @@ var BOTCOMMANDS = {
             },
             trollCommand: {
                 command: 'troll',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try{
@@ -4255,7 +4241,7 @@ var BOTCOMMANDS = {
             },
             afkresetCommand: {
                 command: 'afkreset',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4274,7 +4260,7 @@ var BOTCOMMANDS = {
 
             afktimeCommand: {
                 command: 'afktime',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4316,7 +4302,7 @@ var BOTCOMMANDS = {
 
             autowootCommand: {
                 command: 'autowoot',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4329,7 +4315,7 @@ var BOTCOMMANDS = {
 
             baCommand: {
                 command: 'ba',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4342,7 +4328,7 @@ var BOTCOMMANDS = {
 
             banCommand: {
                 command: 'ban',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4359,7 +4345,7 @@ var BOTCOMMANDS = {
             },
             blinfoCommand: {
                 command: 'blinfo',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4418,7 +4404,7 @@ var BOTCOMMANDS = {
 
             togglevoteskipCommand: {
                 command: 'togglevoteskip',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4438,7 +4424,7 @@ var BOTCOMMANDS = {
 
             dclookupCommand: {
                 command: ['dclookup', 'dc', 'back'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4462,7 +4448,7 @@ var BOTCOMMANDS = {
 
             emojiCommand: {
                 command: 'emoji',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4476,7 +4462,7 @@ var BOTCOMMANDS = {
 
             etaCommand: {
                 command: 'eta',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4503,7 +4489,7 @@ var BOTCOMMANDS = {
 
             filterCommand: {
                 command: 'filter',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4524,7 +4510,7 @@ var BOTCOMMANDS = {
 
             gifCommand: {
                 command: ['gif', 'giphy'],
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4595,7 +4581,7 @@ var BOTCOMMANDS = {
 
             helpCommand: {
                 command: 'help',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4609,7 +4595,7 @@ var BOTCOMMANDS = {
 
             hopupCommand: {
                 command: 'hopup',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4621,7 +4607,7 @@ var BOTCOMMANDS = {
             },
             hopdownCommand: {
                 command: 'hopdown',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4637,7 +4623,7 @@ var BOTCOMMANDS = {
             },
             bootCommand: {
                 command: 'boot',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4665,25 +4651,9 @@ var BOTCOMMANDS = {
                 }
             },
 
-            joinCommand: {
-                command: 'join',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        if (ROULETTE.rouletteStatus && ROULETTE.participants.indexOf(chat.uid) < 0) {
-                            ROULETTE.participants.push(chat.uid);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
-                        }
-                    }
-                }
-            },
-
             jointimeCommand: {
                 command: 'jointime',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4704,7 +4674,7 @@ var BOTCOMMANDS = {
 
             kickCommand: {
                 command: 'kick',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4749,7 +4719,7 @@ var BOTCOMMANDS = {
 
             killbotCommand: {
                 command: 'killbot',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4765,7 +4735,7 @@ var BOTCOMMANDS = {
 
             leaveCommand: {
                 command: 'leave',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4782,7 +4752,7 @@ var BOTCOMMANDS = {
 
             linkCommand: {
                 command: 'link',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4843,7 +4813,7 @@ var BOTCOMMANDS = {
 
             lockskipCommand: {
                 command: 'lockskip',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4951,7 +4921,7 @@ var BOTCOMMANDS = {
             },
             logoutCommand: {
                 command: 'logout',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4985,7 +4955,7 @@ var BOTCOMMANDS = {
 
             motdCommand: {
                 command: 'motd',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5042,7 +5012,7 @@ var BOTCOMMANDS = {
 
             muteCommand: {
                 command: 'mute',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5130,7 +5100,7 @@ var BOTCOMMANDS = {
 
             opCommand: {
                 command: 'op',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5144,7 +5114,7 @@ var BOTCOMMANDS = {
 
             refreshbrowserCommand: {
                 command: 'refreshbrowser',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5162,7 +5132,7 @@ var BOTCOMMANDS = {
 
             reloadCommand: {
                 command: 'reload',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5179,7 +5149,7 @@ var BOTCOMMANDS = {
 
             reloadtestCommand: {
                 command: 'reloadtest',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5196,7 +5166,7 @@ var BOTCOMMANDS = {
 
             restrictetaCommand: {
                 command: 'restricteta',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5216,7 +5186,7 @@ var BOTCOMMANDS = {
 
             sessionstatsCommand: {
                 command: 'sessionstats',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5233,7 +5203,7 @@ var BOTCOMMANDS = {
 
             skipCommand: {
                 command: 'skip',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
@@ -5253,7 +5223,7 @@ var BOTCOMMANDS = {
 
             blockedCommand: {
                 command: 'blocked',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
@@ -5279,7 +5249,7 @@ var BOTCOMMANDS = {
             },
             banlistimportCommand: {   //Added: 06/11/2015 Import ban list from last saved in Github
                 command: 'banlistimport',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5292,7 +5262,7 @@ var BOTCOMMANDS = {
             },
             banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
                 command: 'banremove',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -5320,7 +5290,7 @@ var BOTCOMMANDS = {
             },
             banremoveallsongsCommand: { //Added: 06/10/2015 Remove all banned / blacklisted songs
                 command: 'banremoveallsongs',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5337,7 +5307,7 @@ var BOTCOMMANDS = {
             },
             banallhistorysongsCommand: { //Added: 06/10/2015 Add all songs in current room history to the ban song list
                 command: 'banallhistorysongs',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5369,7 +5339,7 @@ var BOTCOMMANDS = {
             },
             banlastsongCommand: { //Added: 06/11/2015 Add all songs in current room history to the ban song list
                 command: 'banlastsong',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -5411,7 +5381,7 @@ var BOTCOMMANDS = {
             },
             banlistidjsonCommand: {   //Added: 06/11/2015 List all banned songs
                 command: 'banlistidjson',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5424,7 +5394,7 @@ var BOTCOMMANDS = {
             },
             banlistjsonCommand: {   //Added: 06/11/2015 List all banned songs
                 command: 'banlistjson',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5437,7 +5407,7 @@ var BOTCOMMANDS = {
             },
             userlistjsonCommand: {   //Added: 08/25/2015 List all users to json
                 command: 'userlistjson',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5490,7 +5460,7 @@ var BOTCOMMANDS = {
 
             banlistconsoleCommand: {   //Added: 06/11/2015 List all banned songs
                 command: 'banlistconsole',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5503,7 +5473,7 @@ var BOTCOMMANDS = {
             },
             banlistcountCommand: {   //Added: 06/12/2015 List all banned songs
                 command: 'banlistcount',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5516,7 +5486,7 @@ var BOTCOMMANDS = {
             },
             banlistCommand: {   //Added: 06/10/2015 List all banned songs
                 command: ['banlist','banlistpublic'],
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -5566,7 +5536,7 @@ var BOTCOMMANDS = {
             },
             oobCommand: {
                 command: ['oob','bansong','songban','blacklist','bl'],
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5580,7 +5550,7 @@ var BOTCOMMANDS = {
             },
             botmutedCommand: {
                 command: 'botmuted',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5614,7 +5584,7 @@ var BOTCOMMANDS = {
 
             sourceCommand: {
                 command: 'source',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5627,7 +5597,7 @@ var BOTCOMMANDS = {
 
             statusCommand: {
                 command: 'status',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5724,7 +5694,7 @@ var BOTCOMMANDS = {
 
             themeCommand: {
                 command: 'theme',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5738,7 +5708,7 @@ var BOTCOMMANDS = {
 
             timeguardCommand: {
                 command: 'timeguard',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5759,7 +5729,7 @@ var BOTCOMMANDS = {
 
             toggleblCommand: {
                 command: 'togglebl',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5777,7 +5747,7 @@ var BOTCOMMANDS = {
                         
             togglemotdCommand: {
                 command: 'togglemotd',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5797,7 +5767,7 @@ var BOTCOMMANDS = {
 
             unbanCommand: {
                 command: 'unban',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5848,7 +5818,7 @@ var BOTCOMMANDS = {
 
             unmuteCommand: {
                 command: 'unmute',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5967,7 +5937,7 @@ var BOTCOMMANDS = {
             },
             voteratioCommand: {
                 command: 'voteratio',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6042,7 +6012,7 @@ var BOTCOMMANDS = {
             //},
             websiteCommand: {
                 command: ['website','web'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6056,7 +6026,7 @@ var BOTCOMMANDS = {
 
             origemCommand: {
                 command: 'origem',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6068,7 +6038,7 @@ var BOTCOMMANDS = {
             },
             englishCommand: {
                 command: 'english',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -6123,7 +6093,7 @@ var BOTCOMMANDS = {
 
             zigunbanCommand: {
                 command: 'zigunban',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6161,7 +6131,7 @@ var BOTCOMMANDS = {
             },
             meetingCommand: {   //Added 03/28/2015 Zig
                 command: ['meeting', 'lunch', 'beerrun'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -6207,7 +6177,7 @@ var BOTCOMMANDS = {
             },
             lastplayedCommand: {
                 command: 'lastplayed',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6222,7 +6192,7 @@ var BOTCOMMANDS = {
             },
             exrefreshCommand: {
                 command: ['exrefresh','refresh?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6237,7 +6207,7 @@ var BOTCOMMANDS = {
             },
             kissCommand: {
                 command: 'kiss',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6252,7 +6222,7 @@ var BOTCOMMANDS = {
             },
             loguserCommand: {
                 command: 'loguser',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -6299,7 +6269,7 @@ var BOTCOMMANDS = {
             },
             zigaaCommand: {
                 command: 'zigaa',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -6312,7 +6282,7 @@ var BOTCOMMANDS = {
             },
             zigcCommand: {
                 command: 'zigc',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -6323,7 +6293,7 @@ var BOTCOMMANDS = {
             },
             zigdCommand: {
                 command: 'zigd',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -6344,7 +6314,7 @@ var BOTCOMMANDS = {
             },
             debugCommand: {
                 command: 'debug',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6358,7 +6328,7 @@ var BOTCOMMANDS = {
             },
             gifenabledCommand: {
                 command: 'gifenabled',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6372,7 +6342,7 @@ var BOTCOMMANDS = {
             },
 //            whoisCommand: {
 //                command: 'whois',
-//                rank: 'bouncer',
+//                rank: 'mod',
 //                type: 'startsWith',
 //                functionality: function (chat, cmd) {
 //                    try {
@@ -6399,7 +6369,7 @@ var BOTCOMMANDS = {
 
             whoisCommand: {
                 command: 'whois',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6417,7 +6387,7 @@ var BOTCOMMANDS = {
 
             youtubeCommand: {
                 command: 'youtube',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
