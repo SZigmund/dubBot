@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0124",
+  version: "Version  1.01.0020.0125",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2628,7 +2628,7 @@ var API = {
     try {
 	  $.ajax({
             url: "//https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/order",
-			type: "PUT",
+			type: "POST",
 			data: newlist
         });
     }
@@ -2650,6 +2650,7 @@ var API = {
 		  if(djlist[idx].id === userID) idx++;
 		  newlist += djlist[idx].id;
 		}
+	    botDebug.debugMessage(true, "New List[" + i + "," + idx + "] "  + newlist);
 	    idx++;
 	  }
 	  botDebug.debugMessage(true, "New List: " + newlist);
@@ -3740,8 +3741,8 @@ var BOTCOMMANDS = {
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
 						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
 						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
-						if (maxTime === "F") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = ", (API.getSongLengthZ() / 60.0));
-						if (maxTime === "G") botDebug.debugMessage(true, "[  API.getSongLength() ] = ", API.getSongLength());
+						if (maxTime === "F") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = " + (API.getSongLengthZ() / 60.0));
+						if (maxTime === "G") botDebug.debugMessage(true, "[  API.getSongLength() ] = " + API.getSongLength());
                     }
                 }
             },
