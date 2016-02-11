@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0109",
+  version: "Version  1.01.0020.0110",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -156,7 +156,7 @@ var USERS = {
   //todoerer
   getLastActivity: function (usrObjectID) {
       try {
-        if (typeof usrObjectID === "object") return usrObjectID;
+        if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
         var roomUser = USERS.lookupUserName(usrObjectID);
         if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
         return roomUser.lastActivity;
