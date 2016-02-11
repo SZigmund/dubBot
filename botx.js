@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0125",
+  version: "Version  1.01.0020.0126",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1798,9 +1798,9 @@ var ROULETTE = {
     countdown: null
   },
 
-  startRoulette: function () {
+  startRoulette: function (userid) {
     try  {
-	  if (botVar.botID === "560be6cbdce3260300e40770") {
+	  if (userid === "560be6cbdce3260300e40770") {
         if (ROULETTE.settings.rouletteStatus) return;
         ROULETTE.settings.rouletteStatus = true;
         ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
@@ -1817,7 +1817,7 @@ var ROULETTE = {
         {
             ROULETTE.randomRouletteSetTimer();
             if (ROULETTE.settings.randomRoulette === false) return;
-            if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette();
+            if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette(botVar.botID);
         }
     }
     catch(err) { UTIL.logException("randomRouletteCheck: " + err.message); }
@@ -2638,17 +2638,18 @@ var API = {
   moderateMoveDJ: function(userID, queuePos, djlist){
     try {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
-  //560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
       var idx = 0;
 	  var newlist = "";
 	  for(var i = 0; i < djlist.length; i++){
-	    if (newlist.length > 0) newlist += "&order%5B%5D="
+	    if (newlist.length > 0) newlist += String.fromCharCode(13)
 	    if (i + 1 === queuePos) {
-		  newlist += userID;
+		  newlist += "order[]=" + userID;
 		}
 		else {
 		  if(djlist[idx].id === userID) idx++;
-		  newlist += djlist[idx].id;
+		  newlist += "order[]=" + djlist[idx].id;
 		}
 	    botDebug.debugMessage(true, "New List[" + i + "," + idx + "] "  + newlist);
 	    idx++;
@@ -3913,7 +3914,7 @@ var BOTCOMMANDS = {
                         API.sendChat("The LAW runs the Roulette weekdays 9AM-5PM EST");
                         return;
                     }
-                    ROULETTE.startRoulette();
+                    ROULETTE.startRoulette(chat.uid);
                 }
             },
             rulesCommand: {
