@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0111",
+  version: "Version  1.01.0020.0112",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -204,8 +204,8 @@ var USERS = {
     user.lastActivity = Date.now();
     if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
     user.afkWarningCount = 0;
-	botDebug.debugMessage(true, "RESET: " + user.username + " " + user.lastActivity);
-    //clearTimeout(user.afkCountdown);
+	//botDebug.debugMessage(true, "RESET: " + user.username + " " + user.lastActivity);
+    clearTimeout(user.afkCountdown);
   },
 
   // This will return a room user from: Object, Username, UserID
@@ -1724,7 +1724,7 @@ var AFK = {
 				var warncount = roomUser.afkWarningCount;
 				dubBot.queue.tastyValLastAct = lastActive;
 				dubBot.queue.tastyValInact = inactivity;
-				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Targ: " + (AFK.settings.maximumAfk * 60 * 1000));
+				botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Warn: " + warncount);
 				if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
 					if (warncount === 0) {
 						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
@@ -2614,8 +2614,8 @@ var API = {
 	  //542465ce43f5a10200c07f11 - Doc_Z
 
       var roomUser = USERS.defineRoomUser(usrObjectID);
-	  botDebug.debugMessage("UserID: " + roomUser.id);
-	  if (roomUser.id !== "564933a1d4dcab140021cdeb") roomUser.id = "564933a1d4dcab140021cdeb";     //todoerererererererer DELETE
+	  botDebug.debugMessage(true, "Removing UserID: " + roomUser.id + " Username: " + roomUser.username + " Room: " + botVar.roomID);
+	  //if (roomUser.id !== "564933a1d4dcab140021cdeb") roomUser.id = "564933a1d4dcab140021cdeb";     //todoerererererererer DELETE
       $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + roomUser.id + "/pause",
             type: "PUT"
