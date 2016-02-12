@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0129",
+  version: "Version  1.01.0020.0130",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2651,13 +2651,13 @@ var API = {
   },
 
   //todoerererererererer
-  reorderQueueX: function(newlist){
+  reorderQueue: function(newlist){
     try {
 	///user/session/room/:id/queue/order
 	i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
 	Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
     }
-    catch(err) {UTIL.logException("reorderQueueX: " + err.message); }
+    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
   reorderQueueX: function(newlist){
     try {
