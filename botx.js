@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0130",
+  version: "Version  1.01.0020.0131",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2653,7 +2653,7 @@ var API = {
   //todoerererererererer
   reorderQueue: function(newlist){
     try {
-	///user/session/room/:id/queue/order
+	
 	i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
 	Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
     }
@@ -2671,7 +2671,53 @@ var API = {
     catch(err) {UTIL.logException("reorderQueueX: " + err.message); }
   },
 
+  flipA: function(){
+    try {
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
+  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
+ 	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+	  var newlist = [];
+	  if (firstopt) {
+	    botDebug.debugMessage(true, "dexter_nix to 1");
+		newlist.push("564933a1d4dcab140021cdeb");
+		newlist.push("560be6cbdce3260300e40770");
+	  }
+	  else {
+	    botDebug.debugMessage(true, "Levis_Homer to 1");
+		newlist.push("560be6cbdce3260300e40770");
+		newlist.push("564933a1d4dcab140021cdeb");
+	  }
+	  API.reorderQueue(newlist);
+    }
+    catch(err) {UTIL.logException("flipA: " + err.message); }
+  },
   moderateMoveDJ: function(userID, queuePos, djlist){
+    try {
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
+  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
+ 	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+      var idx = 0;
+	  var newlist = [];
+	  for(var i = 0; i < djlist.length; i++){
+	    if (i + 1 === queuePos) {
+		  newlist.push(userID);
+		}
+		else {
+		  if(djlist[idx].id === userID) idx++;
+		  newlist.push(djlist[idx].id);
+		}
+	    botDebug.debugMessage(true, "New List: " + newlist.lenght);
+	  }
+	  API.reorderQueue(newlist);
+    }
+    catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
+  },
+
+  moderateMoveDJX: function(userID, queuePos, djlist){
     try {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
   //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
@@ -2694,9 +2740,9 @@ var API = {
 	  botDebug.debugMessage(true, "New List: " + newlist);
 	  API.reorderQueue(newlist);
     }
-    catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
+    catch(err) {UTIL.logException("moderateMoveDJX: " + err.message); }
   },
-
+  
   // This will pause the users queue:
   moderateRemoveDJ: function(usrObjectID){
     try {
@@ -3779,8 +3825,8 @@ var BOTCOMMANDS = {
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") botDebug.debugMessage(true, USERS.getLastActivity("dexter_nix"));
-						if (maxTime === "E") botDebug.debugMessage(true, USERS.getLastActivity("Levis_Homer"));
+						if (maxTime === "D") API.flipA(true);
+						if (maxTime === "E") API.flipA(false);
 						if (maxTime === "F") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = " + (API.getSongLengthZ() / 60.0));
 						if (maxTime === "G") botDebug.debugMessage(true, "[  API.getSongLength() ] = " + API.getSongLength());
                     }
