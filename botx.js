@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0022.0071",
+  version: "Version  1.01.0022.0072",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2678,7 +2678,7 @@ var API = {
 		  newlist.push(djlist[idx].id);
 		  var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
 		  botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
-		  ind++;
+		  idx++;
 		}
 	    botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
