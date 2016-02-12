@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0127",
+  version: "Version  1.01.0020.0128",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -103,7 +103,7 @@ var dubBot = {
         botVar.currentSong = API.currentSongName();
       botVar.currentDJ   = API.currentDjName();
       
-      botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
+      //botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
@@ -521,7 +521,7 @@ var SETTINGS = {
               botDebug.debugMessage(true, "BL LOAD: BLID Count: " + dubBot.room.newBlacklistIDs.length);
             }
             dubBot.room.blacklistLoaded = true;
-            botDebug.debugMessage(true, "BL LOADED: TRUE");
+            //botDebug.debugMessage(true, "BL LOADED: TRUE");
             var elapsed = Date.now() - JSON.parse(info).time;
             dubBot.room.historyList = room.historyList;
             if ((elapsed < 1 * 60 * 60 * 1000)) {
@@ -1800,14 +1800,14 @@ var ROULETTE = {
 
   startRoulette: function (userid) {
     try  {
-	  if (userid === "560be6cbdce3260300e40770") {
+	  if (botVar.roomID === CONST.RGT_ROOM) {
         if (ROULETTE.settings.rouletteStatus) return;
         ROULETTE.settings.rouletteStatus = true;
         ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
         API.sendChat(botChat.getChatMessage("isopen"));
 		return;
 	  }
-      API.sendChat("Roulette is not functional yet.... But...it's COMING SOON!!!");
+      API.sendChat("Roulette is not functional yet...");
     }
     catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
@@ -2871,7 +2871,7 @@ var API = {
 
   defineRoomQueue: function() {
     try {
-	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
+	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist/details
 	  return $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
@@ -2880,10 +2880,10 @@ var API = {
 	},
 	
   getRoomID: function() {
-    //      var roomid = "5602ed62e8632103004663c2";
 	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
 	//        RGT Room ID: 5602ed62e8632103004663c2
     try { 
+	  return Dubtrack.room.model.get("_id");
 //Dubtrack.cache.users.get(a, this.renderUser, this), this.userActive = !1, 
 //Dubtrack.session && Dubtrack.room && Dubtrack.room.users ? 
 //Dubtrack.session.get("_id") == a ? (this.$(".global-actions").hide(), this.$(".actions").hide()) : (this.$(".global-actions").show(), this.$(".actions a").hide(), (
@@ -2901,8 +2901,6 @@ var API = {
 //Dubtrack.room.model.get("userid") == Dubtrack.session.id && (
 //Dubtrack.room.model.get("userid") == a) && this.$(".actions").hide(), (
 //Dubtrack.room.users.getIfHasRole(a)) && (this.$(".actions a.mute").hide(), this.$(".actions a.kick").hide(), this.$(".actions a.ban").hide());
-
-	  return Dubtrack.room.model.get("_id");
 	}
     catch(err) { UTIL.logException("getRoomID: " + err.message); }
   },
@@ -3068,6 +3066,8 @@ var CONST = {
   userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
   blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
+  RGT_ROOM: "5602ed62e8632103004663c2",
+  TASTY_ROOM: "5600a564bfb6340300a2def2",
   commandLiteral: ".",
             howAreYouComments: [
                 "Shitty, and yourself %%FU%%?",
