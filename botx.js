@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0132",
+  version: "Version  1.01.0020.0133",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -879,7 +879,7 @@ var botChat = {
    botChat.chatMessages.push(["kickrank", "[@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
    botChat.chatMessages.push(["kick", "[@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
    botChat.chatMessages.push(["kill", "/me Shutting down."]);
-   botChat.chatMessages.push(["rouletteleave", "@%%NAME%% left the roulette!"]);
+   botChat.chatMessages.push(["rouletteleave", "@%%NAME%% left the roulette! :chicken:"]);
    botChat.chatMessages.push(["songlink", "[@%%NAME%%] Link to current song: %%LINK%%"]);
    botChat.chatMessages.push(["usedlockskip", "[%%NAME%% used lockskip.]"]);
    botChat.chatMessages.push(["lockskippos", "[@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
@@ -1827,14 +1827,14 @@ var ROULETTE = {
 
   startRoulette: function (userid) {
     try  {
-	  if (botVar.roomID === CONST.RGT_ROOM) {
+	  //if (botVar.roomID === CONST.RGT_ROOM) {
         if (ROULETTE.settings.rouletteStatus) return;
         ROULETTE.settings.rouletteStatus = true;
         ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
         API.sendChat(botChat.getChatMessage("isopen"));
 		return;
-	  }
-      API.sendChat("Roulette is not functional yet...");
+	  //}
+      //API.sendChat("Roulette is not functional yet...");
     }
     catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
@@ -1895,21 +1895,20 @@ var ROULETTE = {
 	  //542465ce43f5a10200c07f11 - Doc_Z
 		var djpos = -1;
 		var looping = 0;
-		//todoerlind
 		while (djpos === -1 && ROULETTE.settings.participants.length > 0 && looping < 3) {
           looping++;
-		  botDebug.debugMessage(true, "-------------------------------------------------------");
-		  botDebug.debugMessage(true, "LEN: " + ROULETTE.settings.participants.length);
+		  //botDebug.debugMessage(true, "-------------------------------------------------------");
+		  //botDebug.debugMessage(true, "LEN: " + ROULETTE.settings.participants.length);
 		  var ind = Math.floor(Math.random() * ROULETTE.settings.participants.length);
-		  botDebug.debugMessage(true, "IND: " + ind);
+		  //botDebug.debugMessage(true, "IND: " + ind);
           var winner = ROULETTE.settings.participants[ind];
-		  botDebug.debugMessage(true, "WINNER: " + winner);
+		  //botDebug.debugMessage(true, "WINNER: " + winner);
           var user = USERS.lookupUserID(winner);
-		  botDebug.debugMessage(true, "WINNERID: " + user.id);
+		  //botDebug.debugMessage(true, "WINNERID: " + user.id);
 		  var djpos = API.getWaitListPosition(user.id, djlist);
 		  // Remove if winner is not in the waitlist:
 		  if (djpos < 0) {
-		    botDebug.debugMessage(true, "ROULETTE: Removing " + user.id);
+		    //botDebug.debugMessage(true, "ROULETTE: Removing " + user.id);
 		    ROULETTE.settings.participants.splice(ind, 1);
 		  }
 		}
@@ -2650,49 +2649,14 @@ var API = {
     },
   },
 
-  //todoerererererererer
   reorderQueue: function(newlist){
     try {
-	
-	i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
-	Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
+		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
     }
     catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
-  reorderQueueX: function(newlist){
-    try {
-	///user/session/room/:id/queue/order
-	  $.ajax({
-            url: "//https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/order",
-			type: "POST",
-			data: newlist
-        });
-    }
-    catch(err) {UTIL.logException("reorderQueueX: " + err.message); }
-  },
 
-  flipA: function(firstopt){
-    try {
-  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
-  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
-  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
- 	  //564933a1d4dcab140021cdeb - dexter_nix
-	  //560be6cbdce3260300e40770 - Levis_Homer
-	  var newlist = [];
-	  if (firstopt) {
-	    botDebug.debugMessage(true, "dexter_nix to 1");
-		newlist.push("564933a1d4dcab140021cdeb");
-		newlist.push("560be6cbdce3260300e40770");
-	  }
-	  else {
-	    botDebug.debugMessage(true, "Levis_Homer to 1");
-		newlist.push("560be6cbdce3260300e40770");
-		newlist.push("564933a1d4dcab140021cdeb");
-	  }
-	  API.reorderQueue(newlist);
-    }
-    catch(err) {UTIL.logException("flipA: " + err.message); }
-  },
   moderateMoveDJ: function(userID, queuePos, djlist){
     try {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
@@ -2710,39 +2674,13 @@ var API = {
 		  if(djlist[idx].id === userID) idx++;
 		  newlist.push(djlist[idx].id);
 		}
-	    botDebug.debugMessage(true, "New List: " + newlist.lenght);
+	    //botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
 	  API.reorderQueue(newlist);
     }
     catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
   },
 
-  moderateMoveDJX: function(userID, queuePos, djlist){
-    try {
-  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
-  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
-  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
- 	  //564933a1d4dcab140021cdeb - dexter_nix
-	  //560be6cbdce3260300e40770 - Levis_Homer
-     var idx = 0;
-	  var newlist = "";
-	  for(var i = 0; i < djlist.length; i++){
-	    if (newlist.length > 0) newlist += String.fromCharCode(13)
-	    if (i + 1 === queuePos) {
-		  newlist += "order[]=" + userID;
-		}
-		else {
-		  if(djlist[idx].id === userID) idx++;
-		  newlist += "order[]=" + djlist[idx].id;
-		}
-	    botDebug.debugMessage(true, "New List[" + i + "," + idx + "] "  + newlist);
-	  }
-	  botDebug.debugMessage(true, "New List: " + newlist);
-	  API.reorderQueue(newlist);
-    }
-    catch(err) {UTIL.logException("moderateMoveDJX: " + err.message); }
-  },
-  
   // This will pause the users queue:
   moderateRemoveDJ: function(usrObjectID){
     try {
@@ -3825,10 +3763,8 @@ var BOTCOMMANDS = {
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") API.flipA(true);
-						if (maxTime === "E") API.flipA(false);
-						if (maxTime === "F") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = " + (API.getSongLengthZ() / 60.0));
-						if (maxTime === "G") botDebug.debugMessage(true, "[  API.getSongLength() ] = " + API.getSongLength());
+						if (maxTime === "D") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = " + (API.getSongLengthZ() / 60.0));
+						if (maxTime === "E") botDebug.debugMessage(true, "[  API.getSongLength() ] = " + API.getSongLength());
                     }
                 }
             },
