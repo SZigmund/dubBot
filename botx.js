@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0128",
+  version: "Version  1.01.0020.0129",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1283,6 +1283,33 @@ var EIGHTBALL = {
 
 //SECTION UTIL: Core functionality:
 var UTIL = {
+	canSkip: function () {  //Added 02/24/2015 Zig
+		try {
+		    return true;
+			//var dj = API.getDJ();
+			//if (!basicBot.roomUtilities.isStaff(dj)) return true;
+			//var timeRemaining = API.getTimeRemaining();
+			//var newMedia = API.getMedia();
+			////botDebug.debugMessage("timeRemaining: " + timeRemaining);
+			////botDebug.debugMessage("newMedia.duration: " + newMedia.duration);
+			////basicBot.roomUtilities.logInfo("DUR1[" + newMedia.duration + "] REMAIN[" + timeRemaining + "] DIFF[" + (newMedia.duration - timeRemaining) + "]");
+			////basicBot.roomUtilities.logObject(newMedia, "media");
+			//if ((newMedia.duration - timeRemaining) > 2) return true;
+			////-------------------------------------------------------------------------------------------------------------------
+			////This is to handle the plug bug where the time remaining is actually longer than the song duration:
+			////-------------------------------------------------------------------------------------------------------------------
+			//var songPlayTime = new Date();
+			//var currTime = songPlayTime.getTime();
+			////basicBot.roomUtilities.logInfo("CID[" + basicBot.room.currentMediaCid + "] START[" + basicBot.room.currentMediaStart + "] NOW[" + (currTime) + "]");
+			//if ((newMedia.cid === basicBot.room.currentMediaCid) && ((currTime - basicBot.room.currentMediaStart) > 3000)) return true;
+			////-------------------------------------------------------------------------------------------------------------------
+			////basicBot.roomUtilities.logInfo("CANNOT SKIP");
+			//return false;
+		}
+		catch(err) {
+		  UTIL.logException("canSkip: " + err.message);
+		}
+	},
     numberToIcon: function(intValue) {
         switch (intValue) {
             case 0: return ":zero:";
@@ -2624,15 +2651,24 @@ var API = {
   },
 
   //todoerererererererer
-  reorderQueue: function(newlist){
+  reorderQueueX: function(newlist){
     try {
+	///user/session/room/:id/queue/order
+	i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+	Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
+    }
+    catch(err) {UTIL.logException("reorderQueueX: " + err.message); }
+  },
+  reorderQueueX: function(newlist){
+    try {
+	///user/session/room/:id/queue/order
 	  $.ajax({
             url: "//https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/order",
 			type: "POST",
 			data: newlist
         });
     }
-    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
+    catch(err) {UTIL.logException("reorderQueueX: " + err.message); }
   },
 
   moderateMoveDJ: function(userID, queuePos, djlist){
@@ -2793,8 +2829,10 @@ var API = {
             setTimeout(function () { API.sendChat(message.substring(space))  }, 500);
             return;
         }
+		var keepmessage = Dubtrack.room.chat._messageInputEl.val();
         Dubtrack.room.chat._messageInputEl.val(message);
         Dubtrack.room.chat.sendMessage();
+		if (keepmessage.length > 0) Dubtrack.room.chat._messageInputEl.val(keepmessage);
         botVar.ImHidden = false;
     }
     else 
@@ -4148,9 +4186,9 @@ var BOTCOMMANDS = {
                 rank: 'vip',
                 type: 'exact',
                 functionality: function (chat, cmd) {
-                    if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    if (!UTIL.canSkip()) return API.sendChat("Skip too soon...");
 					//API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
 					API.moderateForceSkip();
 					//dubBot.room.skippable = false;
