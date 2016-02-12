@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0133",
+  version: "Version  1.01.0022.0069",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -874,7 +874,7 @@ var botChat = {
    botChat.chatMessages.push(["eta", "@%%NAME%% you will reach the booth in approximately %%TIME%%."]);
    botChat.chatMessages.push(["facebook", "Like us on facebook: %%LINK%%"]);
    botChat.chatMessages.push(["starterhelp", "This image will get you started on plug: %%LINK%%"]);
-   botChat.chatMessages.push(["roulettejoin", "@%%NAME%% joined the roulette! (.leave if you regret it.)"]);
+   botChat.chatMessages.push(["roulettejoin", "%%NAME%% joined the roulette! (.leave if you regret it.)"]);
    botChat.chatMessages.push(["jointime", "[@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
    botChat.chatMessages.push(["kickrank", "[@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
    botChat.chatMessages.push(["kick", "[@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
@@ -1714,9 +1714,9 @@ var AFK = {
     maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
-    afk7Days: true,
-    afkRemoveStart: 0,
-    afkRemoveEnd: 24
+    afk7Days: false,
+    afkRemoveStart: 9,
+    afkRemoveEnd: 19
   },
   afkCheck: function () {
     try {
@@ -2659,22 +2659,27 @@ var API = {
 
   moderateMoveDJ: function(userID, queuePos, djlist){
     try {
-  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
-  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
-  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
- 	  //564933a1d4dcab140021cdeb - dexter_nix
-	  //560be6cbdce3260300e40770 - Levis_Homer
+		//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
+		//      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+		////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
+		//564933a1d4dcab140021cdeb - dexter_nix
+		//560be6cbdce3260300e40770 - Levis_Homer
       var idx = 0;
 	  var newlist = [];
+	  //todoerlind
 	  for(var i = 0; i < djlist.length; i++){
 	    if (i + 1 === queuePos) {
 		  newlist.push(userID);
+		  var roomUser =  USERS.defineRoomUser(userID);
+		  botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " USER: " + roomUser.username);
 		}
 		else {
 		  if(djlist[idx].id === userID) idx++;
 		  newlist.push(djlist[idx].id);
+		  var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
+		  botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " USER: " + roomUserX.username);
 		}
-	    //botDebug.debugMessage(true, "New List: " + newlist.length);
+	    botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
 	  API.reorderQueue(newlist);
     }
@@ -3542,6 +3547,24 @@ var BOTCOMMANDS = {
                 }
               }
             },
+            afkresetCommand: {
+                command: 'afkreset',
+                rank: 'mod',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var msg = chat.message;
+                        if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
+                        var name = msg.substring(cmd.length + 2);
+                        var user = USERS.lookupUserName(name);
+                        if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                        USERS.setLastActivity(user, false);
+                        API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatusreset"), {name: chat.un, username: name}));
+                    }
+                }
+            },
             exrouletteCommand: {
                 command: ['exroulette','roulette?'],
                 rank: 'resident-dj',
@@ -4324,24 +4347,6 @@ var BOTCOMMANDS = {
                         API.moderateBanUser(user.id, 1, API.BAN.PERMA);
                     }
                     catch (err) { UTIL.logException("trollCommand: " + err.message); }
-                }
-            },
-            afkresetCommand: {
-                command: 'afkreset',
-                rank: 'mod',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
-                        var name = msg.substring(cmd.length + 2);
-                        var user = USERS.lookupUserName(name);
-                        if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        USERS.setLastActivity(user, false);
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatusreset"), {name: chat.un, username: name}));
-                    }
                 }
             },
 
