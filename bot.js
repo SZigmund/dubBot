@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0022",
+  version: "Version  1.01.0023",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2659,20 +2659,25 @@ var API = {
 
   moderateMoveDJ: function(userID, queuePos, djlist){
     try {
-  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
-  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
-  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
- 	  //564933a1d4dcab140021cdeb - dexter_nix
-	  //560be6cbdce3260300e40770 - Levis_Homer
+		//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
+		//      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+		////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
+		//564933a1d4dcab140021cdeb - dexter_nix
+		//560be6cbdce3260300e40770 - Levis_Homer
       var idx = 0;
 	  var newlist = [];
 	  for(var i = 0; i < djlist.length; i++){
-	    if (i + 1 === queuePos) {
+	    if ((i + 1) === queuePos) {
 		  newlist.push(userID);
+		  //var roomUser =  USERS.defineRoomUser(userID);
+		  //botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUser.username);
 		}
 		else {
 		  if(djlist[idx].id === userID) idx++;
 		  newlist.push(djlist[idx].id);
+		  //var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
+		  //botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
+		  idx++;
 		}
 	    //botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
