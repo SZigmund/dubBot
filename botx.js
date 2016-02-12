@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0022.0069",
+  version: "Version  1.01.0022.0070",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2668,16 +2668,16 @@ var API = {
 	  var newlist = [];
 	  //todoerlind
 	  for(var i = 0; i < djlist.length; i++){
-	    if (i + 1 === queuePos) {
+	    if ((i + 1) === queuePos) {
 		  newlist.push(userID);
 		  var roomUser =  USERS.defineRoomUser(userID);
-		  botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " USER: " + roomUser.username);
+		  botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUser.username);
 		}
 		else {
 		  if(djlist[idx].id === userID) idx++;
 		  newlist.push(djlist[idx].id);
 		  var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
-		  botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " USER: " + roomUserX.username);
+		  botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
 		}
 	    botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
