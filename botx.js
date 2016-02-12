@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020.0131",
+  version: "Version  1.01.0020.0132",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2671,7 +2671,7 @@ var API = {
     catch(err) {UTIL.logException("reorderQueueX: " + err.message); }
   },
 
-  flipA: function(){
+  flipA: function(firstopt){
     try {
   //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
   //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
