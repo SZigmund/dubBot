@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0021",
+  version: "Version  1.01.0022",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1714,9 +1714,9 @@ var AFK = {
     maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
-    afk7Days: true,
-    afkRemoveStart: 0,
-    afkRemoveEnd: 24
+    afk7Days: false,
+    afkRemoveStart: 9,
+    afkRemoveEnd: 19
   },
   afkCheck: function () {
     try {
@@ -3542,6 +3542,24 @@ var BOTCOMMANDS = {
                 }
               }
             },
+            afkresetCommand: {
+                command: 'afkreset',
+                rank: 'mod',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var msg = chat.message;
+                        if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
+                        var name = msg.substring(cmd.length + 2);
+                        var user = USERS.lookupUserName(name);
+                        if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                        USERS.setLastActivity(user, false);
+                        API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatusreset"), {name: chat.un, username: name}));
+                    }
+                }
+            },
             exrouletteCommand: {
                 command: ['exroulette','roulette?'],
                 rank: 'resident-dj',
@@ -4324,24 +4342,6 @@ var BOTCOMMANDS = {
                         API.moderateBanUser(user.id, 1, API.BAN.PERMA);
                     }
                     catch (err) { UTIL.logException("trollCommand: " + err.message); }
-                }
-            },
-            afkresetCommand: {
-                command: 'afkreset',
-                rank: 'mod',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
-                        var name = msg.substring(cmd.length + 2);
-                        var user = USERS.lookupUserName(name);
-                        if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        USERS.setLastActivity(user, false);
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatusreset"), {name: chat.un, username: name}));
-                    }
                 }
             },
 
