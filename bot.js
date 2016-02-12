@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0020",
+  version: "Version  1.01.0021",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -92,6 +92,10 @@ var dubBot = {
     newBlacklistIDs: [],
     blacklistLoaded: false,
   },
+  queue: {
+	dubQueue: null,
+	dubQueueResp: null
+  },
 
   validateCurrentSong: function () {
     try {
@@ -99,7 +103,7 @@ var dubBot = {
         botVar.currentSong = API.currentSongName();
       botVar.currentDJ   = API.currentDjName();
       
-      botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
+      //botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
@@ -147,9 +151,14 @@ var USERS = {
   usersImport: [],
   users: [],
   loadUserInterval: null,
-  getLastActivity: function (user) {
-      //todoer
-      //return user.lastActivity;
+  getLastActivity: function (usrObjectID) {
+      try {
+        if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
+        var roomUser = USERS.lookupUserName(usrObjectID);
+        if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+        return roomUser.lastActivity;
+	  }
+      catch(err) { UTIL.logException("getLastActivity: " + err.message); }
   },
   //removes one MIA User that has no UserID and is not in the room.
   removeMIANonUsers: function () {
@@ -181,17 +190,21 @@ var USERS = {
     }
     catch(err) { UTIL.logException("updateUserID: " + err.message); }
   },
+
   setLastActivityID: function (userId, dispMsg) {
     var user = USERS.lookupUserID(userId);
     if (user === false) return;
     USERS.setLastActivity(user, dispMsg);
   },
-//todoer afk activity TEST:
+
   setLastActivity: function (user, dispMsg) {
     user.lastActivity = Date.now();
-    if ((user.afkWarningCount > 0) && (dispMsg === true)) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
+	var resetAFK = false;
+    if (user.afkWarningCount > 0) resetAFK = true;
+    if (resetAFK && dispMsg) API.sendChat(botChat.subChat(botChat.getChatMessage("afkUserReset"), {name: user.username}));
     user.afkWarningCount = 0;
-    //clearTimeout(user.afkCountdown);
+    clearTimeout(user.afkCountdown);
+	if (resetAFK) SETTINGS.storeToStorage();
   },
 
   // This will return a room user from: Object, Username, UserID
@@ -224,7 +237,6 @@ var USERS = {
 	  }
   },
   lookupUserID: function (id) {   //getroomuser
-  //todoer TEST: 
         for (var i = 0; i < USERS.users.length; i++) {
             if (USERS.users[i].id === id) {
                 return USERS.users[i];
@@ -240,7 +252,7 @@ var USERS = {
                     UTIL.logObject(json, "USR");
                     for (var idx in json) {
                         var newUser = json[idx];
-                        //USERS.usersImport.push(new USERS.User(user.id, user.username, "UNDEFINED"));
+                        //USERS.usersImport.push(new USERS.User(user.id, user.username));
                         USERS.usersImport.push(newUser);
                     }
                 }
@@ -249,14 +261,14 @@ var USERS = {
         }
         catch(err) { UTIL.logException("importBlackList: " + err.message); }
     },
-    User: function (userID, username, userRole) {
+    User: function (userID, username) {
         this.id = userID;
         this.username = username;
         this.jointime = Date.now();
         this.firstActivity = Date.now();
         this.lastActivity = Date.now();
         this.isMehing = false;
-        this.userRole = userRole;
+        this.userRole = 0;
         this.votes = {
             songsPlayed: 0,
             tastyRcv: 0,
@@ -311,44 +323,7 @@ var USERS = {
       }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
     },
-    defineUserRole: function (userElement, username) {
-      try {
-        // SAMPLE: "user-levis_homer dj manager currentDJ"
-        botDebug.debugMessage(false, userElement);
-        userElement = userElement.replace("user-", "");
-        userElement = userElement.replace(username, "");
-        userElement = userElement.replace("currentDJ", "");
-        userElement = userElement.replace("downdub", "");
-        userElement = userElement.trim();
-        userElement = userElement.toLowerCase();
-        var space = userElement.indexOf(' ');
-        var dispRole;
-        if (space === -1) dispRole = userElement;
-        if (space !== -1) dispRole = userElement.substring(0, space);
-        botDebug.debugMessage(false, "DISP ROLE: " + dispRole);
-        switch (dispRole) {
-            case "creator":     return "creator";
-            case "co-owner":    return "co-owner";
-            case "manager":     return "manager";
-            case "mod":         return "mod";
-            case "vip":         return "vip";
-            case "resident-dj": return "resident-dj";
-            case "dj":          return "dj";
-        }
-        // SAMPLE: "user-levis_homer dj manager"
-        // SAMPLE: "dj manager"
-        if (userElement.substring(userElement.length - 8,  userElement.length) === " creator")           return "creator"
-        if (userElement.substring(userElement.length - 17, userElement.length) === " creator co-owner")  return "creator co-owner"
-        if (userElement.substring(userElement.length - 9,  userElement.length) === " co-owner")          return "co-owner"
-        if (userElement.substring(userElement.length - 8,  userElement.length) === " manager")           return "manager"
-        if (userElement.substring(userElement.length - 4,  userElement.length) === " mod")               return "mod"
-        if (userElement.substring(userElement.length - 4,  userElement.length) === " vip")               return "vip"
-        if (userElement.substring(userElement.length - 12, userElement.length) === " resident-dj")       return "resident-dj"
-        if (userElement.substring(userElement.length - 3,  userElement.length) === " dj")                return "dj"
-        return "";
-      }
-      catch(err) { UTIL.logException("defineUserRole: " + err.message); }
-    },
+
     // Resets all users data on song advance:
     resetUserSongStats: function () {
       try {
@@ -383,6 +358,7 @@ var USERS = {
           USERS.users[i].inRoom = false;
           USERS.users[i].inRoomUpdated = false;
           USERS.users[i].dubDown = false;
+		  USERS.users[i].afkWarningCount = 0;
         }
       }
       catch(err) { UTIL.logException("resetAllUsersOnStartup: " + err.message); }
@@ -422,12 +398,11 @@ var USERS = {
         var username = usernameList[i].getElementsByClassName("username")[0].innerHTML;
         botDebug.debugMessage(false, "USER: " + username);
         var userInfo = usernameList[i].className;
-        userRole = USERS.defineUserRole(userInfo, username);
         var userMehing = false;
         if (userInfo.indexOf("downdub") >= 0) userMehing = true;
         var roomUser = USERS.lookupUserName(username);
         if (roomUser === false) {
-          var roomUser = new USERS.User("new", username, userRole);
+          var roomUser = new USERS.User("new", username);
           USERS.users.push(roomUser);
           newUser = true;
         }
@@ -437,7 +412,7 @@ var USERS = {
         if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
         roomUser.inRoom = true;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
-        roomUser.userRole = userRole;
+        roomUser.userRole = 0;
         if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
           API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
         }
@@ -522,13 +497,6 @@ var SETTINGS = {
       catch(err) { UTIL.logException("retrieveSettings: " + err.message); }
     },
 
-//[DEBUG]: STORED DATA: {"debug":true,"afkList":[],"mutedUsers":[],"bannedUsers":[],"skippable":true,"usercommand":true,"allcommand":true,"blacklistInterval":null,"queueing":0,"queueable":true,"currentDJID":null,"currentMediaCid":999,"currentMediaStart":999,"historyList":[],"cycleTimer":85,"queue":{"id":[],"position":[]},"newBlacklist":[],"newBlacklistIDs":[],"blacklistLoaded":true} botx.js:1553:5
-//[DEBUG]: DONE: storeToStorage - UserCnt: 2 TIME: 1448225383912 botx.js:1553:5
-//[DEBUG]: username: [levis_homer] botx.js:1553:5
-//[DEBUG]: USERS IN THE ROOM: levis_homer botx.js:1553:5
-//[DEBUG]: username: [dexter_nix] botx.js:1553:5
-//[DEBUG]: USERS IN THE ROOM: dexter_nix botx.js:1553:5
-
     retrieveFromStorage: function () {
         try {
         var info = localStorage.getItem("dubBotStorageInfo");
@@ -553,7 +521,7 @@ var SETTINGS = {
               botDebug.debugMessage(true, "BL LOAD: BLID Count: " + dubBot.room.newBlacklistIDs.length);
             }
             dubBot.room.blacklistLoaded = true;
-            botDebug.debugMessage(true, "BL LOADED: TRUE");
+            //botDebug.debugMessage(true, "BL LOADED: TRUE");
             var elapsed = Date.now() - JSON.parse(info).time;
             dubBot.room.historyList = room.historyList;
             if ((elapsed < 1 * 60 * 60 * 1000)) {
@@ -561,7 +529,6 @@ var SETTINGS = {
                 for (var prop in settings) {
                     SETTINGS.settings[prop] = settings[prop];
                 }
-                dubBot.room.afkList = room.afkList;
                 dubBot.room.mutedUsers = room.mutedUsers;
                 dubBot.room.autoskip = room.autoskip;
                 dubBot.room.roomstats = room.roomstats;
@@ -576,19 +543,19 @@ var SETTINGS = {
     },
     storeToStorage: function () {
         try {
-        botDebug.debugMessage(true, "START: storeToStorage");
+        //botDebug.debugMessage(true, "START: storeToStorage");
         localStorage.setItem("dubBotSettings", JSON.stringify(SETTINGS.settings));
         localStorage.setItem("dubBotRoom", JSON.stringify(dubBot.room));
         localStorage.setItem("dubBotUsers", JSON.stringify(USERS.users));
 
-        botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
-        botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
+        //botDebug.debugMessage(true, "STORED DATA: " + JSON.stringify(dubBot.room));
+        //botDebug.debugMessage(true, "STORED USERS: " + JSON.stringify(USERS.users));
         var dubBotStorageInfo = {
             time: Date.now(),
             stored: true,
             version: botVar.version
         };
-        botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + USERS.users.length + " TIME: " + dubBotStorageInfo.time);
+        //botDebug.debugMessage(true, "DONE: storeToStorage - UserCnt: " + USERS.users.length + " TIME: " + dubBotStorageInfo.time);
         localStorage.setItem("dubBotStorageInfo", JSON.stringify(dubBotStorageInfo));
         }
         catch(err) {
@@ -809,8 +776,7 @@ var botChat = {
    botChat.chatMessages.push(["ghosting", "[%%NAME1%%] %%NAME2%% is either ghosting or not here."]);
 
    botChat.chatMessages.push(["isopen", " @djs - The roulette is now open! Type .join to participate!"]);
-   botChat.chatMessages.push(["winnerpicked", " A winner has been picked! @%%NAME%% to position %%POSITION%%."]);
-
+   botChat.chatMessages.push(["winnerpicked", " A winner has been picked! @%%NAME%% moves from %%OLDPOS%% to position %%POSITION%%."]);
 
    botChat.chatMessages.push(["alreadyadding", " User is already being added! Changed the desired position to %%POSITION%%."]);
    botChat.chatMessages.push(["adding", " Added @%%NAME%% to the queue. Current queue: %%POSITION%%."]);
@@ -828,12 +794,11 @@ var botChat = {
    botChat.chatMessages.push(["lunchleave", " @%%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)"]);
    botChat.chatMessages.push(["beerrunleave", " @%%NAME%% Going to get some :beer:. (Position: %%POS%%)"]);
 
-
    botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
    botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
-   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkremoveXXX", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
    botChat.chatMessages.push(["afkUserReset", "Thanks @%%NAME%% your afk status has been reset. "]);
-
 
    botChat.chatMessages.push(["caps", "@%%NAME%% unglue your capslock button please."]);
    botChat.chatMessages.push(["askskip", "@%%NAME%% don't ask for skips."]);
@@ -909,12 +874,12 @@ var botChat = {
    botChat.chatMessages.push(["eta", "@%%NAME%% you will reach the booth in approximately %%TIME%%."]);
    botChat.chatMessages.push(["facebook", "Like us on facebook: %%LINK%%"]);
    botChat.chatMessages.push(["starterhelp", "This image will get you started on plug: %%LINK%%"]);
-   botChat.chatMessages.push(["roulettejoin", "@%%NAME%% joined the roulette! (.leave if you regret it.)"]);
+   botChat.chatMessages.push(["roulettejoin", "%%NAME%% joined the roulette! (.leave if you regret it.)"]);
    botChat.chatMessages.push(["jointime", "[@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
    botChat.chatMessages.push(["kickrank", "[@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
    botChat.chatMessages.push(["kick", "[@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
    botChat.chatMessages.push(["kill", "/me Shutting down."]);
-   botChat.chatMessages.push(["rouletteleave", "@%%NAME%% left the roulette!"]);
+   botChat.chatMessages.push(["rouletteleave", "@%%NAME%% left the roulette! :chicken:"]);
    botChat.chatMessages.push(["songlink", "[@%%NAME%%] Link to current song: %%LINK%%"]);
    botChat.chatMessages.push(["usedlockskip", "[%%NAME%% used lockskip.]"]);
    botChat.chatMessages.push(["lockskippos", "[@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
@@ -1318,6 +1283,33 @@ var EIGHTBALL = {
 
 //SECTION UTIL: Core functionality:
 var UTIL = {
+	canSkip: function () {  //Added 02/24/2015 Zig
+		try {
+		    return true;
+			//var dj = API.getDJ();
+			//if (!basicBot.roomUtilities.isStaff(dj)) return true;
+			//var timeRemaining = API.getTimeRemaining();
+			//var newMedia = API.getMedia();
+			////botDebug.debugMessage("timeRemaining: " + timeRemaining);
+			////botDebug.debugMessage("newMedia.duration: " + newMedia.duration);
+			////basicBot.roomUtilities.logInfo("DUR1[" + newMedia.duration + "] REMAIN[" + timeRemaining + "] DIFF[" + (newMedia.duration - timeRemaining) + "]");
+			////basicBot.roomUtilities.logObject(newMedia, "media");
+			//if ((newMedia.duration - timeRemaining) > 2) return true;
+			////-------------------------------------------------------------------------------------------------------------------
+			////This is to handle the plug bug where the time remaining is actually longer than the song duration:
+			////-------------------------------------------------------------------------------------------------------------------
+			//var songPlayTime = new Date();
+			//var currTime = songPlayTime.getTime();
+			////basicBot.roomUtilities.logInfo("CID[" + basicBot.room.currentMediaCid + "] START[" + basicBot.room.currentMediaStart + "] NOW[" + (currTime) + "]");
+			//if ((newMedia.cid === basicBot.room.currentMediaCid) && ((currTime - basicBot.room.currentMediaStart) > 3000)) return true;
+			////-------------------------------------------------------------------------------------------------------------------
+			////basicBot.roomUtilities.logInfo("CANNOT SKIP");
+			//return false;
+		}
+		catch(err) {
+		  UTIL.logException("canSkip: " + err.message);
+		}
+	},
     numberToIcon: function(intValue) {
         switch (intValue) {
             case 0: return ":zero:";
@@ -1414,36 +1406,6 @@ var UTIL = {
     }
   },
    
-  rankToNumber: function (rankString) {
-    var rankInt = null;
-    switch (rankString) {
-        case "admin":
-            rankInt = 10;
-            break;
-        case "ambassador":
-            rankInt = 7;
-            break;
-        case "host":
-            rankInt = 5;
-            break;
-        case "cohost":
-            rankInt = 4;
-            break;
-        case "manager":
-            rankInt = 3;
-            break;
-        case "bouncer":
-            rankInt = 2;
-            break;
-        case "residentdj":
-            rankInt = 1;
-            break;
-        case "user":
-            rankInt = 0;
-            break;
-    }
-    return rankInt;
-  },
   logObject: function (objectToLog, objectName) {
     try {
         for (var prop in objectToLog) {
@@ -1637,7 +1599,7 @@ var TASTY = {
         if (user === false) return false;
         return user.rolled;
     },
-    tastyVote: function (usrObjectID, cmd) {   //todoerererererererer
+    tastyVote: function (usrObjectID, cmd) {
         try {
         var roomUser = USERS.defineRoomUser(usrObjectID);
         if (roomUser.tastyVote) return;
@@ -1692,7 +1654,7 @@ var TASTY = {
                       'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                       'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                       'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
-                      'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
+                      'epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
                       'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
                       'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                       'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
@@ -1748,72 +1710,74 @@ var botDebug = {
 //SECTION AFK: All AFK functionality:
 var AFK = {
   afkInterval: null,
-  afkList: [],
   settings: {
     maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
     afk7Days: true,
     afkRemoveStart: 0,
-    afkRemoveEnd: 24,
-    afkpositionCheck: 30,
-    afkRankCheck: "ambassador"
+    afkRemoveEnd: 24
   },
   afkCheck: function () {
     try {
     if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
     if (!AFK.afkRemovalNow()) return void (0);
-    var rank = UTIL.rankToNumber(AFK.settings.afkRankCheck);
-    var djlist = API.getWaitList();
-    var lastPos = Math.min(djlist.length, AFK.settings.afkpositionCheck);
-    if (lastPos - 1 > djlist.length) return void (0);
-    for (var i = 0; i < lastPos; i++) {
+    API.getWaitList(AFK.afkCheckCallback);
+	}
+    catch(err) { UTIL.logException("afkCheck: " + err.message); }
+  },
+
+  afkCheckCallback: function (djlist) {
+    try {
+	//botDebug.debugMessage(true, "=====================================================================================");
+	//botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
+
+    for (var i = 0; i < djlist.length; i++) {
         if (typeof djlist[i] !== 'undefined') {
+            //botDebug.debugMessage(true, "AFK: DJ Defined");
             var id = djlist[i].id;
-            var user = USERS.lookupUserID(id);
-            if (typeof user !== 'boolean') {
-                var dubUser = API.getDubUser(user);
-                if (rank !== null) {
-                    var name = dubUser.username;
-                    var lastActive = USERS.getLastActivity(user);
-                    var inactivity = Date.now() - lastActive;
-                    var time = UTIL.msToStr(inactivity);
-                    var warncount = user.afkWarningCount;
-					//todoer GET AFK WORKING:
-                    if (inactivity > AFK.settings.maximumAfk * 60 * 1000) {
-                        if (warncount === 0) {
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
-                            user.afkWarningCount = 3;
-                            user.afkCountdown = setTimeout(function (userToChange) {
-                                userToChange.afkWarningCount = 1;
-                            }, 90 * 1000, user);
-                        }
-                        else if (warncount === 1) {
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
-                            user.afkWarningCount = 3;
-                            user.afkCountdown = setTimeout(function (userToChange) {
-                                userToChange.afkWarningCount = 2;
-                            }, 30 * 1000, user);
-                        }
-                        else if (warncount === 2) {
-                            var pos = API.getWaitListPosition(id);
-                            if (pos !== -1) {
-                                pos++;
-                                AFK.afkList.push([id, Date.now(), pos]);
-                                AFK.resetDC(user);
-                                API.moderateRemoveDJ(id);
-                                user.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-                                API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
-                            }
-                            user.afkWarningCount = 0;
-                        }
-                    }
-                }
+            //botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
+            var roomUser = USERS.lookupUserID(id);
+            if (typeof roomUser !== 'boolean') {
+	            //botDebug.debugMessage(true, "AFK: User Defined");
+				var name = djlist[i].username;
+				var lastActive = USERS.getLastActivity(roomUser);
+				var inactivity = Date.now();
+				inactivity -= lastActive;
+				var time = UTIL.msToStr(inactivity);
+				var warncount = roomUser.afkWarningCount;
+				//botDebug.debugMessage(true, "AFK: Checking: " + name + " lastActive: " + lastActive + " time: " + inactivity + " Warn: " + warncount);
+				//botDebug.debugMessage(true, "A: " + roomUser.id + " B: " + botVar.botID);
+				if ((inactivity > (AFK.settings.maximumAfk * 60 * 1000)) && (roomUser.id !== botVar.botID)) {
+					if (warncount === 0) {
+						API.sendChat(botChat.subChat(botChat.getChatMessage("warning1"), {name: name, time: time}));
+						roomUser.afkWarningCount = 3;
+						roomUser.afkCountdown = setTimeout(function (userToChange) {
+							userToChange.afkWarningCount = 1;
+						}, 90 * 1000, roomUser);
+					}
+					else if (warncount === 1) {
+						API.sendChat(botChat.subChat(botChat.getChatMessage("warning2"), {name: name}));
+						roomUser.afkWarningCount = 3;
+						roomUser.afkCountdown = setTimeout(function (userToChange) {
+							userToChange.afkWarningCount = 2;
+						}, 30 * 1000, roomUser);
+					}
+					else if (warncount === 2) {
+						AFK.resetDC(roomUser);
+						API.moderateRemoveDJ(id);
+						roomUser.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
+						//API.sendChat(botChat.subChat(botChat.getChatMessage("afkremoveXXX"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
+						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, maximumafk: AFK.settings.maximumAfk}));
+						roomUser.afkWarningCount = 0;
+						SETTINGS.storeToStorage();
+					}
+				}
             }
         }
     }
     }
-    catch(err) { UTIL.logException("afkCheck: " + err.message); }
+    catch(err) { UTIL.logException("afkCheckCallback: " + err.message); }
   },
   resetDC: function (user) {
     user.lastDC.time = null;
@@ -1844,7 +1808,7 @@ var AFK = {
   },
 };
 
-// Will not currently work as Larry cannot move people in the line AND the @all mention doesn't work.
+// Will not currently work as Larry cannot move people in the line
 //SECTION ROULETTE: All roulette functionality:
 var ROULETTE = {
   settings: {
@@ -1861,23 +1825,26 @@ var ROULETTE = {
     countdown: null
   },
 
-  startRoulette: function () {
+  startRoulette: function (userid) {
     try  {
-        //if (ROULETTE.rouletteStatus) return;
-        //ROULETTE.rouletteStatus = true;
-        //ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
-        //API.sendChat(botChat.getChatMessage("isopen"));
-        API.sendChat("Sorry no roulette yet, I can't manage the queue yet, plus the @all command does not exist yet.");
+	  //if (botVar.roomID === CONST.RGT_ROOM) {
+        if (ROULETTE.settings.rouletteStatus) return;
+        ROULETTE.settings.rouletteStatus = true;
+        ROULETTE.countdown = setTimeout(function () { ROULETTE.endRoulette(); }, 60 * 1000);
+        API.sendChat(botChat.getChatMessage("isopen"));
+		return;
+	  //}
+      //API.sendChat("Roulette is not functional yet...");
     }
     catch(err) { UTIL.logException("startRoulette: " + err.message); }
   },
   randomRouletteCheck: function() {
     try  {
-        if (ROULETTE.nextRandomRoulette <= Date.now())
+        if (ROULETTE.settings.nextRandomRoulette <= Date.now())
         {
             ROULETTE.randomRouletteSetTimer();
-            if (ROULETTE.randomRoulette === false) return;
-            if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette();
+            if (ROULETTE.settings.randomRoulette === false) return;
+            if (ROULETTE.rouletteTimeRange()) ROULETTE.startRoulette(botVar.botID);
         }
     }
     catch(err) { UTIL.logException("randomRouletteCheck: " + err.message); }
@@ -1886,16 +1853,16 @@ var ROULETTE = {
   
   rouletteTimeRange: function () {
     try {
-        if (!ROULETTE.roulette5Days && !ROULETTE.roulette7Days) return false;
-        if (ROULETTE.randomRoulette === false) return false;
+        if (!ROULETTE.settings.roulette5Days && !ROULETTE.settings.roulette7Days) return false;
+        if (ROULETTE.settings.randomRoulette === false) return false;
         var currDate = new Date();
         //Not on Saturday/Sunday if not monitoring 7 days a week
-        if (!ROULETTE.roulette7Days) {
+        if (!ROULETTE.settings.roulette7Days) {
             var dayofweek = currDate.getDay();  // [Day of week Sun=0, Mon=1...Sat=6]
             if (dayofweek === 6 || dayofweek === 0) return false;
         }
         var hourofday = currDate.getHours();
-        if (hourofday >= ROULETTE.rouletteStart && hourofday < ROULETTE.rouletteEnd) return true;
+        if (hourofday >= ROULETTE.settings.rouletteStart && hourofday < ROULETTE.settings.rouletteEnd) return true;
         return false;
     }
     catch(err) { UTIL.logException("rouletteTimeRange: " + err.message); }
@@ -1903,39 +1870,65 @@ var ROULETTE = {
 
   randomRouletteSetTimer: function () {
     try  {
-        var randomRange = (ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin)
+        var randomRange = (ROULETTE.settings.randomRouletteMax - ROULETTE.settings.randomRouletteMin)
         var randomMins = Math.floor(Math.random() * randomRange);
-        randomMins += ROULETTE.randomRouletteMin;
+        randomMins += ROULETTE.settings.randomRouletteMin;
         //JIC: Ensure we are in the correct time range:
-        if ((randomMins > ROULETTE.randomRouletteMax) || (randomMins < ROULETTE.randomRouletteMin))
+        if ((randomMins > ROULETTE.settings.randomRouletteMax) || (randomMins < ROULETTE.settings.randomRouletteMin))
         {
-          randomMins = ROULETTE.randomRouletteMin + ((ROULETTE.randomRouletteMax - ROULETTE.randomRouletteMin) / 2.0)
+          randomMins = ROULETTE.settings.randomRouletteMin + ((ROULETTE.settings.randomRouletteMax - ROULETTE.settings.randomRouletteMin) / 2.0)
         }
         var nextTime = new Date();
         var myTimeSpan;
         myTimeSpan = randomMins*60*1000; // X minutes in milliseconds
         nextTime.setTime(nextTime.getTime() + myTimeSpan);
         API.chatLog("Next Roulette: " + UTIL.msToStr(myTimeSpan));
-        ROULETTE.nextRandomRoulette = nextTime;
+        ROULETTE.settings.nextRandomRoulette = nextTime;
     }
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
+  selectRouletteWinner: function (djlist) {
+    try {
+	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+	  //542465ce43f5a10200c07f11 - Doc_Z
+		var djpos = -1;
+		var looping = 0;
+		while (djpos === -1 && ROULETTE.settings.participants.length > 0 && looping < 3) {
+          looping++;
+		  //botDebug.debugMessage(true, "-------------------------------------------------------");
+		  //botDebug.debugMessage(true, "LEN: " + ROULETTE.settings.participants.length);
+		  var ind = Math.floor(Math.random() * ROULETTE.settings.participants.length);
+		  //botDebug.debugMessage(true, "IND: " + ind);
+          var winner = ROULETTE.settings.participants[ind];
+		  //botDebug.debugMessage(true, "WINNER: " + winner);
+          var user = USERS.lookupUserID(winner);
+		  //botDebug.debugMessage(true, "WINNERID: " + user.id);
+		  var djpos = API.getWaitListPosition(user.id, djlist);
+		  // Remove if winner is not in the waitlist:
+		  if (djpos < 0) {
+		    //botDebug.debugMessage(true, "ROULETTE: Removing " + user.id);
+		    ROULETTE.settings.participants.splice(ind, 1);
+		  }
+		}
+		if (ROULETTE.settings.participants.length === 0) return API.sendChat("Roulette has ended with no participants");
+        ROULETTE.settings.participants = [];
+        var pos = Math.floor((Math.random() * djlist.length) + 1);
+        var name = user.username;
+        API.sendChat(botChat.subChat(botChat.getChatMessage("winnerpicked"), {name: name, oldpos: (djpos + 1), position: pos}));
+        API.moderateMoveDJ(user.id, pos, djlist);
+    }
+    catch(err) { UTIL.logException("selectRouletteWinner: " + err.message); }
+  },
   endRoulette: function () {
     try {
-        ROULETTE.rouletteStatus = false;
-        if (ROULETTE.participants.length === 0) {
+        ROULETTE.settings.rouletteStatus = false;
+        if (ROULETTE.settings.participants.length === 0) {
            API.sendChat("Roulette has ended with no participants");
            return;
         }
-        var ind = Math.floor(Math.random() * ROULETTE.participants.length);
-        var winner = ROULETTE.participants[ind];
-        ROULETTE.participants = [];
-        var pos = Math.floor((Math.random() * API.getWaitList().length) + 1);
-        var user = USERS.lookupUserName(winner);
-        var name = user.username;
-        API.sendChat(subChat(botChat.getChatMessage("winnerpicked"), {name: name, position: pos}));
-        setTimeout(function (winner, pos) { API.moveUser(winner, pos, false); }, 1 * 1000, winner, pos);
+	    API.getWaitList(ROULETTE.selectRouletteWinner);
     }
     catch(err) { UTIL.logException("endRoulette: " + err.message); }
   }
@@ -2620,6 +2613,8 @@ var API = {
 
       window.APIisRunning = true;
       botVar.botName = API.getBotName();
+	  botVar.botID = API.getBotID();
+	  botVar.roomID = API.getRoomID();
       if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
       SETTINGS.retrieveFromStorage();
@@ -2644,8 +2639,7 @@ var API = {
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
       USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
 
-      //todoer AFK DJ CHECK:
-      //AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
+      AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
 
       API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
@@ -2654,15 +2648,75 @@ var API = {
       // [...]
     },
   },
+
+  reorderQueue: function(newlist){
+    try {
+		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
+    }
+    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
+  },
+
+  moderateMoveDJ: function(userID, queuePos, djlist){
+    try {
+  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
+  //      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
+  ////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
+ 	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+      var idx = 0;
+	  var newlist = [];
+	  for(var i = 0; i < djlist.length; i++){
+	    if (i + 1 === queuePos) {
+		  newlist.push(userID);
+		}
+		else {
+		  if(djlist[idx].id === userID) idx++;
+		  newlist.push(djlist[idx].id);
+		}
+	    //botDebug.debugMessage(true, "New List: " + newlist.length);
+	  }
+	  API.reorderQueue(newlist);
+    }
+    catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
+  },
+
+  // This will pause the users queue:
+  moderateRemoveDJ: function(usrObjectID){
+    try {
+	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/pause
+	  //564933a1d4dcab140021cdeb - dexter_nix
+	  //560be6cbdce3260300e40770 - Levis_Homer
+	  //542465ce43f5a10200c07f11 - Doc_Z
+
+      var roomUser = USERS.defineRoomUser(usrObjectID);
+	  //botDebug.debugMessage(true, "Removing UserID: " + roomUser.id + " Username: " + roomUser.username + " Room: " + botVar.roomID);
+      $.ajax({
+            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/user/" + roomUser.id + "/pause",
+            type: "PUT"
+        });
+		
+    }
+    catch(err) {UTIL.logException("moderateRemoveDJ: " + err.message); }
+  },
+
   getDJ: function(){
     return USERS.lookupUserName(API.currentDjName());
   },
 
-  getWaitListPosition: function(id){
+  getWaitListPosition: function(id, djlist){
     try {
-        if(typeof id === 'undefined' || id === null){
-            id = API.getCurrentDubUser().id;
+        if(typeof id === 'undefined' || id === null) id = botVar.botID;
+        for(var i = 0; i < djlist.length; i++){
+            if(djlist[i].id === id) return i;
         }
+        return -1;
+    }
+    catch(err) { UTIL.logException("getWaitListPosition: " + err.message); }
+  },
+  getWaitListPositionOld: function(id){
+    try {
+        if(typeof id === 'undefined' || id === null) id = botVar.botID;
         var wl = API.getWaitList();
         for(var i = 0; i < wl.length; i++){
             if(wl[i].id === id){
@@ -2671,9 +2725,7 @@ var API = {
         }
         return -1;
     }
-       catch(err) {
-       UTIL.logException("getWaitListPosition: " + err.message);
-    }
+    catch(err) { UTIL.logException("getWaitListPositionOld: " + err.message); }
   },
   mehThisSong: function () {
     try  {  $('.dubdown').click();    }  
@@ -2684,12 +2736,6 @@ var API = {
     catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
-  getWaitList: function () {
-  //todoer
-  },
-  getCurrentDubUser: function () {
-    return USERS.lookupUserName(botVar.botName);
-  },
   getDubUserID: function (userid) {
     try {
       //todoer COMPLETE
@@ -2707,34 +2753,31 @@ var API = {
     try {
         return API.getDubUserID(user.id);
     }
-    catch(err) {
-      UTIL.logException("getUser: " + err.message);
-    }
+    catch(err) { UTIL.logException("getUser: " + err.message); }
   },
-  
-  getPermission: function (obj) { //1 requests
+  displayRoleToRoleNumber: function (displayRole) {
     try {
-      return 10;
-      // TODOER
-      //var u;
-      //if (typeof obj === "object") u = obj;
-      //else u = API.getDubUserID(obj);
-      //if (botCreatorIDs.indexOf(u.id) > -1) return 10;    // admin
-      //if (botVar.botID === u.id) return 4;          // cohost
-      //if (u.gRole < 2) return u.role;
-      //else {
-      //switch (u.gRole) {
-      //    case 2:
-      //        return 7;
-      //    case 3:
-      //        return 8;
-      //    case 4:
-      //        return 9;
-      //    case 5:
-      //        return 10;
-      //}
-      //}
-      //return 0;
+	  switch (displayRole) {
+			case "creator":     return 7;
+			case "co-owner":    return 6;
+			case "manager":     return 5;
+			case "mod":         return 4;
+			case "vip":         return 3;
+			case "resident-dj": return 2;
+			case "dj":          return 1;
+			default:            return 0;
+	  }
+    }
+    catch(err) { UTIL.logException("displayRoleToRoleNumber: " + err.message); }
+  },
+  getPermission: function (usrObjectID) { //1 requests
+    try {
+	  //Dubtrack.room.users.getRoleType(Dubtrack.session.id)
+	  //Dubtrack.room.users.getRoleType("542465ce43f5a10200c07f11")
+      var roomUser = USERS.defineRoomUser(usrObjectID);
+	  var displayRole = Dubtrack.room.users.getRoleType(roomUser.id);
+	  roomUser.userRole = API.displayRoleToRoleNumber(displayRole);
+	  return roomUser.userRole;
     }
     catch(err) {
       UTIL.logException("getPermission: " + err.message);
@@ -2770,8 +2813,10 @@ var API = {
             setTimeout(function () { API.sendChat(message.substring(space))  }, 500);
             return;
         }
+		var keepmessage = Dubtrack.room.chat._messageInputEl.val();
         Dubtrack.room.chat._messageInputEl.val(message);
         Dubtrack.room.chat.sendMessage();
+		if (keepmessage.length > 0) Dubtrack.room.chat._messageInputEl.val(keepmessage);
         botVar.ImHidden = false;
     }
     else 
@@ -2782,6 +2827,11 @@ var API = {
   getDubUpCount: function() {
     try        { return parseInt($(".dubup").text()); }
     catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
+  },
+  //
+  getSongLengthZ: function() {
+    try        { return (parseInt(Dubtrack.room.player.activeSong.get("song").songLength) / 1000); }
+    catch(err) { UTIL.logException("getSongLengthZ: " + err.message); }
   },
   getSongLength: function() {
     try        { return parseInt($(".min").text()); }
@@ -2795,10 +2845,88 @@ var API = {
     try        { return parseInt($(".grab-counter").text()); }
     catch(err) { UTIL.logException("getGrabCount: " + err.message); }
   },
+  getBotID: function() {
+    try { return Dubtrack.session.id;    }
+    catch(err) { UTIL.logException("getBotID: " + err.message); }
+  },
   getBotName: function() {
-    try { return $(".user-info").text();    }
+    //try { return $(".user-info").text();    }
+    try { return Dubtrack.session.get("username");    }
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
+
+ waitListItem: function (dubQueueItem) {
+    try {
+        this.id = dubQueueItem.userid;
+        this.username = dubQueueItem._user.username;
+        this.songlength = dubQueueItem.songLength;
+        this.songid = dubQueueItem.songid;
+		this.songname = dubQueueItem._song.name;
+        //botDebug.debugMessage(true, "-------------------------------------------------------------");
+        //botDebug.debugMessage(true, "UID1: " + dubQueueItem.userid);
+        //botDebug.debugMessage(true, "UID2: " + dubQueueItem._user.username);
+        //botDebug.debugMessage(true, "UID3: " + dubQueueItem.songLength);
+        //botDebug.debugMessage(true, "UID4: " + dubQueueItem.songid);
+		//botDebug.debugMessage(true, "UID5: " + dubQueueItem._song.name);
+		return this;
+	}
+    catch(err) { UTIL.logException("waitListItem: " + err.message); }
+  },
+
+  getWaitList: function(cb) {
+    try {
+	  $.when(API.defineRoomQueue()).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
+		dubBot.queue.dubQueueResp = a1;
+	    var waitlist = [];
+        for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
+	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
+		}
+		dubBot.queue.dubQueue = waitlist;
+        cb(waitlist);
+	  });
+	}
+    catch(err) { UTIL.logException("getWaitList: " + err.message); }
+	},
+
+  defineRoomQueue: function() {
+    try {
+	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist/details
+	  return $.ajax({
+            url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
+            type: "GET" });
+	}
+    catch(err) { UTIL.logException("defineRoomQueue: " + err.message); }
+	},
+	
+  getRoomID: function() {
+	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
+	//        RGT Room ID: 5602ed62e8632103004663c2
+    try { 
+	  return Dubtrack.room.model.get("_id");
+//Dubtrack.cache.users.get(a, this.renderUser, this), this.userActive = !1, 
+//Dubtrack.session && Dubtrack.room && Dubtrack.room.users ? 
+//Dubtrack.session.get("_id") == a ? (this.$(".global-actions").hide(), this.$(".actions").hide()) : (this.$(".global-actions").show(), this.$(".actions a").hide(), (
+//Dubtrack.room.users.getIfHasRole(Dubtrack.session.id) || 
+//Dubtrack.room.model.get("userid") == Dubtrack.session.id) && (this.$(".actions").show(), this.$(".actions a.send-pm-message").show(), 
+
+//Dubtrack.helpers.isDubtrackAdmin(Dubtrack.session.id)
+//Dubtrack.room.users.getIfOwner(Dubtrack.session.id)
+//Dubtrack.room.users.getIfMod(Dubtrack.session.id)
+//Dubtrack.room.users.getIfVIP(Dubtrack.session.id)
+//Dubtrack.room.users.getIfManager(Dubtrack.session.id) 
+//Dubtrack.room.users.getIfResidentDJ(Dubtrack.session.id)
+//Dubtrack.room.users.getIfDJ(a)
+//Dubtrack.room.users.getIfmuted(a) ? (this.$(".actions a.mute").hide(), this.$(".actions a.unmute").show()) : (this.$(".actions a.mute").show(), this.$(".actions a.unmute").hide()), this.$(".actions a.kick").show(), this.$(".actions a.ban").show()), (
+//Dubtrack.room.model.get("userid") == Dubtrack.session.id && (
+//Dubtrack.room.model.get("userid") == a) && this.$(".actions").hide(), (
+//Dubtrack.room.users.getIfHasRole(a)) && (this.$(".actions a.mute").hide(), this.$(".actions a.kick").hide(), this.$(".actions a.ban").hide());
+	}
+    catch(err) { UTIL.logException("getRoomID: " + err.message); }
+  },
+
   currentSongName: function() {
     try { return $(".currentSong").text();    }
     catch(err) { UTIL.logException("currentSongName: " + err.message); }
@@ -2850,21 +2978,6 @@ var API = {
   //Accept-Language: en-US,en;q=0.8
   //Cookie: __utma=191699775.433891708.1442850970.1444156735.1444170525.57;   __utmz=191699775.1443654480.36.3.utmcsr=mansfieldplayhouse.com|utmccn=(referral)|utmcmd=referral|utmcct=/dubtrack-help.html; _ga=GA1.2.433891708.1442850970; _gat=1;   connect.sid=s%3ATTA8i2zwfxxIvEE6zAAxeQU2K1udPxqQ.Tpw0AN8QxZa8JSGLyftn1SEpBxQd%2BhUMJClhzE9PsyA; __asc=bd21730b15112a0e927a4c2f702; __auc=d5260d8b1504993fdad0e5ee41e
 
-  moderateRemoveDJ: function(usrObjectID) {
-    try {
-      var roomUser = USERS.defineRoomUser(usrObjectID);
-      //todoer roomUser.uid.....
-      var uid = "560be6cbdce3260300e40770";
-      var roomid = "5602ed62e8632103004663c2";
-      
-      //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/user/564933a1d4dcab140021cdeb/all
-      $.ajax({
-            url: "https://api.dubtrack.fm/room/" + roomid + "/queue/user/" + uid + "/all",
-            type: "DELETE"
-        });
-    }
-    catch(err) { UTIL.logException("moderateRemoveDJ: " + err.message); }
-  },
   moderateForceSkip: function() {
     API.sendChat("/skip");
   },
@@ -2975,6 +3088,8 @@ var CONST = {
   userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
   blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
+  RGT_ROOM: "5602ed62e8632103004663c2",
+  TASTY_ROOM: "5600a564bfb6340300a2def2",
   commandLiteral: ".",
             howAreYouComments: [
                 "Shitty, and yourself %%FU%%?",
@@ -3251,41 +3366,14 @@ var CONST = {
 var BOTCOMMANDS = {
         commands: {
             executable: function (minRank, chat) {
-                return true;
-                // todoer:
-                //var id = chat.uid;
-                //var perm = API.getPermission(id);
-                //var minPerm;
-                //switch (minRank) {
-                //    case 'admin':
-                //        minPerm = 10;
-                //        break;
-                //    case 'ambassador':
-                //        minPerm = 7;
-                //        break;
-                //    case 'host':
-                //        minPerm = 5;
-                //        break;
-                //    case 'cohost':
-                //        minPerm = 4;
-                //        break;
-                //    case 'manager':
-                //        minPerm = 3;
-                //        break;
-                //    //case 'vip': todoer
-                //    case 'bouncer':
-                //        minPerm = 2;
-                //        break;
-                //    case 'residentdj':
-                //        minPerm = 1;
-                //        break;
-                //    case 'user':
-                //        minPerm = 0;
-                //        break;
-                //    default:
-                //        API.chatLog('error assigning minimum permission');
-                //}
-                //return perm >= minPerm;
+			  try {
+			    //valid ranks: 'creator' 'co-owner' 'manager' 'mod' 'vip' 'resident-dj' 'dj' ( 'user' allows ALL dub users )
+                var id = chat.uid;
+                var perm = API.getPermission(id);
+                var minPerm = API.displayRoleToRoleNumber(minRank);
+			    return (perm >= minPerm);
+			  }
+              catch(err) { UTIL.logException("executable: " + err.message); }
             },
 
             //SAMPLE:
@@ -3335,7 +3423,7 @@ var BOTCOMMANDS = {
                           'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
                           'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
-                          'easy','epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
+                          'epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
                           'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
                           'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
                           'legit','like a boss','like a champ','like whoa','likeaboss','likeachamp','likewhoa','lush','mint','money','neato','nice','off da hook',
@@ -3356,15 +3444,13 @@ var BOTCOMMANDS = {
                     try {
                         TASTY.tastyVote(chat.un, cmd);
                     }
-                    catch(err) {
-                        UTIL.logException("tastyCommand: " + err.message);
-                    }
+                    catch(err) { UTIL.logException("tastyCommand: " + err.message); }
                 }
             },
 
             eightballCommand: {   //Added 04/01/2015 Zig
                 command: ['8ball', 'eightball', 'larry'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3433,7 +3519,7 @@ var BOTCOMMANDS = {
             },            
             wootCommand: {  //todoer DELETE THIS COMMAND:
                 command: 'wootthissong',
-                rank: 'user',
+                rank: 'manager',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3458,7 +3544,7 @@ var BOTCOMMANDS = {
             },
             exrouletteCommand: {
                 command: ['exroulette','roulette?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3473,7 +3559,7 @@ var BOTCOMMANDS = {
             },
             extastyCommand: {
                 command: ['extasty','tasty?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3488,7 +3574,7 @@ var BOTCOMMANDS = {
             },
             exmeetingCommand: {
                 command: ['exmeeting', 'exlunch', 'exbeerrun','meeting?', 'lunch?', 'beerrun?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3503,7 +3589,7 @@ var BOTCOMMANDS = {
             },
             exmehCommand: {
                 command: ['exmeh','meh?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3561,7 +3647,7 @@ var BOTCOMMANDS = {
             },
             nsfwCommand: {   //Added 04/22/2015 Zig
                 command: 'nsfw',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -3576,7 +3662,7 @@ var BOTCOMMANDS = {
             },
             elevenCommand: {
                 command: ['eleven','11'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd)  {
                     try {
@@ -3619,7 +3705,7 @@ var BOTCOMMANDS = {
             },
             zigaCommand: {
                 command: 'ziga',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try { 
@@ -3635,7 +3721,7 @@ var BOTCOMMANDS = {
             },
             zigbCommand: {
                 command: 'zigb',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -3659,27 +3745,26 @@ var BOTCOMMANDS = {
                     else {
                         var msg = chat.message;
                         var maxTime = msg.substring(cmd.length + 1);
-                        if (!isNaN(maxTime)) {
-                            if (maxTime === "1") SETTINGS.storeToStorage();
-                            if (maxTime === "2") SETTINGS.retrieveFromStorage();
-                            if (maxTime === "3") SETTINGS.retrieveSettings();
-                            if (maxTime === "4") API.mehThisSong();
-                            if (maxTime === "5") API.wootThisSong();
-                            if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
-                            if (maxTime === "7") {
-                                  var avatarList7 = document.getElementById("main-user-list-room");
-                                  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
-                            }
-                            if (maxTime === "8") {
-                                  var avatarList8 = document.getElementById("avatar-list");
-                                  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
-                            if (maxTime === "9") USERS.loadUsersInRoom(true);
-                            if (maxTime === "A") USERS.removeMIANonUsers();
-                            }
-                            
-
-                        }
-                        else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
+						if (maxTime === "1") SETTINGS.storeToStorage();
+						if (maxTime === "2") SETTINGS.retrieveFromStorage();
+						if (maxTime === "3") SETTINGS.retrieveSettings();
+						if (maxTime === "4") API.mehThisSong();
+						if (maxTime === "5") API.wootThisSong();
+						if (maxTime === "6") TASTY.tastyVote(botVar.botName, "winner");
+						if (maxTime === "7") {
+							  var avatarList7 = document.getElementById("main-user-list-room");
+							  botDebug.debugMessage(true, "avatarList count: " + avatarList7.length);
+						}
+						if (maxTime === "8") {
+							  var avatarList8 = document.getElementById("avatar-list");
+							  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
+						}
+						if (maxTime === "9") USERS.loadUsersInRoom(true);
+						if (maxTime === "A") USERS.removeMIANonUsers();
+						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(AFK.afkCheckCallback);
+						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
+						if (maxTime === "D") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = " + (API.getSongLengthZ() / 60.0));
+						if (maxTime === "E") botDebug.debugMessage(true, "[  API.getSongLength() ] = " + API.getSongLength());
                     }
                 }
             },
@@ -3743,7 +3828,7 @@ var BOTCOMMANDS = {
             },
             exrollCommand: {
                 command: ['exroll','roll?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3758,7 +3843,7 @@ var BOTCOMMANDS = {
             },
             whyCommand: {
                 command: 'why',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3785,7 +3870,7 @@ var BOTCOMMANDS = {
             },
             roomCommand: {
                 command: 'room',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3800,7 +3885,7 @@ var BOTCOMMANDS = {
             },
             ughCommand: {
                 command: 'ugh',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3828,7 +3913,7 @@ var BOTCOMMANDS = {
             },
             pingCommand: {
                 command: 'ping',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -3845,12 +3930,12 @@ var BOTCOMMANDS = {
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    if (ROULETTE.rouletteStatus) return void (0);
+                    if (ROULETTE.settings.rouletteStatus) return void (0);
                     if (ROULETTE.rouletteTimeRange()) {
                         API.sendChat("The LAW runs the Roulette weekdays 9AM-5PM EST");
                         return;
                     }
-                    ROULETTE.startRoulette();
+                    ROULETTE.startRoulette(chat.uid);
                 }
             },
             rulesCommand: {
@@ -3963,7 +4048,7 @@ var BOTCOMMANDS = {
             },
             lowrollpctCommand: {   //Added 07/03/2015 Zig
                 command: 'lowrollpct',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3977,7 +4062,7 @@ var BOTCOMMANDS = {
             },
             lowrollptsCommand: {   //Added 07/03/2015 Zig
                 command: 'lowrollpts',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -3991,7 +4076,7 @@ var BOTCOMMANDS = {
             },
             rollpctCommand: {   //Added 07/03/2015 Zig
                 command: 'rollpct',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4005,7 +4090,7 @@ var BOTCOMMANDS = {
             },
             rollptsCommand: {   //Added 07/03/2015 Zig
                 command: 'rollpts',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4020,7 +4105,7 @@ var BOTCOMMANDS = {
 
             fbCommand: {
                 command: 'fb',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4034,7 +4119,7 @@ var BOTCOMMANDS = {
             //todoer delete after having fun with this:
             autorollCommand: {
                 command: 'autoroll',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -4047,11 +4132,56 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            leaveCommand: {
+                command: 'leave',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var ind = ROULETTE.settings.participants.indexOf(chat.uid);
+                        if (ind > -1) {
+                            ROULETTE.settings.participants.splice(ind, 1);
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("rouletteleave"), {name: chat.un}));
+                        }
+                    }
+                }
+            },
+            joinCommand: {
+                command: 'join',
+                rank: 'user',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        if (ROULETTE.settings.rouletteStatus && ROULETTE.settings.participants.indexOf(chat.uid) < 0) {
+                            ROULETTE.settings.participants.push(chat.uid);
+                            API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
+                        }
+                    }
+                }
+            },
+            skipCommand: {
+                command: 'skip',
+                rank: 'vip',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    if (!UTIL.canSkip()) return API.sendChat("Skip too soon...");
+					//API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
+					API.moderateForceSkip();
+					//dubBot.room.skippable = false;
+					//setTimeout(function () { dubBot.room.skippable = true }, 5 * 1000);
+                }
+            },
 
             /* basic
             activeCommand: {
                 command: 'active',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4147,13 +4277,10 @@ var BOTCOMMANDS = {
                     else {
                         if (botVar.room.repeatSongs) {
                             botVar.room.repeatSongs = !botVar.room.repeatSongs;
-                            //todoer why do we clear the afk interval here???
-                            clearInterval(AFK.afkInterval);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
                         else {
                             botVar.room.repeatSongs = !botVar.room.repeatSongs;
-                            AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 2 * 1000);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
                     }
@@ -4182,7 +4309,7 @@ var BOTCOMMANDS = {
             },
             trollCommand: {
                 command: 'troll',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try{
@@ -4201,7 +4328,7 @@ var BOTCOMMANDS = {
             },
             afkresetCommand: {
                 command: 'afkreset',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4220,7 +4347,7 @@ var BOTCOMMANDS = {
 
             afktimeCommand: {
                 command: 'afktime',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4262,7 +4389,7 @@ var BOTCOMMANDS = {
 
             autowootCommand: {
                 command: 'autowoot',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4275,7 +4402,7 @@ var BOTCOMMANDS = {
 
             baCommand: {
                 command: 'ba',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4288,7 +4415,7 @@ var BOTCOMMANDS = {
 
             banCommand: {
                 command: 'ban',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4305,7 +4432,7 @@ var BOTCOMMANDS = {
             },
             blinfoCommand: {
                 command: 'blinfo',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4364,7 +4491,7 @@ var BOTCOMMANDS = {
 
             togglevoteskipCommand: {
                 command: 'togglevoteskip',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4384,7 +4511,7 @@ var BOTCOMMANDS = {
 
             dclookupCommand: {
                 command: ['dclookup', 'dc', 'back'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4408,7 +4535,7 @@ var BOTCOMMANDS = {
 
             emojiCommand: {
                 command: 'emoji',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4422,7 +4549,7 @@ var BOTCOMMANDS = {
 
             etaCommand: {
                 command: 'eta',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4437,7 +4564,7 @@ var BOTCOMMANDS = {
                         } else name = chat.un;
                         var user = USERS.lookupUserName(name);
                         if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        var pos = API.getWaitListPosition(user.id);
+                        var pos = API.getWaitListPositionOld(user.id);
                         if (pos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
                         var timeRemaining = API.getTimeRemaining();
                         var estimateMS = ((pos * 4 * 60) + timeRemaining) * 1000;
@@ -4449,7 +4576,7 @@ var BOTCOMMANDS = {
 
             filterCommand: {
                 command: 'filter',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4470,7 +4597,7 @@ var BOTCOMMANDS = {
 
             gifCommand: {
                 command: ['gif', 'giphy'],
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4541,7 +4668,7 @@ var BOTCOMMANDS = {
 
             helpCommand: {
                 command: 'help',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4555,7 +4682,7 @@ var BOTCOMMANDS = {
 
             hopupCommand: {
                 command: 'hopup',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4567,7 +4694,7 @@ var BOTCOMMANDS = {
             },
             hopdownCommand: {
                 command: 'hopdown',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4583,7 +4710,7 @@ var BOTCOMMANDS = {
             },
             bootCommand: {
                 command: 'boot',
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4611,25 +4738,9 @@ var BOTCOMMANDS = {
                 }
             },
 
-            joinCommand: {
-                command: 'join',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        if (ROULETTE.rouletteStatus && ROULETTE.participants.indexOf(chat.uid) < 0) {
-                            ROULETTE.participants.push(chat.uid);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
-                        }
-                    }
-                }
-            },
-
             jointimeCommand: {
                 command: 'jointime',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4650,7 +4761,7 @@ var BOTCOMMANDS = {
 
             kickCommand: {
                 command: 'kick',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4695,7 +4806,7 @@ var BOTCOMMANDS = {
 
             killbotCommand: {
                 command: 'killbot',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4709,26 +4820,9 @@ var BOTCOMMANDS = {
                 }
             },
 
-            leaveCommand: {
-                command: 'leave',
-                rank: 'user',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var ind = ROULETTE.participants.indexOf(chat.uid);
-                        if (ind > -1) {
-                            ROULETTE.participants.splice(ind, 1);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("rouletteleave"), {name: chat.un}));
-                        }
-                    }
-                }
-            },
-
             linkCommand: {
                 command: 'link',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4789,7 +4883,7 @@ var BOTCOMMANDS = {
 
             lockskipCommand: {
                 command: 'lockskip',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4813,7 +4907,7 @@ var BOTCOMMANDS = {
                                         dubBot.room.skippable = true
                                     }, 5 * 1000);
                                     setTimeout(function (id) {
-                                        basicBot.userUtilities.moveUser(id, SETTINGS.settings.lockskipPosition, false);
+                                        API.moderateMoveDJ(id, SETTINGS.settings.lockskipPosition, null); // wont work need djlist
                                         dubBot.room.queueable = true;
                                         setTimeout(function () {
                                             basicBot.roomUtilities.booth.unlockBooth();
@@ -4844,7 +4938,7 @@ var BOTCOMMANDS = {
                                         dubBot.room.skippable = true
                                     }, 5 * 1000);
                                     setTimeout(function (id) {
-                                        basicBot.userUtilities.moveUser(id, SETTINGS.settings.lockskipPosition, false);
+                                        API.moderateMoveDJ(id, SETTINGS.settings.lockskipPosition, null); // wont work need djlist
                                         dubBot.room.queueable = true;
                                         setTimeout(function () {
                                             basicBot.roomUtilities.booth.unlockBooth();
@@ -4897,7 +4991,7 @@ var BOTCOMMANDS = {
             },
             logoutCommand: {
                 command: 'logout',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4931,7 +5025,7 @@ var BOTCOMMANDS = {
 
             motdCommand: {
                 command: 'motd',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -4980,7 +5074,7 @@ var BOTCOMMANDS = {
                         if (user.id === botVar.botID) return API.sendChat(botChat.subChat(botChat.getChatMessage("addbotwaitlist"), {name: chat.un}));
                         if (!isNaN(pos)) {
                             API.sendChat(botChat.subChat(botChat.getChatMessage("move"), {name: chat.un}));
-                            basicBot.userUtilities.moveUser(user.id, pos, false);
+                            API.moderateMoveDJ(user.id, pos, null); // wont work need djlist
                         } else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidpositionspecified"), {name: chat.un}));
                     }
                 }
@@ -4988,7 +5082,7 @@ var BOTCOMMANDS = {
 
             muteCommand: {
                 command: 'mute',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5076,7 +5170,7 @@ var BOTCOMMANDS = {
 
             opCommand: {
                 command: 'op',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5090,7 +5184,7 @@ var BOTCOMMANDS = {
 
             refreshbrowserCommand: {
                 command: 'refreshbrowser',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5108,7 +5202,7 @@ var BOTCOMMANDS = {
 
             reloadCommand: {
                 command: 'reload',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5125,7 +5219,7 @@ var BOTCOMMANDS = {
 
             reloadtestCommand: {
                 command: 'reloadtest',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5142,7 +5236,7 @@ var BOTCOMMANDS = {
 
             restrictetaCommand: {
                 command: 'restricteta',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5162,7 +5256,7 @@ var BOTCOMMANDS = {
 
             sessionstatsCommand: {
                 command: 'sessionstats',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5177,29 +5271,9 @@ var BOTCOMMANDS = {
                 }
             },
 
-            skipCommand: {
-                command: 'skip',
-                rank: 'bouncer',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
-                        API.moderateForceSkip();
-                        dubBot.room.skippable = false;
-                        setTimeout(function () {
-                            dubBot.room.skippable = true
-                        }, 5 * 1000);
-
-                    }
-                }
-            },
-
             blockedCommand: {
                 command: 'blocked',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
@@ -5225,7 +5299,7 @@ var BOTCOMMANDS = {
             },
             banlistimportCommand: {   //Added: 06/11/2015 Import ban list from last saved in Github
                 command: 'banlistimport',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5238,7 +5312,7 @@ var BOTCOMMANDS = {
             },
             banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
                 command: 'banremove',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -5266,7 +5340,7 @@ var BOTCOMMANDS = {
             },
             banremoveallsongsCommand: { //Added: 06/10/2015 Remove all banned / blacklisted songs
                 command: 'banremoveallsongs',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5283,7 +5357,7 @@ var BOTCOMMANDS = {
             },
             banallhistorysongsCommand: { //Added: 06/10/2015 Add all songs in current room history to the ban song list
                 command: 'banallhistorysongs',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5315,7 +5389,7 @@ var BOTCOMMANDS = {
             },
             banlastsongCommand: { //Added: 06/11/2015 Add all songs in current room history to the ban song list
                 command: 'banlastsong',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -5357,7 +5431,7 @@ var BOTCOMMANDS = {
             },
             banlistidjsonCommand: {   //Added: 06/11/2015 List all banned songs
                 command: 'banlistidjson',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5370,7 +5444,7 @@ var BOTCOMMANDS = {
             },
             banlistjsonCommand: {   //Added: 06/11/2015 List all banned songs
                 command: 'banlistjson',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5383,7 +5457,7 @@ var BOTCOMMANDS = {
             },
             userlistjsonCommand: {   //Added: 08/25/2015 List all users to json
                 command: 'userlistjson',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5436,7 +5510,7 @@ var BOTCOMMANDS = {
 
             banlistconsoleCommand: {   //Added: 06/11/2015 List all banned songs
                 command: 'banlistconsole',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5449,7 +5523,7 @@ var BOTCOMMANDS = {
             },
             banlistcountCommand: {   //Added: 06/12/2015 List all banned songs
                 command: 'banlistcount',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5462,7 +5536,7 @@ var BOTCOMMANDS = {
             },
             banlistCommand: {   //Added: 06/10/2015 List all banned songs
                 command: ['banlist','banlistpublic'],
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -5512,7 +5586,7 @@ var BOTCOMMANDS = {
             },
             oobCommand: {
                 command: ['oob','bansong','songban','blacklist','bl'],
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5526,7 +5600,7 @@ var BOTCOMMANDS = {
             },
             botmutedCommand: {
                 command: 'botmuted',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -5560,7 +5634,7 @@ var BOTCOMMANDS = {
 
             sourceCommand: {
                 command: 'source',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5573,7 +5647,7 @@ var BOTCOMMANDS = {
 
             statusCommand: {
                 command: 'status',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5586,7 +5660,6 @@ var BOTCOMMANDS = {
                         if (AFK.settings.afkRemoval) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
-                        msg += botChat.getChatMessage("afksremoved") + ": " + AFK.afkList.length + '. ';
                         msg += botChat.getChatMessage("afklimit") + ': ' + AFK.settings.maximumAfk + '. ';
 
                         msg += botChat.getChatMessage("repeatSongs") + ': ';
@@ -5649,20 +5722,20 @@ var BOTCOMMANDS = {
                         var user2 = USERS.lookupUserName(name2);
                         if (typeof user1 === 'boolean' || typeof user2 === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("swapinvalid"), {name: chat.un}));
                         if (user1.id === botVar.botID || user2.id === botVar.botID) return API.sendChat(botChat.subChat(botChat.getChatMessage("addbottowaitlist"), {name: chat.un}));
-                        var p1 = API.getWaitListPosition(user1.id) + 1;
-                        var p2 = API.getWaitListPosition(user2.id) + 1;
+                        var p1 = API.getWaitListPositionOld(user1.id) + 1;
+                        var p2 = API.getWaitListPositionOld(user2.id) + 1;
                         if (p1 < 0 || p2 < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("swapwlonly"), {name: chat.un}));
                         API.sendChat(botChat.subChat(botChat.getChatMessage("swapping"), {'name1': name1, 'name2': name2}));
                         if (p1 < p2) {
-                            basicBot.userUtilities.moveUser(user2.id, p1, false);
+                            API.moderateMoveDJ(user2.id, p1, null); // wont work need djlist
                             setTimeout(function (user1, p2) {
-                                basicBot.userUtilities.moveUser(user1.id, p2, false);
+                                API.moderateMoveDJ(user1.id, p2, null); // wont work need djlist
                             }, 2000, user1, p2);
                         }
                         else {
-                            basicBot.userUtilities.moveUser(user1.id, p2, false);
+                            API.moderateMoveDJ(user1.id, p2, null); // wont work need djlist
                             setTimeout(function (user2, p1) {
-                                basicBot.userUtilities.moveUser(user2.id, p1, false);
+                                API.moderateMoveDJ(user2.id, p1, null); // wont work need djlist
                             }, 2000, user2, p1);
                         }
                     }
@@ -5671,7 +5744,7 @@ var BOTCOMMANDS = {
 
             themeCommand: {
                 command: 'theme',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5685,7 +5758,7 @@ var BOTCOMMANDS = {
 
             timeguardCommand: {
                 command: 'timeguard',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5706,7 +5779,7 @@ var BOTCOMMANDS = {
 
             toggleblCommand: {
                 command: 'togglebl',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5724,7 +5797,7 @@ var BOTCOMMANDS = {
                         
             togglemotdCommand: {
                 command: 'togglemotd',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5744,7 +5817,7 @@ var BOTCOMMANDS = {
 
             unbanCommand: {
                 command: 'unban',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5795,7 +5868,7 @@ var BOTCOMMANDS = {
 
             unmuteCommand: {
                 command: 'unmute',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5914,7 +5987,7 @@ var BOTCOMMANDS = {
             },
             voteratioCommand: {
                 command: 'voteratio',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -5989,7 +6062,7 @@ var BOTCOMMANDS = {
             //},
             websiteCommand: {
                 command: ['website','web'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6003,7 +6076,7 @@ var BOTCOMMANDS = {
 
             origemCommand: {
                 command: 'origem',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6015,7 +6088,7 @@ var BOTCOMMANDS = {
             },
             englishCommand: {
                 command: 'english',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -6070,7 +6143,7 @@ var BOTCOMMANDS = {
 
             zigunbanCommand: {
                 command: 'zigunban',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6108,7 +6181,7 @@ var BOTCOMMANDS = {
             },
             meetingCommand: {   //Added 03/28/2015 Zig
                 command: ['meeting', 'lunch', 'beerrun'],
-                rank: 'user',
+                rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -6125,7 +6198,7 @@ var BOTCOMMANDS = {
                             byusername = " [ executed by " + chat.un + " ]";
                         }
                         var user = USERS.lookupUserName(name);
-                        var currPos = API.getWaitListPosition(user.id) + 1;
+                        var currPos = API.getWaitListPositionOld(user.id) + 1;
                         if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
                         user.lastKnownPosition = currPos;
                         user.lastSeenInLine = Date.now();
@@ -6154,7 +6227,7 @@ var BOTCOMMANDS = {
             },
             lastplayedCommand: {
                 command: 'lastplayed',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6169,7 +6242,7 @@ var BOTCOMMANDS = {
             },
             exrefreshCommand: {
                 command: ['exrefresh','refresh?'],
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6184,7 +6257,7 @@ var BOTCOMMANDS = {
             },
             kissCommand: {
                 command: 'kiss',
-                rank: 'residentdj',
+                rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6199,7 +6272,7 @@ var BOTCOMMANDS = {
             },
             loguserCommand: {
                 command: 'loguser',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
@@ -6246,7 +6319,7 @@ var BOTCOMMANDS = {
             },
             zigaaCommand: {
                 command: 'zigaa',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -6259,7 +6332,7 @@ var BOTCOMMANDS = {
             },
             zigcCommand: {
                 command: 'zigc',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -6270,7 +6343,7 @@ var BOTCOMMANDS = {
             },
             zigdCommand: {
                 command: 'zigd',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd)  {
                     try {
@@ -6291,7 +6364,7 @@ var BOTCOMMANDS = {
             },
             debugCommand: {
                 command: 'debug',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6305,7 +6378,7 @@ var BOTCOMMANDS = {
             },
             gifenabledCommand: {
                 command: 'gifenabled',
-                rank: 'cohost',
+                rank: 'co-owner',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
@@ -6319,7 +6392,7 @@ var BOTCOMMANDS = {
             },
 //            whoisCommand: {
 //                command: 'whois',
-//                rank: 'bouncer',
+//                rank: 'mod',
 //                type: 'startsWith',
 //                functionality: function (chat, cmd) {
 //                    try {
@@ -6346,7 +6419,7 @@ var BOTCOMMANDS = {
 
             whoisCommand: {
                 command: 'whois',
-                rank: 'bouncer',
+                rank: 'mod',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -6364,7 +6437,7 @@ var BOTCOMMANDS = {
 
             youtubeCommand: {
                 command: 'youtube',
-                rank: 'user',
+                rank: 'dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
