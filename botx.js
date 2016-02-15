@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0023.0072",
+  version: "Version  1.01.0023.0073",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3582,7 +3582,7 @@ var BOTCOMMANDS = {
 						botDebug.debugMessage(true, "AFKRESET NAME: " + name);
                         var roomUser = USERS.lookupUserName(name);
                         if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-						var lastActive = USERS.getLastActivity(roomUser, false););
+						var lastActive = USERS.getLastActivity(roomUser, false);
 						var inactivity = Date.now();
 						inactivity -= lastActive;
 						var time = UTIL.msToStr(inactivity);
