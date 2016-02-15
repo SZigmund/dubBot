@@ -3,14 +3,12 @@
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
 // - Record all Bans/Unbans
-// - Permissions
-// - AFK DJ
 // - Bot DJ
 // - Last Played
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0022.0072",
+  version: "Version  1.01.0023.0069",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -205,6 +203,7 @@ var USERS = {
     user.afkWarningCount = 0;
     clearTimeout(user.afkCountdown);
 	if (resetAFK) SETTINGS.storeToStorage();
+	botDebug.debugMessage(true, "RESET AFK Activity");
   },
 
   // This will return a room user from: Object, Username, UserID
@@ -223,11 +222,13 @@ var USERS = {
 
   lookupUserName: function (username) {
     try {
-      //botDebug.debugMessage(true, "username: [" + username + "]");
+      botDebug.debugMessage(true, "username: [" + username + "]");
 	  var usermatch = username.trim().toLowerCase();
 	  usermatch = usermatch.replace(/@/g, '');
       for (var i = 0; i < USERS.users.length; i++) {
+	    botDebug.debugMessage(true, "username(" + i + "): [" + USERS.users[i].username.trim().toLowerCase() + "]");
         if (USERS.users[i].username.trim().toLowerCase() == usermatch) return USERS.users[i];
+	    botDebug.debugMessage(true, "No Match");
       }
       return false;
 	}
@@ -597,7 +598,7 @@ var COMMANDS = {
             chat.message = UTIL.linkFixer(chat.message);
             botDebug.debugMessage(false, "STEP 002");
             chat.message = chat.message.trim();
-            USERS.setLastActivityID(chat.uid, true);
+			if (chat.message.toUpperCase().indexOf("[AFK]") < 0) USERS.setLastActivityID(chat.uid, true);
             botDebug.debugMessage(false, "STEP 003");
             if (botChat.chatFilter(chat)) return void (0);
             botDebug.debugMessage(false, "STEP 004");
@@ -692,6 +693,7 @@ var botChat = {
         botDebug.debugMessage(false, "STEP 101");
         if (chat.type === 'message' || chat.type === 'emote')  {
             botDebug.debugMessage(false, "STEP 102");
+		    if (chat.message.toUpperCase().indexOf("[AFK]") < 0) USERS.setLastActivityID(chat.uid, true);
             USERS.setLastActivityID(chat.uid, false);
             botDebug.debugMessage(false, "STEP 103");
         }
@@ -1714,9 +1716,9 @@ var AFK = {
     maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
-    afk7Days: false,
-    afkRemoveStart: 9,
-    afkRemoveEnd: 19
+    afk7Days: true,
+    afkRemoveStart: 6,
+    afkRemoveEnd: 23
   },
   afkCheck: function () {
     try {
@@ -2666,21 +2668,20 @@ var API = {
 		//560be6cbdce3260300e40770 - Levis_Homer
       var idx = 0;
 	  var newlist = [];
-	  //todoerlind
 	  for(var i = 0; i < djlist.length; i++){
 	    if ((i + 1) === queuePos) {
 		  newlist.push(userID);
-		  var roomUser =  USERS.defineRoomUser(userID);
-		  botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUser.username);
+		  //var roomUser =  USERS.defineRoomUser(userID);
+		  //botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUser.username);
 		}
 		else {
 		  if(djlist[idx].id === userID) idx++;
 		  newlist.push(djlist[idx].id);
-		  var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
-		  botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
+		  //var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
+		  //botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
 		  idx++;
 		}
-	    botDebug.debugMessage(true, "New List: " + newlist.length);
+	    //botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
 	  API.reorderQueue(newlist);
     }
