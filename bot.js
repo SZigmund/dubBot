@@ -3,14 +3,12 @@
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
 // - Record all Bans/Unbans
-// - Permissions
-// - AFK DJ
 // - Bot DJ
 // - Last Played
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0023",
+  version: "Version  1.01.0024",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -205,6 +203,7 @@ var USERS = {
     user.afkWarningCount = 0;
     clearTimeout(user.afkCountdown);
 	if (resetAFK) SETTINGS.storeToStorage();
+    //botDebug.debugMessage(true, "RESET AFK Activity");
   },
 
   // This will return a room user from: Object, Username, UserID
@@ -227,7 +226,9 @@ var USERS = {
 	  var usermatch = username.trim().toLowerCase();
 	  usermatch = usermatch.replace(/@/g, '');
       for (var i = 0; i < USERS.users.length; i++) {
+	    //botDebug.debugMessage(true, "username(" + i + "): [" + USERS.users[i].username.trim().toLowerCase() + "]");
         if (USERS.users[i].username.trim().toLowerCase() == usermatch) return USERS.users[i];
+	    //botDebug.debugMessage(true, "No Match");
       }
       return false;
 	}
@@ -597,7 +598,7 @@ var COMMANDS = {
             chat.message = UTIL.linkFixer(chat.message);
             botDebug.debugMessage(false, "STEP 002");
             chat.message = chat.message.trim();
-            USERS.setLastActivityID(chat.uid, true);
+			if (chat.message.toUpperCase().indexOf("[AFK]") < 0) USERS.setLastActivityID(chat.uid, true);
             botDebug.debugMessage(false, "STEP 003");
             if (botChat.chatFilter(chat)) return void (0);
             botDebug.debugMessage(false, "STEP 004");
@@ -692,7 +693,7 @@ var botChat = {
         botDebug.debugMessage(false, "STEP 101");
         if (chat.type === 'message' || chat.type === 'emote')  {
             botDebug.debugMessage(false, "STEP 102");
-            USERS.setLastActivityID(chat.uid, false);
+		    if (chat.message.toUpperCase().indexOf("[AFK]") < 0) USERS.setLastActivityID(chat.uid, true);
             botDebug.debugMessage(false, "STEP 103");
         }
         else if (chat.type !== 'log')  {
@@ -796,6 +797,7 @@ var botChat = {
 
    botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
    botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
+   botChat.chatMessages.push(["afkstatus", " @%%NAME%% has been afk for %%TIME%%."]);
    botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
    botChat.chatMessages.push(["afkremoveXXX", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
    botChat.chatMessages.push(["afkUserReset", "Thanks @%%NAME%% your afk status has been reset. "]);
@@ -1714,9 +1716,9 @@ var AFK = {
     maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
-    afk7Days: false,
-    afkRemoveStart: 9,
-    afkRemoveEnd: 19
+    afk7Days: true,
+    afkRemoveStart: 0,
+    afkRemoveEnd: 24
   },
   afkCheck: function () {
     try {
@@ -3558,10 +3560,32 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
                         var name = msg.substring(cmd.length + 2);
-                        var user = USERS.lookupUserName(name);
-                        if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        USERS.setLastActivity(user, false);
+					    //botDebug.debugMessage(true, "AFKRESET NAME: " + name);
+                        var roomUser = USERS.lookupUserName(name);
+                        if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                        USERS.setLastActivity(roomUser, false);
                         API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatusreset"), {name: chat.un, username: name}));
+                    }
+                }
+            },
+            afkstatusCommand: {
+                command: 'afkstatus',
+                rank: 'mod',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var msg = chat.message;
+                        if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
+                        var name = msg.substring(cmd.length + 2);
+                        var roomUser = USERS.lookupUserName(name);
+                        if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+						var lastActive = USERS.getLastActivity(roomUser, false);
+						var inactivity = Date.now();
+						inactivity -= lastActive;
+						var time = UTIL.msToStr(inactivity);
+						API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatus"), {name: name, time: time}));
                     }
                 }
             },
