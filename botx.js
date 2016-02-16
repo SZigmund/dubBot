@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0023.0073",
+  version: "Version  1.01.0024.0067",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -151,10 +151,15 @@ var USERS = {
   loadUserInterval: null,
   getLastActivity: function (usrObjectID) {
       try {
-        if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
-        var roomUser = USERS.lookupUserName(usrObjectID);
-        if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
-        return roomUser.lastActivity;
+	    var roomUser = USERS.defineRoomUser(usrObjectID);
+        if (roomUser === false) return Date.now();
+        reutrn roomUser.lastActivity;
+
+		//todoer DELETE after testing
+        //if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
+        //var roomUser = USERS.lookupUserName(usrObjectID);
+        //if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
+        //return roomUser.lastActivity;
 	  }
       catch(err) { UTIL.logException("getLastActivity: " + err.message); }
   },
@@ -203,7 +208,7 @@ var USERS = {
     user.afkWarningCount = 0;
     clearTimeout(user.afkCountdown);
 	if (resetAFK) SETTINGS.storeToStorage();
-	botDebug.debugMessage(true, "RESET AFK Activity");
+    //botDebug.debugMessage(true, "RESET AFK Activity");
   },
 
   // This will return a room user from: Object, Username, UserID
@@ -360,6 +365,7 @@ var USERS = {
           USERS.users[i].inRoomUpdated = false;
           USERS.users[i].dubDown = false;
 		  USERS.users[i].afkWarningCount = 0;
+		  USERS.users[i].userRole = API.getPermission(USERS.users[i].id);
         }
       }
       catch(err) { UTIL.logException("resetAllUsersOnStartup: " + err.message); }
@@ -431,11 +437,7 @@ var USERS = {
 var SETTINGS = {
     settings: {
         autoWootBot: false,
-        autoHopUp: true,
-        autoHopUpCount: 1,
-        autoHopDownCount: 4,
         botRoomUrl: "",
-        hoppingDownNow: false,
         language: "english",
         chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
         bouncerPlus: true,
@@ -983,6 +985,7 @@ var botChat = {
         var msg = chat.message;
         var perm = API.getPermission(chat.uid);
         var user = USERS.lookupUserID(chat.uid);
+        if (typeof user !== 'boolean') user.userRole = perm;
         var isMuted = false;
         for (var i = 0; i < botVar.room.mutedUsers.length; i++) {
             if (botVar.room.mutedUsers[i] === chat.uid) isMuted = true;
@@ -1419,6 +1422,25 @@ var UTIL = {
     }
     catch(err) { UTIL.logException("logObject: " + err.message); }
   },
+  bouncerDjing: function(waitlist, minRank) {
+    try {
+	    var var minPerm = API.displayRoleToRoleNumber(minRank);
+        for(var i = 0; i < waitListItem waitlist.push(new .length; i++){
+            var perm = USERS.getLastActivity:( API.getPermission:(waitlist[i].id);
+            if (perm >= minPerm) return true;
+        }
+		return false;
+    }
+    catch(err) { UTIL.logException("bouncerDjing: " + err.message); }
+  },
+  botInWaitList: function(waitlist) {
+    try {
+		var djpos = API.getWaitListPosition(botVar.botID, waitlist);
+		if (djpos < 0) return false;
+		return true;
+    }
+    catch(err) { UTIL.logException("botInWaitList: " + err.message); }
+  },
 
   logException: function(exceptionMessage) {
     console.log("[EXCEPTION]: " + exceptionMessage);
@@ -1713,12 +1735,12 @@ var botDebug = {
 var AFK = {
   afkInterval: null,
   settings: {
-    maximumAfk: 10,
+    maximumAfk: 60,
     afkRemoval: true,
     afk5Days: true,
     afk7Days: true,
-    afkRemoveStart: 6,
-    afkRemoveEnd: 23
+    afkRemoveStart: 0,
+    afkRemoveEnd: 24
   },
   afkCheck: function () {
     try {
@@ -1934,6 +1956,51 @@ var ROULETTE = {
     }
     catch(err) { UTIL.logException("endRoulette: " + err.message); }
   }
+};
+
+//SECTION BOTDJ
+var BOTDJ = {
+  settings: {
+    autoHopUp: true,
+	autoHopUpCount: 1,
+	autoHopDownCount: 0,
+    hoppingDownNow: false
+	},
+	checkHopDown: function (waitlist) {
+		try {
+			if (!BOTDJ.settings.autoHopUp) return;
+			if (waitlist.length < BOTDJ.settings.autoHopDownCount) return;
+			//todoererererlind
+			if (!UTIL.botInWaitList(waitlist)) return;
+			botDebug.debugMessage(true, "TIME TO HOP DOWN!!!!!");
+			API.botHopDown();
+		}
+		catch(err) {
+		  UTIL.logException("checkHopDown: " + err.message);
+		}
+	},
+	testBouncer: function (waitlist) {
+		try {
+			if (UTIL.bouncerDjing(waitlist, "mod")) 
+				botDebug.debugMessage("Bouncer DJING");
+			else
+				botDebug.debugMessage("Bouncer NOT DJING");
+		}
+		catch(err) { UTIL.logException("testBouncer: " + err.message); }
+	},
+	checkHopUp: function (waitlist) {
+		try {
+			botDebug.debugMessage(true, "WaitListCount: " + waitlist.length);
+			if (waitlist.length > BOTDJ.settings.autoHopUpCount) return;
+			if (BOTDJ.settings.hoppingDownNow) return;
+			if (!BOTDJ.settings.autoHopUp) return;
+			if (UTIL.botInWaitList(waitlist)) return;
+			if (UTIL.bouncerDjing(waitlist, "mod")) return;
+			botDebug.debugMessage("TIME TO HOP UP!!!!!");
+			API.botDjNow();
+		}
+		catch(err) { UTIL.logException("checkHopUp: " + err.message); }
+	}
 };
 
 //SECTION RANDOM COMMENTS: All Random Comment functionality:
@@ -2650,6 +2717,32 @@ var API = {
       // [...]
     },
   },
+
+  botDjNow = function (waitlist) {
+        try {
+            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
+			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
+			$.ajax({
+              url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
+              type: "PUT"
+		    });
+        }
+        catch(err) {
+            UTIL.logException("botDjNow: " + err.message);
+        }
+    };
+    botHopDown = function (waitlist) {
+        try {
+            //todoerlind if (!UTIL.botInWaitList(waitlist)) return;
+			$.ajax({
+              url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
+              type: "PUT"
+		    });
+        }
+        catch(err) {
+            UTIL.logException("botHopDown: " + err.message);
+        }
+    };
 
   reorderQueue: function(newlist){
     try {
@@ -3560,7 +3653,7 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
                         var name = msg.substring(cmd.length + 2);
-						botDebug.debugMessage(true, "AFKRESET NAME: " + name);
+					    //botDebug.debugMessage(true, "AFKRESET NAME: " + name);
                         var roomUser = USERS.lookupUserName(name);
                         if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
                         USERS.setLastActivity(roomUser, false);
@@ -3579,7 +3672,6 @@ var BOTCOMMANDS = {
                         var msg = chat.message;
                         if (msg.length === cmd.length) return API.sendChat(botChat.subChat(botChat.getChatMessage("nouserspecified"), {name: chat.un}));
                         var name = msg.substring(cmd.length + 2);
-						botDebug.debugMessage(true, "AFKRESET NAME: " + name);
                         var roomUser = USERS.lookupUserName(name);
                         if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
 						var lastActive = USERS.getLastActivity(roomUser, false);
@@ -3809,10 +3901,13 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") dubBot.queue.dubQueue = API.getWaitList(AFK.afkCheckCallback);
+						if (maxTime === "B") API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") botDebug.debugMessage(true, "[ API.getSongLengthZ() ] = " + (API.getSongLengthZ() / 60.0));
-						if (maxTime === "E") botDebug.debugMessage(true, "[  API.getSongLength() ] = " + API.getSongLength());
+						if (maxTime === "D") API.botDjNow();
+						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
+						if (maxTime === "F") API.getWaitList(BOTDJ.checkHopUp);
+						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
+						if (maxTime === "H") API.botHopDown();
                     }
                 }
             },
@@ -4730,9 +4825,9 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        SETTINGS.settings.hoppingDownNow = true;
+                        BOTDJ.settings.hoppingDownNow = true;
                         setTimeout(function () {
-                            SETTINGS.settings.hoppingDownNow = false;
+                            BOTDJ.settings.hoppingDownNow = false;
                             }, 2000);
                         API.botHopDown();
                     }
