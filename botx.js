@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0070",
+  version: "Version  1.01.0024.0071",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -149,6 +149,14 @@ var USERS = {
   usersImport: [],
   users: [],
   loadUserInterval: null,
+  getPermission: function (usrObjectID) {
+      try {
+	    var roomUser = USERS.defineRoomUser(usrObjectID);
+        if (roomUser === false) return 0;
+        return roomUser.userRole;
+	  }
+      catch(err) { UTIL.logException("getLastActivity: " + err.message); }
+  },
   getLastActivity: function (usrObjectID) {
       try {
 	    var roomUser = USERS.defineRoomUser(usrObjectID);
@@ -274,7 +282,7 @@ var USERS = {
         this.firstActivity = Date.now();
         this.lastActivity = Date.now();
         this.isMehing = false;
-        this.userRole = 0;
+        this.userRole = API.getPermission(userID);
         this.votes = {
             songsPlayed: 0,
             tastyRcv: 0,
@@ -419,7 +427,7 @@ var USERS = {
         if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
         roomUser.inRoom = true;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
-        roomUser.userRole = 0;
+        roomUser.userRole = API.getPermission(roomUser.id);
         if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
           API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
         }
@@ -1425,8 +1433,8 @@ var UTIL = {
   bouncerDjing: function(waitlist, minRank) {
     try {
 	    var minPerm = API.displayRoleToRoleNumber(minRank);
-        for(var i = 0; i < waitListItem waitlist.push(new .length; i++){
-            var perm = USERS.getLastActivity:( API.getPermission:(waitlist[i].id);
+        for(var i = 0; i < waitListItem.length; i++){
+            var perm = USERS.getPermission(waitlist[i].id);
             if (perm >= minPerm) return true;
         }
 		return false;
