@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0074",
+  version: "Version  1.01.0024.0075",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3983,15 +3983,15 @@ var BOTCOMMANDS = {
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") API.getWaitList(API.botDjNow());
+						if (maxTime === "D") API.getWaitList(API.botDjNow);
 						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
 						if (maxTime === "F") API.getWaitList(BOTDJ.checkHopUp);
 						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
-						if (maxTime === "H") API.getWaitList(API.botHopDown());
-						if (maxTime === "I") API.getWaitList(API.botDjNowA());
-						if (maxTime === "J") API.getWaitList(API.botDjNowB());
-						if (maxTime === "K") API.getWaitList(API.botDjNowC());
-						if (maxTime === "L") API.getWaitList(API.botDjNowD());
+						if (maxTime === "H") API.getWaitList(API.botHopDown);
+						if (maxTime === "I") API.getWaitList(API.botDjNowA);
+						if (maxTime === "J") API.getWaitList(API.botDjNowB);
+						if (maxTime === "K") API.getWaitList(API.botDjNowC);
+						if (maxTime === "L") API.getWaitList(API.botDjNowD);
                     }
                 }
             },
