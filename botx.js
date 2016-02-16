@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0076",
+  version: "Version  1.01.0024.0077",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2795,10 +2795,10 @@ var API = {
 		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
 		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
             //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
-			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause
+			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause POST
+			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause PUT queuePaused: "0"
             var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"));
-			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "post");
+			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "PUT");
         }
         catch(err) { UTIL.logException("botDjNowD: " + err.message); }
     },
