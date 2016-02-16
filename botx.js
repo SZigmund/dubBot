@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0073",
+  version: "Version  1.01.0024.0074",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2734,7 +2734,7 @@ var API = {
             i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
 			var dubList = API.dubDJList(waitlist);
 			dubList.push(botVar.botID);
-		    Dubtrack.helpers.sendRequest(h, , "post");
+		    Dubtrack.helpers.sendRequest(h, "", "post");
 		    Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
 			//$.ajax({
             //  url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
@@ -2756,7 +2756,7 @@ var API = {
             i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
 			var dubList = API.dubDJList(waitlist);
 			dubList.push(botVar.botID);
-		    Dubtrack.helpers.sendRequest(h, , "post");
+		    Dubtrack.helpers.sendRequest(h, "", "post");
 		    //Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
         }
         catch(err) {
@@ -2771,7 +2771,7 @@ var API = {
             i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
 			var dubList = API.dubDJList(waitlist);
 			dubList.push(botVar.botID);
-		    //Dubtrack.helpers.sendRequest(h, , "post");
+		    //Dubtrack.helpers.sendRequest(h, "", "post");
 		    Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
         }
         catch(err) {
