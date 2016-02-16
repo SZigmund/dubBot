@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0068",
+  version: "Version  1.01.0024.0070",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1424,7 +1424,7 @@ var UTIL = {
   },
   bouncerDjing: function(waitlist, minRank) {
     try {
-	    var var minPerm = API.displayRoleToRoleNumber(minRank);
+	    var minPerm = API.displayRoleToRoleNumber(minRank);
         for(var i = 0; i < waitListItem waitlist.push(new .length; i++){
             var perm = USERS.getLastActivity:( API.getPermission:(waitlist[i].id);
             if (perm >= minPerm) return true;
