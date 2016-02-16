@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0072",
+  version: "Version  1.01.0024.0073",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1981,7 +1981,7 @@ var BOTDJ = {
 			//todoererererlind
 			if (!UTIL.botInWaitList(waitlist)) return;
 			botDebug.debugMessage(true, "TIME TO HOP DOWN!!!!!");
-			API.botHopDown();
+			API.botHopDown(waitlist);
 		}
 		catch(err) {
 		  UTIL.logException("checkHopDown: " + err.message);
@@ -2730,22 +2730,84 @@ var API = {
         try {
             //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-			$.ajax({
-              url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
-              type: "PUT"
-		    });
+            var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
+            i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+			var dubList = API.dubDJList(waitlist);
+			dubList.push(botVar.botID);
+		    Dubtrack.helpers.sendRequest(h, , "post");
+		    Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
+			//$.ajax({
+            //  url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
+            //  type: "PUT"
+		    //});
         }
         catch(err) {
             UTIL.logException("botDjNow: " + err.message);
         }
     },
+  botDjNowA: function (waitlist) {
+        try {
+		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
+		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
+
+            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
+			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
+            var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
+            i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+			var dubList = API.dubDJList(waitlist);
+			dubList.push(botVar.botID);
+		    Dubtrack.helpers.sendRequest(h, , "post");
+		    //Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
+        }
+        catch(err) {
+            UTIL.logException("botDjNowA: " + err.message);
+        }
+    },
+  botDjNowB: function (waitlist) {
+        try {
+            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
+			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
+            var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
+            i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+			var dubList = API.dubDJList(waitlist);
+			dubList.push(botVar.botID);
+		    //Dubtrack.helpers.sendRequest(h, , "post");
+		    Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
+        }
+        catch(err) {
+            UTIL.logException("botDjNowB: " + err.message);
+        }
+    },
+  botDjNowC: function (waitlist) {
+        try {
+		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
+		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
+            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
+			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
+            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"))
+			Dubtrack.helpers.sendRequest(i, { "newlistqueuePaused": 0 }, "post");
+        }
+        catch(err) { UTIL.logException("botDjNowC: " + err.message); }
+    },
+  botDjNowD: function (waitlist) {
+        try {
+		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
+		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
+            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
+			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
+            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"))
+			Dubtrack.helpers.sendRequest(i, { "newlistqueuePaused": 0 }, "post");
+        }
+        catch(err) { UTIL.logException("botDjNowD: " + err.message); }
+    },
     botHopDown: function (waitlist) {
         try {
-            //todoerlind if (!UTIL.botInWaitList(waitlist)) return;
-			$.ajax({
-              url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
-              type: "PUT"
-		    });
+            if (!UTIL.botInWaitList(waitlist)) return;
+			API.moderateRemoveDJ(botVar.botID);
+			//$.ajax({
+            //  url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
+            //  type: "PUT"
+		    //});
         }
         catch(err) {
             UTIL.logException("botHopDown: " + err.message);
@@ -2760,6 +2822,16 @@ var API = {
     catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
 
+  dubDJList: function(waitlist){
+    try {
+	  var dubList = [];
+	  for(var i = 0; i < waitlist.length; i++){
+	    dubList.push(waitlist[i].id);
+	  }
+	  return dubList;
+    }
+    catch(err) {UTIL.logException("dubDJList: " + err.message); }
+  },
   moderateMoveDJ: function(userID, queuePos, djlist){
     try {
 		//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
@@ -3911,11 +3983,15 @@ var BOTCOMMANDS = {
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") API.botDjNow();
+						if (maxTime === "D") API.getWaitList(API.botDjNow());
 						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
 						if (maxTime === "F") API.getWaitList(BOTDJ.checkHopUp);
 						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
-						if (maxTime === "H") API.botHopDown();
+						if (maxTime === "H") API.getWaitList(API.botHopDown());
+						if (maxTime === "I") API.getWaitList(API.botDjNowA());
+						if (maxTime === "J") API.getWaitList(API.botDjNowB());
+						if (maxTime === "K") API.getWaitList(API.botDjNowC());
+						if (maxTime === "L") API.getWaitList(API.botDjNowD());
                     }
                 }
             },
@@ -4837,7 +4913,7 @@ var BOTCOMMANDS = {
                         setTimeout(function () {
                             BOTDJ.settings.hoppingDownNow = false;
                             }, 2000);
-                        API.botHopDown();
+                        API.getWaitList(API.botHopDown());
                     }
                 }
             },
@@ -6448,51 +6524,6 @@ var BOTCOMMANDS = {
                             $(".icon-chat").click();
                         }, 1000);
                     }, 1000);
-                }
-            },
-            zigaaCommand: {
-                command: 'zigaa',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd)  {
-                    try {
-                        API.botHopDown();
-                    }
-                    catch(err) {
-                        UTIL.logException("zigaaCommand: " + err.message);
-                    }
-                }
-            },
-            zigcCommand: {
-                command: 'zigc',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd)  {
-                    try {
-                        basicBot.roomUtilities.validateUserCheck();
-                    }
-                    catch(err) { UTIL.logException("zigcCommand: " + err.message); }
-                }
-            },
-            zigdCommand: {
-                command: 'zigd',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd)  {
-                    try {
-                    //grab song testing:
-                        var songHistory = API.getHistory();
-                        //var songHistory = API.getUsers();
-                        basicBot.roomUtilities.logObject(songHistory[0], "songHistory");
-                        botDebug.debugMessage(true, "Media cid: " + songHistory[0].media.cid);
-                        var newMedia = API.getMedia();
-                        basicBot.roomUtilities.logObject(newMedia, "Media");
-                        API.grabSong("7527918", songHistory[0].media.cid);
-//Request body: {"playlistID":,"historyID":"3602db39-e515-4739-aa24-0dc084f384bc"}
-//7527918
-
-                        }
-                    catch(err) { UTIL.logException("zigdCommand: " + err.message); }
                 }
             },
             debugCommand: {
