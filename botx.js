@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0067",
+  version: "Version  1.01.0024.0068",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -153,7 +153,7 @@ var USERS = {
       try {
 	    var roomUser = USERS.defineRoomUser(usrObjectID);
         if (roomUser === false) return Date.now();
-        reutrn roomUser.lastActivity;
+        return roomUser.lastActivity;
 
 		//todoer DELETE after testing
         //if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
