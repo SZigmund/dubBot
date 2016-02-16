@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0071",
+  version: "Version  1.01.0024.0072",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2726,7 +2726,7 @@ var API = {
     },
   },
 
-  botDjNow = function (waitlist) {
+  botDjNow: function (waitlist) {
         try {
             //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
@@ -2738,8 +2738,8 @@ var API = {
         catch(err) {
             UTIL.logException("botDjNow: " + err.message);
         }
-    };
-    botHopDown = function (waitlist) {
+    },
+    botHopDown: function (waitlist) {
         try {
             //todoerlind if (!UTIL.botInWaitList(waitlist)) return;
 			$.ajax({
@@ -2750,7 +2750,7 @@ var API = {
         catch(err) {
             UTIL.logException("botHopDown: " + err.message);
         }
-    };
+    },
 
   reorderQueue: function(newlist){
     try {
