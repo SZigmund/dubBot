@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0075",
+  version: "Version  1.01.0024.0076",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2730,6 +2730,7 @@ var API = {
         try {
             //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
+			//https://api.dubtrack.fm/user/session/room/5602ed62e8632103004663c2/queue
             var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
             i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
 			var dubList = API.dubDJList(waitlist);
@@ -2785,7 +2786,7 @@ var API = {
             //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
             var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"))
-			Dubtrack.helpers.sendRequest(i, { "newlistqueuePaused": 0 }, "post");
+			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "post");
         }
         catch(err) { UTIL.logException("botDjNowC: " + err.message); }
     },
@@ -2795,8 +2796,9 @@ var API = {
 		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
             //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"))
-			Dubtrack.helpers.sendRequest(i, { "newlistqueuePaused": 0 }, "post");
+			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause
+            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"));
+			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "post");
         }
         catch(err) { UTIL.logException("botDjNowD: " + err.message); }
     },
@@ -3987,7 +3989,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
 						if (maxTime === "F") API.getWaitList(BOTDJ.checkHopUp);
 						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
-						if (maxTime === "H") API.getWaitList(API.botHopDown);
+						if (maxTime === "H") API.getWaitList(API.botHopDown); //works well
 						if (maxTime === "I") API.getWaitList(API.botDjNowA);
 						if (maxTime === "J") API.getWaitList(API.botDjNowB);
 						if (maxTime === "K") API.getWaitList(API.botDjNowC);
