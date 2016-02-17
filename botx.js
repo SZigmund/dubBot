@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0081",
+  version: "Version  1.01.0024.0082",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -123,7 +123,7 @@ var dubBot = {
       API.chatLog("Skip: [" + botVar.currentSong + "] dj id: " + userName + ": skiped by: " + skippedBy + " Reason: " + reason);
       var tooMany = false;
       //tooMany = dubBot.tooManyBadSongs(userName);
-      //if (tooMany) API.botDjNow();
+      //if (tooMany) API.botHopUp();
       API.moderateForceSkip();
       //if (tooMany) setTimeout(function () { API.removeDJ(userName); }, 1 * 1000);
       //if (tooMany) setTimeout(function () { UTIL.setBadSongCount(userName, 0); }, 1 * 1500);
@@ -1441,6 +1441,7 @@ var UTIL = {
   },
   bouncerDjing: function(waitlist, minRank) {
     try {
+		if(typeof waitlist === 'undefined' || waitlist === null) return false;
 	    var minPerm = API.displayRoleToRoleNumber(minRank);
         for(var i = 0; i < waitlist.length; i++){
             var perm = USERS.getPermission(waitlist[i].id);
@@ -1452,6 +1453,7 @@ var UTIL = {
   },
   botInWaitList: function(waitlist) {
     try {
+		if(typeof waitlist === 'undefined' || waitlist === null) return false;
 		var djpos = API.getWaitListPosition(botVar.botID, waitlist);
 		if (djpos < 0) return false;
 		return true;
@@ -1986,6 +1988,7 @@ var BOTDJ = {
 	checkHopDown: function (waitlist) {
 		try {
 			if (!BOTDJ.settings.autoHopUp) return;
+			if(typeof waitlist === 'undefined' || waitlist === null) return;
 			if (waitlist.length < BOTDJ.settings.autoHopDownCount) return;
 			//todoererererlind
 			if (!UTIL.botInWaitList(waitlist)) return;
@@ -2007,6 +2010,7 @@ var BOTDJ = {
 	},
 	checkHopUp: function (waitlist) {
 		try {
+		    //todoer Do we need to add this? if(typeof waitlist === 'undefined' || waitlist === null) API.botHopUp(waitlist);
 			botDebug.debugMessage(true, "WaitListCount: " + waitlist.length);
 			if (waitlist.length > BOTDJ.settings.autoHopUpCount) return;
 			if (BOTDJ.settings.hoppingDownNow) return;
@@ -2014,7 +2018,7 @@ var BOTDJ = {
 			if (UTIL.botInWaitList(waitlist)) return;
 			if (UTIL.bouncerDjing(waitlist, "mod")) return;
 			botDebug.debugMessage("TIME TO HOP UP!!!!!");
-			API.botDjNow();
+			API.botHopUp(waitlist);
 		}
 		catch(err) { UTIL.logException("checkHopUp: " + err.message); }
 	}
@@ -2734,15 +2738,25 @@ var API = {
       // [...]
     },
   },
-
-  botDjNow: function (waitlist) {
+  //todoererlind test:
+  queueAllSongs:  function () {
+	  	//LIST OF MY PLAYLISTS: https://api.dubtrack.fm/playlist
+		//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queueplaylist/56c4de96cdd8ca0f0266f10d
+        try {
+			var queueallurl = "/room/:id/queueplaylist/:playlist";
+            var i = Dubtrack.config.apiUrl + queueallurl.replace(":id", botVar.roomID).replace(":playlist", CONST.ACTIVE_PLAY_PLAYLIST);
+			Dubtrack.helpers.sendRequest(i, "", "POST");
+        }
+        catch(err) { UTIL.logException("queueAllSongs: " + err.message); }
+  },
+  botHopUp: function (waitlist) {
         try {
             if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause PUT queuePaused: "0"
-            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"));
+            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", botVar.roomID);
 			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "PUT");
         }
-        catch(err) { UTIL.logException("botDjNow: " + err.message); }
+        catch(err) { UTIL.logException("botHopUp: " + err.message); }
     },
     botHopDown: function (waitlist) {
         try {
@@ -2754,7 +2768,7 @@ var API = {
 
   reorderQueue: function(newlist){
     try {
-		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
+		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", botVar.roomID);
 		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
     }
     catch(err) {UTIL.logException("reorderQueue: " + err.message); }
@@ -3040,7 +3054,6 @@ var API = {
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
-		//dubBot.queue.dubQueue = waitlist;
         cb(waitlist);
 	  });
 	}
@@ -3100,7 +3113,7 @@ var API = {
 	  var songfkid = songInfo.fkid;
 	  var songtype = songInfo.type;
 	  var songname = Dubtrack.room.player.activeSong.get("songInfo").name;
-	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", CONST.ACTIVE_PLAYLIST);
+	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", CONST.ACTIVE_GRAB_PLAYLIST);
 	  //Dubtrack.helpers.sendRequest(i, { "fkid": songfkid, "type": songtype}, "PUT");
 	  Dubtrack.helpers.sendRequest(i, { "songid": songid}, "POST");
 	  //56094f467e91930300350746
@@ -3271,7 +3284,8 @@ var CONST = {
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
   TASTY_ROOM: "5600a564bfb6340300a2def2",
-  ACTIVE_PLAYLIST: "56c37f267892317f01426e01",
+  ACTIVE_GRAB_PLAYLIST: "56c37f267892317f01426e01",
+  ACTIVE_PLAY_PLAYLIST: "56c4de96cdd8ca0f0266f10d",
   commandLiteral: ".",
             howAreYouComments: [
                 "Shitty, and yourself %%FU%%?",
@@ -3654,7 +3668,7 @@ var BOTCOMMANDS = {
                 }
             },
             rollCommand: {   //Added 03/30/2015 Zig
-                command: ['roll','spin','throw','dice','rollem','toss','fling','pitch'],
+                command: ['roll','spin','throw','dice','rollem','toss','fling','pitch','shoot'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -3985,12 +3999,13 @@ var BOTCOMMANDS = {
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") API.getWaitList(API.botDjNow);  //works well
+						if (maxTime === "D") API.getWaitList(API.botHopUp);  //works well
 						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
 						if (maxTime === "F") API.getWaitList(BOTDJ.checkHopUp);
 						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
 						if (maxTime === "H") API.getWaitList(API.botHopDown); //works well
 						if (maxTime === "I") API.currentSongBlocked();
+						if (maxTime === "H") API.queueAllSongs();
                     }
                 }
             },
@@ -4415,6 +4430,29 @@ var BOTCOMMANDS = {
                 }  
                 catch(err) { UTIL.logException("grabCommand: " + err.message); }
               }
+            },
+            hopupCommand: {
+                command: 'hopup',
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    API.getWaitList(API.botHopUp);
+                }
+            },
+            hopdownCommand: {
+                command: 'hopdown',
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					BOTDJ.settings.hoppingDownNow = true;
+					setTimeout(function () { BOTDJ.settings.hoppingDownNow = false; }, 2000);
+					API.getWaitList(API.botHopDown)
+                    }
+                }
             },
 
             /* basic
@@ -4901,34 +4939,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            hopupCommand: {
-                command: 'hopup',
-                rank: 'mod',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.botDjNow();
-                    }
-                }
-            },
-            hopdownCommand: {
-                command: 'hopdown',
-                rank: 'mod',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        BOTDJ.settings.hoppingDownNow = true;
-                        setTimeout(function () {
-                            BOTDJ.settings.hoppingDownNow = false;
-                            }, 2000);
-                        API.getWaitList(API.botHopDown());
-                    }
-                }
-            },
             bootCommand: {
                 command: 'boot',
                 rank: 'dj',
