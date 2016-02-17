@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0078",
+  version: "Version  1.01.0024.0079",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3083,7 +3083,7 @@ var API = {
   },
 
   //todoerlind complete
-  grabSong:: function() {
+  grabSong: function() {
     try { 
 	//LIST OF MY PLAYLISTS: https://api.dubtrack.fm/playlist
 	//https://api.dubtrack.fm/playlist/56c37f267892317f01426e01/songs
