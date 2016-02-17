@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0080",
+  version: "Version  1.01.0024.0081",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1442,7 +1442,7 @@ var UTIL = {
   bouncerDjing: function(waitlist, minRank) {
     try {
 	    var minPerm = API.displayRoleToRoleNumber(minRank);
-        for(var i = 0; i < waitList.length; i++){
+        for(var i = 0; i < waitlist.length; i++){
             var perm = USERS.getPermission(waitlist[i].id);
             if (perm >= minPerm) return true;
         }
@@ -2826,6 +2826,7 @@ var API = {
     try {
 	////Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
         if(typeof id === 'undefined' || id === null) id = botVar.botID;
+		if(typeof djlist === 'undefined' || djlist === null) return -1;
         for(var i = 0; i < djlist.length; i++){
             if(djlist[i].id === id) return i;
         }
