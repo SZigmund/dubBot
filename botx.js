@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0079",
+  version: "Version  1.01.0024.0080",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -861,7 +861,7 @@ var botChat = {
    botChat.chatMessages.push(["whyyoumeh", "[@%%NAME%%] mehed this song [%%SONG%%]"]);
    botChat.chatMessages.push(["voteskiplimit", "[@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
    botChat.chatMessages.push(["voteskipexceededlimit", "@%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
-   botChat.chatMessages.push(["grabbedsong", "%%BOTNAME$%% grabbed %%SONGNAME%%."]);
+   botChat.chatMessages.push(["grabbedsong", "%%BOTNAME%% grabbed %%SONGNAME%%."]);
    botChat.chatMessages.push(["voteskipinvalidlimit", "[@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
    botChat.chatMessages.push(["voteskipsetlimit", "[@%%NAME%%] Voteskip limit set to %%LIMIT%%."]);
    botChat.chatMessages.push(["activeusersintime", "[@%%NAME%% There have been %%AMOUNT%% users chatting in the past %%TIME%% minutes."]);
@@ -1706,7 +1706,7 @@ var TASTY = {
                       '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                       ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                       'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                      'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+                      'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grabbed','yes','hellyes',
                       'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'];
@@ -2946,7 +2946,7 @@ var API = {
 	  if (dubBot.queue.dubQueue.indexOf("copyright grounds") >= 0) return true;
 	  return false;
     }
-    catch(err) { UTIL.logException("getPermission: " + err.message); }
+    catch(err) { UTIL.logException("currentSongBlocked: " + err.message); }
   },
   chatLog: function(txt) {
     var b = new Dubtrack.View.chatLoadingItem;
@@ -3095,11 +3095,14 @@ var API = {
 	//Params:  fkid: this.parentView.songid, type: this.parentView.type
 	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
 	  if (typeof songInfo !== "object") return;
-	  var songid = songInfo.fkid;
+	  var songid = songInfo._id;
+	  var songfkid = songInfo.fkid;
 	  var songtype = songInfo.type;
 	  var songname = Dubtrack.room.player.activeSong.get("songInfo").name;
 	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", CONST.ACTIVE_PLAYLIST);
-	  Dubtrack.helpers.sendRequest(i, { "fkid": songid, "type": songtype}, "PUT");
+	  //Dubtrack.helpers.sendRequest(i, { "fkid": songfkid, "type": songtype}, "PUT");
+	  Dubtrack.helpers.sendRequest(i, { "songid": songid}, "POST");
+	  //56094f467e91930300350746
 	  API.sendChat(botChat.subChat(botChat.getChatMessage("grabbedsong"), {botname: botVar.botName, songname: songname}));
 	}
     catch(err) { UTIL.logException("grabSong: " + err.message); }
@@ -3612,7 +3615,7 @@ var BOTCOMMANDS = {
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
-                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grab','grabbed','yes','hellyes',
+                          'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grabbed','yes','hellyes',
                           'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'],
@@ -3987,7 +3990,6 @@ var BOTCOMMANDS = {
 						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
 						if (maxTime === "H") API.getWaitList(API.botHopDown); //works well
 						if (maxTime === "I") API.currentSongBlocked();
-						if (maxTime === "I") API.grabSong();
                     }
                 }
             },
@@ -4399,6 +4401,19 @@ var BOTCOMMANDS = {
 					//dubBot.room.skippable = false;
 					//setTimeout(function () { dubBot.room.skippable = true }, 5 * 1000);
                 }
+            },
+            grabCommand: {  //Added 05/27/2015
+                command: 'grab',
+                rank: 'vip',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                try  {
+                  if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                  if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                  API.grabSong();
+                }  
+                catch(err) { UTIL.logException("grabCommand: " + err.message); }
+              }
             },
 
             /* basic
@@ -6314,19 +6329,6 @@ var BOTCOMMANDS = {
                     }
                     catch(err) { UTIL.logException("englishCommand: " + err.message); }
                 }
-            },
-            grabCommand: {  //Added 05/27/2015 Zig  (This command relies on Origem Woot to be running)
-                command: 'grab',
-                rank: 'vip',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                try  {
-                  API.grabSong();
-                  }  
-                catch(err) {
-                  UTIL.logException("grabCommand: " + err.message);
-                }
-              }
             },
             dasbootCommand: {
                 command: 'dasboot',
