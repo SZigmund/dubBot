@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0077",
+  version: "Version  1.01.0024.0078",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -92,6 +92,9 @@ var dubBot = {
   },
   queue: {
 	dubQueue: null,
+	dubQueueA: null,
+	dubQueueB: null,
+	dubQueueC: null,
 	dubQueueResp: null
   },
 
@@ -106,6 +109,10 @@ var dubBot = {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
+	  //else if (API.currentSongBlocked()) {
+      //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
+      //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
+	  //}
       //todoer check blacklist
     }
       catch(err) { UTIL.logException("validateCurrentSong: " + err.message); }
@@ -779,6 +786,7 @@ var botChat = {
    botChat.chatMessages.push(["songknown", " :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:"]);
    botChat.chatMessages.push(["songknown2", " :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:"]);
    botChat.chatMessages.push(["timelimit", " @%%NAME%% your song is longer than %%MAXLENGTH%% minutes, you need permission to play longer songs."]);
+   botChat.chatMessages.push(["songblocked", " @%%NAME%% your song is blocked in this country."]);
    botChat.chatMessages.push(["permissionownsong", " :up: @%%NAME%% has permission to play their own production!"]);
    botChat.chatMessages.push(["isblacklisted", " @%%NAME%% [%%SONG%%]] is banned in this room! Skipping song...Please read the rules before you play your next play."]);
    botChat.chatMessages.push(["whois", " [%%NAME1%%] Username: %%NAME2%%, ID: %%ID%%, Rank: %%RANK%%, Joined: %%JOINED%%, Level: %%LEVEL%%, Language: %%LANGUAGE%%, Avatar: %%AVATAR%%%%PROFILE%%"]);
@@ -853,6 +861,7 @@ var botChat = {
    botChat.chatMessages.push(["whyyoumeh", "[@%%NAME%%] mehed this song [%%SONG%%]"]);
    botChat.chatMessages.push(["voteskiplimit", "[@%%NAME%%] Voteskip limit is currently set to %%LIMIT%% mehs."]);
    botChat.chatMessages.push(["voteskipexceededlimit", "@%%NAME%% your song has exceeded the voteskip limit (%%LIMIT%% mehs)."]);
+   botChat.chatMessages.push(["grabbedsong", "%%BOTNAME$%% grabbed %%SONGNAME%%."]);
    botChat.chatMessages.push(["voteskipinvalidlimit", "[@%%NAME%%] Invalid voteskip limit, please try again using a number to signify the number of mehs."]);
    botChat.chatMessages.push(["voteskipsetlimit", "[@%%NAME%%] Voteskip limit set to %%LIMIT%%."]);
    botChat.chatMessages.push(["activeusersintime", "[@%%NAME%% There have been %%AMOUNT%% users chatting in the past %%TIME%% minutes."]);
@@ -1433,7 +1442,7 @@ var UTIL = {
   bouncerDjing: function(waitlist, minRank) {
     try {
 	    var minPerm = API.displayRoleToRoleNumber(minRank);
-        for(var i = 0; i < waitListItem.length; i++){
+        for(var i = 0; i < waitList.length; i++){
             var perm = USERS.getPermission(waitlist[i].id);
             if (perm >= minPerm) return true;
         }
@@ -2728,92 +2737,19 @@ var API = {
 
   botDjNow: function (waitlist) {
         try {
-            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
-			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-			//https://api.dubtrack.fm/user/session/room/5602ed62e8632103004663c2/queue
-            var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
-            i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
-			var dubList = API.dubDJList(waitlist);
-			dubList.push(botVar.botID);
-		    Dubtrack.helpers.sendRequest(h, "", "post");
-		    Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
-			//$.ajax({
-            //  url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
-            //  type: "PUT"
-		    //});
-        }
-        catch(err) {
-            UTIL.logException("botDjNow: " + err.message);
-        }
-    },
-  botDjNowA: function (waitlist) {
-        try {
-		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
-		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
-
-            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
-			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-            var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
-            i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
-			var dubList = API.dubDJList(waitlist);
-			dubList.push(botVar.botID);
-		    Dubtrack.helpers.sendRequest(h, "", "post");
-		    //Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
-        }
-        catch(err) {
-            UTIL.logException("botDjNowA: " + err.message);
-        }
-    },
-  botDjNowB: function (waitlist) {
-        try {
-            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
-			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-            var h = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", Dubtrack.room.model.get("_id")),
-            i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueueOrder.replace(":id", Dubtrack.room.model.get("_id"));
-			var dubList = API.dubDJList(waitlist);
-			dubList.push(botVar.botID);
-		    //Dubtrack.helpers.sendRequest(h, "", "post");
-		    Dubtrack.helpers.sendRequest(i, { "order[]": dubList }, "post");
-        }
-        catch(err) {
-            UTIL.logException("botDjNowB: " + err.message);
-        }
-    },
-  botDjNowC: function (waitlist) {
-        try {
-		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
-		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
-            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
-			//https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/pause
-            var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"))
-			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "post");
-        }
-        catch(err) { UTIL.logException("botDjNowC: " + err.message); }
-    },
-  botDjNowD: function (waitlist) {
-        try {
-		//Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
-		//        return Dubtrack.helpers.sendRequest(b, { queuePaused: 0 }, "put", function(a) {
-            //TODOERLIND if (UTIL.botInWaitList(waitlist)) return;
-			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause POST
+            if (UTIL.botInWaitList(waitlist)) return;
 			//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/pause PUT queuePaused: "0"
             var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueuePause.replace(":id", Dubtrack.room.model.get("_id"));
 			Dubtrack.helpers.sendRequest(i, { "queuePaused": 0 }, "PUT");
         }
-        catch(err) { UTIL.logException("botDjNowD: " + err.message); }
+        catch(err) { UTIL.logException("botDjNow: " + err.message); }
     },
     botHopDown: function (waitlist) {
         try {
             if (!UTIL.botInWaitList(waitlist)) return;
 			API.moderateRemoveDJ(botVar.botID);
-			//$.ajax({
-            //  url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/queue/pause",
-            //  type: "PUT"
-		    //});
         }
-        catch(err) {
-            UTIL.logException("botHopDown: " + err.message);
-        }
+        catch(err) { UTIL.logException("botHopDown: " + err.message); }
     },
 
   reorderQueue: function(newlist){
@@ -2888,6 +2824,7 @@ var API = {
 
   getWaitListPosition: function(id, djlist){
     try {
+	////Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
         if(typeof id === 'undefined' || id === null) id = botVar.botID;
         for(var i = 0; i < djlist.length; i++){
             if(djlist[i].id === id) return i;
@@ -2961,9 +2898,7 @@ var API = {
 	  roomUser.userRole = API.displayRoleToRoleNumber(displayRole);
 	  return roomUser.userRole;
     }
-    catch(err) {
-      UTIL.logException("getPermission: " + err.message);
-    }
+    catch(err) { UTIL.logException("getPermission: " + err.message); }
   },
   moderateDeleteChat: function (cid) {
     // todoer
@@ -2974,6 +2909,44 @@ var API = {
     //        url: "https://plug.dj/_/chat/" + cid,
     //        type: "DELETE"
     //    });
+  },
+  getYTSongStatus: function() {
+	//Valid url: http://gdata.youtube.com/feeds/api/videos/M_oUI5AYZT8
+	//http://gdata.youtube.com/feeds/api/videos/BtuOAnsuZBY
+	
+  },
+  currentSongBlocked: function() {
+    try {
+	//todoerererlind -
+	//This video contains content from Eagle Rock. It is not available in your country.
+	//This video has been removed by the user.
+	//The YouTube account associated with this video has been terminated due to multiple third-party notifications of copyright infringement.
+	//This video is no longer available due to a copyright claim by Warner Music Group.
+	//This video does not exist.
+	//This video contains content from WMG, who has blocked it on copyright grounds.
+	//This video contains content from SME, who has blocked it on copyright grounds.
+	//This video contains content from Warner Chappell, who has blocked it in your country on copyright grounds.
+	//This video is no longer available due to a copyright claim by C3 Presents.
+	//This video is no longer available due to a copyright claim by National Academy of Recording Arts & Sciences, Inc..
+	  //blocked it in your country
+	  dubBot.queue.dubQueue = document.getElementsByClassName(".ytp-error-content-wrap");
+	  dubBot.queue.dubQueueA = document.getElementsByClassName(".ytp-error-content-wrap");
+	  //$().html();
+	  //document.getElementsByClassName("#player").html();
+	  dubBot.queue.dubQueueB = document.getElementsByClassName("#player");
+	  if (dubBot.queue.dubQueue.indexOf("not available in your country") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("This video has been removed by the user") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("third-party notifications of copyright") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("video is no longer available due") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("copyright claim by") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("video does not exist") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("video contains content from") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("blocked it on copyright grounds") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("blocked it in your country") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("copyright grounds") >= 0) return true;
+	  return false;
+    }
+    catch(err) { UTIL.logException("getPermission: " + err.message); }
   },
   chatLog: function(txt) {
     var b = new Dubtrack.View.chatLoadingItem;
@@ -3066,7 +3039,7 @@ var API = {
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
-		dubBot.queue.dubQueue = waitlist;
+		//dubBot.queue.dubQueue = waitlist;
         cb(waitlist);
 	  });
 	}
@@ -3109,6 +3082,28 @@ var API = {
     catch(err) { UTIL.logException("getRoomID: " + err.message); }
   },
 
+  //todoerlind complete
+  grabSong:: function() {
+    try { 
+	//LIST OF MY PLAYLISTS: https://api.dubtrack.fm/playlist
+	//https://api.dubtrack.fm/playlist/56c37f267892317f01426e01/songs
+	//SONGID: Dubtrack.room.player.activeSong.get("song")._id
+	//NAME: Dubtrack.room.player.activeSong.get("songInfo").name
+	//fkid: Dubtrack.room.player.activeSong.get("songInfo").fkid
+	//len: Dubtrack.room.player.activeSong.get("songInfo").songLength
+	//type: Dubtrack.room.player.activeSong.get("songInfo").type
+	//Params:  fkid: this.parentView.songid, type: this.parentView.type
+	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
+	  if (typeof songInfo !== "object") return;
+	  var songid = songInfo.fkid;
+	  var songtype = songInfo.type;
+	  var songname = Dubtrack.room.player.activeSong.get("songInfo").name;
+	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", CONST.ACTIVE_PLAYLIST);
+	  Dubtrack.helpers.sendRequest(i, { "fkid": songid, "type": songtype}, "PUT");
+	  API.sendChat(botChat.subChat(botChat.getChatMessage("grabbedsong"), {botname: botVar.botName, songname: songname}));
+	}
+    catch(err) { UTIL.logException("grabSong: " + err.message); }
+  },
   currentSongName: function() {
     try { return $(".currentSong").text();    }
     catch(err) { UTIL.logException("currentSongName: " + err.message); }
@@ -3272,6 +3267,7 @@ var CONST = {
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
   TASTY_ROOM: "5600a564bfb6340300a2def2",
+  ACTIVE_PLAYLIST: "56c37f267892317f01426e01",
   commandLiteral: ".",
             howAreYouComments: [
                 "Shitty, and yourself %%FU%%?",
@@ -3985,15 +3981,13 @@ var BOTCOMMANDS = {
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") API.getWaitList(AFK.afkCheckCallback);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
-						if (maxTime === "D") API.getWaitList(API.botDjNow);
+						if (maxTime === "D") API.getWaitList(API.botDjNow);  //works well
 						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
 						if (maxTime === "F") API.getWaitList(BOTDJ.checkHopUp);
 						if (maxTime === "G") API.getWaitList(BOTDJ.testBouncer);
 						if (maxTime === "H") API.getWaitList(API.botHopDown); //works well
-						if (maxTime === "I") API.getWaitList(API.botDjNowA);
-						if (maxTime === "J") API.getWaitList(API.botDjNowB);
-						if (maxTime === "K") API.getWaitList(API.botDjNowC);
-						if (maxTime === "L") API.getWaitList(API.botDjNowD);
+						if (maxTime === "I") API.currentSongBlocked();
+						if (maxTime === "I") API.grabSong();
                     }
                 }
             },
@@ -6323,13 +6317,11 @@ var BOTCOMMANDS = {
             },
             grabCommand: {  //Added 05/27/2015 Zig  (This command relies on Origem Woot to be running)
                 command: 'grab',
-                rank: 'manager',
+                rank: 'vip',
                 type: 'exact',
                 functionality: function (chat, cmd) {
                 try  {
-                  API.sendChat("/grab");
-                  //todo: API.grabSong(....
-                  //  $("#grab").click(); 
+                  API.grabSong();
                   }  
                 catch(err) {
                   UTIL.logException("grabCommand: " + err.message);
