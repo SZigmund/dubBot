@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0082",
+  version: "Version  1.01.0024.0083",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -4451,7 +4451,6 @@ var BOTCOMMANDS = {
 					BOTDJ.settings.hoppingDownNow = true;
 					setTimeout(function () { BOTDJ.settings.hoppingDownNow = false; }, 2000);
 					API.getWaitList(API.botHopDown)
-                    }
                 }
             },
 
