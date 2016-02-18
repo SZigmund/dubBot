@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0086",
+  version: "Version  1.01.0024.0087",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1490,6 +1490,7 @@ var UTIL = {
 		  if (playlist === PLAYLIST_10s) return "56c5fa8cbddd676401208321";
 		  if (playlist === PLAYLIST_00s) return "56c5fa89fc1b549a01bd37e9";
       }
+	}
     catch(err) { UTIL.logException("getPlaylistID: " + err.message); }
   },
   logException: function(exceptionMessage) {
