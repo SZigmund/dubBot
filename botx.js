@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0085",
+  version: "Version  1.01.0024.0086",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1460,7 +1460,7 @@ var UTIL = {
     }
     catch(err) { UTIL.logException("botInWaitList: " + err.message); }
   },
-  getActivePlaylistID: : function() {
+  getActivePlaylistID: function() {
     try {
 	  if (botVar.roomID === CONST.RGT_ROOM) ACTIVE_PLAYLIST: return "56c37f267892317f01426e01";
 	  if (botVar.roomID === CONST.TASTY_ROOM) ACTIVE_PLAYLIST: return "5600aa902d5038030094bb66";
