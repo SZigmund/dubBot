@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0087",
+  version: "Version  1.01.0024.0088",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3128,7 +3128,7 @@ var API = {
   grabYTSong: function(ytID, playlist) {
     try { 
       //https://api.dubtrack.fm/playlist/56c37f267892317f01426e01/songs
-	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlist),
+	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlist);
 	  Dubtrack.helpers.sendRequest(i, { "fkid": ytID, "type": "youtube"}, "POST");
 	}
     catch(err) { UTIL.logException("grabYTSong: " + err.message); }
