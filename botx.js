@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0097",
+  version: "Version  1.01.0024.0098",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3100,11 +3100,11 @@ var API = {
   },
  playListItem: function (dubPlaylistItem) {
     try {
-        this.fkid = dubPlaylistItem.fkid;
-        this.songlength = dubPlaylistItem.songLength;
+        this.fkid = dubPlaylistItem._song.fkid;
+        this.songlength = dubPlaylistItem._song.songLength;
         this.songid = dubPlaylistItem.songid;
 		this.songname = dubPlaylistItem._song.name;
-		this.songType =  dubPlaylistItem.type;
+		this.songType =  dubPlaylistItem._song.type;
         //botDebug.debugMessage(true, "-------------------------------------------------------------");
         //botDebug.debugMessage(true, "UID1: " + dubPlaylistItem.songLength);
         //botDebug.debugMessage(true, "UID2: " + dubPlaylistItem.songid);
