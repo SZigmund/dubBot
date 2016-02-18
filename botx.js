@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0092",
+  version: "Version  1.01.0024.0093",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1827,7 +1827,6 @@ var AFK = {
 				//botDebug.debugMessage(true, "A: " + roomUser.id + " B: " + botVar.botID);
 				if ((inactivity > (AFK.settings.afkResetTime * 60 * 1000)) && (roomUser.id !== botVar.botID) && (warncount === 0)) {
 					//reset afk status if the user joins the queue after afkResetTime
-					//todoerlind TEST
 					USERS.setLastActivity(roomUser, false);
 					inactivity = 0;
 				}
@@ -2032,7 +2031,7 @@ var BOTDJ = {
 		  botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
 		  //todoerlind COMPLETE
 		  var playlist = [];
-		  API.getPlaylist(1, playlist, playlistID, BOTDJ.selectRandomSong);
+		  API.getPlaylist(playlist, playlistID, 1, BOTDJ.selectRandomSong);
 		}
 		catch(err) { UTIL.logException("queueRandomSong: " + err.message); }
 	},
@@ -2041,7 +2040,7 @@ var BOTDJ = {
 		  botDebug.debugMessage(true, "selectRandomSong");
 		  botDebug.debugMessage(true, "playlist.length: " + playlist.length);
 		}
-		catch(err) { UTIL.logException("queueRandomSong: " + err.message); }
+		catch(err) { UTIL.logException("selectRandomSong: " + err.message); }
 	},
 	
 	//todoererererlind
@@ -3005,6 +3004,7 @@ var API = {
 	  if (dubBot.queue.dubQueue.indexOf("blocked it on copyright grounds") >= 0) return true;
 	  if (dubBot.queue.dubQueue.indexOf("blocked it in your country") >= 0) return true;
 	  if (dubBot.queue.dubQueue.indexOf("copyright grounds") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("copyright infringement") >= 0) return true;
 	  return false;
     }
     catch(err) { UTIL.logException("currentSongBlocked: " + err.message); }
@@ -3089,6 +3089,7 @@ var API = {
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
   getPlaylist: function(playlist, playlistID, pageno, cb) {
+  //getPlaylist(playlist, playlistID, 1, BOTDJ.selectRandomSong);
     try {
 		botDebug.debugMessage(true, "getPlaylist pageno: " + pageno);
 	  $.when(API.definePlaylist(playlistID, pageno)).done(function(a1) {
@@ -3170,7 +3171,6 @@ var API = {
 	}
     catch(err) { UTIL.logException("getRoomID: " + err.message); }
   },
-//todoerlind TEST:
   grabYTSong: function(ytID, playlist) {
     try { 
       //https://api.dubtrack.fm/playlist/56c37f267892317f01426e01/songs
@@ -4844,7 +4844,6 @@ var API = {
 	  }
     catch(err) { UTIL.logException("YTList80sImport: " + err.message); }
   },
-  //todoerlind TEST
   grabCurrentSong: function() {
     try { 
 	//LIST OF MY PLAYLISTS: https://api.dubtrack.fm/playlist
@@ -5774,6 +5773,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "7080F") API.YTList7080FImport();
 						if (maxTime === "COV") API.YTListCovImport();
 						if (maxTime === "CLAS") API.YTListClassicImport();
+						if (maxTime === "Q") BOTDJ.queueRandomSong();
                     }
                 }
             },
