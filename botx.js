@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0096",
+  version: "Version  1.01.0024.0097",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2041,6 +2041,7 @@ var BOTDJ = {
 		  botDebug.debugMessage(true, "playlist.length: " + playlist.length);
 		  songIdx = Math.floor(Math.random() * playlist.length);
 		  botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
+		  dubBot.queue.dubQueue = playlist;
 		  var songType = playlist[songIdx].songType;
 		  var fkid = playlist[songIdx].fkid;
 		  botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
