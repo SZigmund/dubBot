@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0088",
+  version: "Version  1.01.0024.0089",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1439,7 +1439,6 @@ var UTIL = {
     }
     catch(err) { UTIL.logException("logObject: " + err.message); }
   },
-  //todoerlind TEST:
   bouncerDjing: function(waitlist, minRank) {
     try {
 	    var minPerm = API.displayRoleToRoleNumber(minRank);
@@ -1450,6 +1449,15 @@ var UTIL = {
 		return false;
     }
     catch(err) { UTIL.logException("bouncerDjing: " + err.message); }
+  },
+  botInWaitListTest: function(waitlist) {
+    try {
+      if (UTIL.botInWaitList(waitlist))
+		botDebug.debugMessage(true, "Bot is waitlist");
+	  else
+		botDebug.debugMessage(true, "Bot is not in waitlist");
+    }
+    catch(err) { UTIL.logException("botInWaitListTest: " + err.message); }
   },
   botInWaitList: function(waitlist) {
     try {
@@ -1469,26 +1477,26 @@ var UTIL = {
   },
   getPlaylistID: function(playlist) {
     try {
-	  if (playlist === PLAYLIST_ACTIVE) return UTIL.getActivePlaylistID();
+	  if (playlist === CONST.PLAYLIST_ACTIVE) return UTIL.getActivePlaylistID();
 	  if (botVar.roomID === CONST.RGT_ROOM) {
-		  if (playlist === PLAYLIST_COVERS) return "560c1b20d4561b03007cca7a";
-		  if (playlist === PLAYLIST_90s) return "56c5da94558ec1130115ca3b";
-		  if (playlist === PLAYLIST_80s) return "56c5da8fe966fa2e01b0a95c";
-		  if (playlist === PLAYLIST_70s80sRockEpic) return "56c5e4de2905d125013ae8e4";
-		  if (playlist === PLAYLIST_70s80sFavs) return "56c5e4e33409d646009df1c7";
-		  if (playlist === PLAYLIST_70s) return "56c5daa127ae2b4b007a41c6";
-		  if (playlist === PLAYLIST_10s) return "56c5da9da552130101e9c1de";
-		  if (playlist === PLAYLIST_00s) return "56c5da98f4508b5a00ef9645";
+		  if (playlist === CONST.PLAYLIST_COVERS) return "560c1b20d4561b03007cca7a";
+		  if (playlist === CONST.PLAYLIST_90s) return "56c5da94558ec1130115ca3b";
+		  if (playlist === CONST.PLAYLIST_80s) return "56c5da8fe966fa2e01b0a95c";
+		  if (playlist === CONST.PLAYLIST_70s80sRockEpic) return "56c5e4de2905d125013ae8e4";
+		  if (playlist === CONST.PLAYLIST_70s80sFavs) return "56c5e4e33409d646009df1c7";
+		  if (playlist === CONST.PLAYLIST_70s) return "56c5daa127ae2b4b007a41c6";
+		  if (playlist === CONST.PLAYLIST_10s) return "56c5da9da552130101e9c1de";
+		  if (playlist === CONST.PLAYLIST_00s) return "56c5da98f4508b5a00ef9645";
 	  }
 	  if (botVar.roomID === CONST.TASTY_ROOM) {
-		  if (playlist === PLAYLIST_COVERS) return "56c5fc440295d3e201b8a2fa";
-		  if (playlist === PLAYLIST_90s) return "56c5fa8535c32d720230ff5b";
-		  if (playlist === PLAYLIST_80s) return "56c5fa82bddd676401208320";
-		  if (playlist === PLAYLIST_70s80sRockEpic) return "56c5faa2fb262718026961e1";
-		  if (playlist === PLAYLIST_70s80sFavs) return "56c5fa97fb262718026961db";
-		  if (playlist === PLAYLIST_70s) return "56c5fa7d18444e5e0075687a";
-		  if (playlist === PLAYLIST_10s) return "56c5fa8cbddd676401208321";
-		  if (playlist === PLAYLIST_00s) return "56c5fa89fc1b549a01bd37e9";
+		  if (playlist === CONST.PLAYLIST_COVERS) return "56c5fc440295d3e201b8a2fa";
+		  if (playlist === CONST.PLAYLIST_90s) return "56c5fa8535c32d720230ff5b";
+		  if (playlist === CONST.PLAYLIST_80s) return "56c5fa82bddd676401208320";
+		  if (playlist === CONST.PLAYLIST_70s80sRockEpic) return "56c5faa2fb262718026961e1";
+		  if (playlist === CONST.PLAYLIST_70s80sFavs) return "56c5fa97fb262718026961db";
+		  if (playlist === CONST.PLAYLIST_70s) return "56c5fa7d18444e5e0075687a";
+		  if (playlist === CONST.PLAYLIST_10s) return "56c5fa8cbddd676401208321";
+		  if (playlist === CONST.PLAYLIST_00s) return "56c5fa89fc1b549a01bd37e9";
       }
 	}
     catch(err) { UTIL.logException("getPlaylistID: " + err.message); }
@@ -3135,14 +3143,14 @@ var API = {
   },
   YTList80sImport1: function() {
     try {
-	  var playlist = UTIL.getPlaylistID(PLAYLIST_80s);
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_80s);
 	  API.grabYTSong("djV11Xbc914", playlist);
 	}
     catch(err) { UTIL.logException("YTList80sImport1: " + err.message); }
   },
   YTList80sImport: function() {
     try {
-	  var playlist = UTIL.getPlaylistID(PLAYLIST_80s);
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_80s);
       API.grabYTSong("djV11Xbc914", playlist);
       API.grabYTSong("OMOGaugKpzs", playlist);
       API.grabYTSong("otCpCn0l4Wo", playlist);
@@ -4361,6 +4369,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "K") API.queueAllSongs();
 						if (maxTime === "801") API.YTList80sImport1();
 						if (maxTime === "80") API.YTList80sImport();
+						if (maxTime === "L") API.getWaitList(UTIL.botInWaitListTest);
                     }
                 }
             },
