@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0101",
+  version: "Version  1.01.0024.0102",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -278,7 +278,7 @@ var USERS = {
                     }
                 }
             });
-            botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
+			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
         }
         catch(err) { UTIL.logException("importBlackList: " + err.message); }
     },
@@ -2013,8 +2013,8 @@ var BOTDJ = {
   monitorWaitlistInterval: null,
   settings: {
     autoHopUp: true,
-	autoHopUpCount: 1,
-	autoHopDownCount: 0,
+	autoHopUpCount: 2,
+	autoHopDownCount: 4,
     hoppingDownNow: false
 	},
 	monitorWaitlist: function () {
@@ -2034,7 +2034,7 @@ var BOTDJ = {
 	},
 	checkMyQueueCount: function (myQueue) {
 		try {
-		  botDebug.debugMessage(true, "checkMyQueueCount Queue Len: " + myQueue.length);
+		  //botDebug.debugMessage(true, "checkMyQueueCount Queue Len: " + myQueue.length);
 		  if (myQueue.length < 10) BOTDJ.queueRandomSong();
 		}
 		catch(err) { UTIL.logException("checkMyQueueCount: " + err.message); }
@@ -2043,8 +2043,7 @@ var BOTDJ = {
 		try {
 		  // SELECT Random Playlist:
 		  var playlistID = UTIL.getPlaylistID(Math.floor(Math.random() * 9) + 1);
-		  botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
-		  //todoerlind COMPLETE
+		  //botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
 		  var playlist = [];
 		  API.getPlaylist(playlist, playlistID, 1, BOTDJ.playRandomSong);
 		}
@@ -2052,14 +2051,13 @@ var BOTDJ = {
 	},
 	playRandomSong: function (playlist, playlistID) {
 		try {
-		  
-		  botDebug.debugMessage(true, "playlist.length: " + playlist.length);
+		  //botDebug.debugMessage(true, "playlist.length: " + playlist.length);
 		  songIdx = Math.floor(Math.random() * playlist.length);
-		  botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
+		  //botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
 		  dubBot.queue.dubQueue = playlist;
 		  var songType = playlist[songIdx].songType;
 		  var fkid = playlist[songIdx].fkid;
-		  botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
+		  //botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
 		  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist
 		  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomQueue.replace("{id}", Dubtrack.room.model.id);
 		  Dubtrack.helpers.sendRequest(i, { "songId": fkid, "songType": songType}, "POST");
@@ -2074,7 +2072,7 @@ var BOTDJ = {
 			if(typeof waitlist === 'undefined' || waitlist === null) return;
 			if (waitlist.length < BOTDJ.settings.autoHopDownCount) return;
 			if (!UTIL.botInWaitList(waitlist)) return;
-			botDebug.debugMessage(true, "TIME TO HOP DOWN!!!!!");
+			//botDebug.debugMessage(true, "TIME TO HOP DOWN!!!!!");
 			API.botHopDown(waitlist);
 		}
 		catch(err) { UTIL.logException("checkHopDown: " + err.message); }
@@ -2090,13 +2088,13 @@ var BOTDJ = {
 	},
 	checkHopUp: function (waitlist) {
 		try {
-			botDebug.debugMessage(true, "WaitListCount: " + waitlist.length);
+			//botDebug.debugMessage(true, "WaitListCount: " + waitlist.length);
 			if (waitlist.length > BOTDJ.settings.autoHopUpCount) return;
 			if (BOTDJ.settings.hoppingDownNow) return;
 			if (!BOTDJ.settings.autoHopUp) return;
 			if (UTIL.botInWaitList(waitlist)) return;
 			if (UTIL.bouncerDjing(waitlist, "mod")) return;
-			botDebug.debugMessage(true, "TIME TO HOP UP!!!!!");
+			//botDebug.debugMessage(true, "TIME TO HOP UP!!!!!");
 			API.botHopUp(waitlist);
 			API.getMyQueue(BOTDJ.checkMyQueueCount);
 		}
@@ -3129,7 +3127,7 @@ var API = {
   getPlaylist: function(playlist, playlistID, pageno, cb) {
   //getPlaylist(playlist, playlistID, 1, BOTDJ.playRandomSong);
     try {
-		botDebug.debugMessage(true, "getPlaylist pageno: " + pageno);
+		//botDebug.debugMessage(true, "getPlaylist pageno: " + pageno);
 	  $.when(API.definePlaylist(playlistID, pageno)).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
         // a1 is a list of length 3 containing the response text,
@@ -5018,8 +5016,9 @@ var API = {
     },
     EVENT_USER_JOIN: function () {
       try {
-        //if (botVar.ImHidden === true) return;
-        botDebug.debugMessage(true, "USERJOIN");
+        //This event doesn't work
+		//if (botVar.ImHidden === true) return;
+        //botDebug.debugMessage(true, "USERJOIN");
         //USERS.loadUsersInRoom(true);
       }
       catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
@@ -5791,7 +5790,7 @@ var BOTCOMMANDS = {
                 }
             },
             zigCommand: {  //Added 02/14/2015 Zig 
-                command: 'zig',
+                command: ['zig','botmaint'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
