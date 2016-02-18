@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0093",
+  version: "Version  1.01.0024.0094",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3005,6 +3005,7 @@ var API = {
 	  if (dubBot.queue.dubQueue.indexOf("blocked it in your country") >= 0) return true;
 	  if (dubBot.queue.dubQueue.indexOf("copyright grounds") >= 0) return true;
 	  if (dubBot.queue.dubQueue.indexOf("copyright infringement") >= 0) return true;
+	  if (dubBot.queue.dubQueue.indexOf("account associated with this video has been terminated") >= 0) return true;
 	  return false;
     }
     catch(err) { UTIL.logException("currentSongBlocked: " + err.message); }
@@ -3088,6 +3089,19 @@ var API = {
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
+ playListItem: function (dubPlaylistItem) {
+    try {
+        this.songlength = dubPlaylistItem.songLength;
+        this.songid = dubPlaylistItem.songid;
+		this.songname = dubPlaylistItem._song.name;
+        //botDebug.debugMessage(true, "-------------------------------------------------------------");
+        //botDebug.debugMessage(true, "UID1: " + dubPlaylistItem.songLength);
+        //botDebug.debugMessage(true, "UID2: " + dubPlaylistItem.songid);
+		//botDebug.debugMessage(true, "UID3: " + dubPlaylistItem._song.name);
+		return this;
+	}
+    catch(err) { UTIL.logException("playListItem: " + err.message); }
+  },
   getPlaylist: function(playlist, playlistID, pageno, cb) {
   //getPlaylist(playlist, playlistID, 1, BOTDJ.selectRandomSong);
     try {
@@ -3099,11 +3113,12 @@ var API = {
 		dubBot.queue.dubPlaylist = a1;
 	    var playlist = [];
         for (var i = 0; i < dubBot.queue.dubPlaylist.data.length; i++) {
-	      playlist.push(new API.waitListItem(dubBot.queue.dubPlaylist.data[i]));
+	      playlist.push(new API.playListItem(dubBot.queue.dubPlaylist.data[i]));
 		}
 		//dubBot.queue.dubQueue = playlist;
+		pageno++;
 		if (dubBot.queue.dubPlaylist.data.length > 0)
-			API.getPlaylist(playlist, playlistID, pageno++, cb);
+			API.getPlaylist(playlist, playlistID, pageno, cb);
 		else
 			cb(playlist, playlistID);
 	  });
