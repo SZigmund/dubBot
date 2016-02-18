@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0098",
+  version: "Version  1.01.0024.0099",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1362,7 +1362,7 @@ var UTIL = {
       return day;
     },
   killbot: function () {
-        clearInterval(AFK.afkInterval);
+        clearInterval(BOTDJ.monitorWaitlistInterval);
         clearInterval(RANDOMCOMMENTS.randomInterval);
         clearInterval(USERS.loadUserInterval);
         botVar.botStatus = false;
@@ -1795,29 +1795,21 @@ var AFK = {
     afkRemoveStart: 0,
     afkRemoveEnd: 24
   },
-  afkCheck: function () {
-    try {
-    if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
-    if (!AFK.afkRemovalNow()) return void (0);
-    API.getWaitList(AFK.afkCheckCallback);
-	}
-    catch(err) { UTIL.logException("afkCheck: " + err.message); }
-  },
 
-  afkCheckCallback: function (djlist) {
+  afkCheck: function (waitlist) {
     try {
-	//botDebug.debugMessage(true, "=====================================================================================");
-	//botDebug.debugMessage(true, "AFK: afkCheckCallback Waitlist Len: " + djlist.length);
-
-    for (var i = 0; i < djlist.length; i++) {
-        if (typeof djlist[i] !== 'undefined') {
+      if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
+      if (!AFK.afkRemovalNow()) return void (0);
+	  
+	  for (var i = 0; i < waitlist.length; i++) {
+        if (typeof waitlist[i] !== 'undefined') {
             //botDebug.debugMessage(true, "AFK: DJ Defined");
-            var id = djlist[i].id;
+            var id = waitlist[i].id;
             //botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
             var roomUser = USERS.lookupUserID(id);
             if (typeof roomUser !== 'boolean') {
 	            //botDebug.debugMessage(true, "AFK: User Defined");
-				var name = djlist[i].username;
+				var name = waitlist[i].username;
 				var lastActive = USERS.getLastActivity(roomUser);
 				var inactivity = Date.now();
 				inactivity -= lastActive;
@@ -1859,7 +1851,7 @@ var AFK = {
         }
     }
     }
-    catch(err) { UTIL.logException("afkCheckCallback: " + err.message); }
+    catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
   resetDC: function (user) {
     user.lastDC.time = null;
@@ -1970,7 +1962,7 @@ var ROULETTE = {
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
-  selectRouletteWinner: function (djlist) {
+  selectRouletteWinner: function (waitlist) {
     try {
 	  //564933a1d4dcab140021cdeb - dexter_nix
 	  //560be6cbdce3260300e40770 - Levis_Homer
@@ -1987,7 +1979,7 @@ var ROULETTE = {
 		  //botDebug.debugMessage(true, "WINNER: " + winner);
           var user = USERS.lookupUserID(winner);
 		  //botDebug.debugMessage(true, "WINNERID: " + user.id);
-		  var djpos = API.getWaitListPosition(user.id, djlist);
+		  var djpos = API.getWaitListPosition(user.id, waitlist);
 		  // Remove if winner is not in the waitlist:
 		  if (djpos < 0) {
 		    //botDebug.debugMessage(true, "ROULETTE: Removing " + user.id);
@@ -1996,10 +1988,10 @@ var ROULETTE = {
 		}
 		if (ROULETTE.settings.participants.length === 0) return API.sendChat("Roulette has ended with no participants");
         ROULETTE.settings.participants = [];
-        var pos = Math.floor((Math.random() * djlist.length) + 1);
+        var pos = Math.floor((Math.random() * waitlist.length) + 1);
         var name = user.username;
         API.sendChat(botChat.subChat(botChat.getChatMessage("winnerpicked"), {name: name, oldpos: (djpos + 1), position: pos}));
-        API.moderateMoveDJ(user.id, pos, djlist);
+        API.moderateMoveDJ(user.id, pos, waitlist);
     }
     catch(err) { UTIL.logException("selectRouletteWinner: " + err.message); }
   },
@@ -2018,11 +2010,34 @@ var ROULETTE = {
 
 //SECTION BOTDJ
 var BOTDJ = {
+  monitorWaitlistInterval: null,
   settings: {
     autoHopUp: true,
 	autoHopUpCount: 1,
 	autoHopDownCount: 0,
     hoppingDownNow: false
+	},
+	monitorWaitlist: function () {
+		try {
+			API.getWaitList(BOTDJ.monitorWaitlistCB);
+		}
+		catch(err) { UTIL.logException("monitorWaitlist: " + err.message); }
+	},
+	monitorWaitlistCB: function (waitlist) {
+		try {
+			if (UTIL.botInWaitList(waitlist)) API.getMyQueue(BOTDJ.checkMyQueueCount);
+			AFK.afkCheck(waitlist);
+			BOTDJ.checkHopUp(waitlist);
+			BOTDJ.checkHopDown(waitlist);
+		}
+		catch(err) { UTIL.logException("monitorWaitlist: " + err.message); }
+	},
+	checkMyQueueCount: function (myQueue) {
+		try {
+		  botDebug.debugMessage(true, "checkMyQueueCount Queue Len: " + myQueue.length);
+		  if (myQueue.length < 10) BOTDJ.queueRandomSong();
+		}
+		catch(err) { UTIL.logException("checkMyQueueCount: " + err.message); }
 	},
 	queueRandomSong: function () {
 		try {
@@ -2793,7 +2808,7 @@ var API = {
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
       USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
 
-      AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 10 * 1000);
+	  BOTDJ.monitorWaitlistInterval = setInterval(function () { BOTDJ.monitorWaitlist() }, 20 * 1000);
 
       API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
@@ -2827,18 +2842,15 @@ var API = {
     }
     catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
-
-  dubDJList: function(waitlist){
+  reorderQueue: function(newlist){
     try {
-	  var dubList = [];
-	  for(var i = 0; i < waitlist.length; i++){
-	    dubList.push(waitlist[i].id);
-	  }
-	  return dubList;
+		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
+		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "GET");
     }
-    catch(err) {UTIL.logException("dubDJList: " + err.message); }
+    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
-  moderateMoveDJ: function(userID, queuePos, djlist){
+
+  moderateMoveDJ: function(userID, queuePos, waitlist){
     try {
 		//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
 		//      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
@@ -2847,17 +2859,17 @@ var API = {
 		//560be6cbdce3260300e40770 - Levis_Homer
       var idx = 0;
 	  var newlist = [];
-	  for(var i = 0; i < djlist.length; i++){
+	  for(var i = 0; i < waitlist.length; i++){
 	    if ((i + 1) === queuePos) {
 		  newlist.push(userID);
 		  //var roomUser =  USERS.defineRoomUser(userID);
 		  //botDebug.debugMessage(true, "New List MATCH: " + userID + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUser.username);
 		}
 		else {
-		  if(djlist[idx].id === userID) idx++;
-		  newlist.push(djlist[idx].id);
-		  //var roomUserX =  USERS.defineRoomUser(djlist[idx].id);
-		  //botDebug.debugMessage(true, "New List NOMCH: " + djlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
+		  if(waitlist[idx].id === userID) idx++;
+		  newlist.push(waitlist[idx].id);
+		  //var roomUserX =  USERS.defineRoomUser(waitlist[idx].id);
+		  //botDebug.debugMessage(true, "New List NOMCH: " + waitlist[idx].id + " POS: " + queuePos + " IND: " + idx + " USER: " + roomUserX.username);
 		  idx++;
 		}
 	    //botDebug.debugMessage(true, "New List: " + newlist.length);
@@ -2890,13 +2902,13 @@ var API = {
     return USERS.lookupUserName(API.currentDjName());
   },
 
-  getWaitListPosition: function(id, djlist){
+  getWaitListPosition: function(id, waitlist){
     try {
 	////Dubtrack.room.users.getIfQueueIsActive(Dubtrack.session.id)
         if(typeof id === 'undefined' || id === null) id = botVar.botID;
-		if(typeof djlist === 'undefined' || djlist === null) return -1;
-        for(var i = 0; i < djlist.length; i++){
-            if(djlist[i].id === id) return i;
+		if(typeof waitlist === 'undefined' || waitlist === null) return -1;
+        for(var i = 0; i < waitlist.length; i++){
+            if(waitlist[i].id === id) return i;
         }
         return -1;
     }
@@ -3135,6 +3147,38 @@ var API = {
 	}
     catch(err) { UTIL.logException("getPlaylist: " + err.message); }
 	},
+  definePlaylist: function(playlistID, pageno) {
+    try {
+	  //https://api.dubtrack.fm/playlist/560beb12faf08b030004fcec/songs?name=&page=1
+	  var urlsongs = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "?name=&page=" + pageno
+	  return $.ajax({ url: urlsongs, type: "GET" });
+	}
+    catch(err) { UTIL.logException("definePlaylist: " + err.message); }
+	},
+  getMyQueue: function(cb) {
+    try {
+	  $.when(API.defineMyQueue(playlistID, pageno)).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
+		myDubQueue = a1;
+	    var myQueue = [];
+        for (var i = 0; i < myDubQueue.data.length; i++) {
+	      myQueue.push(new API.playListItem(dubBot.queue.dubPlaylist.data[i]));
+		}
+		cb(myQueue);
+	  });
+	}
+    catch(err) { UTIL.logException("getMyQueue: " + err.message); }
+	},
+  defineMyQueue: function(playlistID, pageno) {
+    try {
+	  //"https://api.dubtrack.fm/user/session/room/:id/queue"
+	  var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
+	  return $.ajax({ url: theUrl, type: "GET" });
+	}
+    catch(err) { UTIL.logException("defineMyQueue: " + err.message); }
+	},
   getWaitList: function(cb) {
     try {
 	  $.when(API.defineRoomQueue()).done(function(a1) {
@@ -3153,14 +3197,6 @@ var API = {
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
 
-  definePlaylist: function(playlistID, pageno) {
-    try {
-	  //https://api.dubtrack.fm/playlist/560beb12faf08b030004fcec/songs?name=&page=1
-	  var urlsongs = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "?name=&page=" + pageno
-	  return $.ajax({ url: urlsongs, type: "GET" });
-	}
-    catch(err) { UTIL.logException("definePlaylist: " + err.message); }
-	},
   defineRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist/details
@@ -5779,7 +5815,7 @@ var BOTCOMMANDS = {
 						}
 						if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
-						if (maxTime === "B") API.getWaitList(AFK.afkCheckCallback);
+						if (maxTime === "B") API.getWaitList(AFK.afkCheck);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
 						if (maxTime === "D") API.getWaitList(API.botHopUp);  //works well
 						if (maxTime === "E") API.getWaitList(BOTDJ.checkHopDown);
@@ -6366,12 +6402,10 @@ var BOTCOMMANDS = {
                     else {
                         if (AFK.settings.afkRemoval) {
                             AFK.settings.afkRemoval = !AFK.settings.afkRemoval;
-                            clearInterval(AFK.afkInterval);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("afkremoval")}));
                         }
                         else {
                             AFK.settings.afkRemoval = !AFK.settings.afkRemoval;
-                            AFK.afkInterval = setInterval(function () { AFK.afkCheck() }, 2 * 1000);
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("afkremoval")}));
                         }
                     }
