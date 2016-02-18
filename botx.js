@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0094",
+  version: "Version  1.01.0024.0095",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2031,16 +2031,20 @@ var BOTDJ = {
 		  botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
 		  //todoerlind COMPLETE
 		  var playlist = [];
-		  API.getPlaylist(playlist, playlistID, 1, BOTDJ.selectRandomSong);
+		  API.getPlaylist(playlist, playlistID, 1, BOTDJ.playRandomSong);
 		}
 		catch(err) { UTIL.logException("queueRandomSong: " + err.message); }
 	},
-	selectRandomSong: function (playlist, playlistID) {
+	playRandomSong: function (playlist, playlistID) {
 		try {
-		  botDebug.debugMessage(true, "selectRandomSong");
+		  botDebug.debugMessage(true, "playRandomSong");
 		  botDebug.debugMessage(true, "playlist.length: " + playlist.length);
+		  songIdx = Math.floor(Math.random() * playlist.length);
+		  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist
+		  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomQueue.replace("{id}", Dubtrack.room.model.id);
+		  Dubtrack.helpers.sendRequest(i, { "songId": playlist[songIdx].fkid, "songType": playlist[songIdx].songType}, "POST");
 		}
-		catch(err) { UTIL.logException("selectRandomSong: " + err.message); }
+		catch(err) { UTIL.logException("playRandomSong: " + err.message); }
 	},
 	
 	//todoererererlind
@@ -3091,9 +3095,11 @@ var API = {
   },
  playListItem: function (dubPlaylistItem) {
     try {
+        this.fkid = dubPlaylistItem.fkid;
         this.songlength = dubPlaylistItem.songLength;
         this.songid = dubPlaylistItem.songid;
 		this.songname = dubPlaylistItem._song.name;
+		this.songType =  dubPlaylistItem.type;
         //botDebug.debugMessage(true, "-------------------------------------------------------------");
         //botDebug.debugMessage(true, "UID1: " + dubPlaylistItem.songLength);
         //botDebug.debugMessage(true, "UID2: " + dubPlaylistItem.songid);
@@ -3103,7 +3109,7 @@ var API = {
     catch(err) { UTIL.logException("playListItem: " + err.message); }
   },
   getPlaylist: function(playlist, playlistID, pageno, cb) {
-  //getPlaylist(playlist, playlistID, 1, BOTDJ.selectRandomSong);
+  //getPlaylist(playlist, playlistID, 1, BOTDJ.playRandomSong);
     try {
 		botDebug.debugMessage(true, "getPlaylist pageno: " + pageno);
 	  $.when(API.definePlaylist(playlistID, pageno)).done(function(a1) {
@@ -3111,7 +3117,6 @@ var API = {
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
 		dubBot.queue.dubPlaylist = a1;
-	    var playlist = [];
         for (var i = 0; i < dubBot.queue.dubPlaylist.data.length; i++) {
 	      playlist.push(new API.playListItem(dubBot.queue.dubPlaylist.data[i]));
 		}
