@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0099",
+  version: "Version  1.01.0024.0100",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2098,6 +2098,7 @@ var BOTDJ = {
 			if (UTIL.bouncerDjing(waitlist, "mod")) return;
 			botDebug.debugMessage(true, "TIME TO HOP UP!!!!!");
 			API.botHopUp(waitlist);
+			API.getMyQueue(BOTDJ.checkMyQueueCount);
 		}
 		catch(err) { UTIL.logException("checkHopUp: " + err.message); }
 	}
