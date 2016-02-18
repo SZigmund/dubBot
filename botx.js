@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0095",
+  version: "Version  1.01.0024.0096",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2037,12 +2037,16 @@ var BOTDJ = {
 	},
 	playRandomSong: function (playlist, playlistID) {
 		try {
-		  botDebug.debugMessage(true, "playRandomSong");
+		  
 		  botDebug.debugMessage(true, "playlist.length: " + playlist.length);
 		  songIdx = Math.floor(Math.random() * playlist.length);
+		  botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
+		  var songType = playlist[songIdx].songType;
+		  var fkid = playlist[songIdx].fkid;
+		  botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
 		  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist
 		  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomQueue.replace("{id}", Dubtrack.room.model.id);
-		  Dubtrack.helpers.sendRequest(i, { "songId": playlist[songIdx].fkid, "songType": playlist[songIdx].songType}, "POST");
+		  Dubtrack.helpers.sendRequest(i, { "songId": fkid, "songType": songType}, "POST");
 		}
 		catch(err) { UTIL.logException("playRandomSong: " + err.message); }
 	},
