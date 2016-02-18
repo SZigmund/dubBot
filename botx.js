@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0091",
+  version: "Version  1.01.0024.0092",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3105,6 +3105,7 @@ var API = {
 			API.getPlaylist(playlist, playlistID, pageno++, cb);
 		else
 			cb(playlist, playlistID);
+	  });
 	}
     catch(err) { UTIL.logException("getPlaylist: " + err.message); }
 	},
