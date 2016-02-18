@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0090",
+  version: "Version  1.01.0024.0091",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2028,7 +2028,7 @@ var BOTDJ = {
 	queueRandomSong: function () {
 		try {
 		  // SELECT Random Playlist:
-		  var playlistID = UTIL.getPlaylistID((Math.floor(Math.random() * 9) + 1;));
+		  var playlistID = UTIL.getPlaylistID(Math.floor(Math.random() * 9) + 1);
 		  botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
 		  //todoerlind COMPLETE
 		  var playlist = [];
