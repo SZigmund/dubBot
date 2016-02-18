@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0100",
+  version: "Version  1.01.0024.0101",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3158,7 +3158,7 @@ var API = {
 	},
   getMyQueue: function(cb) {
     try {
-	  $.when(API.defineMyQueue(playlistID, pageno)).done(function(a1) {
+	  $.when(API.defineMyQueue()).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
@@ -3172,7 +3172,7 @@ var API = {
 	}
     catch(err) { UTIL.logException("getMyQueue: " + err.message); }
 	},
-  defineMyQueue: function(playlistID, pageno) {
+  defineMyQueue: function() {
     try {
 	  //"https://api.dubtrack.fm/user/session/room/:id/queue"
 	  var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
