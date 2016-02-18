@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0089",
+  version: "Version  1.01.0024.0090",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -94,7 +94,7 @@ var dubBot = {
 	dubQueue: null,
 	dubQueueA: null,
 	dubQueueB: null,
-	dubQueueC: null,
+	dubPlaylist: null,
 	dubQueueResp: null
   },
 
@@ -1450,15 +1450,6 @@ var UTIL = {
     }
     catch(err) { UTIL.logException("bouncerDjing: " + err.message); }
   },
-  botInWaitListTest: function(waitlist) {
-    try {
-      if (UTIL.botInWaitList(waitlist))
-		botDebug.debugMessage(true, "Bot is waitlist");
-	  else
-		botDebug.debugMessage(true, "Bot is not in waitlist");
-    }
-    catch(err) { UTIL.logException("botInWaitListTest: " + err.message); }
-  },
   botInWaitList: function(waitlist) {
     try {
 		if(typeof waitlist === 'undefined' || waitlist === null) return false;
@@ -1479,6 +1470,7 @@ var UTIL = {
     try {
 	  if (playlist === CONST.PLAYLIST_ACTIVE) return UTIL.getActivePlaylistID();
 	  if (botVar.roomID === CONST.RGT_ROOM) {
+		  if (playlist === CONST.PLAYLIST_CLASSIC) return "56c626fd4b741c0203f81e08";
 		  if (playlist === CONST.PLAYLIST_COVERS) return "560c1b20d4561b03007cca7a";
 		  if (playlist === CONST.PLAYLIST_90s) return "56c5da94558ec1130115ca3b";
 		  if (playlist === CONST.PLAYLIST_80s) return "56c5da8fe966fa2e01b0a95c";
@@ -1489,6 +1481,7 @@ var UTIL = {
 		  if (playlist === CONST.PLAYLIST_00s) return "56c5da98f4508b5a00ef9645";
 	  }
 	  if (botVar.roomID === CONST.TASTY_ROOM) {
+		  if (playlist === CONST.PLAYLIST_CLASSIC) return "56c62770df5d8e5c039e92df";
 		  if (playlist === CONST.PLAYLIST_COVERS) return "56c5fc440295d3e201b8a2fa";
 		  if (playlist === CONST.PLAYLIST_90s) return "56c5fa8535c32d720230ff5b";
 		  if (playlist === CONST.PLAYLIST_80s) return "56c5fa82bddd676401208320";
@@ -2032,19 +2025,36 @@ var BOTDJ = {
 	autoHopDownCount: 0,
     hoppingDownNow: false
 	},
+	queueRandomSong: function () {
+		try {
+		  // SELECT Random Playlist:
+		  var playlistID = UTIL.getPlaylistID((Math.floor(Math.random() * 9) + 1;));
+		  botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
+		  //todoerlind COMPLETE
+		  var playlist = [];
+		  API.getPlaylist(1, playlist, playlistID, BOTDJ.selectRandomSong);
+		}
+		catch(err) { UTIL.logException("queueRandomSong: " + err.message); }
+	},
+	selectRandomSong: function (playlist, playlistID) {
+		try {
+		  botDebug.debugMessage(true, "selectRandomSong");
+		  botDebug.debugMessage(true, "playlist.length: " + playlist.length);
+		}
+		catch(err) { UTIL.logException("queueRandomSong: " + err.message); }
+	},
+	
+	//todoererererlind
 	checkHopDown: function (waitlist) {
 		try {
 			if (!BOTDJ.settings.autoHopUp) return;
 			if(typeof waitlist === 'undefined' || waitlist === null) return;
 			if (waitlist.length < BOTDJ.settings.autoHopDownCount) return;
-			//todoererererlind
 			if (!UTIL.botInWaitList(waitlist)) return;
 			botDebug.debugMessage(true, "TIME TO HOP DOWN!!!!!");
 			API.botHopDown(waitlist);
 		}
-		catch(err) {
-		  UTIL.logException("checkHopDown: " + err.message);
-		}
+		catch(err) { UTIL.logException("checkHopDown: " + err.message); }
 	},
 	testBouncer: function (waitlist) {
 		try {
@@ -3078,7 +3088,26 @@ var API = {
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
-
+  getPlaylist: function(playlist, playlistID, pageno, cb) {
+    try {
+		botDebug.debugMessage(true, "getPlaylist pageno: " + pageno);
+	  $.when(API.definePlaylist(playlistID, pageno)).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
+		dubBot.queue.dubPlaylist = a1;
+	    var playlist = [];
+        for (var i = 0; i < dubBot.queue.dubPlaylist.data.length; i++) {
+	      playlist.push(new API.waitListItem(dubBot.queue.dubPlaylist.data[i]));
+		}
+		//dubBot.queue.dubQueue = playlist;
+		if (dubBot.queue.dubPlaylist.data.length > 0)
+			API.getPlaylist(playlist, playlistID, pageno++, cb);
+		else
+			cb(playlist, playlistID);
+	}
+    catch(err) { UTIL.logException("getPlaylist: " + err.message); }
+	},
   getWaitList: function(cb) {
     try {
 	  $.when(API.defineRoomQueue()).done(function(a1) {
@@ -3097,6 +3126,14 @@ var API = {
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
 	},
 
+  definePlaylist: function(playlistID, pageno) {
+    try {
+	  //https://api.dubtrack.fm/playlist/560beb12faf08b030004fcec/songs?name=&page=1
+	  var urlsongs = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "?name=&page=" + pageno
+	  return $.ajax({ url: urlsongs, type: "GET" });
+	}
+    catch(err) { UTIL.logException("definePlaylist: " + err.message); }
+	},
   defineRoomQueue: function() {
     try {
 	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist/details
@@ -3148,9 +3185,842 @@ var API = {
 	}
     catch(err) { UTIL.logException("YTList80sImport1: " + err.message); }
   },
-  YTList80sImport: function() {
+  YTList70sImport: function() {
     try {
-	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_80s);
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_70s);
+      API.grabYTSong("nCAso76mbdI", playlist);
+      API.grabYTSong("ZIFknAdVvNM", playlist);
+      API.grabYTSong("xjloX_EvYiI", playlist);
+      API.grabYTSong("RM72iWami9M", playlist);
+      API.grabYTSong("-cXrEPNvRO8", playlist);
+      API.grabYTSong("Kn6tBYUiWKQ", playlist);
+      API.grabYTSong("b07-yKnKRMQ", playlist);
+      API.grabYTSong("UauHDIlhvTk", playlist);
+      API.grabYTSong("ExYsh1W22Wo", playlist);
+      API.grabYTSong("ih7N9_VUU4U", playlist);
+      API.grabYTSong("NKR2n-G-wdM", playlist);
+      API.grabYTSong("IgZOYt5kH9Q", playlist);
+      API.grabYTSong("2NUkhMq_iRo", playlist);
+      API.grabYTSong("DCrSoM5o-fg", playlist);
+      API.grabYTSong("Q8AM356TXZ4", playlist);
+      API.grabYTSong("c2cQ47VVzU0", playlist);
+      API.grabYTSong("s6FsnmaJrQQ", playlist);
+      API.grabYTSong("nvIydHPhb98", playlist);
+      API.grabYTSong("c3uatcJqt54", playlist);
+      API.grabYTSong("aB_TM5AvJP0", playlist);
+      API.grabYTSong("0a45z_HG3WU", playlist);
+      API.grabYTSong("_T2Dxgn-lls", playlist);
+      API.grabYTSong("k5Yh0YWeDNU", playlist);
+      API.grabYTSong("vLW_pjrssxI", playlist);
+      API.grabYTSong("2hNaarPVZfg", playlist);
+      API.grabYTSong("a6swgSTSWR8", playlist);
+      API.grabYTSong("yrp9RLVAUgs", playlist);
+      API.grabYTSong("kr-LzfEuuac", playlist);
+      API.grabYTSong("as8K3H7Rros", playlist);
+      API.grabYTSong("RzOhJOk7v6M", playlist);
+      API.grabYTSong("Yii1ufTyOWs", playlist);
+      API.grabYTSong("PFwZqE7AS_s", playlist);
+      API.grabYTSong("jtDQxJlcUxE", playlist);
+      API.grabYTSong("Q5ZL8qvEmR0", playlist);
+      API.grabYTSong("HJNrKHv50X8", playlist);
+      API.grabYTSong("BDbTjM_GRdU", playlist);
+      API.grabYTSong("gkqfpkTTy2w", playlist);
+      API.grabYTSong("_d8C4AIFgUg", playlist);
+      API.grabYTSong("6sIjSNTS7Fs", playlist);
+      API.grabYTSong("dJe1iUuAW4M", playlist);
+      API.grabYTSong("19IqwU3itFk", playlist);
+      API.grabYTSong("pEnKEcBvBvw", playlist);
+      API.grabYTSong("siMFORx8uO8", playlist);
+      API.grabYTSong("NJJQpSzDgC0", playlist);
+      API.grabYTSong("BTFD5DZwK7g", playlist);
+      API.grabYTSong("dBn2ux5vRHk", playlist);
+      API.grabYTSong("p8_FOQ7-P30", playlist);
+      API.grabYTSong("7lu81z2E6pE", playlist);
+      API.grabYTSong("vUHtJJ1Fgjs", playlist);
+      API.grabYTSong("RcX1qA1Etc8", playlist);
+      API.grabYTSong("nFvRvSxsW-I", playlist);
+      API.grabYTSong("tJWM5FmZyqU", playlist);
+      API.grabYTSong("_ojRQ15My7s", playlist);
+      API.grabYTSong("lVtdYKVXYhI", playlist);
+      API.grabYTSong("gJ-bhM-xuec", playlist);
+      API.grabYTSong("Al9WmowJ3bQ", playlist);
+      API.grabYTSong("Z6E98ZRaU1s", playlist);
+      API.grabYTSong("2_9QooYDYtU", playlist);
+      API.grabYTSong("Z5-rdr0qhWk", playlist);
+      API.grabYTSong("cIcqUokPiTw", playlist);
+      API.grabYTSong("_Ee3C2m3OXE", playlist);
+      API.grabYTSong("rTusMLs9SJE", playlist);
+      API.grabYTSong("8vLlpJc9mW0", playlist);
+      API.grabYTSong("UaEC-lWSlmI", playlist);
+      API.grabYTSong("XbNEOJMGFAo", playlist);
+      API.grabYTSong("u6T5C-jzSH0", playlist);
+      API.grabYTSong("t30cX6OGO0U", playlist);
+      API.grabYTSong("sSQOeQakExU", playlist);
+      API.grabYTSong("ZInWGC5L2T8", playlist);
+      API.grabYTSong("EHaRptTNBTI", playlist);
+      API.grabYTSong("IJbFVJvRqOQ", playlist);
+      API.grabYTSong("tgYuLsudaJQ", playlist);
+      API.grabYTSong("iW1WHi60aq0", playlist);
+      API.grabYTSong("KBX2dySWGew", playlist);
+      API.grabYTSong("26J0uDIGErM", playlist);
+      API.grabYTSong("0SB3x6KtNi4", playlist);
+      API.grabYTSong("haZPPBJC8Ic", playlist);
+      API.grabYTSong("wPlV2dzXWCw", playlist);
+      API.grabYTSong("mcHlL6PR5NU", playlist);
+      API.grabYTSong("uBi61pgDUP8", playlist);
+      API.grabYTSong("K4R93xnKink", playlist);
+      API.grabYTSong("VdNmgNu86xA", playlist);
+      API.grabYTSong("zFmkM6YXOqo", playlist);
+      API.grabYTSong("4KUL9-eNXzQ", playlist);
+      API.grabYTSong("Xqu9qhBHWNs", playlist);
+      API.grabYTSong("w5_EIikdFr8", playlist);
+      API.grabYTSong("PdLIerfXuZ4", playlist);
+      API.grabYTSong("XBw25CrUS-o", playlist);
+      API.grabYTSong("qe1ScoePqVA", playlist);
+      API.grabYTSong("SuFScoO4tb0", playlist);
+      API.grabYTSong("dPmbT5XC-q0", playlist);
+      API.grabYTSong("Bo-qweh7nbQ", playlist);
+      API.grabYTSong("atxUuldUcfI", playlist);
+      API.grabYTSong("WZ88oTITMoM", playlist);
+      API.grabYTSong("uMUQMSXLlHM", playlist);
+      API.grabYTSong("O1eOsMc2Fgg", playlist);
+      API.grabYTSong("y7rFYbMhcG8", playlist);
+      API.grabYTSong("HaZpZQG2z10", playlist);
+      API.grabYTSong("C-PNun-Pfb4", playlist);
+      API.grabYTSong("82cJgPXU-ik", playlist);
+      API.grabYTSong("bKttENbsoyk", playlist);
+      API.grabYTSong("hgI8bta-7aw", playlist);
+      API.grabYTSong("98P-gu_vMRc", playlist);
+      API.grabYTSong("WXV_QjenbDw", playlist);
+      API.grabYTSong("g1T71PGd-J0", playlist);
+      API.grabYTSong("diiL9bqvalo", playlist);
+      API.grabYTSong("wj10EzNKA2M", playlist);
+      API.grabYTSong("URAqnM1PP5E", playlist);
+      API.grabYTSong("SHhrZgojY1Q", playlist);
+      API.grabYTSong("kCdjvTTnzDU", playlist);
+      API.grabYTSong("7T5hYlUsQ0s", playlist);
+      API.grabYTSong("KUwjNBjqR-c", playlist);
+      API.grabYTSong("WeNBspJGVko", playlist);
+      API.grabYTSong("q3svW8PM_jc", playlist);
+      API.grabYTSong("TOSZwEwl_1Q", playlist);
+      API.grabYTSong("Tm4BrZjY_Sg", playlist);
+      API.grabYTSong("_Dsh9M6qnhE", playlist);
+      API.grabYTSong("e5MAg_yWsq8", playlist);
+      API.grabYTSong("jzPA-FrVu3I", playlist);
+      API.grabYTSong("k5hWWe-ts2s", playlist);
+      API.grabYTSong("_mRFWQoXq4c", playlist);
+      API.grabYTSong("h3JFEfdK_Ls", playlist);
+      API.grabYTSong("QM7LR46zrQU", playlist);
+      API.grabYTSong("qzTZ76vhnKk", playlist);
+      API.grabYTSong("MikRS_EEGcQ", playlist);
+      API.grabYTSong("AHfddvbKb4w", playlist);
+      API.grabYTSong("uNNl3C0qvKg", playlist);
+      API.grabYTSong("Go9aks4aujM", playlist);
+      API.grabYTSong("uR4if4ble1A", playlist);
+      API.grabYTSong("-Q1kB0R4Ijs", playlist);
+      API.grabYTSong("tr-BYVeCv6U", playlist);
+      API.grabYTSong("_bQGRRolrg0", playlist);
+      API.grabYTSong("hYKYka-PNt0", playlist);
+      API.grabYTSong("XtzoUu7w-YM", playlist);
+      API.grabYTSong("cwugjyeSKx4", playlist);
+      API.grabYTSong("M-aSjHnbw18", playlist);
+      API.grabYTSong("fJ9rUzIMcZQ", playlist);
+      API.grabYTSong("tIdIqbv7SPo", playlist);
+      API.grabYTSong("pAgnJDJN4VA", playlist);
+      API.grabYTSong("w9TGj2jrJk8", playlist);
+      API.grabYTSong("YR5ApYxkU-U", playlist);
+      API.grabYTSong("I_izvAbhExY", playlist);
+      API.grabYTSong("xFrGuyw1V8s", playlist);
+      API.grabYTSong("7oKPYe53h78", playlist);
+      API.grabYTSong("-tJYN-eG1zk", playlist);
+      API.grabYTSong("LanCLS_hIo4", playlist);
+      API.grabYTSong("8Pa9x9fZBtY", playlist);
+      API.grabYTSong("tH2w6Oxx0kQ", playlist);
+      API.grabYTSong("mTa8U0Wa0q8", playlist);
+      API.grabYTSong("XpqqjU7u5Yc", playlist);
+      API.grabYTSong("nREV8bQJ1MA", playlist);
+      API.grabYTSong("Eh44QPT1mPE", playlist);
+      API.grabYTSong("SSR6ZzjDZ94", playlist);
+      API.grabYTSong("Gs069dndIYk", playlist);
+      API.grabYTSong("ZBR2G-iI3-I", playlist);
+      API.grabYTSong("TS9_ipu9GKw", playlist);
+      API.grabYTSong("gxEPV4kolz0", playlist);
+      API.grabYTSong("-ihs-vT9T3Q", playlist);
+      API.grabYTSong("cd_Fdly3rX8", playlist);
+      API.grabYTSong("D_P-v1BVQn8", playlist);
+      API.grabYTSong("Lo2qQmj0_h4", playlist);
+      API.grabYTSong("-crgQGdpZR0", playlist);
+      API.grabYTSong("BKPoHgKcqag", playlist);
+      API.grabYTSong("JWdZEumNRmI", playlist);
+      API.grabYTSong("Hphwfq1wLJs", playlist);
+      API.grabYTSong("yRhq-yO1KN8", playlist);
+      API.grabYTSong("6inwzOooXRU", playlist);
+      API.grabYTSong("1IdEhvuNxV8", playlist);
+      API.grabYTSong("Fcd3XuQwDQQ", playlist);
+      API.grabYTSong("Hn-enjcgV1o", playlist);
+      API.grabYTSong("Tj96QFzOL5Y", playlist);
+      API.grabYTSong("_JoZS6LgqYI", playlist);
+      API.grabYTSong("cYMCLz5PQVw", playlist);
+      API.grabYTSong("0kNGnIKUdMI", playlist);
+      API.grabYTSong("1lWJXDG2i0A", playlist);
+      API.grabYTSong("soDZBW-1P04", playlist);
+      API.grabYTSong("IxuThNgl3YA", playlist);
+      API.grabYTSong("__VQX2Xn7tI", playlist);
+      API.grabYTSong("RHsDa9_HSlA", playlist);
+      API.grabYTSong("lMLnDuzgkjo", playlist);
+      API.grabYTSong("MSVTOMkJdqs", playlist);
+      API.grabYTSong("cJpB_AEZf6U", playlist);
+      API.grabYTSong("PBEXSiFzOfU", playlist);
+      API.grabYTSong("GcCNcgoyG_0", playlist);
+      API.grabYTSong("lcWVL4B-4pI", playlist);
+      API.grabYTSong("RcZn2-bGXqQ", playlist);
+      API.grabYTSong("-ihs-vT9T3Q", playlist);
+      API.grabYTSong("XZGwHtGBZJU", playlist);
+      API.grabYTSong("tLDMh8F8plI", playlist);
+      API.grabYTSong("Hphwfq1wLJs", playlist);
+      API.grabYTSong("rBL2kzKg4nY", playlist);
+      API.grabYTSong("7T5hYlUsQ0s", playlist);
+      API.grabYTSong("MFbjTC-57v0", playlist);
+      API.grabYTSong("kJY9wYodL4Q", playlist);
+      API.grabYTSong("wXrkg_DweRs", playlist);
+      API.grabYTSong("k7Jvsbcxunc", playlist);
+      API.grabYTSong("I_izvAbhExY", playlist);
+      API.grabYTSong("C-PNun-Pfb4", playlist);
+      API.grabYTSong("CS9OO0S5w2k", playlist);
+      API.grabYTSong("cpYINo85USQ", playlist);
+      API.grabYTSong("mZ8miTErh-o", playlist);
+      API.grabYTSong("nvIydHPhb98", playlist);
+      API.grabYTSong("kPYese-Hl8M", playlist);
+      API.grabYTSong("9qdKZBXMX5E", playlist);
+      API.grabYTSong("NsMqb9RQWGE", playlist);
+      API.grabYTSong("B-Tb80rmPt4", playlist);
+      API.grabYTSong("4KUL9-eNXzQ", playlist);
+      API.grabYTSong("ew9f-Pq3Wsk", playlist);
+      API.grabYTSong("xFrGuyw1V8s", playlist);
+      API.grabYTSong("YR5ApYxkU-U", playlist);
+      API.grabYTSong("j1ykMNtzMT8", playlist);
+      API.grabYTSong("iA6BqS9FlQ0", playlist);
+      API.grabYTSong("D_P-v1BVQn8", playlist);
+      API.grabYTSong("k2kxlZDOHeQ", playlist);
+      API.grabYTSong("UaEC-lWSlmI", playlist);
+      API.grabYTSong("C21G2OkHEYo", playlist);
+      API.grabYTSong("2_9QooYDYtU", playlist);
+      API.grabYTSong("YY8APrYU2Gs", playlist);
+      API.grabYTSong("jhUkGIsKvn0", playlist);
+      API.grabYTSong("ostaHXGSCB8", playlist);
+      API.grabYTSong("liyiT_DGREA", playlist);
+      API.grabYTSong("XtzoUu7w-YM", playlist);
+      API.grabYTSong("nREV8bQJ1MA", playlist);
+      API.grabYTSong("IM39yIKoSo4", playlist);
+      API.grabYTSong("Tm4BrZjY_Sg", playlist);
+      API.grabYTSong("wj23_nDFSfE", playlist);
+      API.grabYTSong("arxhW1RgDDo", playlist);
+      API.grabYTSong("mQZmCJUSC6g", playlist);
+      API.grabYTSong("GghUvQc4hFo", playlist);
+      API.grabYTSong("n3rEzI0PtPA", playlist);
+      API.grabYTSong("8kAU3B9Pi_U", playlist);
+      API.grabYTSong("yd__DR377Ks", playlist);
+      API.grabYTSong("eAKInjg66fY", playlist);
+      API.grabYTSong("lzHJlncKXTM", playlist);
+      API.grabYTSong("ZIFknAdVvNM", playlist);
+      API.grabYTSong("Fcd3XuQwDQQ", playlist);
+      API.grabYTSong("RdopMqrftXs", playlist);
+      API.grabYTSong("auYCXBzep9o", playlist);
+      API.grabYTSong("iKH7BHzq_VM", playlist);
+      API.grabYTSong("26J0uDIGErM", playlist);
+      API.grabYTSong("gT_9OUvmb5I", playlist);
+      API.grabYTSong("yK543f0_UKc", playlist);
+      API.grabYTSong("C2q2bis6eLE", playlist);
+      API.grabYTSong("Jxpe1oSp_sg", playlist);
+      API.grabYTSong("T6fVDAjs9f0", playlist);
+      API.grabYTSong("QsY066wa08E", playlist);
+      API.grabYTSong("vejogCcyRRw", playlist);
+      API.grabYTSong("KuRxXRuAz-I", playlist);
+      API.grabYTSong("-crgQGdpZR0", playlist);
+      API.grabYTSong("_65LLafsa9g", playlist);
+      API.grabYTSong("3B0Y3LUqr1Q", playlist);
+      API.grabYTSong("w1F5BLLFAeM", playlist);
+      API.grabYTSong("EE34cSvZCd8", playlist);
+      API.grabYTSong("j3VN54M1OXA", playlist);
+      API.grabYTSong("zFmkM6YXOqo", playlist);
+      API.grabYTSong("TOSZwEwl_1Q", playlist);
+      API.grabYTSong("M7Tmqps7iXs", playlist);
+      API.grabYTSong("BLKDFKRTdlo", playlist);
+      API.grabYTSong("Avvh5H-EPWU", playlist);
+      API.grabYTSong("IZr6AE-u2UM", playlist);
+      API.grabYTSong("hcyw9QJwfY0", playlist);
+      API.grabYTSong("NJJQpSzDgC0", playlist);
+      API.grabYTSong("Y-vicuO1b0s", playlist);
+      API.grabYTSong("6BM3j9pKXJ8", playlist);
+      API.grabYTSong("3WJ1cf3nrLE", playlist);
+      API.grabYTSong("5X-Mrc2l1d0", playlist);
+      API.grabYTSong("-4VTz7gSHds", playlist);
+      API.grabYTSong("OM7zRfHG0no", playlist);
+      API.grabYTSong("_d8C4AIFgUg", playlist);
+      API.grabYTSong("wj10EzNKA2M", playlist);
+      API.grabYTSong("Xmg7Klfx2lA", playlist);
+      API.grabYTSong("yURRmWtbTbo", playlist);
+      API.grabYTSong("FDPMmaHWj1I", playlist);
+      API.grabYTSong("JMrcnqKSbw8", playlist);
+      API.grabYTSong("x9gXgiHSskk", playlist);
+      API.grabYTSong("Go9aks4aujM", playlist);
+      API.grabYTSong("6inwzOooXRU", playlist);
+      API.grabYTSong("DJpyG3PXoKw", playlist);
+      API.grabYTSong("YTaWayUE5XA", playlist);
+      API.grabYTSong("pEnKEcBvBvw", playlist);
+      API.grabYTSong("rhQ13geD2OA", playlist);
+      API.grabYTSong("jhUkGIsKvn0", playlist);
+      API.grabYTSong("arxhW1RgDDo", playlist);
+      API.grabYTSong("Yyy4yaVwsv0", playlist);
+      API.grabYTSong("YNn361umypM", playlist);
+	  }
+    catch(err) { UTIL.logException("YTList70sImport: " + err.message); }
+  },
+  YTList90sImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_90s);
+      API.grabYTSong("8SbUC-UaAxE", playlist);
+      API.grabYTSong("3JWTaaS7LdU", playlist);
+      API.grabYTSong("otCpCn0l4Wo", playlist);
+      API.grabYTSong("1lyu1KKwC74", playlist);
+      API.grabYTSong("4fndeDfaWCg", playlist);
+      API.grabYTSong("TR3Vdo5etCQ", playlist);
+      API.grabYTSong("C-u5WLJ9Yk4", playlist);
+      API.grabYTSong("6hzrDeceEKc", playlist);
+      API.grabYTSong("p2Rch6WvPJE", playlist);
+      API.grabYTSong("gJLIiF15wjQ", playlist);
+      API.grabYTSong("saalGKY7ifU", playlist);
+      API.grabYTSong("Qt2mbGP6vFI", playlist);
+      API.grabYTSong("F2AitTPI5U0", playlist);
+      API.grabYTSong("k2C5TjS2sh4", playlist);
+      API.grabYTSong("rog8ou-ZepE", playlist);
+      API.grabYTSong("p47fEXGabaY", playlist);
+      API.grabYTSong("0IA3ZvCkRkQ", playlist);
+      API.grabYTSong("a-Lp2uC_1lg", playlist);
+      API.grabYTSong("mM0-ZU8njdo", playlist);
+      API.grabYTSong("VV1XWJN3nJo", playlist);
+      API.grabYTSong("NdYWuo9OFAw", playlist);
+      API.grabYTSong("C3lWwBslWqg", playlist);
+      API.grabYTSong("WQnAxOQxQIU", playlist);
+      API.grabYTSong("sQgd6MccwZc", playlist);
+      API.grabYTSong("T6wbugWrfLU", playlist);
+      API.grabYTSong("WNIPqafd4As", playlist);
+      API.grabYTSong("FxYw0XPEoKE", playlist);
+      API.grabYTSong("lYfkl-HXfuU", playlist);
+      API.grabYTSong("LfRNRymrv9k", playlist);
+      API.grabYTSong("fV8vB1BB2qc", playlist);
+      API.grabYTSong("DXvMT_mVbqw", playlist);
+      API.grabYTSong("nPLV7lGbmT4", playlist);
+      API.grabYTSong("KNZH-emehxA", playlist);
+      API.grabYTSong("4kGvlESGvbs", playlist);
+      API.grabYTSong("kIDWgqDBNXA", playlist);
+      API.grabYTSong("hq2KgzKETBw", playlist);
+      API.grabYTSong("UXxRyNvTPr8", playlist);
+      API.grabYTSong("-oqAU5VxFWs", playlist);
+      API.grabYTSong("GuJQSAiODqI", playlist);
+      API.grabYTSong("vFD2gu007dc", playlist);
+      API.grabYTSong("bv5vMJKBAbo", playlist);
+      API.grabYTSong("sN62PAKoBfE", playlist);
+      API.grabYTSong("NHozn0YXAeE", playlist);
+      API.grabYTSong("0hiUuL5uTKc", playlist);
+      API.grabYTSong("zDKO6XYXioc", playlist);
+      API.grabYTSong("ftjEcrrf7r0", playlist);
+      API.grabYTSong("JkK8g6FMEXE", playlist);
+      API.grabYTSong("010KyIQjkTk", playlist);
+      API.grabYTSong("YFood_bTOX4", playlist);
+      API.grabYTSong("Jne9t8sHpUc", playlist);
+      API.grabYTSong("bQRzrnH6_HY", playlist);
+      API.grabYTSong("8WEtxJ4-sh4", playlist);
+      API.grabYTSong("YFK6H_CcuX8", playlist);
+      API.grabYTSong("_66jPJVS4JE", playlist);
+      API.grabYTSong("3YcNzHOBmk8", playlist);
+      API.grabYTSong("ijZRCIrTgQc", playlist);
+      API.grabYTSong("LlZydtG3xqI", playlist);
+      API.grabYTSong("xbO3dfF9uuE", playlist);
+      API.grabYTSong("sDcpXlttqq4", playlist);
+      API.grabYTSong("zTcu7MCtuTs", playlist);
+      API.grabYTSong("6Whgn_iE5uc", playlist);
+      API.grabYTSong("39YUXIKrOFk", playlist);
+      API.grabYTSong("w3KOowB4k_k", playlist);
+      API.grabYTSong("kwEZRPkAAu8", playlist);
+      API.grabYTSong("SnL1e4-NfaA", playlist);
+      API.grabYTSong("wsdy_rct6uo", playlist);
+      API.grabYTSong("C-Naa1HXeDQ", playlist);
+      API.grabYTSong("LatorN4P9aA", playlist);
+      API.grabYTSong("3eOuK-pYhy4", playlist);
+      API.grabYTSong("y2kEx5BLoC4", playlist);
+      API.grabYTSong("MfmYCM4CS8o", playlist);
+      API.grabYTSong("JDcuRgk-JEI", playlist);
+      API.grabYTSong("pRFEz2MjZgg", playlist);
+      API.grabYTSong("fLVzw9wVd9o", playlist);
+      API.grabYTSong("qq09UkPRdFY", playlist);
+      API.grabYTSong("g2gy1Evb1Kg", playlist);
+      API.grabYTSong("Va1Y6uAgNJY", playlist);
+      API.grabYTSong("3cqU1pFRqYE", playlist);
+      API.grabYTSong("5EdmHSTwmWY", playlist);
+      API.grabYTSong("OAfxs0IDeMs", playlist);
+      API.grabYTSong("LDj8kkVwisY", playlist);
+      API.grabYTSong("_Ka01Y_pYgM", playlist);
+      API.grabYTSong("2H5uWRjFsGc", playlist);
+      API.grabYTSong("uIbXvaE39wM", playlist);
+      API.grabYTSong("KLVq0IAzh1A", playlist);
+      API.grabYTSong("vUdloUqZa7w", playlist);
+      API.grabYTSong("zUtnwcv-quE", playlist);
+      API.grabYTSong("RFnD3uwKHag", playlist);
+      API.grabYTSong("Z-FPimCmbX8", playlist);
+      API.grabYTSong("yCmsZUN4r_s", playlist);
+      API.grabYTSong("fC_q9KPczAg", playlist);
+      API.grabYTSong("09qBdgqwYJY", playlist);
+      API.grabYTSong("lFYBLwb3I84", playlist);
+      API.grabYTSong("NoOhnrjdYOc", playlist);
+      API.grabYTSong("ay6GjmiJTPM", playlist);
+      API.grabYTSong("CqBtS6BIP1E", playlist);
+      API.grabYTSong("tov22NtCMC4", playlist);
+      API.grabYTSong("CjY_uSSncQw", playlist);
+      API.grabYTSong("4p0chD8U8fA", playlist);
+      API.grabYTSong("B6LhWbQthAI", playlist);
+	  }
+    catch(err) { UTIL.logException("YTList90sImport: " + err.message); }
+  },
+  YTList00sImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_00s);
+      API.grabYTSong("4m1EFMoRFvY", playlist);
+      API.grabYTSong("nEF_-IcnQC4", playlist);
+      API.grabYTSong("EbJtYqBYCV8", playlist);
+      API.grabYTSong("UODX_pYpVxk", playlist);
+      API.grabYTSong("Wt88GMJmVk0", playlist);
+      API.grabYTSong("Bg59q4puhmg", playlist);
+      API.grabYTSong("eNII9PDlFJ0", playlist);
+      API.grabYTSong("FJfFZqTlWrQ", playlist);
+      API.grabYTSong("PsO6ZnUZI0g", playlist);
+      API.grabYTSong("Bxau9B3jOHM", playlist);
+      API.grabYTSong("BB0DU4DoPP4", playlist);
+      API.grabYTSong("Q1dUDzBdnmI", playlist);
+      API.grabYTSong("pZG7IK99OvI", playlist);
+      API.grabYTSong("oofSnsGkops", playlist);
+      API.grabYTSong("cB5e0zHRzHc", playlist);
+      API.grabYTSong("iEe_eraFWWs", playlist);
+      API.grabYTSong("5NPBIwQyPWE", playlist);
+      API.grabYTSong("0tcDXJfAFVw", playlist);
+      API.grabYTSong("GH_StQ6KdW0", playlist);
+      API.grabYTSong("CcCw1ggftuQ", playlist);
+      API.grabYTSong("AWGqoCNbsvM", playlist);
+      API.grabYTSong("KcSNwUD6rpA", playlist);
+      API.grabYTSong("qi7Yh16dA0w", playlist);
+      API.grabYTSong("bKDdT_nyP54", playlist);
+      API.grabYTSong("dJ8VjyPw0qY", playlist);
+      API.grabYTSong("y6y_4_b6RS8", playlist);
+      API.grabYTSong("mNLVMDF9mUo", playlist);
+      API.grabYTSong("yjmKAFv4Ymg", playlist);
+      API.grabYTSong("Ui86peQZ74s", playlist);
+      API.grabYTSong("sSh_Oc78A4o", playlist);
+      API.grabYTSong("X75mry1LcFg", playlist);
+      API.grabYTSong("kPBzTxZQG5Q", playlist);
+      API.grabYTSong("WziA88-n02k", playlist);
+      API.grabYTSong("DLt5n0auPwM", playlist);
+      API.grabYTSong("H2KabvvLF7M", playlist);
+      API.grabYTSong("E1mU6h4Xdxc", playlist);
+      API.grabYTSong("dW2MmuA1nI4", playlist);
+      API.grabYTSong("tr-H8dR0HLo", playlist);
+      API.grabYTSong("EkHTsc9PU2A", playlist);
+      API.grabYTSong("3gOHvDP_vCs", playlist);
+      API.grabYTSong("iBHNgV6_znU", playlist);
+      API.grabYTSong("CvBfHwUxHIk", playlist);
+      API.grabYTSong("gH476CxJxfg", playlist);
+      API.grabYTSong("rZoD8JEFjAE", playlist);
+      API.grabYTSong("jjnmICxvoVY", playlist);
+      API.grabYTSong("U5rLz5AZBIA", playlist);
+      API.grabYTSong("_UqOHEPkGms", playlist);
+      API.grabYTSong("Ju8Hr50Ckwk", playlist);
+      API.grabYTSong("dvgZkm1xWPE", playlist);
+      API.grabYTSong("GtUVQei3nX4", playlist);
+      API.grabYTSong("R7UrFYvl5TE", playlist);
+      API.grabYTSong("99j0zLuNhi8", playlist);
+      API.grabYTSong("ajmI1P3r1w4", playlist);
+      API.grabYTSong("0J3vgcE5i2o", playlist);
+      API.grabYTSong("xPU8OAjjS4k", playlist);
+      API.grabYTSong("bESGLojNYSo", playlist);
+      API.grabYTSong("ViwtNLUqkMY", playlist);
+      API.grabYTSong("2IH8tNQAzSs", playlist);
+      API.grabYTSong("8ucz_pm3LX8", playlist);
+      API.grabYTSong("koVHN6eO4Xg", playlist);
+      API.grabYTSong("_ABSwwau7C8", playlist);
+      API.grabYTSong("2Abk1jAONjw", playlist);
+      API.grabYTSong("w6QGe-pXgdI", playlist);
+      API.grabYTSong("MXp413NynFk", playlist);
+      API.grabYTSong("GeZZr_p6vB8", playlist);
+      API.grabYTSong("YtC92pzp5vw", playlist);
+      API.grabYTSong("Sjx9oSJDAVQ", playlist);
+      API.grabYTSong("Urdlvw0SSEc", playlist);
+      API.grabYTSong("hO2wA0Te0wM", playlist);
+      API.grabYTSong("yCmsZUN4r_s", playlist);
+      API.grabYTSong("2EwViQxSJJQ", playlist);
+      API.grabYTSong("5qm8PH4xAss", playlist);
+      API.grabYTSong("8UFIYGkROII", playlist);
+      API.grabYTSong("F4uRZ1UYKio", playlist);
+      API.grabYTSong("t5XNWFw5HVw", playlist);
+      API.grabYTSong("PWgvGjAhvIw", playlist);
+      API.grabYTSong("gUPrnu3BEU8", playlist);
+      API.grabYTSong("0lPQZni7I18", playlist);
+      API.grabYTSong("Vzo-EL_62fQ", playlist);
+      API.grabYTSong("nQJACVmankY", playlist);
+      API.grabYTSong("o3IWTfcks4k", playlist);
+      API.grabYTSong("nPLV7lGbmT4", playlist);
+      API.grabYTSong("E6sqA9QtV5I", playlist);
+      API.grabYTSong("znlFu_lemsU", playlist);
+      API.grabYTSong("8WYHDfJDPDc", playlist);
+      API.grabYTSong("ZSM3w1v-A_Y", playlist);
+      API.grabYTSong("6vwNcNOTVzY", playlist);
+      API.grabYTSong("NARjr3fMMvY", playlist);
+      API.grabYTSong("4m48GqaOz90", playlist);
+      API.grabYTSong("rywUS-ohqeE", playlist);
+      API.grabYTSong("uSD4vsh1zDA", playlist);
+      API.grabYTSong("1cQh1ccqu8M", playlist);
+      API.grabYTSong("3VVuMIB2hC0", playlist);
+      API.grabYTSong("eSPhCS-15eE", playlist);
+      API.grabYTSong("0habxsuXW4g", playlist);
+      API.grabYTSong("5sMKX22BHeE", playlist);
+	  }
+    catch(err) { UTIL.logException("YTList00sImport: " + err.message); }
+  },
+  YTList10sImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_10s);
+      API.grabYTSong("rYEDA3JcQqw", playlist);
+      API.grabYTSong("LjhCEhWiKXk", playlist);
+      API.grabYTSong("QGJuMBdaqIw", playlist);
+      API.grabYTSong("F57P9C4SAW4", playlist);
+      API.grabYTSong("1RnPB76mjxI", playlist);
+      API.grabYTSong("SR6iYWJxHqs", playlist);
+      API.grabYTSong("uelHwf8o7_U", playlist);
+      API.grabYTSong("Vysgv7qVYTo", playlist);
+      API.grabYTSong("e82VE8UtW8A", playlist);
+      API.grabYTSong("pa14VNsdSYM", playlist);
+      API.grabYTSong("pc0mxOXbWIU", playlist);
+      API.grabYTSong("98WtmW-lfeE", playlist);
+      API.grabYTSong("8PTDv_szmL0", playlist);
+      API.grabYTSong("kn6-c223DUU", playlist);
+      API.grabYTSong("U0CGsw6h60k", playlist);
+      API.grabYTSong("w4s6H4ku6ZY", playlist);
+      API.grabYTSong("mXvmSaE0JXA", playlist);
+      API.grabYTSong("KdS6HFQ_LUc", playlist);
+      API.grabYTSong("X9_n8jakvWU", playlist);
+      API.grabYTSong("UePtoxDhJSw", playlist);
+      API.grabYTSong("XjVNlG5cZyQ", playlist);
+      API.grabYTSong("j5-yKhDd64s", playlist);
+      API.grabYTSong("JwQZQygg3Lk", playlist);
+      API.grabYTSong("UecPqm2Dbes", playlist);
+      API.grabYTSong("C-dvTjK_07c", playlist);
+      API.grabYTSong("N6O2ncUKvlg", playlist);
+      API.grabYTSong("8aRor905cCw", playlist);
+      API.grabYTSong("SgM3r8xKfGE", playlist);
+      API.grabYTSong("mqWq_48LxWQ", playlist);
+      API.grabYTSong("QR_qa3Ohwls", playlist);
+      API.grabYTSong("8ESdn0MuJWQ", playlist);
+      API.grabYTSong("zA_CzWdaGsg", playlist);
+      API.grabYTSong("XPBwXKgDTdE", playlist);
+      API.grabYTSong("Z-ZUuHXgQ8k", playlist);
+      API.grabYTSong("kVpv8-5XWOI", playlist);
+      API.grabYTSong("YgFyi74DVjc", playlist);
+      API.grabYTSong("Xyv4Bjja8yc", playlist);
+      API.grabYTSong("ekAXPCphKXQ", playlist);
+      API.grabYTSong("ymKLymvwD2U", playlist);
+      API.grabYTSong("AaXaig_43lU", playlist);
+      API.grabYTSong("k-ImCpNqbJw", playlist);
+      API.grabYTSong("hWjrMTWXH28", playlist);
+      API.grabYTSong("8v_4O44sfjM", playlist);
+      API.grabYTSong("p-Z3YrHJ1sU", playlist);
+      API.grabYTSong("CR8logunPzQ", playlist);
+      API.grabYTSong("wUqnrjSFXtE", playlist);
+      API.grabYTSong("3mC2ixOAivA", playlist);
+      API.grabYTSong("2J2dwFVZHsY", playlist);
+      API.grabYTSong("3taEuL4EHAg", playlist);
+      API.grabYTSong("CFWX0hWCbng", playlist);
+      API.grabYTSong("AYC2FUutdKA", playlist);
+      API.grabYTSong("CHZtMNbrmWE", playlist);
+      API.grabYTSong("LefQdEMJP1I", playlist);
+      API.grabYTSong("edP0L6LQzZE", playlist);
+      API.grabYTSong("RcmKbTR--iA", playlist);
+      API.grabYTSong("gM7Hlg75Mlo", playlist);
+      API.grabYTSong("Glny4jSciVI", playlist);
+      API.grabYTSong("Rmp6zIr5y4U", playlist);
+      API.grabYTSong("a_YR4dKArgo", playlist);
+      API.grabYTSong("QzvGKas5RsU", playlist);
+      API.grabYTSong("NWdrO4BoCu8", playlist);
+      API.grabYTSong("Cq-NShfefks", playlist);
+      API.grabYTSong("X1Fqn9du7xo", playlist);
+      API.grabYTSong("dEGnYyKib9E", playlist);
+      API.grabYTSong("mYLycKoC0uA", playlist);
+      API.grabYTSong("7NJqUN9TClM", playlist);
+      API.grabYTSong("KRBS5WZMdik", playlist);
+      API.grabYTSong("sjSG6z_13-Q", playlist);
+      API.grabYTSong("IKkUE9KuZK0", playlist);
+      API.grabYTSong("KTfSmYYY0J8", playlist);
+      API.grabYTSong("rhBwt9mw7Sk", playlist);
+      API.grabYTSong("QUwxKWT6m7U", playlist);
+      API.grabYTSong("MWKchS0GAyo", playlist);
+      API.grabYTSong("AG-0ASyBYT0", playlist);
+      API.grabYTSong("dHsCGoZst-w", playlist);
+      API.grabYTSong("1zugOJU8bds", playlist);
+      API.grabYTSong("jNpzJIDLvxg", playlist);
+      API.grabYTSong("-4S9gQb9PjM", playlist);
+      API.grabYTSong("8F1q0Vn4u4g", playlist);
+      API.grabYTSong("1k2D90QtZeE", playlist);
+      API.grabYTSong("qiBxYEPbDaw", playlist);
+      API.grabYTSong("nZI0j-irx9A", playlist);
+      API.grabYTSong("rpkxgDpCyAc", playlist);
+      API.grabYTSong("GAjLo_guTKs", playlist);
+      API.grabYTSong("skhxizRYxps", playlist);
+      API.grabYTSong("2lTB1pIg1y0", playlist);
+      API.grabYTSong("uu_zwdmz0hE", playlist);
+      API.grabYTSong("5iDPw_qjhtM", playlist);
+      API.grabYTSong("EAc4zHEDd7o", playlist);
+      API.grabYTSong("JqHliQijgvA", playlist);
+      API.grabYTSong("26jKtELitQE", playlist);
+      API.grabYTSong("frv6FOt1BNI", playlist);
+      API.grabYTSong("wPBbMbKSZrQ", playlist);
+      API.grabYTSong("pSFyrrhKj1Q", playlist);
+      API.grabYTSong("D9AFMVMl9qE", playlist);
+      API.grabYTSong("pOf3kYtwASo", playlist);
+      API.grabYTSong("LCH1AsUydSc", playlist);
+      API.grabYTSong("8UVNT4wvIGY", playlist);
+	  }
+    catch(err) { UTIL.logException("YTList10sImport: " + err.message); }
+  },
+  YTList7080EImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic);
+      API.grabYTSong("YkADj0TPrJA", playlist);
+      API.grabYTSong("gxEPV4kolz0", playlist);
+      API.grabYTSong("tIdIqbv7SPo", playlist);
+      API.grabYTSong("Zi_XLOBDo_Y", playlist);
+      API.grabYTSong("Gu2pVPWGYMQ", playlist);
+      API.grabYTSong("hoskDZRLOCs", playlist);
+      API.grabYTSong("CvwQmxLaknc", playlist);
+      API.grabYTSong("wsWBTtoXbzM", playlist);
+      API.grabYTSong("8SbUC-UaAxE", playlist);
+      API.grabYTSong("o1tj2zJ2Wvg", playlist);
+      API.grabYTSong("OMOGaugKpzs", playlist);
+      API.grabYTSong("NmqK0aXkHho", playlist);
+      API.grabYTSong("fJ9rUzIMcZQ", playlist);
+      API.grabYTSong("9f06QZCVUHg", playlist);
+      API.grabYTSong("btPJPFnesV4", playlist);
+      API.grabYTSong("lDK9QqIzhwk", playlist);
+      API.grabYTSong("SSR6ZzjDZ94", playlist);
+      API.grabYTSong("pAgnJDJN4VA", playlist);
+      API.grabYTSong("hTWKbfoikeg", playlist);
+      API.grabYTSong("Tj75Arhq5ho", playlist);
+      API.grabYTSong("XmSdTa9kaiQ", playlist);
+      API.grabYTSong("9jK-NcRmVcw", playlist);
+      API.grabYTSong("BHFFuukk9Y8", playlist);
+      API.grabYTSong("ye5BuYf8q4o", playlist);
+      API.grabYTSong("ZEsoq0B1IOo", playlist);
+      API.grabYTSong("oRdxUFDoQe0", playlist);
+      API.grabYTSong("FTQbiNvZqaY", playlist);
+      API.grabYTSong("vtPk5IUbdH0", playlist);
+      API.grabYTSong("ejorQVy3m8E", playlist);
+      API.grabYTSong("eFTLKWw542g", playlist);
+      API.grabYTSong("a_XgQhMPeEQ", playlist);
+      API.grabYTSong("hCuMWrfXG4E", playlist);
+      API.grabYTSong("ST86JM1RPl0", playlist);
+      API.grabYTSong("yG07WSu7Q9w", playlist);
+      API.grabYTSong("S_E2EHVxNAE", playlist);
+      API.grabYTSong("6E2hYDIFDIU", playlist);
+      API.grabYTSong("dQw4w9WgXcQ", playlist);
+      API.grabYTSong("djV11Xbc914", playlist);
+      API.grabYTSong("129kuDCQtHs", playlist);
+      API.grabYTSong("cbASq3FMf70", playlist);
+      API.grabYTSong("J9gKyRmic20", playlist);
+      API.grabYTSong("5QD5n98R_nk", playlist);
+      API.grabYTSong("SRvCvsRp5ho", playlist);
+      API.grabYTSong("MbXWrmQW-OE", playlist);
+      API.grabYTSong("KLVq0IAzh1A", playlist);
+      API.grabYTSong("mkBS4zUjJZo", playlist);
+      API.grabYTSong("U3sMjm9Eloo", playlist);
+      API.grabYTSong("KrZHPOeOxQQ", playlist);
+      API.grabYTSong("vx2u5uUu3DE", playlist);
+      API.grabYTSong("etAIpkdhU9Q", playlist);
+      API.grabYTSong("9xWr5U4hO3k", playlist);
+      API.grabYTSong("1efZrWN7sqc", playlist);
+      API.grabYTSong("EexwySX2aKU", playlist);
+      API.grabYTSong("TXZoWTvkBqM", playlist);
+      API.grabYTSong("3T1c7GkzRQQ", playlist);
+      API.grabYTSong("Rbm6GXllBiw", playlist);
+      API.grabYTSong("ErvgV4P6Fzc", playlist);
+      API.grabYTSong("qYS732zyYfU", playlist);
+      API.grabYTSong("fX5USg8_1gA", playlist);
+      API.grabYTSong("6jxsnIRpy2E", playlist);
+      API.grabYTSong("gEPmA3USJdI", playlist);
+      API.grabYTSong("zakKvbIQ28o", playlist);
+      API.grabYTSong("VZ5bS3_BCDs", playlist);
+      API.grabYTSong("nC9P8-B42cA", playlist);
+      API.grabYTSong("Gin-l4LDdXQ", playlist);
+      API.grabYTSong("PBEXSiFzOfU", playlist);
+      API.grabYTSong("Vppbdf-qtGU", playlist);
+      API.grabYTSong("7wRHBLwpASw", playlist);
+      API.grabYTSong("xRQnJyP77tY", playlist);
+      API.grabYTSong("-tJYN-eG1zk", playlist);
+      API.grabYTSong("rY0WxgSXdEE", playlist);
+      API.grabYTSong("I_izvAbhExY", playlist);
+      API.grabYTSong("VMnjF1O4eH0", playlist);
+      API.grabYTSong("zO6D_BAuYCI", playlist);
+      API.grabYTSong("a01QQZyl-_I", playlist);
+      API.grabYTSong("2ZBtPf7FOoM", playlist);
+      API.grabYTSong("KNZVzIfJlY4", playlist);
+      API.grabYTSong("IJ24uMcrhts", playlist);
+      API.grabYTSong("gV7a22pVrj0", playlist);
+      API.grabYTSong("htgr3pvBr-I", playlist);
+      API.grabYTSong("2X_2IdybTV0", playlist);
+      API.grabYTSong("xvaEJzoaYZk", playlist);
+      API.grabYTSong("UrIiLvg58SY", playlist);
+      API.grabYTSong("ePWpolxEKiw", playlist);
+      API.grabYTSong("3mkidP2OUCk", playlist);
+      API.grabYTSong("lnigc08J6FI", playlist);
+      API.grabYTSong("x4Wwq9_zn_c", playlist);
+      API.grabYTSong("erSJGrpfnOI", playlist);
+      API.grabYTSong("dTjvG4WJD_A", playlist);
+      API.grabYTSong("740geW2Uy4U", playlist);
+      API.grabYTSong("_VU9DjQpvMQ", playlist);
+      API.grabYTSong("w-rv2BQa2OU", playlist);
+      API.grabYTSong("C3lWwBslWqg", playlist);
+      API.grabYTSong("nPLV7lGbmT4", playlist);
+      API.grabYTSong("Lrle0x_DHBM", playlist);
+      API.grabYTSong("god7hAPv8f0", playlist);
+      API.grabYTSong("_JoZS6LgqYI", playlist);
+      API.grabYTSong("nqAvFx3NxUM", playlist);
+      API.grabYTSong("n6P0SitRwy8", playlist);
+      API.grabYTSong("s88r_q7oufE", playlist);
+      API.grabYTSong("pkcJEvMcnEg", playlist);
+      API.grabYTSong("Gs069dndIYk", playlist);
+      API.grabYTSong("qqIIW7nxBgc", playlist);
+      API.grabYTSong("izGwDsrQ1eQ", playlist);
+      API.grabYTSong("3GwjfUFyY6M", playlist);
+      API.grabYTSong("JMHp9a5FwrI", playlist);
+      API.grabYTSong("oomCIXGzsR0", playlist);
+      API.grabYTSong("xFrGuyw1V8s", playlist);
+      API.grabYTSong("JmcA9LIIXWw", playlist);
+      API.grabYTSong("WkL7Fkigfn8", playlist);
+      API.grabYTSong("za05HBtGsgU", playlist);
+      API.grabYTSong("XEjLoHdbVeE", playlist);
+      API.grabYTSong("b_ILDFp5DGA", playlist);
+      API.grabYTSong("pAyKJAtDNCw", playlist);
+      API.grabYTSong("GIQn8pab8Vc", playlist);
+      API.grabYTSong("9EHAo6rEuas", playlist);
+      API.grabYTSong("XpqqjU7u5Yc", playlist);
+      API.grabYTSong("tbkOZTSvrHs", playlist);
+      API.grabYTSong("5QOy7d-VWpY", playlist);
+      API.grabYTSong("mDJMgANjLwk", playlist);
+      API.grabYTSong("nKhN1t_7PEY", playlist);
+      API.grabYTSong("6dOwHzCHfgA", playlist);
+      API.grabYTSong("vCadcBR95oU", playlist);
+      API.grabYTSong("HImcaPDmfBY", playlist);
+      API.grabYTSong("maAyfcO-X3k", playlist);
+      API.grabYTSong("spsVigJCvNU", playlist);
+      API.grabYTSong("ZoEwR9_Sy_M", playlist);
+      API.grabYTSong("JW5UEW2kYvc", playlist);
+      API.grabYTSong("yG0oBPtyNb0", playlist);
+      API.grabYTSong("AMCl9eOBlsY", playlist);
+      API.grabYTSong("0sB3Fjw3Uvc", playlist);
+      API.grabYTSong("N-aK6JnyFmk", playlist);
+      API.grabYTSong("dipFMJckZOM", playlist);
+      API.grabYTSong("Bo-qweh7nbQ", playlist);
+      API.grabYTSong("QwOU3bnuU0k", playlist);
+      API.grabYTSong("wDZFf0pm0SE", playlist);
+      API.grabYTSong("O3v3hMeG_aQ", playlist);
+      API.grabYTSong("JWdZEumNRmI", playlist);
+      API.grabYTSong("loWXMtjUZWM", playlist);
+      API.grabYTSong("inXC_lab-34", playlist);
+      API.grabYTSong("b2WzocbSd2w", playlist);
+      API.grabYTSong("vPjaXu6g1Xk", playlist);
+      API.grabYTSong("C1AHec7sfZ8", playlist);
+      API.grabYTSong("-LX7WrHCaUA", playlist);
+      API.grabYTSong("F5JaDPHbFs4", playlist);
+      API.grabYTSong("-xTGrfs5TXM", playlist);
+      API.grabYTSong("ckw_U86ordc", playlist);
+      API.grabYTSong("yK0P1Bk8Cx4", playlist);
+      API.grabYTSong("jWqg_dS2sL0", playlist);
+      API.grabYTSong("wFWDGTVYqE8", playlist);
+      API.grabYTSong("pIgZ7gMze7A", playlist);
+      API.grabYTSong("BqDjMZKf-wg", playlist);
+      API.grabYTSong("8Pa9x9fZBtY", playlist);
+      API.grabYTSong("Mln0RciE2o0", playlist);
+      API.grabYTSong("PyxLaHmOaYM", playlist);
+      API.grabYTSong("QT9_tEzjtIU", playlist);
+      API.grabYTSong("TG8Ect3Xn7w", playlist);
+      API.grabYTSong("QtxlCsVKkvY", playlist);
+      API.grabYTSong("nLsnJAj5cms", playlist);
+      API.grabYTSong("bX7V6FAoTLc", playlist);
+      API.grabYTSong("rMbATaj7Il8", playlist);
+      API.grabYTSong("InRDF_0lfHk", playlist);
+      API.grabYTSong("bnNWUUZ7cEA", playlist);
+      API.grabYTSong("3QGMCSCFoKA", playlist);
+      API.grabYTSong("iOikQWAL8qc", playlist);
+      API.grabYTSong("t1TcDHrkQYg", playlist);
+      API.grabYTSong("8FftI0oRg2M", playlist);
+      API.grabYTSong("8iwBM_YB1sE", playlist);
+      API.grabYTSong("eH3giaIzONA", playlist);
+      API.grabYTSong("QYHxGBH6o4M", playlist);
+      API.grabYTSong("4N3N1MlvVc4", playlist);
+      API.grabYTSong("B32yjbCSVpU", playlist);
+      API.grabYTSong("HQuWaegFz-w", playlist);
+      API.grabYTSong("8NjbGr2nk2c", playlist);
+      API.grabYTSong("yL3lJfpenAc", playlist);
+      API.grabYTSong("wIffOq8AuSw", playlist);
+      API.grabYTSong("TnqZl_blT7E", playlist);
+      API.grabYTSong("tDZy6-fMCw4", playlist);
+      API.grabYTSong("EPhWR4d3FJQ", playlist);
+      API.grabYTSong("K1b8AhIsSYQ", playlist);
+      API.grabYTSong("qeMFqkcPYcg", playlist);
+      API.grabYTSong("oOg5VxrRTi0", playlist);
+      API.grabYTSong("kybeq2dWBf8", playlist);
+      API.grabYTSong("c56vEgA4fjU", playlist);
+      API.grabYTSong("82cJgPXU-ik", playlist);
+      API.grabYTSong("mRCe5L1imxg", playlist);
+      API.grabYTSong("KK5YGWS5H84", playlist);
+      API.grabYTSong("-C_3eYj-pOM", playlist);
+      API.grabYTSong("DGDyAb6pePo", playlist);
+      API.grabYTSong("Eyaf1yMHx54", playlist);
+      API.grabYTSong("iIpfWORQWhU", playlist);
+      API.grabYTSong("2ssCL292DQA", playlist);
+      API.grabYTSong("3wxyN3z9PL4", playlist);
+      API.grabYTSong("tlU5xmKDLFI", playlist);
+      API.grabYTSong("ajCYQL8ouqw", playlist);
+      API.grabYTSong("L3HQMbQAWRc", playlist);
+      API.grabYTSong("vPzDTfIb0DU", playlist);
+      API.grabYTSong("NIuyDWzctgY", playlist);
+      API.grabYTSong("9G4jnaznUoQ", playlist);
+      API.grabYTSong("zhjNm20XbXw", playlist);
+      API.grabYTSong("uAsV5-Hv-7U", playlist);
+      API.grabYTSong("DzSC2__LXk4", playlist);
+      API.grabYTSong("gY5rztWa1TM", playlist);
+      API.grabYTSong("kW_5YdPL9Go", playlist);
+      API.grabYTSong("VkAVfsw5xSQ", playlist);
+      API.grabYTSong("qh4nVj8g4hg", playlist);
+      API.grabYTSong("fY2YPXI__tg", playlist);
+      API.grabYTSong("kvDMlk3kSYg", playlist);
+      API.grabYTSong("h6KYAVn8ons", playlist);
+      API.grabYTSong("RsKqMNDoR4o", playlist);
+      API.grabYTSong("Qt2mbGP6vFI", playlist);
+      API.grabYTSong("rWMKXezAaPY", playlist);
+      API.grabYTSong("pm3rDbXbZRI", playlist);
+      API.grabYTSong("bJ9r8LMU9bQ", playlist);
+      API.grabYTSong("oGIFublvDes", playlist);
+      API.grabYTSong("kd9TlGDZGkI", playlist);
+      API.grabYTSong("rjlSiASsUIs", playlist);
+      API.grabYTSong("9UaJAnnipkY", playlist);
+      API.grabYTSong("uyTVyCp7xrw", playlist);
+      API.grabYTSong("bBQVrCflZ_E", playlist);
+      API.grabYTSong("Tgcc5V9Hu3g", playlist);
+      API.grabYTSong("tRcPA7Fzebw", playlist);
+      API.grabYTSong("Rk70wuIYBBE", playlist);
+      API.grabYTSong("DohRa9lsx0Q", playlist);
+	  }
+    catch(err) { UTIL.logException("YTList7080EImport: " + err.message); }
+  },
+  YTList7080FImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs);
       API.grabYTSong("djV11Xbc914", playlist);
       API.grabYTSong("OMOGaugKpzs", playlist);
       API.grabYTSong("otCpCn0l4Wo", playlist);
@@ -3445,6 +4315,532 @@ var API = {
       API.grabYTSong("QPoTGyWT0Cg", playlist);
       API.grabYTSong("KoLMLFz2Hg8", playlist);
     }
+    catch(err) { UTIL.logException("YTList7080FImport: " + err.message); }
+  },
+  YTListClassicImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC);
+      API.grabYTSong("PvezjDat48U", playlist);
+      API.grabYTSong("2dyw6LZpSOA", playlist);
+      API.grabYTSong("2X_2IdybTV0", playlist);
+      API.grabYTSong("BcL---4xQYA", playlist);
+      API.grabYTSong("lvHycIZ3aQY", playlist);
+      API.grabYTSong("pPSR9K7tzPc", playlist);
+      API.grabYTSong("qAzqSYQ9X9U", playlist);
+      API.grabYTSong("WuofEhjphIY", playlist);
+      API.grabYTSong("HQmmM_qwG4k", playlist);
+      API.grabYTSong("3OR6HkGS11c", playlist);
+      API.grabYTSong("7mCK05dgwgU", playlist);
+      API.grabYTSong("HmRDM7GyJXE", playlist);
+      API.grabYTSong("sxkMFgFjC8E", playlist);
+      API.grabYTSong("7fXaC07X5M8", playlist);
+      API.grabYTSong("3T1c7GkzRQQ", playlist);
+      API.grabYTSong("6hg5skx5TZM", playlist);
+      API.grabYTSong("k6DK3XRmhJI", playlist);
+      API.grabYTSong("HDLLXUaqZxg", playlist);
+      API.grabYTSong("-tRdBsnX4N4", playlist);
+      API.grabYTSong("3bEUaeG4wH4", playlist);
+      API.grabYTSong("PdiCJUysIT0", playlist);
+      API.grabYTSong("AF85_vVnrbo", playlist);
+      API.grabYTSong("g9S93bE06H0", playlist);
+      API.grabYTSong("SGyOaCXr8Lw", playlist);
+      API.grabYTSong("YkADj0TPrJA", playlist);
+      API.grabYTSong("Ej5n2oieXYo", playlist);
+      API.grabYTSong("TLV4_xaYynY", playlist);
+      API.grabYTSong("0EVNeh9dasI", playlist);
+      API.grabYTSong("tH9zG28GQEg", playlist);
+      API.grabYTSong("5Tq-UsaRchI", playlist);
+      API.grabYTSong("70-WSgZn1MQ", playlist);
+      API.grabYTSong("6SO8x_j-4Iw", playlist);
+      API.grabYTSong("T3phscjgc_A", playlist);
+      API.grabYTSong("sil76t2X_DE", playlist);
+      API.grabYTSong("gaMS_5i0Bbs", playlist);
+      API.grabYTSong("p8Ojjn35kP8", playlist);
+      API.grabYTSong("Rbm6GXllBiw", playlist);
+      API.grabYTSong("0KaWSOlASWc", playlist);
+      API.grabYTSong("aAdtUDaBfRA", playlist);
+      API.grabYTSong("nDbeqj-1XOo", playlist);
+      API.grabYTSong("Oy1FBKBrtRg", playlist);
+      API.grabYTSong("EKpn0esJ73w", playlist);
+      API.grabYTSong("hic-dnps6MU", playlist);
+      API.grabYTSong("-HboLQccEv0", playlist);
+      API.grabYTSong("cMYSWiPm7E0", playlist);
+      API.grabYTSong("ATWUtBsFTT0", playlist);
+      API.grabYTSong("dlPjxz4LGak", playlist);
+      API.grabYTSong("RlNhD0oS5pk", playlist);
+      API.grabYTSong("8vLlpJc9mW0", playlist);
+      API.grabYTSong("TnHm4ro_l8s", playlist);
+      API.grabYTSong("-cXrEPNvRO8", playlist);
+      API.grabYTSong("UdvIUHw31js", playlist);
+      API.grabYTSong("HwpxWQDVeJw", playlist);
+      API.grabYTSong("n6j4TGqVl5g", playlist);
+      API.grabYTSong("VxA3atHD2QM", playlist);
+      API.grabYTSong("LQZLPV6xcHI", playlist);
+      API.grabYTSong("v13JAf6Oohc", playlist);
+      API.grabYTSong("c2yQLXTuctA", playlist);
+      API.grabYTSong("AAt7YbX0T9k", playlist);
+      API.grabYTSong("NKOq7-mNeaE", playlist);
+      API.grabYTSong("XYFdldfYEJk", playlist);
+      API.grabYTSong("pl3vxEudif8", playlist);
+      API.grabYTSong("1CW3ttZ5_oQ", playlist);
+      API.grabYTSong("z5zZKawkcBU", playlist);
+      API.grabYTSong("j8QqxMvb8AM", playlist);
+      API.grabYTSong("ASqyf_cDN0s", playlist);
+      API.grabYTSong("yWP6Qki8mWc", playlist);
+      API.grabYTSong("mSZv9KKf0g0", playlist);
+      API.grabYTSong("U3sMjm9Eloo", playlist);
+      API.grabYTSong("0GRR_n_yQGA", playlist);
+      API.grabYTSong("gIRqMTg1GVc", playlist);
+      API.grabYTSong("Ap4jRRK75dA", playlist);
+      API.grabYTSong("qA78eLqHLkM", playlist);
+      API.grabYTSong("2WVzNt2hDWQ", playlist);
+      API.grabYTSong("a01QQZyl-_I", playlist);
+      API.grabYTSong("uc-7G2OSsBY", playlist);
+      API.grabYTSong("3XqyGoE2Q4Y", playlist);
+      API.grabYTSong("nCrlyX6XbTU", playlist);
+      API.grabYTSong("APWhx97QvxE", playlist);
+      API.grabYTSong("hFWbF0Kp-_4", playlist);
+      API.grabYTSong("ExYsh1W22Wo", playlist);
+      API.grabYTSong("_D4eUWBAE_A", playlist);
+      API.grabYTSong("oFRbZJXjWIA", playlist);
+      API.grabYTSong("xTuIXtXUEw4", playlist);
+      API.grabYTSong("JynwVKXzc9s", playlist);
+      API.grabYTSong("Sry7ML4PzbE", playlist);
+      API.grabYTSong("RbMS0BzOMV0", playlist);
+      API.grabYTSong("v1hVOz_NwXI", playlist);
+      API.grabYTSong("QTdD1QqsrfI", playlist);
+      API.grabYTSong("j7oQEPfe-O8", playlist);
+      API.grabYTSong("MOgFnO4EXRg", playlist);
+      API.grabYTSong("S13DozOsAu8", playlist);
+      API.grabYTSong("BKGRijV8U3s", playlist);
+      API.grabYTSong("ktdQiODWt84", playlist);
+      API.grabYTSong("VdphvuyaV_I", playlist);
+      API.grabYTSong("jTbX_XYo6xI", playlist);
+      API.grabYTSong("fLjE-2_Luaw", playlist);
+      API.grabYTSong("7ExjJPvvTxw", playlist);
+      API.grabYTSong("xMaE6toi4mk", playlist);
+      API.grabYTSong("nf0oXY4nDxE", playlist);
+      API.grabYTSong("PmyzFsYEdco", playlist);
+      API.grabYTSong("ZeDtmbt4JS4", playlist);
+      API.grabYTSong("bQYrq-4U5HQ", playlist);
+      API.grabYTSong("W1PNvopXjbg", playlist);
+      API.grabYTSong("-PuC7xyJsBQ", playlist);
+      API.grabYTSong("RcYFBEmNlYk", playlist);
+      API.grabYTSong("tjJU_wQPpKk", playlist);
+      API.grabYTSong("0vo23H9J8o8", playlist);
+      API.grabYTSong("oJYRtOPUonA", playlist);
+      API.grabYTSong("zt39m5kH1GY", playlist);
+      API.grabYTSong("pTajbTWhMRc", playlist);
+      API.grabYTSong("oohFGOmcxuo", playlist);
+      API.grabYTSong("jy75njEwydE", playlist);
+      API.grabYTSong("WGRrOEbY3pI", playlist);
+      API.grabYTSong("W1OFuyCsJBk", playlist);
+      API.grabYTSong("tTAOvEX8WB4", playlist);
+      API.grabYTSong("ZbBprURPYFA", playlist);
+      API.grabYTSong("Rt75y38J00s", playlist);
+      API.grabYTSong("UmTx9y7ePTg", playlist);
+      API.grabYTSong("RDnlU6rPfwY", playlist);
+      API.grabYTSong("V9Yq5m9eLIQ", playlist);
+      API.grabYTSong("RHnl7jNK6us", playlist);
+      API.grabYTSong("Y1D3a5eDJIs", playlist);
+      API.grabYTSong("YZdvt2NX-dk", playlist);
+      API.grabYTSong("2TZRn0zNIbY", playlist);
+      API.grabYTSong("SM3jgkChV6M", playlist);
+      API.grabYTSong("1PQLoHJOPOI", playlist);
+      API.grabYTSong("SmPMMitJDYg", playlist);
+      API.grabYTSong("bzAGZT_XTAk", playlist);
+      API.grabYTSong("CqswNr2B874", playlist);
+      API.grabYTSong("pR30knJs4Xk", playlist);
+      API.grabYTSong("VK7Z83UbwKM", playlist);
+      API.grabYTSong("VMnjF1O4eH0", playlist);
+      API.grabYTSong("lJQ1jcYlNn8", playlist);
+      API.grabYTSong("hMr3KtYUCcI", playlist);
+      API.grabYTSong("d18UWu4dRv4", playlist);
+      API.grabYTSong("b-Uvy7CBs2M", playlist);
+      API.grabYTSong("kfUPL5KQuiE", playlist);
+      API.grabYTSong("LAzPX37YuLc", playlist);
+      API.grabYTSong("R0Ca_vSlBwQ", playlist);
+      API.grabYTSong("CQ-QfMv7Fzw", playlist);
+      API.grabYTSong("iZzVdomYHnI", playlist);
+      API.grabYTSong("0kNGnIKUdMI", playlist);
+      API.grabYTSong("CmELf8DJAVY", playlist);
+      API.grabYTSong("oksTiOIuhHA", playlist);
+      API.grabYTSong("pSA_RLCriHs", playlist);
+      API.grabYTSong("g5njyO9h9Ys", playlist);
+      API.grabYTSong("fTdxMXKT4So", playlist);
+      API.grabYTSong("tQCvNj1F3-w", playlist);
+      API.grabYTSong("XVajUY-hBVI", playlist);
+      API.grabYTSong("ipqqEFoJPL4", playlist);
+      API.grabYTSong("RqQn2ADZE1A", playlist);
+      API.grabYTSong("ZCo3wFCYZsw", playlist);
+      API.grabYTSong("xrYb4HQY5rQ", playlist);
+      API.grabYTSong("wDZFf0pm0SE", playlist);
+      API.grabYTSong("z13qXQf1Gk8", playlist);
+      API.grabYTSong("0CAHDI_vkSs", playlist);
+      API.grabYTSong("KOQ4pkUAFbA", playlist);
+      API.grabYTSong("gngNfieMJe8", playlist);
+      API.grabYTSong("xNnAvTTaJjM", playlist);
+      API.grabYTSong("SMSZALOGF_M", playlist);
+      API.grabYTSong("HCRcFNATZTQ", playlist);
+      API.grabYTSong("vizkeOkBcv4", playlist);
+      API.grabYTSong("5qRJIBtbc2c", playlist);
+      API.grabYTSong("ctTkNkPIoK0", playlist);
+      API.grabYTSong("xa6xquyj5X0", playlist);
+      API.grabYTSong("Tqg58fE70NE", playlist);
+      API.grabYTSong("p0OX_8YvFxA", playlist);
+      API.grabYTSong("tpX3NhpRGdE", playlist);
+      API.grabYTSong("UWxdGJR_foY", playlist);
+      API.grabYTSong("00eN1t4iKCo", playlist);
+      API.grabYTSong("YBfE8nMxv-U", playlist);
+      API.grabYTSong("O8m1Z43uato", playlist);
+      API.grabYTSong("4AKbUm8GrbM", playlist);
+      API.grabYTSong("jQcBwE6j09U", playlist);
+      API.grabYTSong("S0NFaQcTJsg", playlist);
+      API.grabYTSong("YL4OWXiV8LY", playlist);
+      API.grabYTSong("HbqQL0J_Vr0", playlist);
+      API.grabYTSong("DzSC2__LXk4", playlist);
+      API.grabYTSong("wEOa3guQkX0", playlist);
+      API.grabYTSong("BJs_L7yq5qE", playlist);
+      API.grabYTSong("MrV6exi1WlM", playlist);
+      API.grabYTSong("tAjhqwHvMds", playlist);
+      API.grabYTSong("W3JsuWz4xWc", playlist);
+      API.grabYTSong("zDSVorNiJCU", playlist);
+      API.grabYTSong("F8IbIxQ2sxA", playlist);
+      API.grabYTSong("yDl0qPfkSRw", playlist);
+      API.grabYTSong("WLiuMkGCOC4", playlist);
+      API.grabYTSong("Fgm7F30EN50", playlist);
+      API.grabYTSong("Sy8iUI_ayuo", playlist);
+      API.grabYTSong("uAF57_91Gb0", playlist);
+      API.grabYTSong("IdCJcvuU8jM", playlist);
+      API.grabYTSong("zKGOCOAI_2c", playlist);
+      API.grabYTSong("kijpcUv-b8M", playlist);
+      API.grabYTSong("8hA2fzvzT_w", playlist);
+      API.grabYTSong("2ZBtPf7FOoM", playlist);
+      API.grabYTSong("4XWxyQVqP-M", playlist);	  
+    }
+    catch(err) { UTIL.logException("YTListClassicImport: " + err.message); }
+  },
+  YTListCovImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_COVERS);
+      API.grabYTSong("TLV4_xaYynY", playlist);
+      API.grabYTSong("SmVAWKfJ4Go", playlist);
+      API.grabYTSong("ZAjrC4Rd168", playlist);
+      API.grabYTSong("FRFgFBfa1v4", playlist);
+      API.grabYTSong("s4_4abCWw-w", playlist);
+      API.grabYTSong("V1bFr2SWP1I", playlist);
+      API.grabYTSong("_B6kheJ8zks", playlist);
+      API.grabYTSong("GoUKdLQ91Zc", playlist);
+      API.grabYTSong("egY8rUpxqcE", playlist);
+      API.grabYTSong("KsS0cvTxU-8", playlist);
+      API.grabYTSong("y8AWFf7EAc4", playlist);
+      API.grabYTSong("hXlzci1rKNM", playlist);
+      API.grabYTSong("m6_J_VcCLQA", playlist);
+      API.grabYTSong("gE3-q-aoFZI", playlist);
+      API.grabYTSong("SHXZdDIkwWI", playlist);
+      API.grabYTSong("gdZtOvUBGcw", playlist);
+      API.grabYTSong("jx4TqLYrhaY", playlist);
+      API.grabYTSong("1aHOiAxzy1I", playlist);
+      API.grabYTSong("OdYGnAFaeHU", playlist);
+      API.grabYTSong("89f9EPq_GtU", playlist);
+      API.grabYTSong("YDEVn8dcPjQ", playlist);
+      API.grabYTSong("L_dSjHmmOOM", playlist);
+      API.grabYTSong("b_X_SWuwM7k", playlist);
+      API.grabYTSong("ChNW7Ey7KkM", playlist);
+      API.grabYTSong("6XAT2C9CCPY", playlist);
+      API.grabYTSong("zSif77IVQdY", playlist);
+      API.grabYTSong("XpzggAVxLME", playlist);
+      API.grabYTSong("d_EqpXC741A", playlist);
+      API.grabYTSong("buAzVkcH4YI", playlist);
+      API.grabYTSong("aBOpk33VlSg", playlist);
+      API.grabYTSong("4N3N1MlvVc4", playlist);
+      API.grabYTSong("xzkiJJ_NkD0", playlist);
+      API.grabYTSong("FLsMvGCFtOU", playlist);
+      API.grabYTSong("O5rVmXyZP5s", playlist);
+      API.grabYTSong("mn7F6p-nnKE", playlist);
+      API.grabYTSong("Q8Tiz6INF7I", playlist);
+      API.grabYTSong("qybcerRwsMk", playlist);
+      API.grabYTSong("my19Dlm_fYY", playlist);
+      API.grabYTSong("nJAklQZ7kBg", playlist);
+      API.grabYTSong("WjXYkFzxIlU", playlist);
+      API.grabYTSong("1IeLb87K-so", playlist);
+      API.grabYTSong("Be-loLSUWT0", playlist);
+      API.grabYTSong("sdOLFtk9joI", playlist);
+      API.grabYTSong("UnPMoAb4y8U", playlist);
+      API.grabYTSong("iUiTQvT0W_0", playlist);
+      API.grabYTSong("sQtntLMJ-TY", playlist);
+      API.grabYTSong("27e073tc6mA", playlist);
+      API.grabYTSong("mHOykeC8xdY", playlist);
+      API.grabYTSong("5sMtmwAMSyg", playlist);
+      API.grabYTSong("53onH1g_z1o", playlist);
+      API.grabYTSong("m42efOxOx1g", playlist);
+      API.grabYTSong("5-juDiDTYfw", playlist);
+      API.grabYTSong("Es3Vsfzdr14", playlist);
+      API.grabYTSong("wmE-fh6oqJ4", playlist);
+      API.grabYTSong("6xdB_N2mhHM", playlist);
+      API.grabYTSong("uepj0-RMPoo", playlist);
+      API.grabYTSong("GP6rkf3qB0c", playlist);
+      API.grabYTSong("sMF8KZ5Woyw", playlist);
+      API.grabYTSong("DChHEf0lpEE", playlist);
+      API.grabYTSong("JAHA4Jh5jkw", playlist);
+      API.grabYTSong("8K0EAc3abq8", playlist);
+      API.grabYTSong("wUSzrHCqQks", playlist);
+      API.grabYTSong("xlhmdfl89tg", playlist);
+      API.grabYTSong("Yh2o5OJjdYs", playlist);
+      API.grabYTSong("6FOUqQt3Kg0", playlist);
+      API.grabYTSong("mhujM7T1_fQ", playlist);
+      API.grabYTSong("lDPn4d651zM", playlist);
+      API.grabYTSong("kmw1yYRdDOM", playlist);
+      API.grabYTSong("gNPCI8y9avc", playlist);
+      API.grabYTSong("2rdUUBc9p8o", playlist);
+      API.grabYTSong("ZEsoq0B1IOo", playlist);
+      API.grabYTSong("kOe7xRQUxa4", playlist);
+      API.grabYTSong("M7D4SZS5yJM", playlist);
+      API.grabYTSong("_KpeCk6NyZU", playlist);
+      API.grabYTSong("3l436MSlivQ", playlist);
+      API.grabYTSong("NsPFvqguawU", playlist);
+      API.grabYTSong("XWxYx9mmr7U", playlist);
+      API.grabYTSong("H9nPf7w7pDI", playlist);
+      API.grabYTSong("UlJDX6LRIsg", playlist);
+      API.grabYTSong("sMBXcX9mmRc", playlist);
+      API.grabYTSong("x-05M6zK56c", playlist);
+      API.grabYTSong("XpVgigAB1l8", playlist);
+      API.grabYTSong("hl_zzlAvNmI", playlist);
+      API.grabYTSong("D-5M93tovEs", playlist);
+      API.grabYTSong("wTlUu0a9oWc", playlist);
+      API.grabYTSong("CDl9ZMfj6aE", playlist);
+      API.grabYTSong("x_rwwAE5GHc", playlist);
+      API.grabYTSong("jQcNiD0Z3MU", playlist);
+      API.grabYTSong("JoolQUDWq-k", playlist);
+      API.grabYTSong("u4UghI6rug4", playlist);
+      API.grabYTSong("7KJjVMqNIgA", playlist);
+      API.grabYTSong("rbTozgoj9OQ", playlist);
+      API.grabYTSong("tRgcwT9X2J8", playlist);
+      API.grabYTSong("WcM14Al83Ls", playlist);
+      API.grabYTSong("YAA0ApV6TsQ", playlist);
+      API.grabYTSong("cvQI5-rkV_A", playlist);
+      API.grabYTSong("TehFZ38kt6o", playlist);
+      API.grabYTSong("UPPgeDhGzKY", playlist);
+      API.grabYTSong("s9GqpOWx74o", playlist);
+      API.grabYTSong("bxDlC7YV5is", playlist);
+      API.grabYTSong("YQMmWWpRR2I", playlist);
+      API.grabYTSong("by8oyJztzwo", playlist);
+      API.grabYTSong("yvh0z6-Dae4", playlist);
+      API.grabYTSong("2k3uexeegD8", playlist);
+      API.grabYTSong("JwvBeHbDL9Q", playlist);
+      API.grabYTSong("I-jjYWpRKgg", playlist);
+      API.grabYTSong("lAluSbUNkBo", playlist);
+      API.grabYTSong("L64c5vT3NBw", playlist);
+      API.grabYTSong("BS0saL_DsuM", playlist);
+      API.grabYTSong("kNxMHJ8YWa4", playlist);
+      API.grabYTSong("be8bf7FFbFM", playlist);
+      API.grabYTSong("tr4XnP4tAtc", playlist);
+      API.grabYTSong("DSIUrba-aoc", playlist);
+      API.grabYTSong("GR6GqcPd60U", playlist);
+      API.grabYTSong("B1Us9GXv-uM", playlist);
+      API.grabYTSong("kO4BF67pvsc", playlist);
+      API.grabYTSong("gHJ1TI-1Nzo", playlist);
+      API.grabYTSong("g8tZFtUSgcA", playlist);
+      API.grabYTSong("i5P8lrgBtcU", playlist);
+      API.grabYTSong("2-GEuJOyLOg", playlist);
+      API.grabYTSong("CrYntgFr-s0", playlist);
+      API.grabYTSong("popPQmikR9w", playlist);
+      API.grabYTSong("d9NF2edxy-M", playlist);
+      API.grabYTSong("V4WGsMplGxU", playlist);
+      API.grabYTSong("8PtckjZ-Xys", playlist);
+      API.grabYTSong("xpUkfCVDjWo", playlist);
+      API.grabYTSong("gEjB7xf6T14", playlist);
+      API.grabYTSong("sTQZhM7YfZk", playlist);
+      API.grabYTSong("9t5_rzWFjns", playlist);
+      API.grabYTSong("jxQWckbhVTU", playlist);
+      API.grabYTSong("3MteSlpxCpo", playlist);
+      API.grabYTSong("bdb5wDbshqA", playlist);
+      API.grabYTSong("Cb7b5Sr_ypE", playlist);
+      API.grabYTSong("9vi14x4nCpQ", playlist);
+      API.grabYTSong("f-4ZwiW1cPs", playlist);
+      API.grabYTSong("9xMCNmUaGko", playlist);
+      API.grabYTSong("gYjzKLAC7AM", playlist);
+      API.grabYTSong("j2JXy1Z9ovs", playlist);
+      API.grabYTSong("8BglEyv5O2Y", playlist);
+      API.grabYTSong("C3AC9ape88c", playlist);
+      API.grabYTSong("4Ybm94FR8eU", playlist);
+      API.grabYTSong("GbcjW9SQabc", playlist);
+      API.grabYTSong("wXiTwalPvuQ", playlist);
+      API.grabYTSong("MCWaN_Tc5wo", playlist);
+      API.grabYTSong("K2ITWtozyqw", playlist);
+      API.grabYTSong("PE9HvSdcaL4", playlist);
+      API.grabYTSong("ze06wpIr_Y4", playlist);
+      API.grabYTSong("8MHZ3GwPRqA", playlist);
+      API.grabYTSong("WpRA3HQe1fE", playlist);
+      API.grabYTSong("KUshkp0Kr5M", playlist);
+      API.grabYTSong("NR7dG_m3MsI", playlist);
+      API.grabYTSong("3WUkxQQ2cA4", playlist);
+      API.grabYTSong("io1WpKXQ__4", playlist);
+      API.grabYTSong("J45y_KFjrws", playlist);
+      API.grabYTSong("dREKkAk628I", playlist);
+      API.grabYTSong("hRUy-D0JU2I", playlist);
+      API.grabYTSong("ThjilYhKQNc", playlist);
+      API.grabYTSong("WWoKv2eZLo0", playlist);
+      API.grabYTSong("DEKFkwVwfS0", playlist);
+      API.grabYTSong("6y1aOg_UO_A", playlist);
+      API.grabYTSong("-FMa6jWqO8E", playlist);
+      API.grabYTSong("2sx3U_6LqdM", playlist);
+	  }
+    catch(err) { UTIL.logException("YTListCovImport: " + err.message); }
+  },
+  YTList80sImport: function() {
+    try {
+	  var playlist = UTIL.getPlaylistID(CONST.PLAYLIST_80s);
+      API.grabYTSong("sOnqjkJTMaA", playlist);
+      API.grabYTSong("djV11Xbc914", playlist);
+      API.grabYTSong("OMOGaugKpzs", playlist);
+      API.grabYTSong("WpmILPAcRQo", playlist);
+      API.grabYTSong("PIb6AZdTr-A", playlist);
+      API.grabYTSong("lDK9QqIzhwk", playlist);
+      API.grabYTSong("Zi_XLOBDo_Y", playlist);
+      API.grabYTSong("dQw4w9WgXcQ", playlist);
+      API.grabYTSong("JmcA9LIIXWw", playlist);
+      API.grabYTSong("Rbm6GXllBiw", playlist);
+      API.grabYTSong("btPJPFnesV4", playlist);
+      API.grabYTSong("XmSdTa9kaiQ", playlist);
+      API.grabYTSong("dsUXAEzaC3Q", playlist);
+      API.grabYTSong("HzZ_urpj4As", playlist);
+      API.grabYTSong("lcOxhH8N3Bo", playlist);
+      API.grabYTSong("YR5ApYxkU-U", playlist);
+      API.grabYTSong("Qt2mbGP6vFI", playlist);
+      API.grabYTSong("t1TcDHrkQYg", playlist);
+      API.grabYTSong("VdQY7BusJNU", playlist);
+      API.grabYTSong("loWXMtjUZWM", playlist);
+      API.grabYTSong("izGwDsrQ1eQ", playlist);
+      API.grabYTSong("KrZHPOeOxQQ", playlist);
+      API.grabYTSong("FTQbiNvZqaY", playlist);
+      API.grabYTSong("yCC_b5WHLX0", playlist);
+      API.grabYTSong("YkADj0TPrJA", playlist);
+      API.grabYTSong("rY0WxgSXdEE", playlist);
+      API.grabYTSong("S_E2EHVxNAE", playlist);
+      API.grabYTSong("pIgZ7gMze7A", playlist);
+      API.grabYTSong("Ym0hZG-zNOk", playlist);
+      API.grabYTSong("qeMFqkcPYcg", playlist);
+      API.grabYTSong("eH3giaIzONA", playlist);
+      API.grabYTSong("M9BNoNFKCBI", playlist);
+      API.grabYTSong("sFvENQBc-F8", playlist);
+      API.grabYTSong("5X-Mrc2l1d0", playlist);
+      API.grabYTSong("3GwjfUFyY6M", playlist);
+      API.grabYTSong("PivWY9wn5ps", playlist);
+      API.grabYTSong("d-diB65scQU", playlist);
+      API.grabYTSong("129kuDCQtHs", playlist);
+      API.grabYTSong("OMD8hBsA-RI", playlist);
+      API.grabYTSong("92cwKCU8Z5c", playlist);
+      API.grabYTSong("s6TtwR2Dbjg", playlist);
+      API.grabYTSong("QwOU3bnuU0k", playlist);
+      API.grabYTSong("LPn0KFlbqX8", playlist);
+      API.grabYTSong("N4d7Wp9kKjA", playlist);
+      API.grabYTSong("uPudE8nDog0", playlist);
+      API.grabYTSong("IYzlVDlE72w", playlist);
+      API.grabYTSong("hCuMWrfXG4E", playlist);
+      API.grabYTSong("M3T_xeoGES8", playlist);
+      API.grabYTSong("1w7OgIMMRc4", playlist);
+      API.grabYTSong("ST86JM1RPl0", playlist);
+      API.grabYTSong("zO6D_BAuYCI", playlist);
+      API.grabYTSong("CdqoNKCCt7A", playlist);
+      API.grabYTSong("AR8D2yqgQ1U", playlist);
+      API.grabYTSong("yG07WSu7Q9w", playlist);
+      API.grabYTSong("yfg97-5uhFQ", playlist);
+      API.grabYTSong("eFjjO_lhf9c", playlist);
+      API.grabYTSong("b_ILDFp5DGA", playlist);
+      API.grabYTSong("zTcu7MCtuTs", playlist);
+      API.grabYTSong("ILWSp0m9G2U", playlist);
+      API.grabYTSong("G333Is7VPOg", playlist);
+      API.grabYTSong("VcjzHMhBtf0", playlist);
+      API.grabYTSong("p3j2NYZ8FKs", playlist);
+      API.grabYTSong("dlPjxz4LGak", playlist);
+      API.grabYTSong("bJ9r8LMU9bQ", playlist);
+      API.grabYTSong("yL3lJfpenAc", playlist);
+      API.grabYTSong("oOg5VxrRTi0", playlist);
+      API.grabYTSong("wuvtoyVi7vY", playlist);
+      API.grabYTSong("EPOIS5taqA8", playlist);
+      API.grabYTSong("bBQVrCflZ_E", playlist);
+      API.grabYTSong("m3-hY-hlhBg", playlist);
+      API.grabYTSong("7YvAYIJSSZY", playlist);
+      API.grabYTSong("QYHxGBH6o4M", playlist);
+      API.grabYTSong("4xmckWVPRaI", playlist);
+      API.grabYTSong("lu3VTngm1F0", playlist);
+      API.grabYTSong("vWz9VN40nCA", playlist);
+      API.grabYTSong("lrpXArn3hII", playlist);
+      API.grabYTSong("siwpn14IE7E", playlist);
+      API.grabYTSong("yRYFKcMa_Ek", playlist);
+      API.grabYTSong("PK2HANwsUWg", playlist);
+      API.grabYTSong("we0mk_J0zyc", playlist);
+      API.grabYTSong("zpOULjyy-n8", playlist);
+      API.grabYTSong("nCBASt507WA", playlist);
+      API.grabYTSong("StKVS0eI85I", playlist);
+      API.grabYTSong("ZYRfUoR9Q4Y", playlist);
+      API.grabYTSong("41P8UxneDJE", playlist);
+      API.grabYTSong("wEwNcnklcsk", playlist);
+      API.grabYTSong("s1ysoohV_zA", playlist);
+      API.grabYTSong("ogoIxkPjRts", playlist);
+      API.grabYTSong("Bx51eegLTY8", playlist);
+      API.grabYTSong("nqAvFx3NxUM", playlist);
+      API.grabYTSong("snsTmi9N9Gs", playlist);
+      API.grabYTSong("k9e157Ner90", playlist);
+      API.grabYTSong("aI9lo5BRJmg", playlist);
+      API.grabYTSong("r0qBaBb1Y-U", playlist);
+      API.grabYTSong("K1b8AhIsSYQ", playlist);
+      API.grabYTSong("BWP-AsG5DRk", playlist);
+      API.grabYTSong("rDnUIXF2ly8", playlist);
+      API.grabYTSong("oR6okRuOLc8", playlist);
+      API.grabYTSong("rvVs0muI-gU", playlist);
+      API.grabYTSong("BqDjMZKf-wg", playlist);
+      API.grabYTSong("SGyOaCXr8Lw", playlist);
+      API.grabYTSong("SECVGN4Bsgg", playlist);
+      API.grabYTSong("DNSUOFgj97M", playlist);
+      API.grabYTSong("-_niy2ZM5Jo", playlist);
+      API.grabYTSong("4dOsbsuhYGQ", playlist);
+      API.grabYTSong("nY31ZH6hAFI", playlist);
+      API.grabYTSong("F8BMm6Jn6oU", playlist);
+      API.grabYTSong("w-l5FyA3pgo", playlist);
+      API.grabYTSong("JkRKT6T0QLg", playlist);
+      API.grabYTSong("JP4xXjW97ko", playlist);
+      API.grabYTSong("VMkIuKXwmlU", playlist);
+      API.grabYTSong("QVdhZwK7cS8", playlist);
+      API.grabYTSong("xrOek4z32Vg", playlist);
+      API.grabYTSong("5eAQa4MOGkE", playlist);
+      API.grabYTSong("h04CH9YZcpI", playlist);
+      API.grabYTSong("VgkOCJ9PGkk", playlist);
+      API.grabYTSong("oiS8YokFzeY", playlist);
+      API.grabYTSong("nfk6sCzRTbM", playlist);
+      API.grabYTSong("s_8KR-n2fBQ", playlist);
+      API.grabYTSong("TCBttS_y7lE", playlist);
+      API.grabYTSong("uzbRoG6XFlg", playlist);
+      API.grabYTSong("OdQDXs75Ulo", playlist);
+      API.grabYTSong("TZtiJN6yiik", playlist);
+      API.grabYTSong("rgczlrYM4eI", playlist);
+      API.grabYTSong("Uc8wmLul3uw", playlist);
+      API.grabYTSong("BoXu6QmxpJE", playlist);
+      API.grabYTSong("AzlKwOoQ4eE", playlist);
+      API.grabYTSong("9f16Fw_K45s", playlist);
+      API.grabYTSong("JmGMzyajA2U", playlist);
+      API.grabYTSong("ltrMfT4Qz5Y", playlist);
+      API.grabYTSong("-0skjm-uJSs", playlist);
+      API.grabYTSong("IVF0zcqr9Dg", playlist);
+      API.grabYTSong("p0pM5dm--yQ", playlist);
+      API.grabYTSong("r9uizdKZAGE", playlist);
+      API.grabYTSong("8iwBM_YB1sE", playlist);
+      API.grabYTSong("EaleKN9GQ54", playlist);
+      API.grabYTSong("jImFqAwYV7o", playlist);
+      API.grabYTSong("oqlauwX_ums", playlist);
+      API.grabYTSong("pehMBaHgpWE", playlist);
+      API.grabYTSong("0sw54Pdh_m8", playlist);
+      API.grabYTSong("LH8xbDGv7oY", playlist);
+      API.grabYTSong("VdcnhCoZDCI", playlist);
+      API.grabYTSong("M7JVlpm0eRs", playlist);
+      API.grabYTSong("F93ywiGMDnQ", playlist);
+      API.grabYTSong("fWptXUblA4E", playlist);
+      API.grabYTSong("oqTq8gckf8E", playlist);
+      API.grabYTSong("gTBVKuX-Zjs", playlist);
+      API.grabYTSong("n0nEiTAAeuc", playlist);
+      API.grabYTSong("teyQNG_LEgk", playlist);
+	  }
     catch(err) { UTIL.logException("YTList80sImport: " + err.message); }
   },
   //todoerlind TEST
@@ -3637,7 +5033,8 @@ var CONST = {
   PLAYLIST_70s: 6,
   PLAYLIST_10s: 7,
   PLAYLIST_00s: 8,
-  PLAYLIST_ACTIVE: 9,
+  PLAYLIST_CLASSIC: 9,
+  PLAYLIST_ACTIVE: 10,
 
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
   blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
@@ -4367,9 +5764,15 @@ var BOTCOMMANDS = {
 						if (maxTime === "I") API.currentSongBlocked();
 						if (maxTime === "J") API.grabCurrentSong();
 						if (maxTime === "K") API.queueAllSongs();
-						if (maxTime === "801") API.YTList80sImport1();
+						if (maxTime === "70") API.YTList70sImport();
 						if (maxTime === "80") API.YTList80sImport();
-						if (maxTime === "L") API.getWaitList(UTIL.botInWaitListTest);
+						if (maxTime === "90") API.YTList90sImport();
+						if (maxTime === "00") API.YTList00sImport();
+						if (maxTime === "10") API.YTList10sImport();
+						if (maxTime === "7080E") API.YTList7080EImport();
+						if (maxTime === "7080F") API.YTList7080FImport();
+						if (maxTime === "COV") API.YTListCovImport();
+						if (maxTime === "CLAS") API.YTListClassicImport();
                     }
                 }
             },
