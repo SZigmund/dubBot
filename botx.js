@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0110",
+  version: "Version  1.01.0024.0111",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -4922,7 +4922,7 @@ var API = {
 	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
 	  if (typeof songInfo === 'undefined' || songInfo === null) return;
 	  if (typeof songInfo !== "object") return;
-	  var songid = songInfo._id;
+	  var songid = songInfo._song._id;
 	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), songid);
 	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_90s), songid);
 	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_80s), songid);
