@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0109",
+  version: "Version  1.01.0024.0110",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2062,7 +2062,6 @@ var BOTDJ = {
 		  //botDebug.debugMessage(true, "playlist.length: " + playlist.length);
 		  songIdx = Math.floor(Math.random() * playlist.length);
 		  //botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
-		  dubBot.queue.dubQueue = playlist;
 		  var songType = playlist[songIdx].songType;
 		  var fkid = playlist[songIdx].fkid;
 		  //botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
@@ -4919,20 +4918,22 @@ var API = {
 		API.sendChat(botVar.botName + " is not the current dj.");
 	    return;
 	  }
+	  dubBot.queue.dubQueue = Dubtrack.room.player.activeSong.get("songInfo");
 	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
 	  if (typeof songInfo === 'undefined' || songInfo === null) return;
 	  if (typeof songInfo !== "object") return;
 	  var songid = songInfo._id;
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_COVERS, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_90s, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_80s, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_70s, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_10s, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_00s, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC, songid));
-	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_ACTIVE, songid));
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_90s), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_80s), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_70s), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_10s), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_00s), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC), songid);
+	  API.deleteCurrentSongApi(UTIL.getPlaylistID(CONST.PLAYLIST_ACTIVE), songid);
+	  API.moderateForceSkip();
 	  }
     catch(err) { UTIL.logException("deleteCurrentSong: " + err.message); }
   },
