@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0113",
+  version: "Version  1.01.0024.0114",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2850,13 +2850,6 @@ var API = {
     }
     catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
-  reorderQueue: function(newlist){
-    try {
-		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
-		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "GET");
-    }
-    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
-  },
 
   moderateMoveDJ: function(userID, queuePos, waitlist){
     try {
@@ -2883,6 +2876,7 @@ var API = {
 		}
 	    botDebug.debugMessage(true, "New List: " + newlist.length);
 	  }
+	  botDebug.debugMessage(true, "New List: " + newlist.length);
 	  API.reorderQueue(newlist);
     }
     catch(err) {UTIL.logException("moderateMoveDJ: " + err.message); }
