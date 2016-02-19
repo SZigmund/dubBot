@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0103",
+  version: "Version  1.01.0024.0104",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2011,6 +2011,7 @@ var ROULETTE = {
 //SECTION BOTDJ
 var BOTDJ = {
   monitorWaitlistInterval: null,
+  forcedToDJ: false,
   settings: {
     autoHopUp: true,
 	autoHopUpCount: 2,
@@ -2028,9 +2029,9 @@ var BOTDJ = {
 			if (UTIL.botInWaitList(waitlist)) API.getMyQueue(BOTDJ.checkMyQueueCount);
 			AFK.afkCheck(waitlist);
 			BOTDJ.checkHopUp(waitlist);
-			BOTDJ.checkHopDown(waitlist);
+			if (BOTDJ.forcedToDJ === false) BOTDJ.checkHopDown(waitlist);
 		}
-		catch(err) { UTIL.logException("monitorWaitlist: " + err.message); }
+		catch(err) { UTIL.logException("monitorWaitlistCB: " + err.message); }
 	},
 	checkMyQueueCount: function (myQueue) {
 		try {
@@ -2830,6 +2831,7 @@ var API = {
         try {
             if (!UTIL.botInWaitList(waitlist)) return;
 			API.moderateRemoveDJ(botVar.botID);
+			BOTDJ.forcedToDJ = false;
         }
         catch(err) { UTIL.logException("botHopDown: " + err.message); }
     },
@@ -6269,6 +6271,7 @@ var BOTCOMMANDS = {
                      if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                      if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                      API.getWaitList(API.botHopUp);
+		 			 BOTDJ.forcedToDJ = true;
                  }
              },
              hopdownCommand: {
