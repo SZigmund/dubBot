@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0025",
+  version: "Version  1.01.0026",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2844,21 +2844,16 @@ var API = {
 
   reorderQueue: function(newlist){
     try {
-		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", botVar.roomID);
+		//botDebug.debugMessage(true, "reorderQueue, len: " + newlist.length);
+	    i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUserQueueOrder.replace(":id", botVar.roomID);
 		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "post");
-    }
-    catch(err) {UTIL.logException("reorderQueue: " + err.message); }
-  },
-  reorderQueue: function(newlist){
-    try {
-		i = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
-		Dubtrack.helpers.sendRequest(i, { "order[]": newlist }, "GET");
     }
     catch(err) {UTIL.logException("reorderQueue: " + err.message); }
   },
 
   moderateMoveDJ: function(userID, queuePos, waitlist){
     try {
+		//botDebug.debugMessage(true, "moderateMoveDJ Userid: " + userID + " queuepos: " + queuePos + " WL-Len: " + waitlist.length);
 		//https://api.dubtrack.fm/room/5602ed62e8632103004663c2/queue/order
 		//      560be6cbdce3260300e40770&order%5B%5D=564933a1d4dcab140021cdeb
 		////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
