@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0111",
+  version: "Version  1.01.0024.0112",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -4918,6 +4918,7 @@ var API = {
 		API.sendChat(botVar.botName + " is not the current dj.");
 	    return;
 	  }
+	  //todoerlind - This doesn't work as the _id is unique for each queue. Would have to load all playlists and scan for fkid matching this fkid.
 	  dubBot.queue.dubQueue = Dubtrack.room.player.activeSong.get("songInfo");
 	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
 	  if (typeof songInfo === 'undefined' || songInfo === null) return;
