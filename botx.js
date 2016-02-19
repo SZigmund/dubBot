@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0107",
+  version: "Version  1.01.0024.0108",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -4915,7 +4915,7 @@ var API = {
   },
   deleteCurrentSong: function(playlistId, songId) {
     try {
-	  if (!UTIL.botIsCurrentDJ(waitlist)) {
+	  if (!UTIL.botIsCurrentDJ()) {
 		API.sendChat(botVar.botName + " is not the current dj.");
 	    return;
 	  }
