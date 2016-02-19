@@ -8,7 +8,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0024.0105",
+  version: "Version  1.01.0024.0106",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -4916,7 +4916,7 @@ var API = {
   deleteCurrentSong: function(playlistId, songId) {
     try {
 	  if (!UTIL.botIsCurrentDJ(waitlist)) {
-		API.sendChat(botVar.botName " is not the current dj.");
+		API.sendChat(botVar.botName + " is not the current dj.");
 	    return;
 	  }
 	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
