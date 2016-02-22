@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0088",
+  version: "Version  1.01.0026.0089",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2098,13 +2098,21 @@ var BOTDJ = {
 	//stalker option to find a user in another room
 	loadTheRoomList: function (roomlist) {
 		try {
-		  if(typeof roomlist === 'undefined' || roomlist === null) botDebug.debugMessage(true, "loadTheRoomList: ROOMLIST IS NULL");
-		  if(roomlist.length === 0) botDebug.debugMessage(true, "loadTheRoomList: ROOMLIST IS EMPTY");
-		  botDebug.debugMessage(true, "loadTheRoomList.len: " + roomlist.length);
-		  for(var i = 0; i < roomlist.length; i++)
-			API.getUserlist(dubBot.queue.dubRoomlist[i].users, dubBot.queue.dubRoomlist[i].roomID, dubBot.queue.dubRoomlist[i].roomname, "buck", BOTDJ.ListUsersOne);
+			dubBot.queue.dubRoomlist = [];
+			API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.loadTheRoomListWork);  //stalker option to find a user in another room
 		}
 		catch(err) { UTIL.logException("loadTheRoomList: " + err.message); }
+	},
+	//stalker option to find a user in another room
+	loadTheRoomListWork: function (roomlist) {
+		try {
+		  if(typeof roomlist === 'undefined' || roomlist === null) botDebug.debugMessage(true, "loadTheRoomListWork: ROOMLIST IS NULL");
+		  if(roomlist.length === 0) botDebug.debugMessage(true, "loadTheRoomListWork: ROOMLIST IS EMPTY");
+		  botDebug.debugMessage(true, "loadTheRoomListWork.len: " + roomlist.length);
+		  for(var i = 0; i < roomlist.length; i++)
+			API.getUserlist(dubBot.queue.dubRoomlist[i].users, dubBot.queue.dubRoomlist[i].roomID, dubBot.queue.dubRoomlist[i].roomname, "notworking", BOTDJ.ListUsersOne);
+		}
+		catch(err) { UTIL.logException("loadTheRoomListWork: " + err.message); }
 	},
 	//stalker option to find a user in another room
 	ListUsersOne: function (userlist, roomName, matchstr) {
@@ -2125,7 +2133,7 @@ var BOTDJ = {
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
 		    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
 			  if (dubBot.queue.dubRoomlist[i].users[j].username.toUpperCase().indexOf(matchstr) > -1) {
-				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname);
+				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname + "(" + dubBot.queue.dubRoomlist[i].activeUsers + ")");
 			  }
 			}
 		  }
@@ -2148,9 +2156,10 @@ var BOTDJ = {
 	//stalker option to find a user in another room
 	ListRoomUsers: function (roomId) {
 		try {
-		  //var roomId = "55ff22d5636dce0300ae36b5";
+		  var roomId = "55ff22d5636dce0300ae36b5";
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
 			  if (dubBot.queue.dubRoomlist[i].roomID === roomId) {
+			    botDebug.debugMessage(true, "FOUND MATCH: " + dubBot.queue.dubRoomlist[i].users.length);
 			    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
 				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname);
 			  }
