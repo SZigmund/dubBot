@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0074",
+  version: "Version  1.01.0026.0075",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3187,6 +3187,7 @@ var API = {
         // the code here will be executed when all four ajax requests resolve.
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
+		dubBot.queue.dubRoomlist = a1;
 		var dubRoomlist = a1;
 		botDebug.debugMessage(true, "getRoomlist: dubRoomlist.len: " + dubRoomlist.length);
         for (var i = 0; i < dubRoomlist.data.length; i++) {
