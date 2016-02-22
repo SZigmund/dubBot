@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0081",
+  version: "Version  1.01.0026.0082",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -5063,8 +5063,9 @@ var API = {
   },
   deleteCurrentSongApi: function(playlist, playlistID) {
     try {
-	    botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
+	    botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid + " PLLEN: " + playlist.length);
         for (var i = 0; i < playlist.length; i++) {
+		  botDebug.debugMessage(true, "Match SONGID?: " + debug playlist[i].fkid);
 	      if (playlist[i].fkid === dubBot.queue.deleteSongFkid) {
 		    botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
 		    var songId = playlist[songIdx].playlistSongID;
