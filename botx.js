@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0078",
+  version: "Version  1.01.0026.0079",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2101,10 +2101,33 @@ var BOTDJ = {
 		  if(roomlist.length === 0) botDebug.debugMessage(true, "testRoomList: ROOMLIST IS EMPTY");
 		  botDebug.debugMessage(true, "testRoomList.len: " + roomlist.length);
 		  for(var i = 0; i < roomlist.length; i++)
-		    botDebug.debugMessage(true, "ROOM: " + roomlist[i].roomID + " - " + roomlist[i].activeUsers + " " + roomlist[i].roomname);
+			API.getUserlist(dubBot.queue.dubRoomlist[i].users, dubBot.queue.dubRoomlist[i].roomid, dubBot.queue.dubRoomlist[i].roomname, "buck", BOTDJ.ListUsersOne);
 		}
 		catch(err) { UTIL.logException("testRoomList: " + err.message); }
 	},
+	ListUsersOne: function (userlist, roomName, matchstr) {
+		try {
+		    for(var i = 0; i < userlist.length; i++) {
+			  if (userlist[i].username.indexOf(matchstr) > -1) {
+				botDebug.debugMessage(true, "USER: " + userlist[i].username + " IN " + roomName);
+			  }
+			}
+		}
+		catch(err) { UTIL.logException("ListUsersOne: " + err.message); }
+	},
+	ListUsers: function (matchstr) {
+		try {
+		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
+		    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
+			  if (dubBot.queue.dubRoomlist[i].users[j].username.indexOf(matchstr) > -1) {
+				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname);
+			  }
+			}
+		  }
+		}
+		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+	},
+	
 	checkHopUp: function (waitlist) {
 		try {
 			//botDebug.debugMessage(true, "WaitListCount: " + waitlist.length);
@@ -3150,6 +3173,15 @@ var API = {
 	}
     catch(err) { UTIL.logException("roomListItem: " + err.message); }
   },
+ userListItem: function (dubUser, roomName) {
+    try {
+        this.userID = dubUser.userid;
+		this.roomname = roomName;
+		this.username =  dubUser._user.username;
+		return this;
+	}
+    catch(err) { UTIL.logException("userListItem: " + err.message); }
+  },
   getPlaylist: function(playlist, playlistID, pageno, filterOn, cb) {
   //getPlaylist(playlist, playlistID, 1, null, BOTDJ.playRandomSong);
     try {
@@ -3180,6 +3212,36 @@ var API = {
 	}
     catch(err) { UTIL.logException("definePlaylist: " + err.message); }
 	},
+	
+  getUserlist: function(userlist, roomId, roomName, userSearch, cb) {
+    try {
+	  $.when(API.defineUserlist(roomId)).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
+		var dubUserlist = a1;
+        for (var i = 0; i < dubUserlist.data.length; i++) {
+	      userlist.push(new API.userListItem(dubUserlist.data[i]));
+		}
+		//dubBot.queue.dubQueue = userlist;
+		if (dubRoomlist.data.length > 0)
+			API.getUserlist(userlist, pageno, cb);
+		else {
+		ListUsersOne
+			cb(userlist, roomName, userSearch);
+		}
+	  });
+	}
+    catch(err) { UTIL.logException("getUserlist: " + err.message); }
+	},
+  defineUserlist: function(roomId) {
+    try {
+	  //https://api.dubtrack.fm/room/560103972e803803000ff1f2/users
+	  var urlusers = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomUsers.replace("{id}", roomId);
+	  return $.ajax({ url: urlusers, type: "GET" });
+	}
+    catch(err) { UTIL.logException("defineUserlist: " + err.message); }
+	},
   getRoomlist: function(roomlist, pageno, cb) {
     try {
 		//botDebug.debugMessage(true, "getRoomlist Page: " + pageno);
@@ -3188,7 +3250,6 @@ var API = {
         // the code here will be executed when all four ajax requests resolve.
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
-		dubBot.queue.dubRoomlist = a1;
 		var dubRoomlist = a1;
 		if (pageno === 0) dubBot.queue.dubQueueA = a1;
 		//botDebug.debugMessage(true, "getRoomlist: dubRoomlist.len: " + dubRoomlist.data.length + " RL: " + roomlist.length);
@@ -5952,7 +6013,10 @@ var BOTCOMMANDS = {
 						if (maxTime === "7080F") API.YTList7080FImport();
 						if (maxTime === "COV") API.YTListCovImport();
 						if (maxTime === "CLAS") API.YTListClassicImport();
-						if (maxTime === "Q") API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.testRoomList);
+						if (maxTime === "Q") {
+							dubBot.queue.dubRoomlist = [];
+							API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.testRoomList);
+						}
                     }
                 }
             },
