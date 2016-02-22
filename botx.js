@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0075",
+  version: "Version  1.01.0026.0076",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -96,7 +96,7 @@ var dubBot = {
 	deleteSongName: null,
 	deleteSongFkid: null,
 	dubPlaylist: null,
-	dubRoomlist: null,
+	dubRoomlist: [],
 	dubQueueResp: null
   },
 
