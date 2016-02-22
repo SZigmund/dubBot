@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0079",
+  version: "Version  1.01.0026.0080",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3224,7 +3224,6 @@ var API = {
 	      userlist.push(new API.userListItem(dubUserlist.data[i], roomName));
 		}
 	    cb(userlist, roomName, userSearch);
-		}
 	  });
 	}
     catch(err) { UTIL.logException("getUserlist: " + err.message); }
