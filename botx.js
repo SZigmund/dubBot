@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0080",
+  version: "Version  1.01.0026.0081",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2101,7 +2101,7 @@ var BOTDJ = {
 		  if(roomlist.length === 0) botDebug.debugMessage(true, "testRoomList: ROOMLIST IS EMPTY");
 		  botDebug.debugMessage(true, "testRoomList.len: " + roomlist.length);
 		  for(var i = 0; i < roomlist.length; i++)
-			API.getUserlist(dubBot.queue.dubRoomlist[i].users, dubBot.queue.dubRoomlist[i].roomid, dubBot.queue.dubRoomlist[i].roomname, "buck", BOTDJ.ListUsersOne);
+			API.getUserlist(dubBot.queue.dubRoomlist[i].users, dubBot.queue.dubRoomlist[i].roomID, dubBot.queue.dubRoomlist[i].roomname, "buck", BOTDJ.ListUsersOne);
 		}
 		catch(err) { UTIL.logException("testRoomList: " + err.message); }
 	},
