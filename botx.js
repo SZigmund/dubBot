@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0087",
+  version: "Version  1.01.0026.0088",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2121,9 +2121,10 @@ var BOTDJ = {
 	//stalker option to find a user in another room
 	ListUsers: function (matchstr) {
 		try {
+		  matchstr = matchstr.toUpperCase();
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
 		    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
-			  if (dubBot.queue.dubRoomlist[i].users[j].username.indexOf(matchstr) > -1) {
+			  if (dubBot.queue.dubRoomlist[i].users[j].username.toUpperCase().indexOf(matchstr) > -1) {
 				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname);
 			  }
 			}
@@ -2135,8 +2136,9 @@ var BOTDJ = {
 	ListRooms: function (matchstr) {
 		try {
 		  //var matchstr = "80";
+		  matchstr = matchstr.toUpperCase();
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
-			  if (dubBot.queue.dubRoomlist[i].roomname.indexOf(matchstr) > -1) {
+			  if (dubBot.queue.dubRoomlist[i].roomname.toUpperCase().indexOf(matchstr) > -1) {
 				botDebug.debugMessage(true, "ROOM: " + dubBot.queue.dubRoomlist[i].roomID + " " + dubBot.queue.dubRoomlist[i].roomname);
 			  }
 		  }
