@@ -3221,14 +3221,9 @@ var API = {
         // status, and jqXHR object for each of the four ajax calls respectively.
 		var dubUserlist = a1;
         for (var i = 0; i < dubUserlist.data.length; i++) {
-	      userlist.push(new API.userListItem(dubUserlist.data[i]));
+	      userlist.push(new API.userListItem(dubUserlist.data[i], roomName));
 		}
-		//dubBot.queue.dubQueue = userlist;
-		if (dubRoomlist.data.length > 0)
-			API.getUserlist(userlist, pageno, cb);
-		else {
-		ListUsersOne
-			cb(userlist, roomName, userSearch);
+	    cb(userlist, roomName, userSearch);
 		}
 	  });
 	}
