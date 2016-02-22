@@ -3,17 +3,11 @@
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
 // - Record all Bans/Unbans
-// - Bot DJ
 // - Last Played
-// Bot DJ
-// Song Grab
-// Reset AFK after 120 mins
-// .hopup
-// .hopdown
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0069",
+  version: "Version  1.01.0026.0070",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -102,6 +96,7 @@ var dubBot = {
 	deleteSongName: null,
 	deleteSongFkid: null,
 	dubPlaylist: null,
+	dubRoomlist: null,
 	dubQueueResp: null
   },
 
@@ -2100,6 +2095,13 @@ var BOTDJ = {
 		}
 		catch(err) { UTIL.logException("testBouncer: " + err.message); }
 	},
+	testRoomList: function (roomlist) {
+		try {
+		  for(var i = 0; i < roomlist.length; i++)
+		    botDebug.debugMessage(true, "ROOM: " + roomlist.roomID + " - " + roomlist.activeUsers + " " + roomlist.roomname;
+		}
+		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+	},
 	checkHopUp: function (waitlist) {
 		try {
 			//botDebug.debugMessage(true, "WaitListCount: " + waitlist.length);
@@ -3135,11 +3137,21 @@ var API = {
 	}
     catch(err) { UTIL.logException("playListItem: " + err.message); }
   },
+ roomListItem: function (dubRoom) {
+    try {
+        this.roomID = dubRoom._id;
+		this.roomname = dubRoom.name;
+		this.activeUsers =  dubRoom.activeUsers;
+		this.users =  [];
+		return this;
+	}
+    catch(err) { UTIL.logException("roomListItem: " + err.message); }
+  },
   getPlaylist: function(playlist, playlistID, pageno, filterOn, cb) {
   //getPlaylist(playlist, playlistID, 1, null, BOTDJ.playRandomSong);
     try {
 		//botDebug.debugMessage(true, "getPlaylist pageno: " + pageno);
-	  $.when(API.definePlaylist(playlistID, pageno)).done(function(a1) {
+	  $.when(API.definePlaylist(playlistID, pageno, filterOn)).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
@@ -3157,13 +3169,43 @@ var API = {
 	}
     catch(err) { UTIL.logException("getPlaylist: " + err.message); }
 	},
-  definePlaylist: function(playlistID, pageno) {
+  definePlaylist: function(playlistID, pageno, filterOn) {
     try {
 	  //https://api.dubtrack.fm/playlist/560beb12faf08b030004fcec/songs?name=&page=1
-	  var urlsongs = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "?name=&page=" + pageno
+	  var urlsongs = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "?name=" + filterOn + "&page=" + pageno
 	  return $.ajax({ url: urlsongs, type: "GET" });
 	}
     catch(err) { UTIL.logException("definePlaylist: " + err.message); }
+	},
+  getRoomlist: function(roomlist, pageno, cb) {
+    try {
+		//botDebug.debugMessage(true, "getRoomlist pageno: " + pageno);
+	  $.when(API.defineRoomlist(pageno)).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
+		var dubRoomlist = a1;
+        for (var i = 0; i < dubBot.queue.dubRoomlist.data.length; i++) {
+	      roomlist.push(new API.roomListItem(dubBot.queue.dubRoomlist.data[i]));
+		}
+		//dubBot.queue.dubQueue = roomlist;
+		pageno += 20;
+		if (dubBot.queue.dubRoomlist.data.length > 0)
+			API.getRoomlist(roomlist, pageno, cb);
+		else
+			cb(roomlist);
+	  });
+	}
+    catch(err) { UTIL.logException("getRoomlist: " + err.message); }
+	},
+  defineRoomlist: function(pageno) {
+    try {
+	  //https://api.dubtrack.fm/room?offset=20
+	  var urlroom = Dubtrack.config.apiUrl + Dubtrack.config.urls.room
+	  if (pageno > 0) urlroom += "?offset=" + pageno
+	  return $.ajax({ url: urlroom, type: "GET" });
+	}
+    catch(err) { UTIL.logException("defineRoomlist: " + err.message); }
 	},
   getMyQueue: function(cb) {
     try {
@@ -4958,11 +5000,12 @@ var API = {
   },
   deleteCurrentSongApi: function(playlist, playlistID) {
     try {
-	    botDebug.debugMessage(true, "API - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
+	    botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
         for (var i = 0; i < playlist.length; i++) {
 	      if (playlist[i].fkid === dubBot.queue.deleteSongFkid) {
 		    botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
 		    var songId = playlist[songIdx].playlistSongID;
+			botDebug.debugMessage(true, "Delete song: " + songId);
 		    //https://api.dubtrack.fm/playlist/56c5da98f4508b5a00ef9645/songs/56c63eb5cb0ed0a4037f8f99
 		    var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "/" + songId;
 			$.ajax({ url: theUrl, type: "DELETE" });
@@ -5901,7 +5944,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "7080F") API.YTList7080FImport();
 						if (maxTime === "COV") API.YTListCovImport();
 						if (maxTime === "CLAS") API.YTListClassicImport();
-						if (maxTime === "Q") BOTDJ.queueRandomSong();
+						if (maxTime === "Q") API.getRoomlist(dubBot.queue.dubRoomlist, 0, testRoomList);
                     }
                 }
             },
@@ -8538,7 +8581,6 @@ if (!window.APIisRunning) {
 // basicBot.chat -> botChat.chatMessages botChat.getChatMessage("
 // dubBot.room. cBot.room.
 //TODO:
-// • Test .larry, <<question>>
 // • /me comments to not trigger AI detection
 // • Load UID from chat and update/remove users as needed
 // • Skip songs played in last 90 mins
