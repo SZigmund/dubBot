@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0073",
+  version: "Version  1.01.0026.0074",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3181,13 +3181,14 @@ var API = {
 	},
   getRoomlist: function(roomlist, pageno, cb) {
     try {
+		botDebug.debugMessage(true, "getRoomlist Page: " + pageno);
 		//botDebug.debugMessage(true, "getRoomlist pageno: " + pageno);
 	  $.when(API.defineRoomlist(pageno)).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
 		var dubRoomlist = a1;
-		botDebug.debugMessage(true, "dubRoomlist: " + dubRoomlist.length);
+		botDebug.debugMessage(true, "getRoomlist: dubRoomlist.len: " + dubRoomlist.length);
         for (var i = 0; i < dubRoomlist.data.length; i++) {
 	      roomlist.push(new API.roomListItem(dubRoomlist.data[i]));
 		}
