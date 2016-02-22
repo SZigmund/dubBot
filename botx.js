@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0085",
+  version: "Version  1.01.0026.0086",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2095,16 +2095,18 @@ var BOTDJ = {
 		}
 		catch(err) { UTIL.logException("testBouncer: " + err.message); }
 	},
-	testRoomList: function (roomlist) {
+	//stalker option to find a user in another room
+	loadTheRoomList: function (roomlist) {
 		try {
-		  if(typeof roomlist === 'undefined' || roomlist === null) botDebug.debugMessage(true, "testRoomList: ROOMLIST IS NULL");
-		  if(roomlist.length === 0) botDebug.debugMessage(true, "testRoomList: ROOMLIST IS EMPTY");
-		  botDebug.debugMessage(true, "testRoomList.len: " + roomlist.length);
+		  if(typeof roomlist === 'undefined' || roomlist === null) botDebug.debugMessage(true, "loadTheRoomList: ROOMLIST IS NULL");
+		  if(roomlist.length === 0) botDebug.debugMessage(true, "loadTheRoomList: ROOMLIST IS EMPTY");
+		  botDebug.debugMessage(true, "loadTheRoomList.len: " + roomlist.length);
 		  for(var i = 0; i < roomlist.length; i++)
 			API.getUserlist(dubBot.queue.dubRoomlist[i].users, dubBot.queue.dubRoomlist[i].roomID, dubBot.queue.dubRoomlist[i].roomname, "buck", BOTDJ.ListUsersOne);
 		}
-		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+		catch(err) { UTIL.logException("loadTheRoomList: " + err.message); }
 	},
+	//stalker option to find a user in another room
 	ListUsersOne: function (userlist, roomName, matchstr) {
 		try {
 		    for(var i = 0; i < userlist.length; i++) {
@@ -2115,6 +2117,7 @@ var BOTDJ = {
 		}
 		catch(err) { UTIL.logException("ListUsersOne: " + err.message); }
 	},
+	//stalker option to find a user in another room
 	ListUsers: function (matchstr) {
 		try {
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
@@ -2125,8 +2128,9 @@ var BOTDJ = {
 			}
 		  }
 		}
-		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+		catch(err) { UTIL.logException("ListUsers: " + err.message); }
 	},
+	//stalker option to find a user in another room
 	ListRooms: function (matchstr) {
 		try {
 		  //var matchstr = "80";
@@ -2136,8 +2140,9 @@ var BOTDJ = {
 			  }
 		  }
 		}
-		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+		catch(err) { UTIL.logException("ListRooms: " + err.message); }
 	},
+	//stalker option to find a user in another room
 	ListRoomUsers: function (roomId) {
 		try {
 		  //var roomId = "55ff22d5636dce0300ae36b5";
@@ -2149,7 +2154,7 @@ var BOTDJ = {
 			}
 		  }
 		}
-		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+		catch(err) { UTIL.logException("ListRoomUsers: " + err.message); }
 	},
 	
 	checkHopUp: function (waitlist) {
@@ -5092,7 +5097,7 @@ var API = {
 		  botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].fkid);
 	      if (playlist[i].fkid === dubBot.queue.deleteSongFkid) {
 		    botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
-		    var songId = playlist[songIdx].playlistSongID;
+		    var songId = playlist[i].playlistSongID;
 			botDebug.debugMessage(true, "Delete song: " + songId);
 		    //https://api.dubtrack.fm/playlist/56c5da98f4508b5a00ef9645/songs/56c63eb5cb0ed0a4037f8f99
 		    var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "/" + songId;
@@ -6034,7 +6039,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "CLAS") API.YTListClassicImport();
 						if (maxTime === "Q") {
 							dubBot.queue.dubRoomlist = [];
-							API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.testRoomList);  //stalker option to find a user in another room
+							API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.loadTheRoomList);  //stalker option to find a user in another room
 						}
                     }
                 }
