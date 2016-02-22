@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0083",
+  version: "Version  1.01.0026.0084",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2127,6 +2127,31 @@ var BOTDJ = {
 		}
 		catch(err) { UTIL.logException("testRoomList: " + err.message); }
 	},
+	ListRooms: function (matchstr) {
+		try {
+		  //var matchstr = "80";
+		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
+			  if (dubBot.queue.dubRoomlist[i].roomname.indexOf(matchstr) > -1) {
+				botDebug.debugMessage(true, "ROOM: " + dubBot.queue.dubRoomlist[i].roomID + " " + dubBot.queue.dubRoomlist[i].roomname);
+			  }
+			}
+		  }
+		}
+		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+	},
+	ListRooms: function (roomId) {
+		try {
+		  //var roomId = "55ff22d5636dce0300ae36b5";
+		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
+			  if (dubBot.queue.dubRoomlist[i].roomID === roomId) {
+			    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
+				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname);
+			  }
+			}
+		  }
+		}
+		catch(err) { UTIL.logException("testRoomList: " + err.message); }
+	},
 	
 	checkHopUp: function (waitlist) {
 		try {
@@ -3196,7 +3221,7 @@ var API = {
 		}
 		//dubBot.queue.dubQueue = playlist;
 		pageno++;
-		if (dubBot.queue.dubPlaylist.data.length > 0)
+		if (dubBot.queue.dubPlaylist.data.length > 0 && filterOn.length === 0)
 			API.getPlaylist(playlist, playlistID, pageno, filterOn, cb);
 		else
 			cb(playlist, playlistID);
@@ -6010,7 +6035,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "CLAS") API.YTListClassicImport();
 						if (maxTime === "Q") {
 							dubBot.queue.dubRoomlist = [];
-							API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.testRoomList);
+							API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.testRoomList);  //stalker option to find a user in another room
 						}
                     }
                 }
