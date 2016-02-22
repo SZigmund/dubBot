@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0070",
+  version: "Version  1.01.0026.0071",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2098,7 +2098,7 @@ var BOTDJ = {
 	testRoomList: function (roomlist) {
 		try {
 		  for(var i = 0; i < roomlist.length; i++)
-		    botDebug.debugMessage(true, "ROOM: " + roomlist.roomID + " - " + roomlist.activeUsers + " " + roomlist.roomname;
+		    botDebug.debugMessage(true, "ROOM: " + roomlist.roomID + " - " + roomlist.activeUsers + " " + roomlist.roomname);
 		}
 		catch(err) { UTIL.logException("testRoomList: " + err.message); }
 	},
