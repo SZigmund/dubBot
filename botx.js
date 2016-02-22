@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0076",
+  version: "Version  1.01.0026.0077",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2099,6 +2099,7 @@ var BOTDJ = {
 		try {
 		  if(typeof roomlist === 'undefined' || roomlist === null) botDebug.debugMessage(true, "testRoomList: ROOMLIST IS NULL");
 		  if(roomlist.length === 0) botDebug.debugMessage(true, "testRoomList: ROOMLIST IS EMPTY");
+		  botDebug.debugMessage(true, "testRoomList.len: " + roomlist.length);
 		  for(var i = 0; i < roomlist.length; i++)
 		    botDebug.debugMessage(true, "ROOM: " + roomlist.roomID + " - " + roomlist.activeUsers + " " + roomlist.roomname);
 		}
@@ -3189,7 +3190,8 @@ var API = {
         // status, and jqXHR object for each of the four ajax calls respectively.
 		dubBot.queue.dubRoomlist = a1;
 		var dubRoomlist = a1;
-		botDebug.debugMessage(true, "getRoomlist: dubRoomlist.len: " + dubRoomlist.length);
+		if (pageno === 0) dubBot.queue.dubQueueA = a1;
+		botDebug.debugMessage(true, "getRoomlist: dubRoomlist.len: " + dubRoomlist.data.length);
         for (var i = 0; i < dubRoomlist.data.length; i++) {
 	      roomlist.push(new API.roomListItem(dubRoomlist.data[i]));
 		}
