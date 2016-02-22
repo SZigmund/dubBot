@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0086",
+  version: "Version  1.01.0026.0087",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2109,8 +2109,9 @@ var BOTDJ = {
 	//stalker option to find a user in another room
 	ListUsersOne: function (userlist, roomName, matchstr) {
 		try {
+		    matchstr = matchstr.toUpperCase();
 		    for(var i = 0; i < userlist.length; i++) {
-			  if (userlist[i].username.indexOf(matchstr) > -1) {
+			  if (userlist[i].username.toUpperCase().indexOf(matchstr) > -1) {
 				botDebug.debugMessage(true, "USER: " + userlist[i].username + " IN " + roomName);
 			  }
 			}
@@ -5062,43 +5063,43 @@ var API = {
 	  if (typeof songInfo !== "object") return;
   	  dubBot.queue.deleteSongName =  songInfo.name;
 	  dubBot.queue.deleteSongFkid = songInfo.fkid;
-	  botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
+	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
 	  //https://api.dubtrack.fm/playlist/56c5da9da552130101e9c1de/songs/56c63ed66f1dfadf03a5bedb
 	  var playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_90s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_90s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_80s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_80s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
 	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_10s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_00s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_00s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  playlist = [];
-	  //API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_ACTIVE), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_ACTIVE), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  API.moderateForceSkip();
 	  }
     catch(err) { UTIL.logException("deleteCurrentSong: " + err.message); }
   },
   deleteCurrentSongApi: function(playlist, playlistID) {
     try {
-	    botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid + " PLLEN: " + playlist.length);
+	    //botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid + " PLLEN: " + playlist.length);
         for (var i = 0; i < playlist.length; i++) {
-		  botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].fkid);
+		  //botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].fkid);
 	      if (playlist[i].fkid === dubBot.queue.deleteSongFkid) {
-		    botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
+		    //botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
 		    var songId = playlist[i].playlistSongID;
-			botDebug.debugMessage(true, "Delete song: " + songId);
+			//botDebug.debugMessage(true, "Delete song: " + songId);
 		    //https://api.dubtrack.fm/playlist/56c5da98f4508b5a00ef9645/songs/56c63eb5cb0ed0a4037f8f99
 		    var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "/" + songId;
 			$.ajax({ url: theUrl, type: "DELETE" });
