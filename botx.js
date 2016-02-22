@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0071",
+  version: "Version  1.01.0026.0072",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2055,7 +2055,7 @@ var BOTDJ = {
 		  var playlistID = UTIL.getPlaylistID(Math.floor(Math.random() * 9) + 1);
 		  //botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
 		  var playlist = [];
-		  API.getPlaylist(playlist, playlistID, 1, null, BOTDJ.playRandomSong);
+		  API.getPlaylist(playlist, playlistID, 1, "", BOTDJ.playRandomSong);
 		}
 		catch(err) { UTIL.logException("queueRandomSong: " + err.message); }
 	},
@@ -3185,12 +3185,12 @@ var API = {
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
 		var dubRoomlist = a1;
-        for (var i = 0; i < dubBot.queue.dubRoomlist.data.length; i++) {
-	      roomlist.push(new API.roomListItem(dubBot.queue.dubRoomlist.data[i]));
+        for (var i = 0; i < dubRoomlist.data.length; i++) {
+	      roomlist.push(new API.roomListItem(dubRoomlist.data[i]));
 		}
 		//dubBot.queue.dubQueue = roomlist;
 		pageno += 20;
-		if (dubBot.queue.dubRoomlist.data.length > 0)
+		if (dubRoomlist.data.length > 0)
 			API.getRoomlist(roomlist, pageno, cb);
 		else
 			cb(roomlist);
@@ -5944,7 +5944,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "7080F") API.YTList7080FImport();
 						if (maxTime === "COV") API.YTListCovImport();
 						if (maxTime === "CLAS") API.YTListClassicImport();
-						if (maxTime === "Q") API.getRoomlist(dubBot.queue.dubRoomlist, 0, testRoomList);
+						if (maxTime === "Q") API.getRoomlist(dubBot.queue.dubRoomlist, 0, BOTDJ.testRoomList);
                     }
                 }
             },
