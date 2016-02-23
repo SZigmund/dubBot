@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0093",
+  version: "Version  1.01.0026.0094",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3274,6 +3274,7 @@ var API = {
 		this.roomname = roomName;
 		this.username =  dubUser._user.username;
 		this.role = "";
+	    if (dubUser.roleid === null) return this;
 	    if (typeof dubUser.roleid === "object") this.role = dubUser.roleid.type;
 		return this;
 	}
