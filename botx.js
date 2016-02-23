@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0092",
+  version: "Version  1.01.0026.0093",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -248,14 +248,29 @@ var LOOKING = {
 		catch(err) { UTIL.logException("ListRooms: " + err.message); }
 	},
 	//stalker option to find a user in another room
+	ListRoomStaff: function (roomId) {
+		try {
+		  //var roomId = "55ff22d5636dce0300ae36b5";
+		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
+			  if (dubBot.queue.dubRoomlist[i].roomID === roomId) {
+			    for(var j = 0; j < dubBot.queue.dubRoomlist[i].staff.length; j++) {
+			    userinfo = LOOKING.loadUserInfo(dubBot.queue.dubRoomlist[i], dubBot.queue.dubRoomlist[i].staff[j]);
+				botDebug.debugMessage(true, userinfo);
+			  }
+			}
+		  }
+		}
+		catch(err) { UTIL.logException("ListRoomStaff: " + err.message); }
+	},
+	//stalker option to find a user in another room
 	ListRoomUsers: function (roomId) {
 		try {
 		  //var roomId = "55ff22d5636dce0300ae36b5";
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
 			  if (dubBot.queue.dubRoomlist[i].roomID === roomId) {
-			    botDebug.debugMessage(true, "FOUND MATCH: " + dubBot.queue.dubRoomlist[i].users.length);
 			    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
-				botDebug.debugMessage(true, "USER: " + dubBot.queue.dubRoomlist[i].users[j].username + " IN " + dubBot.queue.dubRoomlist[i].roomname);
+			    userinfo = LOOKING.loadUserInfo(dubBot.queue.dubRoomlist[i], dubBot.queue.dubRoomlist[i].users[j]);
+				botDebug.debugMessage(true, userinfo);
 			  }
 			}
 		  }
