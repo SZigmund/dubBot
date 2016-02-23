@@ -7,7 +7,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0091",
+  version: "Version  1.01.0026.0092",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -203,7 +203,7 @@ var LOOKING = {
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
 		    for(var j = 0; j < dubBot.queue.dubRoomlist[i].staff.length; j++) {
 			  if (dubBot.queue.dubRoomlist[i].staff[j].username.toUpperCase().indexOf(matchstr) > -1) {
-			    userinfo = LOOKING.loadUserInfo(dubBot.queue.dubRoomlist[i], roomitem.staff[j]);
+			    userinfo = LOOKING.loadUserInfo(dubBot.queue.dubRoomlist[i], dubBot.queue.dubRoomlist[i].staff[j]);
 				botDebug.debugMessage(true, userinfo);
 			  }
 			}
@@ -218,7 +218,7 @@ var LOOKING = {
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
 		    for(var j = 0; j < dubBot.queue.dubRoomlist[i].users.length; j++) {
 			  if (dubBot.queue.dubRoomlist[i].users[j].username.toUpperCase().indexOf(matchstr) > -1) {
-			    userinfo = LOOKING.loadUserInfo(dubBot.queue.dubRoomlist[i], roomitem.users[j]);
+			    userinfo = LOOKING.loadUserInfo(dubBot.queue.dubRoomlist[i], dubBot.queue.dubRoomlist[i].users[j]);
 				botDebug.debugMessage(true, userinfo);
 			  }
 			}
