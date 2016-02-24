@@ -1,4 +1,7 @@
 // Written by: DocZ
+//grabCurrentSong
+//getSongLength
+//deleteCurrentSong
 //[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
 //[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
@@ -7,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0094",
+  version: "Version  1.01.0026.0095",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -106,7 +109,6 @@ var dubBot = {
       botVar.currentSong = API.currentSongName();
       botVar.currentDJ   = API.currentDjName();
       
-      //botDebug.debugMessage(true, "[ API.getSongLength() ] = ", API.getSongLength());
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
@@ -594,7 +596,7 @@ var SETTINGS = {
         voteSkipLimit: 4,
         welcomeForeignerMsg: false,
         timeGuard: true,
-        maximumSongLength: 8,
+        maximumSongLength: 480,
         skipSound5Days: false,
         skipSound7Days: false,
         skipSoundStart: 7,
@@ -3197,14 +3199,32 @@ var API = {
     try        { return parseInt($(".dubup").text()); }
     catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
   },
-  //
-  getSongLengthZ: function() {
-    try        { return (parseInt(Dubtrack.room.player.activeSong.get("song").songLength) / 1000); }
-    catch(err) { UTIL.logException("getSongLengthZ: " + err.message); }
-  },
   getSongLength: function() {
-    try        { return parseInt($(".min").text()); }
+    try        { return API.getCurrentSong().songLength; }
     catch(err) { UTIL.logException("getSongLength: " + err.message); }
+  },
+  //todoer DELETE after testing:
+  //getSongLength: function() {
+  //  try        { return parseInt($(".min").text()); }
+  //  catch(err) { UTIL.logException("getSongLength: " + err.message); }
+  //},
+  getCurrentSong: function() {
+    try {
+	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
+	  if (songinfo === null) {
+		  this.songLength = 0;
+		  this.songName = "";
+		  this.songMediaType = "";
+		  this.songMediaId = "";
+		  this.playlistSongId = "";
+		  return;
+	  }
+	  this.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
+	  this.songName = songinfo.name;
+	  this.songMediaType = songinfo.type;
+	  this.songMediaId = songinfo.fkid;
+	  this.playlistSongId = songinfo._id;
+    catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
   },
   getDubDownCount: function() {
     try        { return parseInt($(".dubdown").text()); }
@@ -5148,12 +5168,13 @@ var API = {
 	    return;
 	  }
 	  //todoerlind - This doesn't work as the _id is unique for each queue. Would have to load all playlists and scan for fkid matching this fkid.
-	  //dubBot.queue.dubQueue = Dubtrack.room.player.activeSong.get("songInfo");
-	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
+      var songInfo = API.getCurrentSong();
 	  if (typeof songInfo === 'undefined' || songInfo === null) return;
 	  if (typeof songInfo !== "object") return;
-  	  dubBot.queue.deleteSongName =  songInfo.name;
-	  dubBot.queue.deleteSongFkid = songInfo.fkid;
+
+  	  dubBot.queue.deleteSongName =  songInfo.songName;
+	  dubBot.queue.deleteSongFkid = songInfo.songMediaId;
+
 	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
 	  //https://api.dubtrack.fm/playlist/56c5da9da552130101e9c1de/songs/56c63ed66f1dfadf03a5bedb
 	  var playlist = [];
@@ -5203,23 +5224,14 @@ var API = {
     try { 
 	//LIST OF MY PLAYLISTS: https://api.dubtrack.fm/playlist
 	//https://api.dubtrack.fm/playlist/56c37f267892317f01426e01/songs
-	//SONGID: Dubtrack.room.player.activeSong.get("song")._id
-	//NAME: Dubtrack.room.player.activeSong.get("songInfo").name
-	//fkid: Dubtrack.room.player.activeSong.get("songInfo").fkid
-	//len: Dubtrack.room.player.activeSong.get("songInfo").songLength
-	//type: Dubtrack.room.player.activeSong.get("songInfo").type
-	//Params:  fkid: this.parentView.songid, type: this.parentView.type
-	  var songInfo = Dubtrack.room.player.activeSong.get("songInfo");
+
+      var songInfo = API.getCurrentSong();
 	  if (typeof songInfo === 'undefined' || songInfo === null) return;
 	  if (typeof songInfo !== "object") return;
-	  var songid = songInfo._id;
- 	  var songfkid = songInfo.fkid;
-	  var songtype = songInfo.type;
-	  var songname = Dubtrack.room.player.activeSong.get("songInfo").name;
+
 	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", UTIL.getActivePlaylistID());
-	  //Dubtrack.helpers.sendRequest(i, { "fkid": songid, "type": songtype}, "PUT");
-	  Dubtrack.helpers.sendRequest(i, { "songid": songid}, "POST");
-	  API.sendChat(botChat.subChat(botChat.getChatMessage("grabbedsong"), {botname: botVar.botName, songname: songname}));
+	  Dubtrack.helpers.sendRequest(i, { "songid": songInfo.playlistSongId}, "POST");
+	  API.sendChat(botChat.subChat(botChat.getChatMessage("grabbedsong"), {botname: botVar.botName, songname: songInfo.songName}));
 	}
     catch(err) { UTIL.logException("grabCurrentSong: " + err.message); }
   },
