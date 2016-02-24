@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0103",
+  version: "Version  1.01.0026.0104",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1230,11 +1230,8 @@ var botChat = {
   },
   processChatItem: function(chatMessage, username, uid) {
     try{
-      //botDebug.debugMessage(true, "processChatItem:: " + username + ": {" + chatMessage + "}");
       var chat = botChat.formatChat(chatMessage, username, uid);
-      //botDebug.debugMessage(true, "processChatItem:: " + username + ": {" + chat.message + "}");
       COMMANDS.checkCommands(chat);
-      //botDebug.debugMessage(true, "processChatItem:: " + username + ": {" + chat.message + "}");
       } catch (err) { UTIL.logException("processChatItem: " + err.message); }
   },
   getChatUserId: function(className) {
@@ -2944,7 +2941,7 @@ var API = {
 
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
-      $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
+      //$('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
       $('.room-user-counter').bind("DOMSubtreeModified", API.on.EVENT_USER_JOIN);
       $('.dubup').bind("DOMSubtreeModified", API.on.EVENT_DUBUP);
       $('.dubdown').bind("DOMSubtreeModified", API.on.EVENT_DUBDOWN);
@@ -5320,9 +5317,11 @@ var API = {
   },
     EVENT_CHAT_TEST: function(data) {  //songadvance
       try { 
+	    
 	    var msg = data.message;
 		var user = data.user.username;
 		var userId = data.user._id;
+		botChat.processChatItem(data.message, data.user.username, data.user._id);
 	    UTIL.logObject(data, "CHAT_DATA");
 		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + user + "-" + userId + "]: " + msg); }
       catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
