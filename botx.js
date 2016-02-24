@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0096",
+  version: "Version  1.01.0026.0097",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3217,13 +3217,14 @@ var API = {
 		  this.songMediaType = "";
 		  this.songMediaId = "";
 		  this.playlistSongId = "";
-		  return;
+		  return this;
 	  }
 	  this.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
 	  this.songName = songinfo.name;
 	  this.songMediaType = songinfo.type;
 	  this.songMediaId = songinfo.fkid;
 	  this.playlistSongId = songinfo._id;
+	  return this;
     }
 	catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
   },
