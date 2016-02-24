@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0104",
+  version: "Version  1.01.0026.0105",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -1564,7 +1564,7 @@ var UTIL = {
             if (typeof objectToLog[prop] === "object") 
                 UTIL.logObject(objectToLog[prop], objectName + "." + prop);
             else
-                botDebug.debugMessage(false, "Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop]);
+                botDebug.debugMessage(true, "Prop->" + objectName + ": "  + prop + " value: " + objectToLog[prop]);
         }
     }
     catch(err) { UTIL.logException("logObject: " + err.message); }
@@ -2934,8 +2934,9 @@ var API = {
       botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
 
 	  //Test events stuff:
+	  // This fires off WAY too often!!
+	  //Dubtrack.Events.bind("realtime:room_playlist-update", API.EVENT_SONG_ADV_TEST);
 	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT_TEST);
-	  Dubtrack.Events.bind("realtime:room_playlist-update", API.EVENT_SONG_ADV_TEST);
 	  Dubtrack.Events.bind("realtime:user-join", API.EVENT_USER_JOIN_TEST);
 	  Dubtrack.Events.bind("realtime:user-leave", API.EVENT_USER_LEAVE_TEST);
 
@@ -5333,14 +5334,15 @@ var API = {
       catch(err) { UTIL.logException("EVENT_SONG_ADV_TEST: " + err.message); }
     },
     EVENT_USER_JOIN_TEST: function(data) {  //songadvance
-      try { botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
-	  UTIL.logObject(data, "JOIN_DATA");
+      try { 
+	    UTIL.logObject(data, "JOIN_DATA");
+	    botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
 	  }
       catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
     },
-    EVENT_USER_LEAVE_TEST: function() {  //songadvance
-      try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
+    EVENT_USER_LEAVE_TEST: function(data) {  //songadvance
 	  UTIL.logObject(data, "LEAVE_DATA");
+      try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
 	  }
       catch(err) { UTIL.logException("EVENT_USER_LEAVE_TEST: " + err.message); }
     },
