@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0099",
+  version: "Version  1.01.0026.0100",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -19,6 +19,7 @@ var botVar = {
   botRunning: false,
   currentDJ: "",
   currentSong: "",
+  lastSkippedSong: "",
   tastyCount: 0,
   previousSong: "",
   previousStats: "",
@@ -106,12 +107,13 @@ var dubBot = {
   validateCurrentSong: function () {
     try {
       botVar.room.currentMehCount = 0;
-      botVar.currentSong = API.currentSongName();
-      botVar.currentDJ   = API.currentDjName();
+      botVar.currentSong = API.getSongName();
+      botVar.currentDJ   = API.getDjName();
+	  if (botVar.lastSkippedSong === botVar.currentSong) return;
       if (SETTINGS.settings.maximumSongLength < 180) SETTINGS.settings.maximumSongLength = 480;  //(Default to 8 mins if < 3 mins)
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
-	    botDebug.debugMessage(true, "MAX LEN: " + SETTINGS.settings.maximumSongLength);
-        API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
+	    botVar.lastSkippedSong = botVar.currentSong;
+        API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
 	  //else if (API.currentSongBlocked()) {
@@ -1446,7 +1448,7 @@ var UTIL = {
 			////botDebug.debugMessage(true, "timeRemaining: " + timeRemaining);
 			////botDebug.debugMessage(true, "newMedia.duration: " + newMedia.duration);
 			////basicBot.roomUtilities.logInfo("DUR1[" + newMedia.duration + "] REMAIN[" + timeRemaining + "] DIFF[" + (newMedia.duration - timeRemaining) + "]");
-			////basicBot.roomUtilities.logObject(newMedia, "media");
+			////UTIL.logObject(newMedia, "media");
 			//if ((newMedia.duration - timeRemaining) > 2) return true;
 			////-------------------------------------------------------------------------------------------------------------------
 			////This is to handle the plug bug where the time remaining is actually longer than the song duration:
@@ -1583,7 +1585,7 @@ var UTIL = {
   },
   botIsCurrentDJ: function() {
     try {
-		if (API.currentDjName() === botVar.botName) return true;
+		if (API.getDjName() === botVar.botName) return true;
 		return false;
     }
     catch(err) { UTIL.logException("botIsCurrentDJ: " + err.message); }
@@ -1818,7 +1820,7 @@ var TASTY = {
         var roomUser = USERS.defineRoomUser(usrObjectID);
         if (roomUser.tastyVote) return;
         roomUser.votes.tastyGiv++;
-        if (API.currentDjName() === roomUser.username)
+        if (API.getDjName() === roomUser.username)
         {
             API.sendChat("I'm glad you find your own play tasty @" + roomUser.username);
             return;
@@ -1900,7 +1902,7 @@ var TASTY = {
             var arrayID = Math.floor(Math.random() * arrayCount);
             if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
             var tastyCmt = "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
-            var djName = API.currentDjName();
+            var djName = API.getDjName();
             if (djName.length > 0) tastyCmt += " @"  + djName;
             return tastyCmt;
         }
@@ -2930,10 +2932,16 @@ var API = {
       USERS.loadUsersInRoom(false);
       USERS.removeMIANonUsers();
 
-      botVar.currentSong = API.currentSongName();
-      botVar.currentDJ   = API.currentDjName();
+      botVar.currentSong = API.getSongName();
+      botVar.currentDJ   = API.getDjName();
       botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
-      
+
+	  //Test events stuff:
+	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT_TEST);
+	  Dubtrack.Events.bind("realtime:room_playlist-update", API.EVENT_SONG_ADV_TEST);
+	  Dubtrack.Events.bind("realtime:user-join", API.EVENT_USER_JOIN_TEST);
+	  Dubtrack.Events.bind("realtime:user-leave", API.EVENT_USER_LEAVE_TEST);
+
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
       $('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
@@ -2955,7 +2963,6 @@ var API = {
       // [...]
     },
   },
-
   botHopUp: function (waitlist) {
         try {
             if (UTIL.botInWaitList(waitlist)) return;
@@ -3033,7 +3040,7 @@ var API = {
   },
 
   getDJ: function(){
-    return USERS.lookupUserName(API.currentDjName());
+    return USERS.lookupUserName(API.getDjName());
   },
 
   getWaitListPosition: function(id, waitlist){
@@ -3200,6 +3207,12 @@ var API = {
     try        { return parseInt($(".dubup").text()); }
     catch(err) { UTIL.logException("getDubUpCount: " + err.message); }
   },
+  getSongName: function() {
+    try { return API.getCurrentSong().songName; }
+	//TODOER DELETE after testing:
+    //try { return $(".currentSong").text();    }
+    catch(err) { UTIL.logException("getSongName: " + err.message); }
+  },
   getSongLength: function() {
     try        { return API.getCurrentSong().songLength; }
     catch(err) { UTIL.logException("getSongLength: " + err.message); }
@@ -3214,7 +3227,6 @@ var API = {
 	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
 	  //parseInt(Dubtrack.room.player.activeSong.attributes.songInfo.songLength) / 1000;
 	  if (songinfo === null) {
-	  botDebug.debugMessage(true, "NULL SONG");
 		  this.songLength = 0;
 		  this.songName = "";
 		  this.songMediaType = "";
@@ -3223,7 +3235,6 @@ var API = {
 		  return this;
 	  }
 	  this.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
-	  botDebug.debugMessage(true, "SONG LEN: " + this.songLength);
 	  this.songName = songinfo.name;
 	  this.songMediaType = songinfo.type;
 	  this.songMediaId = songinfo.fkid;
@@ -5241,22 +5252,19 @@ var API = {
 	}
     catch(err) { UTIL.logException("grabCurrentSong: " + err.message); }
   },
-  currentSongName: function() {
-    try { return $(".currentSong").text();    }
-    catch(err) { UTIL.logException("currentSongName: " + err.message); }
-  },
-  currentDjName: function() {
-    try {
-      var userInfo = document.getElementsByClassName("infoContainerInner");
-      botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
-      var spans = userInfo[0].getElementsByClassName("currentDJSong");
-      var djName = spans[0].innerHTML;
-      botDebug.debugMessage(false, "djName: " + djName);
-      djName = djName.replace("is playing", "");
-      botDebug.debugMessage(false, "djName: " + djName.trim());
-      return djName.trim();
+  getDjName: function() {
+    try { return Dubtrack.room.player.activeSong.attributes.user.attributes.username;
+	  //todoer DELETE after testing
+      //var userInfo = document.getElementsByClassName("infoContainerInner");
+      //botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
+      //var spans = userInfo[0].getElementsByClassName("currentDJSong");
+      //var djName = spans[0].innerHTML;
+      //botDebug.debugMessage(false, "djName: " + djName);
+      //djName = djName.replace("is playing", "");
+      //botDebug.debugMessage(false, "djName: " + djName.trim());
+      //return djName.trim();
     }
-    catch(err) { UTIL.logException("currentDjName: " + err.message); }
+    catch(err) { UTIL.logException("getDjName: " + err.message); }
   },
   //<li id="560be6cbdce3260300e40770-1447722815886" class="user-560be6cbdce3260300e40770 current-chat-user"><div class="stream-item-content"><div class="chatDelete"><span class="icon-close"></span></div><div class="image_row"><img src="https://api.dubtrack.fm/user/560be6cbdce3260300e40770/image" alt="levis_homer" onclick="Dubtrack.helpers.displayUser('560be6cbdce3260300e40770', this);" class="cursor-pointer" onerror="Dubtrack.helpers.image.imageError(this);"></div><div class="activity-row"><div class="text"><p><a href="#" class="username">levis_homer</a> test</p></div><div class="meta-info"><span class="username">levis_homer </span><i class="icon-dot"></i><span class="timeinfo"><time title="11/16/2015, 8:13:33 PM" class="timeago" datetime="2015-11-17T01:13:33.552Z">2 minutes ago</time></span></div></div></div></li>
 
@@ -5336,12 +5344,39 @@ var API = {
       }
       catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
     },
+    EVENT_CHAT_TEST: function(data) {  //songadvance
+      try { 
+	    var msg = data.message;
+		var user = data.user.username;
+		var userId = data.user._id;
+	    UTIL.logObject(data, CHAT_DATA);
+		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + user + "-" + userId + "]: " + msg); }
+      catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
+    },
+	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
+      try { botDebug.debugMessage(true, "EVENT_SONG_ADV_TEST: " + API.getSongName()); 
+	  UTIL.logObject(data, ADV_DATA);
+	  }
+      catch(err) { UTIL.logException("EVENT_SONG_ADV_TEST: " + err.message); }
+    },
+    EVENT_USER_JOIN_TEST: function(data) {  //songadvance
+      try { botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
+	  UTIL.logObject(data, JOIN_DATA);
+	  }
+      catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
+    },
+    EVENT_USER_LEAVE_TEST: function() {  //songadvance
+      try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
+	  UTIL.logObject(data, LEAVE_DATA);
+	  }
+      catch(err) { UTIL.logException("EVENT_USER_LEAVE_TEST: " + err.message); }
+    },
     EVENT_SONG_ADVANCE: function() {  //songadvance
       try {
       // UPDATE ON SONG UPDATE
       if (botVar.ImHidden === true) return;
-      if (botVar.currentSong === API.currentSongName()) return;
-      botDebug.debugMessage(false, "EVENT_SONG_ADVANCE: " + API.currentSongName() + API.currentDjName());
+      if (botVar.currentSong === API.getSongName()) return;
+      botDebug.debugMessage(false, "EVENT_SONG_ADVANCE: " + API.getSongName() + API.getDjName());
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
       TASTY.settings.rolledDice = false;
 
@@ -5351,9 +5386,9 @@ var API = {
       var previousDJ = botVar.currentDJ;
       var previousSong = botVar.currentSong;
       botDebug.debugMessage(false, "previousDJ: " + previousDJ);
-      botVar.currentDJ   = API.currentDjName();
+      botVar.currentDJ   = API.getDjName();
       botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
-      botVar.currentSong = API.currentSongName();
+      botVar.currentSong = API.getSongName();
       var tastyPoints = botVar.tastyCount;
       botVar.tastyCount = 0;
       USERS.resetUserSongStats();
@@ -5806,7 +5841,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if (API.currentDjName().toUpperCase() !== chat.un.toUpperCase()) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
+                        if (API.getDjName().toUpperCase() !== chat.un.toUpperCase()) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
                         //if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
@@ -6584,7 +6619,7 @@ var BOTCOMMANDS = {
                  try  {
                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-				   TASTY.tastyVote(chat.un, cmd);
+				   if (API.getDjName() !== roomUser.username) TASTY.tastyVote(chat.un, cmd);
                    API.grabCurrentSong();
                  }  
                  catch(err) { UTIL.logException("grabCommand: " + err.message); }
@@ -7757,7 +7792,7 @@ var BOTCOMMANDS = {
                         for (var i = 0; i < songHistory.length; i++) {
                             var song = songHistory[i];
                             songCount++;
-                            //if (i === 0) basicBot.roomUtilities.logObject(song, "SONG");
+                            //if (i === 0) UTIL.logObject(song, "SONG");
                             var songMid = song.media.format + ':' + song.media.cid;
                             if (dubBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
                             //var media = API.getMedia();
@@ -8660,7 +8695,7 @@ var BOTCOMMANDS = {
                             var resetDebug = false;
                             if (dubBot.room.debug === false) resetDebug = true;
                             dubBot.room.debug = true;
-                            basicBot.roomUtilities.logObject(roomUser, "User");
+                            UTIL.logObject(roomUser, "User");
                             botDebug.debugMessage(true, "JSON: " + JSON.stringify(roomUser));
                             if (resetDebug) dubBot.room.debug = false;
                         }
