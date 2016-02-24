@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0095",
+  version: "Version  1.01.0026.0096",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3224,7 +3224,8 @@ var API = {
 	  this.songMediaType = songinfo.type;
 	  this.songMediaId = songinfo.fkid;
 	  this.playlistSongId = songinfo._id;
-    catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
+    }
+	catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
   },
   getDubDownCount: function() {
     try        { return parseInt($(".dubdown").text()); }
