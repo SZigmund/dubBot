@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0100",
+  version: "Version  1.01.0026.0102",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -108,7 +108,7 @@ var dubBot = {
     try {
       botVar.room.currentMehCount = 0;
       botVar.currentSong = API.getSongName();
-      botVar.currentDJ   = API.getDjName();
+      botVar.currentDJ   = API.getDjName("A");
 	  if (botVar.lastSkippedSong === botVar.currentSong) return;
       if (SETTINGS.settings.maximumSongLength < 180) SETTINGS.settings.maximumSongLength = 480;  //(Default to 8 mins if < 3 mins)
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
@@ -1585,7 +1585,7 @@ var UTIL = {
   },
   botIsCurrentDJ: function() {
     try {
-		if (API.getDjName() === botVar.botName) return true;
+		if (API.getDjName("B") === botVar.botName) return true;
 		return false;
     }
     catch(err) { UTIL.logException("botIsCurrentDJ: " + err.message); }
@@ -1820,7 +1820,7 @@ var TASTY = {
         var roomUser = USERS.defineRoomUser(usrObjectID);
         if (roomUser.tastyVote) return;
         roomUser.votes.tastyGiv++;
-        if (API.getDjName() === roomUser.username)
+        if (API.getDjName("C") === roomUser.username)
         {
             API.sendChat("I'm glad you find your own play tasty @" + roomUser.username);
             return;
@@ -1902,7 +1902,7 @@ var TASTY = {
             var arrayID = Math.floor(Math.random() * arrayCount);
             if (cmd === "tasty") return CONST.tastyCommentArray[arrayID];
             var tastyCmt = "[" + cmd.replace(CONST.commandLiteral, '') + "] " + CONST.tastyCommentArray[arrayID];
-            var djName = API.getDjName();
+            var djName = API.getDjName("D");
             if (djName.length > 0) tastyCmt += " @"  + djName;
             return tastyCmt;
         }
@@ -2933,7 +2933,7 @@ var API = {
       USERS.removeMIANonUsers();
 
       botVar.currentSong = API.getSongName();
-      botVar.currentDJ   = API.getDjName();
+      botVar.currentDJ   = API.getDjName("E");
       botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
 
 	  //Test events stuff:
@@ -3040,7 +3040,7 @@ var API = {
   },
 
   getDJ: function(){
-    return USERS.lookupUserName(API.getDjName());
+    return USERS.lookupUserName(API.getDjName("F"));
   },
 
   getWaitListPosition: function(id, waitlist){
@@ -5252,8 +5252,14 @@ var API = {
 	}
     catch(err) { UTIL.logException("grabCurrentSong: " + err.message); }
   },
-  getDjName: function() {
-    try { return Dubtrack.room.player.activeSong.attributes.user.attributes.username;
+  getDjName: function(calledFrom) {
+    try { 
+	  currDJ = Dubtrack.room.player.activeSong.attributes.user;
+	  if (currDJ === null) {
+	      botDebug.debugMessage(true, "getDjName No DJ: " + calledFrom);
+		  return botVar.currentDJ;
+      }
+	  return currDJ.attributes.username;
 	  //todoer DELETE after testing
       //var userInfo = document.getElementsByClassName("infoContainerInner");
       //botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
@@ -5312,6 +5318,33 @@ var API = {
   showPopup: function(title, message) {
     Dubtrack.helpers.displayError(title, message);
   },
+    EVENT_CHAT_TEST: function(data) {  //songadvance
+      try { 
+	    var msg = data.message;
+		var user = data.user.username;
+		var userId = data.user._id;
+	    UTIL.logObject(data, CHAT_DATA);
+		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + user + "-" + userId + "]: " + msg); }
+      catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
+    },
+	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
+      try { botDebug.debugMessage(true, "EVENT_SONG_ADV_TEST: " + API.getSongName()); 
+	  UTIL.logObject(data, ADV_DATA);
+	  }
+      catch(err) { UTIL.logException("EVENT_SONG_ADV_TEST: " + err.message); }
+    },
+    EVENT_USER_JOIN_TEST: function(data) {  //songadvance
+      try { botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
+	  UTIL.logObject(data, JOIN_DATA);
+	  }
+      catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
+    },
+    EVENT_USER_LEAVE_TEST: function() {  //songadvance
+      try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
+	  UTIL.logObject(data, LEAVE_DATA);
+	  }
+      catch(err) { UTIL.logException("EVENT_USER_LEAVE_TEST: " + err.message); }
+    },
 
   on: {
     EVENT_DUBUP: function () {
@@ -5344,39 +5377,12 @@ var API = {
       }
       catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
     },
-    EVENT_CHAT_TEST: function(data) {  //songadvance
-      try { 
-	    var msg = data.message;
-		var user = data.user.username;
-		var userId = data.user._id;
-	    UTIL.logObject(data, CHAT_DATA);
-		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + user + "-" + userId + "]: " + msg); }
-      catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
-    },
-	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
-      try { botDebug.debugMessage(true, "EVENT_SONG_ADV_TEST: " + API.getSongName()); 
-	  UTIL.logObject(data, ADV_DATA);
-	  }
-      catch(err) { UTIL.logException("EVENT_SONG_ADV_TEST: " + err.message); }
-    },
-    EVENT_USER_JOIN_TEST: function(data) {  //songadvance
-      try { botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
-	  UTIL.logObject(data, JOIN_DATA);
-	  }
-      catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
-    },
-    EVENT_USER_LEAVE_TEST: function() {  //songadvance
-      try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
-	  UTIL.logObject(data, LEAVE_DATA);
-	  }
-      catch(err) { UTIL.logException("EVENT_USER_LEAVE_TEST: " + err.message); }
-    },
     EVENT_SONG_ADVANCE: function() {  //songadvance
       try {
       // UPDATE ON SONG UPDATE
       if (botVar.ImHidden === true) return;
       if (botVar.currentSong === API.getSongName()) return;
-      botDebug.debugMessage(false, "EVENT_SONG_ADVANCE: " + API.getSongName() + API.getDjName());
+      botDebug.debugMessage(false, "EVENT_SONG_ADVANCE: " + API.getSongName() + API.getDjName("G"));
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
       TASTY.settings.rolledDice = false;
 
@@ -5386,7 +5392,7 @@ var API = {
       var previousDJ = botVar.currentDJ;
       var previousSong = botVar.currentSong;
       botDebug.debugMessage(false, "previousDJ: " + previousDJ);
-      botVar.currentDJ   = API.getDjName();
+      botVar.currentDJ   = API.getDjName("H");
       botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
       botVar.currentSong = API.getSongName();
       var tastyPoints = botVar.tastyCount;
@@ -5841,7 +5847,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if (API.getDjName().toUpperCase() !== chat.un.toUpperCase()) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
+                        if (API.getDjName("I").toUpperCase() !== chat.un.toUpperCase()) return API.sendChat(botChat.subChat(botChat.getChatMessage("notcurrentdj"), {name: chat.un}));
                         //if (TASTY.getRolled(chat.un))  return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         if (TASTY.settings.rolledDice === true) return API.sendChat(botChat.subChat(botChat.getChatMessage("doubleroll"), {name: chat.un}));
                         var msg = chat.message;
@@ -6619,7 +6625,7 @@ var BOTCOMMANDS = {
                  try  {
                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-				   if (API.getDjName() !== roomUser.username) TASTY.tastyVote(chat.un, cmd);
+				   if (API.getDjName("J") !== roomUser.username) TASTY.tastyVote(chat.un, cmd);
                    API.grabCurrentSong();
                  }  
                  catch(err) { UTIL.logException("grabCommand: " + err.message); }
