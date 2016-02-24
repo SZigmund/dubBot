@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0102",
+  version: "Version  1.01.0026.0103",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -5323,25 +5323,25 @@ var API = {
 	    var msg = data.message;
 		var user = data.user.username;
 		var userId = data.user._id;
-	    UTIL.logObject(data, CHAT_DATA);
+	    UTIL.logObject(data, "CHAT_DATA");
 		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + user + "-" + userId + "]: " + msg); }
       catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
     },
 	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
       try { botDebug.debugMessage(true, "EVENT_SONG_ADV_TEST: " + API.getSongName()); 
-	  UTIL.logObject(data, ADV_DATA);
+	  UTIL.logObject(data, "ADV_DATA");
 	  }
       catch(err) { UTIL.logException("EVENT_SONG_ADV_TEST: " + err.message); }
     },
     EVENT_USER_JOIN_TEST: function(data) {  //songadvance
       try { botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
-	  UTIL.logObject(data, JOIN_DATA);
+	  UTIL.logObject(data, "JOIN_DATA");
 	  }
       catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
     },
     EVENT_USER_LEAVE_TEST: function() {  //songadvance
       try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
-	  UTIL.logObject(data, LEAVE_DATA);
+	  UTIL.logObject(data, "LEAVE_DATA");
 	  }
       catch(err) { UTIL.logException("EVENT_USER_LEAVE_TEST: " + err.message); }
     },
