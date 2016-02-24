@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0097",
+  version: "Version  1.01.0026.0098",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -110,6 +110,7 @@ var dubBot = {
       botVar.currentDJ   = API.currentDjName();
       
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+	    botDebug.debugMessage(true, "MAX LEN: " + SETTINGS.settings.maximumSongLength);
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
@@ -1035,7 +1036,7 @@ var botChat = {
    botChat.chatMessages.push(["usedlockskip", "[%%NAME%% used lockskip.]"]);
    botChat.chatMessages.push(["lockskippos", "[@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
    botChat.chatMessages.push(["lockguardtime", "[@%%NAME%%] The lockguard is set to %%TIME%% minute(s)."]);
-   botChat.chatMessages.push(["maxlengthtime", "[@%%NAME%%] The maximum song duration is set to %%TIME%% minutes."]);
+   botChat.chatMessages.push(["maxlengthtime", "[@%%NAME%%] The maximum song duration is set to %%TIME%% seconds."]);
    botChat.chatMessages.push(["motdset", "MotD set to:  %%MSG%%"]);
    botChat.chatMessages.push(["motdintervalset", "MotD interval set to %%INTERVAL%%."]);
    botChat.chatMessages.push(["addbotwaitlist", "@%%NAME%% don't try to add me to the waitlist, please."]);
@@ -3211,7 +3212,9 @@ var API = {
   getCurrentSong: function() {
     try {
 	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
+	  //parseInt(Dubtrack.room.player.activeSong.attributes.songInfo.songLength) / 1000;
 	  if (songinfo === null) {
+	  botDebug.debugMessage(true, "NULL SONG");
 		  this.songLength = 0;
 		  this.songName = "";
 		  this.songMediaType = "";
@@ -3220,6 +3223,7 @@ var API = {
 		  return this;
 	  }
 	  this.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
+	  botDebug.debugMessage(true, "SONG LEN: " + this.songLength);
 	  this.songName = songinfo.name;
 	  this.songMediaType = songinfo.type;
 	  this.songMediaId = songinfo.fkid;
@@ -6609,6 +6613,24 @@ var BOTCOMMANDS = {
  					API.getWaitList(API.botHopDown)
                  }
              },
+            maxlengthCommand: {
+                command: 'maxlength',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var msg = chat.message;
+                        var maxTime = msg.substring(cmd.length + 1);
+                        if (!isNaN(maxTime)) {
+                            SETTINGS.settings.maximumSongLength = maxTime;
+                            return API.sendChat(botChat.subChat(botChat.getChatMessage("maxlengthtime"), {name: chat.un, time: SETTINGS.settings.maximumSongLength}));
+                        }
+                        else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
+                    }
+                }
+            },
 
             /* basic
             activeCommand: {
@@ -7385,24 +7407,6 @@ var BOTCOMMANDS = {
                         setTimeout(function () {
                             $(".logout").mousedown()
                         }, 1000);
-                    }
-                }
-            },
-            maxlengthCommand: {
-                command: 'maxlength',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        var maxTime = msg.substring(cmd.length + 1);
-                        if (!isNaN(maxTime)) {
-                            SETTINGS.settings.maximumSongLength = maxTime;
-                            return API.sendChat(botChat.subChat(botChat.getChatMessage("maxlengthtime"), {name: chat.un, time: SETTINGS.settings.maximumSongLength}));
-                        }
-                        else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
                     }
                 }
             },
