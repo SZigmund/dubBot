@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0098",
+  version: "Version  1.01.0026.0099",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -108,7 +108,7 @@ var dubBot = {
       botVar.room.currentMehCount = 0;
       botVar.currentSong = API.currentSongName();
       botVar.currentDJ   = API.currentDjName();
-      
+      if (SETTINGS.settings.maximumSongLength < 180) SETTINGS.settings.maximumSongLength = 480;  //(Default to 8 mins if < 3 mins)
       if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
 	    botDebug.debugMessage(true, "MAX LEN: " + SETTINGS.settings.maximumSongLength);
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: SETTINGS.settings.maximumSongLength}));
