@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0107",
+  version: "Version  1.01.0026.0108",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -107,9 +107,9 @@ var dubBot = {
 
   announceSongStats: function(waitlist) {
     try {
-	  if (waitlist.length > 1) ROOM.queue.songStatsMessage += " [Next DJ: " + waitlist[1].username + "]";
-	  botDebug.debugMessage(true, ROOM.queue.songStatsMessage);
-	  API.sendChat(ROOM.queue.songStatsMessage);
+	  if (waitlist.length > 1) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[1].username + "]";
+	  botDebug.debugMessage(true, dubBot.queue.songStatsMessage);
+	  API.sendChat(dubBot.queue.songStatsMessage);
     }
     catch(err) { UTIL.logException("announceSongStats: " + err.message); }
   },
@@ -5450,8 +5450,8 @@ var API = {
 	  roomUser.votes.curate = parseInt(roomUser.votes.curate) + parseInt(grabCount);
 
       //API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
-	  ROOM.queue.songStatsMessage = botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong });
-      API.getWaitList(ROOM.announceSongStats);
+	  dubBot.queue.songStatsMessage = botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong });
+      API.getWaitList(dubBot.announceSongStats);
 
       //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
       //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
