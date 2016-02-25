@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0105",
+  version: "Version  1.01.0026.0106",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -97,6 +97,7 @@ var dubBot = {
 	dubQueue: null,
 	dubQueueA: null,
 	dubQueueB: null,
+	songStatsMessage: "",
 	deleteSongName: null,
 	deleteSongFkid: null,
 	dubPlaylist: null,
@@ -104,6 +105,14 @@ var dubBot = {
 	dubQueueResp: null
   },
 
+  announceSongStats: function(waitlist) {
+    try {
+	  if (waitlist.length > 1) ROOM.queue.songStatsMessage += " [Next DJ: " + waitlist[1].username + "]";
+	  botDebug.debugMessage(true, ROOM.queue.songStatsMessage);
+	  API.sendChat(ROOM.queue.songStatsMessage);
+    }
+    catch(err) { UTIL.logException("announceSongStats: " + err.message); }
+  },
   validateCurrentSong: function () {
     try {
       botVar.room.currentMehCount = 0;
@@ -1228,65 +1237,68 @@ var botChat = {
     botChat.commandChat.sound = "mention";
     return botChat.commandChat;
   },
-  processChatItem: function(chatMessage, username, uid) {
-    try{
-      var chat = botChat.formatChat(chatMessage, username, uid);
-      COMMANDS.checkCommands(chat);
-      } catch (err) { UTIL.logException("processChatItem: " + err.message); }
-  },
-  getChatUserId: function(className) {
-    try{
-      //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
-      //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-      var idx = className.indexOf("user-");
-      if (idx < 0) return "";
-      var userID = className.substring(idx + 5);
-      idx = userID.indexOf(" ");
-      if (idx > 0) userID = userID.substring(0, idx);
-	  return userID;
-    //
-    } catch (err) { UTIL.logException("getChatUserId: " + err.message); }
-  },
-  getChatId: function(className) {
-    try{
-      // SAMPLE:
-      //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
-      //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-      var idx = className.indexOf("chat-id-");
-      if (idx < 0) return null;
-      return className.substring(idx + 8)
-    } catch (err) { UTIL.logException("getChatId: " + err.message); }
-  },
-  processChatItems: function(liItem) {
-    try{
-      if (typeof liItem === "undefined") return;                // ignore empty items
-      var chatId = botChat.getChatId(liItem.className);
-      var userId = botChat.getChatUserId(liItem.className);
-      if(chatId === null) return null;
-      botDebug.debugMessage(false, "CHAT - Item ID: " + chatId);
-      if (chatId.length < 10) return;                        // ignore chat without IDs
-      var itemHistory = botChat.findChatItem(chatId);
-      botDebug.debugMessage(false, "CHAT - Hist Item count: " + itemHistory.chatCount);
-      var chatItems = liItem.getElementsByTagName("p");
-      botDebug.debugMessage(false, "CHAT - Items count: " + chatItems.length);
-      if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
-      var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-      //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
-      botDebug.debugMessage(false, "CHAT - User: " + username);
-      if (userId.length > 0) USERS.updateUserID(userId, username);
-      var historyChatCount = itemHistory.chatCount;
-      itemHistory.chatCount = chatItems.length;
-      
-      //Process any unprocessed messages:
-      for (var i = chatItems.length -1; i >= historyChatCount; i--) {
-          var node = chatItems[i];
-          var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
-          chatMsg = chatMsg.replace(username, "");
-          botDebug.debugMessage(false, "CHAT - MSG: " + chatMsg);
-          botChat.processChatItem(chatMsg, username, userId);
-      }
-      } catch (err) { UTIL.logException("processChatItems: " + err.message); }
-    },
+  // todoeroldchat - Obsolete:
+  //processChatItem: function(chatMessage, username, uid) {
+  //  try{
+  //    var chat = botChat.formatChat(chatMessage, username, uid);
+  //    COMMANDS.checkCommands(chat);
+  //    } catch (err) { UTIL.logException("processChatItem: " + err.message); }
+  //},
+  // todoeroldchat - Obsolete:
+  //getChatUserId: function(className) {
+  //  try{
+  //    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+  //    //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
+  //    var idx = className.indexOf("user-");
+  //    if (idx < 0) return "";
+  //    var userID = className.substring(idx + 5);
+  //    idx = userID.indexOf(" ");
+  //    if (idx > 0) userID = userID.substring(0, idx);
+  //    return userID;
+  //  } catch (err) { UTIL.logException("getChatUserId: " + err.message); }
+  //},
+  // todoeroldchat - Obsolete:
+  //getChatId: function(className) {
+  //  try{
+  //    // SAMPLE:
+  //    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+  //    //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
+  //    var idx = className.indexOf("chat-id-");
+  //    if (idx < 0) return null;
+  //    return className.substring(idx + 8)
+  //  } catch (err) { UTIL.logException("getChatId: " + err.message); }
+  //},
+  // todoeroldchat - Obsolete:
+  //processChatItems: function(liItem) {
+  //  try{
+  //    if (typeof liItem === "undefined") return;                // ignore empty items
+  //    var chatId = botChat.getChatId(liItem.className);
+  //    var userId = botChat.getChatUserId(liItem.className);
+  //    if(chatId === null) return null;
+  //    botDebug.debugMessage(false, "CHAT - Item ID: " + chatId);
+  //    if (chatId.length < 10) return;                        // ignore chat without IDs
+  //    var itemHistory = botChat.findChatItem(chatId);
+  //    botDebug.debugMessage(false, "CHAT - Hist Item count: " + itemHistory.chatCount);
+  //    var chatItems = liItem.getElementsByTagName("p");
+  //    botDebug.debugMessage(false, "CHAT - Items count: " + chatItems.length);
+  //    if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
+  //    var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
+  //    //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
+  //    botDebug.debugMessage(false, "CHAT - User: " + username);
+  //    if (userId.length > 0) USERS.updateUserID(userId, username);
+  //    var historyChatCount = itemHistory.chatCount;
+  //    itemHistory.chatCount = chatItems.length;
+  //    
+  //    //Process any unprocessed messages:
+  //    for (var i = chatItems.length -1; i >= historyChatCount; i--) {
+  //        var node = chatItems[i];
+  //        var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
+  //        chatMsg = chatMsg.replace(username, "");
+  //        botDebug.debugMessage(false, "CHAT - MSG: " + chatMsg);
+  //        botChat.processChatItem(chatMsg, username, userId);
+  //    }
+  //    } catch (err) { UTIL.logException("processChatItems: " + err.message); }
+  //  },
   chatMessages: []
 };
 
@@ -2937,8 +2949,8 @@ var API = {
 	  // This fires off WAY too often!!
 	  //Dubtrack.Events.bind("realtime:room_playlist-update", API.EVENT_SONG_ADV_TEST);
 	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT_TEST);
-	  Dubtrack.Events.bind("realtime:user-join", API.EVENT_USER_JOIN_TEST);
-	  Dubtrack.Events.bind("realtime:user-leave", API.EVENT_USER_LEAVE_TEST);
+	  //todoer Replace the old code: Dubtrack.Events.bind("realtime:user-join", API.EVENT_USER_JOIN_TEST);
+	  //Dubtrack.Events.bind("realtime:user-leave", API.EVENT_USER_LEAVE_TEST);
 
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
@@ -5318,13 +5330,17 @@ var API = {
   },
     EVENT_CHAT_TEST: function(data) {  //songadvance
       try { 
-	    
-	    var msg = data.message;
-		var user = data.user.username;
-		var userId = data.user._id;
-		botChat.processChatItem(data.message, data.user.username, data.user._id);
-	    UTIL.logObject(data, "CHAT_DATA");
-		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + user + "-" + userId + "]: " + msg); }
+	    // todoer delete after testing this stuff
+	    //var msg = data.message;
+		//var user = data.user.username;
+		//var userId = data.user._id;
+        
+		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message); }
+		var chat = botChat.formatChat(data.message, data.user.username, data.user._id);
+        COMMANDS.checkCommands(chat);
+
+		//botChat.processChatItem(data.message, data.user.username, data.user._id);
+	    //UTIL.logObject(data, "CHAT_DATA");
       catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
     },
 	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
@@ -5335,14 +5351,16 @@ var API = {
     },
     EVENT_USER_JOIN_TEST: function(data) {  //songadvance
       try { 
-	    UTIL.logObject(data, "JOIN_DATA");
-	    botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.username); 
+	    //UTIL.logObject(data, "JOIN_DATA");
+	    botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.user.username); 
+		API.sendChat(botChat.subChat(botChat.getChatMessage("welcomeback"), {name: data.user.username}));
 	  }
       catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
     },
     EVENT_USER_LEAVE_TEST: function(data) {  //songadvance
 	  UTIL.logObject(data, "LEAVE_DATA");
-      try { botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.username); 
+      try { 
+	  botDebug.debugMessage(true, "EVENT_USER_LEAVE_TEST: " + data.user.username); 
 	  }
       catch(err) { UTIL.logException("EVENT_USER_LEAVE_TEST: " + err.message); }
     },
@@ -5378,6 +5396,24 @@ var API = {
       }
       catch(err) { UTIL.logException("EVENT_USER_JOIN: " + err.message); }
     },
+	// todoeroldchat - Obsolete:
+    //EVENT_NEW_CHAT: function() {
+    //  try {
+    //    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li").length;
+    //    botDebug.debugMessage(false, "============================= NEW CHAT =============================");
+    //    var mainChat = document.getElementsByClassName("chat-main");
+    //    var LiItems = mainChat[0].getElementsByTagName("li");
+    //    var startCounter = 0;
+    //    if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
+    //    botChat.lastMessageCount = LiItems.length;
+    //    botDebug.debugMessage(false, "CHAT - LOOP: " + startCounter + " - " + LiItems.length);
+    //    for (var i = startCounter; i < LiItems.length; i++) {
+    //      botChat.processChatItems(LiItems[i]);
+    //    }
+    //  } catch (err) {
+    //    UTIL.logException("EVENT_NEW_CHAT: " + err.message);
+    //  }
+    //},
     EVENT_SONG_ADVANCE: function() {  //songadvance
       try {
       // UPDATE ON SONG UPDATE
@@ -5412,29 +5448,15 @@ var API = {
 	  roomUser.votes.meh = parseInt(roomUser.votes.meh) + parseInt(mehCount);
 	  roomUser.votes.curate = parseInt(roomUser.votes.curate) + parseInt(grabCount);
 
-      API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
+      //API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
+	  ROOM.queue.songStatsMessage = botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong });
+      API.getWaitList(ROOM.announceSongStats);
+
       //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
       //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
       SETTINGS.storeToStorage();
       }
       catch(err) { UTIL.logException("EVENT_SONG_ADVANCE: " + err.message); }
-    },
-    EVENT_NEW_CHAT: function() {
-      try {
-        //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li").length;
-        botDebug.debugMessage(false, "============================= NEW CHAT =============================");
-        var mainChat = document.getElementsByClassName("chat-main");
-        var LiItems = mainChat[0].getElementsByTagName("li");
-        var startCounter = 0;
-        if ((LiItems.length >= botChat.lastMessageCount) && (botChat.lastMessageCount > 0)) startCounter = botChat.lastMessageCount - 1;
-        botChat.lastMessageCount = LiItems.length;
-        botDebug.debugMessage(false, "CHAT - LOOP: " + startCounter + " - " + LiItems.length);
-        for (var i = startCounter; i < LiItems.length; i++) {
-          botChat.processChatItems(LiItems[i]);
-        }
-      } catch (err) {
-        UTIL.logException("EVENT_NEW_CHAT: " + err.message);
-      }
     }
   }
 };
