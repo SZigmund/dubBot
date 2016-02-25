@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0108",
+  version: "Version  1.01.0026.0109",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -107,7 +107,7 @@ var dubBot = {
 
   announceSongStats: function(waitlist) {
     try {
-	  if (waitlist.length > 1) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[1].username + "]";
+	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
 	  botDebug.debugMessage(true, dubBot.queue.songStatsMessage);
 	  API.sendChat(dubBot.queue.songStatsMessage);
     }
