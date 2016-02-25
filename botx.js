@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0109",
+  version: "Version  1.01.0026.0110",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -108,14 +108,14 @@ var dubBot = {
   announceSongStats: function(waitlist) {
     try {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
-	  botDebug.debugMessage(true, dubBot.queue.songStatsMessage);
 	  API.sendChat(dubBot.queue.songStatsMessage);
     }
     catch(err) { UTIL.logException("announceSongStats: " + err.message); }
   },
   validateCurrentSong: function () {
     try {
-      botVar.room.currentMehCount = 0;
+      API.getWaitList(dubBot.announceSongStats);
+	  botVar.room.currentMehCount = 0;
       botVar.currentSong = API.getSongName();
       botVar.currentDJ   = API.getDjName("A");
 	  if (botVar.lastSkippedSong === botVar.currentSong) return;
@@ -204,7 +204,7 @@ var LOOKING = {
 		    //matchstr = matchstr.toUpperCase();
 		    //for(var i = 0; i < userlist.length; i++) {
 			//  if (userlist[i].username.toUpperCase().indexOf(matchstr) > -1) {
-			//	botDebug.debugMessage(true, "USER: " + userlist[i].username + " IN " + roomName);
+			//botDebug.debugMessage(true, "USER: " + userlist[i].username + " IN " + roomName);
 			//  }
 			//}
 		}
@@ -5265,10 +5265,8 @@ var API = {
   getDjName: function(calledFrom) {
     try { 
 	  currDJ = Dubtrack.room.player.activeSong.attributes.user;
-	  if (currDJ === null) {
-	      botDebug.debugMessage(true, "getDjName No DJ: " + calledFrom);
-		  return botVar.currentDJ;
-      }
+	  if (currDJ === null) return "";
+	  //if (currDJ === null) botDebug.debugMessage(true, "getDjName No DJ: " + calledFrom);
 	  return currDJ.attributes.username;
 	  //todoer DELETE after testing
       //var userInfo = document.getElementsByClassName("infoContainerInner");
@@ -5335,7 +5333,7 @@ var API = {
 		//var user = data.user.username;
 		//var userId = data.user._id;
         
-		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message);
+		//botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message);
 		var chat = botChat.formatChat(data.message, data.user.username, data.user._id);
         COMMANDS.checkCommands(chat);
 
@@ -5353,8 +5351,8 @@ var API = {
     EVENT_USER_JOIN_TEST: function(data) {  //songadvance
       try { 
 	    //UTIL.logObject(data, "JOIN_DATA");
-	    botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.user.username); 
-		API.sendChat(botChat.subChat(botChat.getChatMessage("welcomeback"), {name: data.user.username}));
+	    //botDebug.debugMessage(true, "EVENT_USER_JOIN_TEST: " + data.user.username); 
+		//API.sendChat(botChat.subChat(botChat.getChatMessage("welcomeback"), {name: data.user.username}));
 	  }
       catch(err) { UTIL.logException("EVENT_USER_JOIN_TEST: " + err.message); }
     },
@@ -5420,7 +5418,6 @@ var API = {
       // UPDATE ON SONG UPDATE
       if (botVar.ImHidden === true) return;
       if (botVar.currentSong === API.getSongName()) return;
-      botDebug.debugMessage(false, "EVENT_SONG_ADVANCE: " + API.getSongName() + API.getDjName("G"));
       //Get Current song name #player-controller > div.left > ul > li.infoContainer.display-block > div > span.
       TASTY.settings.rolledDice = false;
 
@@ -5431,7 +5428,6 @@ var API = {
       var previousSong = botVar.currentSong;
       botDebug.debugMessage(false, "previousDJ: " + previousDJ);
       botVar.currentDJ   = API.getDjName("H");
-      botDebug.debugMessage(false, "botVar.currentDJ: " + botVar.currentDJ);
       botVar.currentSong = API.getSongName();
       var tastyPoints = botVar.tastyCount;
       botVar.tastyCount = 0;
@@ -5451,7 +5447,6 @@ var API = {
 
       //API.sendChat(botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong }));
 	  dubBot.queue.songStatsMessage = botChat.subChat(botChat.getChatMessage("songstatisticstasty"), {woots: dubCount, grabs: grabCount, mehs: mehCount, tasty: tastyPoints, user: previousDJ, song: previousSong });
-      API.getWaitList(dubBot.announceSongStats);
 
       //botChat.chatMessages.push(["songstatisticstasty", "[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
       //"[ :thumbsup: %%WOOTS%% :thumbsdown: %%MEHS%% :cake: %%TASTY%%] %%USER%% [%%SONG%%]"]);
