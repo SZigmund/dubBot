@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0106",
+  version: "Version  1.01.0026.0107",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -5335,12 +5335,13 @@ var API = {
 		//var user = data.user.username;
 		//var userId = data.user._id;
         
-		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message); }
+		botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message);
 		var chat = botChat.formatChat(data.message, data.user.username, data.user._id);
         COMMANDS.checkCommands(chat);
 
 		//botChat.processChatItem(data.message, data.user.username, data.user._id);
 	    //UTIL.logObject(data, "CHAT_DATA");
+	  }
       catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
     },
 	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
