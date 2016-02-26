@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0026.0110",
+  version: "Version  1.01.0027.0069",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -170,12 +170,12 @@ String.prototype.splitBetween = function (a, b) {
 //SECTION USERS: All User data
 var LOOKING = {
 	//stalker option to find a user in another room
-	loadTheRoomList: function (roomlist) {
+	A_LoadTheRoomList: function (roomlist) {
 		try {
 			dubBot.queue.dubRoomlist = [];
 			API.getRoomlist(dubBot.queue.dubRoomlist, 0, LOOKING.loadTheRoomListWork);  //stalker option to find a user in another room
 		}
-		catch(err) { UTIL.logException("loadTheRoomList: " + err.message); }
+		catch(err) { UTIL.logException("A_LoadTheRoomList: " + err.message); }
 	},
 	//stalker option to find a user in another room
 	loadTheRoomListWork: function (roomlist) {
@@ -189,29 +189,29 @@ var LOOKING = {
 		catch(err) { UTIL.logException("loadTheRoomListWork: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	loadTheRoomStaff: function (roomlist) {
+	B_LoadTheRoomStaff: function (roomlist) {
 		try {
-		  if(typeof dubBot.queue.dubRoomlist === 'undefined' || dubBot.queue.dubRoomlist === null) botDebug.debugMessage(true, "loadTheRoomStaff: ROOMLIST IS NULL");
-		  if(dubBot.queue.dubRoomlist.length === 0) botDebug.debugMessage(true, "loadTheRoomStaff: ROOMLIST IS EMPTY");
+		  if(typeof dubBot.queue.dubRoomlist === 'undefined' || dubBot.queue.dubRoomlist === null) botDebug.debugMessage(true, "B_LoadTheRoomStaff: ROOMLIST IS NULL");
+		  if(dubBot.queue.dubRoomlist.length === 0) botDebug.debugMessage(true, "B_LoadTheRoomStaff: ROOMLIST IS EMPTY");
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++)
 			API.getStaffList(dubBot.queue.dubRoomlist[i].staff, dubBot.queue.dubRoomlist[i].roomID, dubBot.queue.dubRoomlist[i].roomname, LOOKING.ListUsersOne);
 		}
-		catch(err) { UTIL.logException("loadTheRoomStaff: " + err.message); }
+		catch(err) { UTIL.logException("B_LoadTheRoomStaff: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	ListUsersOne: function (userlist, roomName, matchstr) {
+	ListUsersOne: function (userlist, roomName) {
 		try {
+			botDebug.debugMessage(true, "USER CNT: " + userlist.length + " IN " + roomName);
 		    //matchstr = matchstr.toUpperCase();
 		    //for(var i = 0; i < userlist.length; i++) {
 			//  if (userlist[i].username.toUpperCase().indexOf(matchstr) > -1) {
-			//botDebug.debugMessage(true, "USER: " + userlist[i].username + " IN " + roomName);
 			//  }
 			//}
 		}
 		catch(err) { UTIL.logException("ListUsersOne: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	ListStaff: function (matchstr) {
+	C_ListStaff: function (matchstr) {
 		try {
 		  matchstr = matchstr.toUpperCase();
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
@@ -223,10 +223,10 @@ var LOOKING = {
 			}
 		  }
 		}
-		catch(err) { UTIL.logException("ListStaff: " + err.message); }
+		catch(err) { UTIL.logException("C_ListStaff: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	ListUsers: function (matchstr) {
+	C_ListUsers: function (matchstr) {
 		try {
 		  matchstr = matchstr.toUpperCase();
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
@@ -238,7 +238,7 @@ var LOOKING = {
 			}
 		  }
 		}
-		catch(err) { UTIL.logException("ListUsers: " + err.message); }
+		catch(err) { UTIL.logException("C_ListUsers: " + err.message); }
 	},
 	loadUserInfo: function (roomitem, useritem) {
 		try {
@@ -249,7 +249,7 @@ var LOOKING = {
 		catch(err) { UTIL.logException("loadUserInfo: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	ListRooms: function (matchstr) {
+	C_ListRooms: function (matchstr) {
 		try {
 		  //var matchstr = "80";
 		  matchstr = matchstr.toUpperCase();
@@ -259,10 +259,10 @@ var LOOKING = {
 			  }
 		  }
 		}
-		catch(err) { UTIL.logException("ListRooms: " + err.message); }
+		catch(err) { UTIL.logException("C_ListRooms: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	ListRoomStaff: function (roomId) {
+	C_ListRoomStaff: function (roomId) {
 		try {
 		  //var roomId = "55ff22d5636dce0300ae36b5";
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
@@ -274,10 +274,10 @@ var LOOKING = {
 			}
 		  }
 		}
-		catch(err) { UTIL.logException("ListRoomStaff: " + err.message); }
+		catch(err) { UTIL.logException("C_ListRoomStaff: " + err.message); }
 	},
 	//stalker option to find a user in another room
-	ListRoomUsers: function (roomId) {
+	C_ListRoomUsers: function (roomId) {
 		try {
 		  //var roomId = "55ff22d5636dce0300ae36b5";
 		  for(var i = 0; i < dubBot.queue.dubRoomlist.length; i++) {
@@ -289,7 +289,7 @@ var LOOKING = {
 			}
 		  }
 		}
-		catch(err) { UTIL.logException("ListRoomUsers: " + err.message); }
+		catch(err) { UTIL.logException("C_ListRoomUsers: " + err.message); }
 	},
 };
 
@@ -2204,6 +2204,10 @@ var BOTDJ = {
 		  //botDebug.debugMessage(true, "playlist.length: " + playlist.length);
 		  songIdx = Math.floor(Math.random() * playlist.length);
 		  //botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
+		  //Skip songs that exceed the max song len:
+		  //while (playlist[songIdx].songlength > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
+          botDebug.debugMessage(true, "LEN: " + playlist[songIdx].songlength + " - " + SETTINGS.settings.maximumSongLength);
+
 		  var songType = playlist[songIdx].songType;
 		  var fkid = playlist[songIdx].fkid;
 		  //botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
@@ -6130,38 +6134,6 @@ var BOTCOMMANDS = {
                     API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
                 }
             },
-            zigaCommand: {
-                command: 'ziga',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd)  {
-                    try { 
-                        var userInfo = document.getElementsByClassName("user-info");
-                        botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
-                        var spans = userInfo[0].getElementsByTagName("span");
-                        botDebug.debugMessage(true, "userInfo: " + spans[0].innerHTML);
-                    }
-                    catch(err) {
-                        UTIL.logException("zigaCommand: " + err.message);
-                    }
-                }
-            },
-            zigbCommand: {
-                command: 'zigb',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd)  {
-                    try {
-                        var userInfo = document.getElementsByClassName("infoContainerInner");
-                        botDebug.debugMessage(true, "userInfo count: " + userInfo.length);
-                        var spans = userInfo[0].getElementsByClassName("currentDJSong");
-                        botDebug.debugMessage(true, "currentDJSong: " + spans[0].innerHTML);
-                    }
-                    catch(err) {
-                        UTIL.logException("zigbCommand: " + err.message);
-                    }
-                }
-            },
             zigCommand: {  //Added 02/14/2015 Zig 
                 command: ['zig','botmaint'],
                 rank: 'manager',
@@ -6209,7 +6181,7 @@ var BOTCOMMANDS = {
 						if (maxTime === "CLAS") API.YTListClassicImport();
 						if (maxTime === "Q") {
 							dubBot.queue.dubRoomlist = [];
-							API.getRoomlist(dubBot.queue.dubRoomlist, 0, LOOKING.loadTheRoomList);  //stalker option to find a user in another room
+							API.getRoomlist(dubBot.queue.dubRoomlist, 0, LOOKING.A_LoadTheRoomList);  //stalker option to find a user in another room
 						}
                     }
                 }
