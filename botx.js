@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0027.0069",
+  version: "Version  1.01.0027.0070",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2202,11 +2202,11 @@ var BOTDJ = {
 	playRandomSong: function (playlist, playlistID) {
 		try {
 		  //botDebug.debugMessage(true, "playlist.length: " + playlist.length);
+		  var songIdx = 0;
 		  songIdx = Math.floor(Math.random() * playlist.length);
-		  //botDebug.debugMessage(true, "playRandomSong IDX: " + songIdx);
 		  //Skip songs that exceed the max song len:
-		  //while (playlist[songIdx].songlength > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
-          botDebug.debugMessage(true, "LEN: " + playlist[songIdx].songlength + " - " + SETTINGS.settings.maximumSongLength);
+		  while ((playlist[songIdx].songlength / 1000) > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
+          //botDebug.debugMessage(true, "LEN: " + playlist[songIdx].songlength + " - " + SETTINGS.settings.maximumSongLength);
 
 		  var songType = playlist[songIdx].songType;
 		  var fkid = playlist[songIdx].fkid;
