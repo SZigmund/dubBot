@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0027.0070",
+  version: "Version  1.01.0028.0069",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -577,7 +577,7 @@ var USERS = {
         roomUser.inRoom = true;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
         roomUser.userRole = API.getPermission(roomUser.id);
-        if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
+        if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false) && (SETTINGS.settings.announceMehs === true)) {
           API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
         }
         roomUser.isMehing = userMehing;
@@ -609,6 +609,7 @@ var SETTINGS = {
         welcomeForeignerMsg: false,
         timeGuard: true,
         maximumSongLength: 480,
+		announceMehs: false,
         skipSound5Days: false,
         skipSound7Days: false,
         skipSoundStart: 7,
@@ -958,8 +959,7 @@ var botChat = {
    botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
    botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
    botChat.chatMessages.push(["afkstatus", " @%%NAME%% has been afk for %%TIME%%."]);
-   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
-   botChat.chatMessages.push(["afkremoveXXX", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
    botChat.chatMessages.push(["afkUserReset", "Thanks @%%NAME%% your afk status has been reset. "]);
 
    botChat.chatMessages.push(["caps", "@%%NAME%% unglue your capslock button please."]);
@@ -1893,7 +1893,8 @@ var TASTY = {
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grabbed','yes','hellyes',
                       'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
-                      'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'];
+                      'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
+                      'holycrapLarryhasAshitLoadOfCommands','thatswhatimtalkinabout'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -1990,8 +1991,7 @@ var AFK = {
 						AFK.resetDC(roomUser);
 						API.moderateRemoveDJ(id);
 						roomUser.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-						//API.sendChat(botChat.subChat(botChat.getChatMessage("afkremoveXXX"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
-						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, maximumafk: AFK.settings.maximumAfk}));
+						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: (i + 1), maximumafk: AFK.settings.maximumAfk}));
 						roomUser.afkWarningCount = 0;
 						SETTINGS.storeToStorage();
 					}
@@ -5828,7 +5828,8 @@ var BOTCOMMANDS = {
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grabbed','yes','hellyes',
                           'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
-                          'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'],
+                          'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
+                          'holycrapLarryhasAshitLoadOfCommands','thatswhatimtalkinabout'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6616,7 +6617,7 @@ var BOTCOMMANDS = {
                  try  {
                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-				   if (API.getDjName("J") !== roomUser.username) TASTY.tastyVote(chat.un, cmd);
+				   if (API.getDjName("J") !== chat.un) TASTY.tastyVote(chat.un, cmd);
                    API.grabCurrentSong();
                  }  
                  catch(err) { UTIL.logException("grabCommand: " + err.message); }
@@ -6661,6 +6662,19 @@ var BOTCOMMANDS = {
                         }
                         else return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidtime"), {name: chat.un}));
                     }
+                }
+            },
+            announcemehsCommand: {
+                command: 'maxlength',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					SETTINGS.settings.announceMehs = !SETTINGS.settings.announceMehs;
+					var settingMsg = "Announcing user mehs has been disabled";
+					if (SETTINGS.settings.announceMehs === true) settingMsg = "Announcing user mehs has been enabled";
+					API.sendChat(botChat.subChat(botChat.getChatMessage("maxlengthtime"), {name: chat.un, time: SETTINGS.settings.announceMehs}));
                 }
             },
 
