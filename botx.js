@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0080",
+  version: "Version  1.01.0028.0081",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -113,7 +113,7 @@ var dubBot = {
 			var roomUser;
 			for(var i = 0; i < waitlist.length; i++) {
 				roomUser = USERS.lookupUserID(waitlist[i].id);
-				if (user !== false) {
+				if (roomUser !== false) {
 					roomUser.lastKnownPosition = pos + 1;
 					roomUser.lastSeenInLine = Date.now();
 				}
@@ -2171,22 +2171,26 @@ var AFK = {
 	  try { AFK.dclookup(waitlist, roomUser, true); }
 		catch(err) { UTIL.logException("dclookupWithMsg: " + err.message); }
 	},
-	dclookup: function (waitlist, user, dispMsg) {
+	dclookup: function (waitlist, user, userRequest) {
 	  try {
 	    botDebug.debugMessage(true, "CALLED: dclookup: " + user.username);
+		if (userRequest === true) {  // Verify they are in the waitlist:
+			var djpos = API.getWaitListPosition(user.id, waitlist);
+			if (djpos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
+		}
 		if (user.lastDC.time === null) {
 			AFK.resetDC(user);
 			var noDisconnectReason = botChat.subChat(botChat.getChatMessage("notdisconnected"), {name: user.username});
 			if (user.lastDC.resetReason.length > 0) noDisconnectReason = user.lastDC.resetReason;
-			if (dispMsg === true) user.lastDC.resetReason = "";
-			if (dispMsg === true) API.sendChat(noDisconnectReason);
+			if (userRequest === true) user.lastDC.resetReason = "";
+			if (userRequest === true) API.sendChat(noDisconnectReason);
 			return;
 		}
 		var dc = user.lastDC.time;
 		var newPosition = user.lastDC.position;
 		if (newPosition < 1) {
 			AFK.resetDC(user);
-			if (dispMsg === true) API.sendChat(botChat.getChatMessage("noposition"));
+			if (userRequest === true) API.sendChat(botChat.getChatMessage("noposition"));
 			return;
 		}
 		var timeDc = Date.now() - dc;
@@ -2195,7 +2199,7 @@ var AFK = {
 		var time = UTIL.msToStr(timeDc);
 		if (!validDC) {
 			AFK.resetDC(user);
-			if (dispMsg === true) API.sendChat(botChat.subChat(botChat.getChatMessage("toolongago", {name: user.username, time: time})));
+			if (userRequest === true) API.sendChat(botChat.subChat(botChat.getChatMessage("toolongago", {name: user.username, time: time})));
 			return;
 		}
 
