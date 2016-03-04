@@ -10,9 +10,11 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0075",
+  version: "Version  1.01.0028.0076",
   ImHidden: false,
   botName: "larry_the_law",
+  roomID: "",
+  roomName: "",
   botID: -1,
   botStatus: false, 
   botMuted: false,
@@ -125,6 +127,8 @@ var dubBot = {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
+	  var dubUserList: [];
+	  API.getUserlist:(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
       //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
@@ -1028,7 +1032,7 @@ var botChat = {
    botChat.chatMessages.push(["bootableDisabled", "[@%%NAME%%] line removal canceled. %%USERBYNAME%%"]);
    botChat.chatMessages.push(["bootableEnabled", "By request [@%%NAME%%] will get removed from line after next song. %%USERBYNAME%%"]);
    botChat.chatMessages.push(["emojilist", "Emoji list: %%LINK%%"]);
-   botChat.chatMessages.push(["notinwaitlist", "@%%NAME%% you are not on the waitlist."]);
+   botChat.chatMessages.push(["notinwaitlist", "@%%NAME%% you are not in the Room Queue."]);
    botChat.chatMessages.push(["doubleroll", "@%%NAME%% you already rolled. Sorry no double dipping."]);
    botChat.chatMessages.push(["rollresults", "@%%NAME%% you rolled a %%ROLL%%"]);
    botChat.chatMessages.push(["rollresultsgood", "Nice %%NAME%% you rolled a %%ROLL%%"]);
@@ -2069,15 +2073,15 @@ var AFK = {
         user.lastSeenInLine = Date.now();
 		var msg = "";
 	    if (lunchRequest.cmd == '.beerrun') {
-			AKF.setBeerRunStatus(user, true);
+			AFK.setBeerRunStatus(user, true);
 			msg = botChat.subChat(botChat.getChatMessage("beerrunleave"), {name: lunchRequest.username, pos: currPos});
 		}
 		if (lunchRequest.cmd == '.lunch') {
-			AKF.setLunchStatus(user, true);
+			AFK.setLunchStatus(user, true);
 			msg = botChat.subChat(botChat.getChatMessage("lunchleave"), {name: lunchRequest.username, pos: currPos});
 		}
 		if (lunchRequest.cmd == '.meeting') {
-			AKF.setMeetingStatus(user, true);
+			AFK.setMeetingStatus(user, true);
 			msg = botChat.subChat(botChat.getChatMessage("meetingleave"), {name: lunchRequest.username, pos: currPos});
 		}
         AFK.updateDC(user);
@@ -2086,7 +2090,7 @@ var AFK = {
     }
     catch(err) { UTIL.logException("takeLunch: " + err.message); }
   },
-	resetOldDisconnects: function (userslist) {
+	resetOldDisconnects: function (dubUserList) {
 		try {
 			botDebug.debugMessage(false, "======================resetOldDisconnects======================");
 			for (var i = 0; i < USERS.users.length; i++) {
@@ -3119,6 +3123,7 @@ var API = {
       botVar.botName = API.getBotName();
 	  botVar.botID = API.getBotID();
 	  botVar.roomID = API.getRoomID();
+	  botVar.roomName = API.getRoomName();
       if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
       SETTINGS.retrieveFromStorage();
@@ -3677,7 +3682,10 @@ var API = {
 	}
     catch(err) { UTIL.logException("defineRoomQueue: " + err.message); }
 	},
-	
+  getRoomName: function() {
+    try { return Dubtrack.room.model.get("name");	}
+    catch(err) { UTIL.logException("getRoomName: " + err.message); }
+  },
   getRoomID: function() {
 	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
 	//        RGT Room ID: 5602ed62e8632103004663c2
@@ -6919,7 +6927,7 @@ var BOTCOMMANDS = {
 						}
 						var user = USERS.lookupUserName(name);
 						if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-						API.getWaitList(AKF.dclookup, user);
+						API.getWaitList(AFK.dclookup, user);
                     }
                     catch(err) { UTIL.logException("backCommand: " + err.message); }
                 }
