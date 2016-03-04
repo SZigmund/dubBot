@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0072",
+  version: "Version  1.01.0028.0073",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3135,14 +3135,15 @@ var API = {
 	  // This fires off WAY too often!!
 	  //Dubtrack.Events.bind("realtime:room_playlist-update", API.EVENT_SONG_ADV_TEST);
 	  Dubtrack.Events.bind("realtime:room_playlist-queue-reorder", API.EVENT_QUEUE_REORDER);
-	  Dubtrack.Events.bind("realtime:room_playlist-queue-update", API.EVENT_QUEUE_UPDATE);
+	  //Dubtrack.Events.bind("realtime:room_playlist-queue-update", API.EVENT_QUEUE_UPDATE);
 	  Dubtrack.Events.bind("realtime:room_playlist-queue-update-grabs", API.EVENT_UPDATE_GRABS);
-	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT_TEST);
+	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT);
 	  //todoer Replace the old code: Dubtrack.Events.bind("realtime:user-join", API.EVENT_USER_JOIN_TEST);
 	  //Dubtrack.Events.bind("realtime:user-leave", API.EVENT_USER_LEAVE_TEST);
 
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
+      $('.queue-total').bind("DOMSubtreeModified", API.on.EVENT_QUEUE_UPDATE);
       //$('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
       $('.room-user-counter').bind("DOMSubtreeModified", API.on.EVENT_USER_JOIN);
       $('.dubup').bind("DOMSubtreeModified", API.on.EVENT_DUBUP);
@@ -5513,21 +5514,21 @@ var API = {
   showPopup: function(title, message) {
     Dubtrack.helpers.displayError(title, message);
   },
-    EVENT_CHAT_TEST: function(data) {  //songadvance
+    EVENT_CHAT: function(data) {  //songadvance
       try { 
 	    // todoer delete after testing this stuff
 	    //var msg = data.message;
 		//var user = data.user.username;
 		//var userId = data.user._id;
         
-		//botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message);
+		//botDebug.debugMessage(true, "EVENT_CHAT[" + data.user.username + "-" + data.user._id + "]: " + data.message);
 		var chat = botChat.formatChat(data.message, data.user.username, data.user._id);
         COMMANDS.checkCommands(chat);
 
 		//botChat.processChatItem(data.message, data.user.username, data.user._id);
 	    //UTIL.logObject(data, "CHAT_DATA");
 	  }
-      catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
+      catch(err) { UTIL.logException("EVENT_CHAT: " + err.message); }
     },
     EVENT_QUEUE_REORDER: function(data) {
       try { botDebug.debugMessage(true, "EVENT_QUEUE_REORDER"); 
@@ -5537,7 +5538,8 @@ var API = {
     },
     EVENT_QUEUE_UPDATE: function(data) {
       try { botDebug.debugMessage(true, "EVENT_QUEUE_UPDATE"); 
-	  UTIL.logObject(data, "ADV_DATA");
+	  botDebug.debugMessage(true, "TOTAL: " + $(".currentSong").text());
+	  //UTIL.logObject(data, "ADV_DATA");
 	  }
       catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
     },
