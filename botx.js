@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0076",
+  version: "Version  1.01.0028.0077",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -128,7 +128,7 @@ var dubBot = {
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
 	  var dubUserList: [];
-	  API.getUserlist:(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
+	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
       //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
@@ -2139,20 +2139,37 @@ var AFK = {
 		}
 		catch(err) { UTIL.logException("resetOldDisconnects: " + err.message); }
 	},
-	dclookup: function (waitlist, user) {
+	dclookupCheckAll: function (waitlist) {
+	  try {
+		  for (var i = 0; i < waitlist.length; i++) {
+			if (typeof waitlist[i] !== 'undefined') {
+		      var roomUser = USERS.lookupUserID(waitlist[i].id);
+			  if (roomUser !== false) AFK.dclookup(waitlist, roomUser, false);
+			}
+		  }
+		}
+		catch(err) { UTIL.logException("dclookupCheckAll: " + err.message); }
+	},
+	dclookupWithMsg: function (waitlist, user) {
+	  try { AFK.dclookup(waitlist, roomUser, true); }
+		catch(err) { UTIL.logException("dclookupWithMsg: " + err.message); }
+	},
+	dclookup: function (waitlist, user, dispMsg) {
 	  try {
 		if (user.lastDC.time === null) {
 			AFK.resetDC(user);
 			var noDisconnectReason = botChat.subChat(botChat.getChatMessage("notdisconnected"), {name: user.username});
 			if (user.lastDC.resetReason.length > 0) noDisconnectReason = user.lastDC.resetReason;
-			user.lastDC.resetReason = "";
-			return API.sendChat(noDisconnectReason);
+			if (dispMsg === true) user.lastDC.resetReason = "";
+			if (dispMsg === true) API.sendChat(noDisconnectReason);
+			return;
 		}
 		var dc = user.lastDC.time;
 		var newPosition = user.lastDC.position;
 		if (newPosition < 1) {
 			AFK.resetDC(user);
-			return API.sendChat(botChat.getChatMessage("noposition"));
+			if (dispMsg === true) API.sendChat(botChat.getChatMessage("noposition"));
+			return;
 		}
 		var timeDc = Date.now() - dc;
 		var validDC = false;
@@ -2160,7 +2177,8 @@ var AFK = {
 		var time = UTIL.msToStr(timeDc);
 		if (!validDC) {
 			AFK.resetDC(user);
-			return API.sendChat(botChat.subChat(botChat.getChatMessage("toolongago", {name: user.username, time: time})));
+			if (dispMsg === true) API.sendChat(botChat.subChat(botChat.getChatMessage("toolongago", {name: user.username, time: time})));
+			return;
 		}
 		
 		if (newPosition <= 0) newPosition = 1;
@@ -2175,7 +2193,7 @@ var AFK = {
 		USERS.setLastActivity(user, false);
 		user.lastKnownPosition = newPosition;
 		user.lastSeenInLine = Date.now();
-		API.sendChat(msg);
+		if (dispMsg === true) API.sendChat(msg);
       }
       catch(err) { UTIL.logException("dclookup: " + err.message); }
 	},
@@ -5624,6 +5642,7 @@ var API = {
     EVENT_QUEUE_UPDATE: function(data) {
       try { botDebug.debugMessage(true, "EVENT_QUEUE_UPDATE"); 
 	  botDebug.debugMessage(true, "TOTAL: " + $(".currentSong").text());
+	  API.getWaitList(AFK.dclookupCheckAll, null);
 	  //UTIL.logObject(data, "ADV_DATA");
 	  }
       catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
@@ -6925,9 +6944,9 @@ var BOTCOMMANDS = {
 							name = msg.substring(cmd.length + 2);
 							if (!BOTCOMMANDS.commands.executable("mod", chat)) return API.sendChat(botChat.subChat(botChat.getChatMessage("dclookuprank"), {name: chat.un}));
 						}
-						var user = USERS.lookupUserName(name);
-						if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-						API.getWaitList(AFK.dclookup, user);
+						var roomUser = USERS.lookupUserName(name);
+						if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+						API.getWaitList(AFK.dclookupWithMsg, roomUser);
                     }
                     catch(err) { UTIL.logException("backCommand: " + err.message); }
                 }
