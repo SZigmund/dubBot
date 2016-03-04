@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0083",
+  version: "Version  1.01.0028.0084",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -111,8 +111,8 @@ var dubBot = {
 		try {
 			botDebug.debugMessage(true, "CALLED: updateWaitlist");
 			var roomUser;
-			for(var i = 0; i < waitlist.length; i++) {
-				roomUser = USERS.lookupUserID(waitlist[i].id);
+			for(var pos = 0; pos < waitlist.length; pos++) {
+				roomUser = USERS.lookupUserID(waitlist[pos].id);
 				if (roomUser !== false) {
 					roomUser.lastKnownPosition = pos + 1;
 					roomUser.lastSeenInLine = Date.now();
@@ -326,6 +326,27 @@ var USERS = {
 	  }
       catch(err) { UTIL.logException("getPermission: " + err.message); }
   },
+  userLeftRoom: function (roomUser) {
+		try {
+            API.chatLog(roomUser.username + " split");
+			// If user has not been in line for over 10 mins and they leave reset the DC
+			if ((roomUser.lastKnownPosition > 0) && (roomUser.lastSeenInLine !== null)) {
+				AFK.updateDC(roomUser);
+				roomUser.lastDC.leftroom = Date.now();
+				var miaTime = Date.now() - roomUser.lastSeenInLine;
+				if (miaTime > (10 * 60 * 1000)) AFK.resetDC(roomUser);
+			}
+			if (roomUser.lastKnownPosition > 0) {
+				AFK.updateDC(roomUser);
+				roomUser.lastDC.leftroom = Date.now();
+			}
+			else 
+				AFK.resetDC(roomUser);
+			roomUser.inRoom = false;
+		}
+		catch(err) { UTIL.logException("userLeftRoom: " + err.message); }
+  },
+
   getLastActivity: function (usrObjectID) {
       try {
 	    var roomUser = USERS.defineRoomUser(usrObjectID);
@@ -528,8 +549,10 @@ var USERS = {
       try {
         for (var i = 0; i < USERS.users.length; i++) {
           if ((USERS.users[i].inRoom === true) && (USERS.users[i].inRoomUpdated === false)) {
-            USERS.users[i].inRoom = false;
-            API.logInfo(USERS.users[i].username + " left the room");
+			USERS.userLeftRoom(USERS.users[i]);
+	        var dubUserList = [];
+			API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
+			SETTINGS.storeToStorage();
           }
         }
       }
@@ -2153,6 +2176,7 @@ var AFK = {
 				if (resetUser === true) AFK.resetDC(roomUser);
 			}
 			botDebug.debugMessage(false, "======================resetOldDisconnects======================");
+			SETTINGS.storeToStorage();
 		}
 		catch(err) { UTIL.logException("resetOldDisconnects: " + err.message); }
 	},
@@ -5580,8 +5604,9 @@ var API = {
       catch(err) { UTIL.logException("EVENT_CHAT: " + err.message); }
     },
     EVENT_QUEUE_REORDER: function(data) {
-      try { botDebug.debugMessage(true, "EVENT_QUEUE_REORDER"); 
-	  UTIL.logObject(data, "ADV_DATA");
+      try { 
+	  //botDebug.debugMessage(true, "EVENT_QUEUE_REORDER"); 
+	  //UTIL.logObject(data, "ADV_DATA");
 	  }
       catch(err) { UTIL.logException("EVENT_QUEUE_REORDER: " + err.message); }
     },
