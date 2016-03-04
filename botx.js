@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0082",
+  version: "Version  1.01.0028.0083",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2103,6 +2103,7 @@ var AFK = {
         AFK.updateDC(user);
         setTimeout(function () { API.moderateRemoveDJ(user.id); }, 1000);
         API.sendChat(msg + lunchRequest.requestUsername);
+		SETTINGS.storeToStorage();
     }
     catch(err) { UTIL.logException("takeLunch: " + err.message); }
   },
