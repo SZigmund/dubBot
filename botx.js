@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0070",
+  version: "Version  1.01.0028.0071",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -2165,7 +2165,7 @@ var AFK = {
 		if (user.beerRun === true) leaveMsgType = "beerrunreturn";
 		if (user.inMeeting === true) leaveMsgType = "meetingreturn";
 		if (user.atLunch === true) leaveMsgType = "lunchreturn";
-	    var msg = botChat.subChat(botChat.getChatMessage(, {name: user.username, time: time, position: newPosition}));
+	    var msg = botChat.subChat(botChat.getChatMessage(leaveMsgType, {name: user.username, time: time, position: newPosition}));
 		API.moderateMoveDJ(user.id, newPosition, waitlist);
 		AFK.resetDC(user);
 		USERS.setLastActivity(user, false);
