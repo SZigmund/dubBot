@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0078",
+  version: "Version  1.01.0028.0079",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2051,7 +2051,7 @@ var AFK = {
   updateDC: function (user) {
 	user.lastDC.time = Date.now();
 	user.lastDC.position = user.lastKnownPosition;
-	user.lastDC.songCount = basicBot.room.roomstats.songCount;
+	//user.lastDC.songCount = basicBot.room.roomstats.songCount;
   },
   
   buildLunchRequest: function (username, byusername, cmd) {
@@ -5641,7 +5641,7 @@ var API = {
     //},
     EVENT_QUEUE_UPDATE: function(data) {
       try { botDebug.debugMessage(true, "EVENT_QUEUE_UPDATE"); 
-	  botDebug.debugMessage(true, "TOTAL: " + $(".currentSong").text());
+	  botDebug.debugMessage(true, "TOTAL: " + $(".queue-total").text());
 	  API.getWaitList(AFK.dclookupCheckAll, null);
 	  //UTIL.logObject(data, "ADV_DATA");
 	  }
