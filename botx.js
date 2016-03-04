@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0084",
+  version: "Version  1.01.0028.0085",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -109,7 +109,6 @@ var dubBot = {
 
 	updateWaitlist: function (waitlist) {
 		try {
-			botDebug.debugMessage(true, "CALLED: updateWaitlist");
 			var roomUser;
 			for(var pos = 0; pos < waitlist.length; pos++) {
 				roomUser = USERS.lookupUserID(waitlist[pos].id);
@@ -2130,9 +2129,9 @@ var AFK = {
     }
     catch(err) { UTIL.logException("takeLunch: " + err.message); }
   },
-	resetOldDisconnects: function (dubUserList) {
+  resetOldDisconnects: function (dubUserList) {
 		try {
-			botDebug.debugMessage(true, "======================resetOldDisconnects======================");
+			botDebug.debugMessage(false, "======================resetOldDisconnects======================");
 			for (var i = 0; i < USERS.users.length; i++) {
 				var roomUser = USERS.users[i];
 				var dcTime = roomUser.lastDC.time;
@@ -2140,8 +2139,6 @@ var AFK = {
 				var dcPos = roomUser.lastDC.position;
 				var miaTime = 0;
 				var resetUser = false;
-				//UTIL.logObject(roomUser, "roomUser");
-				//UTIL.logObject(roomUser.lastDC, "LastDC");
 				botDebug.debugMessage(false, "User: " + roomUser.username + " - " + roomUser.id);
 				// If left room > 10 mins ago:
 				if (leftroom !== null) {
@@ -2182,7 +2179,6 @@ var AFK = {
 	},
 	dclookupCheckAll: function (waitlist) {
 	  try {
-  		  botDebug.debugMessage(true, "CALLED: dclookupCheckAll");
 		  for (var i = 0; i < waitlist.length; i++) {
 			if (typeof waitlist[i] !== 'undefined') {
 		      var roomUser = USERS.lookupUserID(waitlist[i].id);
@@ -2194,11 +2190,10 @@ var AFK = {
 	},
 	dclookupWithMsg: function (waitlist, roomUser) {
 	  try { AFK.dclookup(waitlist, roomUser, true); }
-		catch(err) { UTIL.logException("dclookupWithMsg: " + err.message); }
+	  catch(err) { UTIL.logException("dclookupWithMsg: " + err.message); }
 	},
 	dclookup: function (waitlist, user, userRequest) {
 	  try {
-	    botDebug.debugMessage(true, "CALLED: dclookup: " + user.username);
 		if (userRequest === true) {  // Verify they are in the waitlist:
 			var djpos = API.getWaitListPosition(user.id, waitlist);
 			if (djpos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: user.username}));
@@ -5611,7 +5606,11 @@ var API = {
       catch(err) { UTIL.logException("EVENT_QUEUE_REORDER: " + err.message); }
     },
     EVENT_UPDATE_GRABS: function(data) {
-      try { API.chatLog("GRABBED BY: " + data.user.username);
+      try { 
+	    API.chatLog("GRABBED BY: " + data.user.username);
+		var roomUser = USERS.lookupUserName(data.user.username);
+		if (typeof roomUser === 'boolean') return;
+		USERS.setLastActivity(roomUser, false);
 	  }
       catch(err) { UTIL.logException("EVENT_UPDATE_GRABS: " + err.message); }
     },
@@ -5688,11 +5687,7 @@ var API = {
     //  }
     //},
     EVENT_QUEUE_UPDATE: function(data) {
-      try { botDebug.debugMessage(true, "EVENT_QUEUE_UPDATE"); 
-	  botDebug.debugMessage(true, "TOTAL: " + $(".queue-total").text());
-	  API.getWaitList(AFK.dclookupCheckAll, null);
-	  //UTIL.logObject(data, "ADV_DATA");
-	  }
+      try { API.getWaitList(AFK.dclookupCheckAll, null); }
       catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
     },
     EVENT_SONG_ADVANCE: function() {  //songadvance
