@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0079",
+  version: "Version  1.01.0028.0080",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -107,10 +107,26 @@ var dubBot = {
 	dubQueueResp: null
   },
 
+	updateWaitlist: function (waitlist) {
+		try {
+			botDebug.debugMessage(true, "CALLED: updateWaitlist");
+			var roomUser;
+			for(var i = 0; i < waitlist.length; i++) {
+				roomUser = USERS.lookupUserID(waitlist[i].id);
+				if (user !== false) {
+					roomUser.lastKnownPosition = pos + 1;
+					roomUser.lastSeenInLine = Date.now();
+				}
+			}
+		}
+		catch(err) { UTIL.logException("updateWaitlist: " + err.message); }
+	},
   announceSongStats: function(waitlist) {
     try {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
 	  API.sendChat(dubBot.queue.songStatsMessage);
+	  AFK.dclookupCheckAll(waitlist);
+	  dubBot.updateWaitlist(waitlist);
     }
     catch(err) { UTIL.logException("announceSongStats: " + err.message); }
   },
@@ -2092,7 +2108,7 @@ var AFK = {
   },
 	resetOldDisconnects: function (dubUserList) {
 		try {
-			botDebug.debugMessage(false, "======================resetOldDisconnects======================");
+			botDebug.debugMessage(true, "======================resetOldDisconnects======================");
 			for (var i = 0; i < USERS.users.length; i++) {
 				var roomUser = USERS.users[i];
 				var dcTime = roomUser.lastDC.time;
@@ -2141,6 +2157,7 @@ var AFK = {
 	},
 	dclookupCheckAll: function (waitlist) {
 	  try {
+  		  botDebug.debugMessage(true, "CALLED: dclookupCheckAll");
 		  for (var i = 0; i < waitlist.length; i++) {
 			if (typeof waitlist[i] !== 'undefined') {
 		      var roomUser = USERS.lookupUserID(waitlist[i].id);
@@ -2150,12 +2167,13 @@ var AFK = {
 		}
 		catch(err) { UTIL.logException("dclookupCheckAll: " + err.message); }
 	},
-	dclookupWithMsg: function (waitlist, user) {
+	dclookupWithMsg: function (waitlist, roomUser) {
 	  try { AFK.dclookup(waitlist, roomUser, true); }
 		catch(err) { UTIL.logException("dclookupWithMsg: " + err.message); }
 	},
 	dclookup: function (waitlist, user, dispMsg) {
 	  try {
+	    botDebug.debugMessage(true, "CALLED: dclookup: " + user.username);
 		if (user.lastDC.time === null) {
 			AFK.resetDC(user);
 			var noDisconnectReason = botChat.subChat(botChat.getChatMessage("notdisconnected"), {name: user.username});
@@ -2180,7 +2198,7 @@ var AFK = {
 			if (dispMsg === true) API.sendChat(botChat.subChat(botChat.getChatMessage("toolongago", {name: user.username, time: time})));
 			return;
 		}
-		
+
 		if (newPosition <= 0) newPosition = 1;
 		if ((newPosition <= 1) && ((user.beerRun === true) || (user.inMeeting === true) || (user.atLunch === true))) newPosition = 2;
 		var leaveMsgType = "validdisconnect";
@@ -2193,7 +2211,7 @@ var AFK = {
 		USERS.setLastActivity(user, false);
 		user.lastKnownPosition = newPosition;
 		user.lastSeenInLine = Date.now();
-		if (dispMsg === true) API.sendChat(msg);
+		API.sendChat(msg);
       }
       catch(err) { UTIL.logException("dclookup: " + err.message); }
 	},
