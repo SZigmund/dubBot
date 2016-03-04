@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0071",
+  version: "Version  1.01.0028.0072",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3155,7 +3155,7 @@ var API = {
 
 	  BOTDJ.monitorWaitlistInterval = setInterval(function () { BOTDJ.monitorWaitlist() }, 20 * 1000);
 
-      API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+      API.sendChat:(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
       botVar.botRunning = true;
 
@@ -3399,7 +3399,6 @@ var API = {
     }
     else 
         API.chatLog(message);
-    
   },
   
   getDubUpCount: function() {
@@ -5543,8 +5542,7 @@ var API = {
       catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
     },
     EVENT_UPDATE_GRABS: function(data) {
-      try { botDebug.debugMessage(true, "EVENT_UPDATE_GRABS"); 
-	  UTIL.logObject(data, "ADV_DATA");
+      try { API.chatLog("GRABBED BY: " + data.user.username);
 	  }
       catch(err) { UTIL.logException("EVENT_UPDATE_GRABS: " + err.message); }
     },
@@ -6897,7 +6895,7 @@ var BOTCOMMANDS = {
                             byusername = " [ executed by " + chat.un + " ]";
                         }
 						var lunchRequest = new AFK.buildLunchRequest(name, byusername, cmd);
-						API.getWaitList(AKF.takeLunch, lunchRequest);
+						API.getWaitList(AFK.takeLunch, lunchRequest);
                     }
                     catch(err) { UTIL.logException("meetingCommand: " + err.message); }
                 }
