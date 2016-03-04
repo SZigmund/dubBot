@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0073",
+  version: "Version  1.01.0028.0074",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -3156,7 +3156,7 @@ var API = {
 
 	  BOTDJ.monitorWaitlistInterval = setInterval(function () { BOTDJ.monitorWaitlist() }, 20 * 1000);
 
-      API.sendChat:(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+      API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
       botVar.botStatus = true;
       botVar.botRunning = true;
 
