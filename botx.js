@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0081",
+  version: "Version  1.01.0028.0082",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2176,7 +2176,7 @@ var AFK = {
 	    botDebug.debugMessage(true, "CALLED: dclookup: " + user.username);
 		if (userRequest === true) {  // Verify they are in the waitlist:
 			var djpos = API.getWaitListPosition(user.id, waitlist);
-			if (djpos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
+			if (djpos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: user.username}));
 		}
 		if (user.lastDC.time === null) {
 			AFK.resetDC(user);
@@ -2209,7 +2209,7 @@ var AFK = {
 		if (user.beerRun === true) leaveMsgType = "beerrunreturn";
 		if (user.inMeeting === true) leaveMsgType = "meetingreturn";
 		if (user.atLunch === true) leaveMsgType = "lunchreturn";
-	    var msg = botChat.subChat(botChat.getChatMessage(leaveMsgType, {name: user.username, time: time, position: newPosition}));
+	    var msg = botChat.subChat(botChat.getChatMessage(leaveMsgType), {name: user.username, time: time, position: newPosition});
 		API.moderateMoveDJ(user.id, newPosition, waitlist);
 		AFK.resetDC(user);
 		USERS.setLastActivity(user, false);
