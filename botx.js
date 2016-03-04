@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0074",
+  version: "Version  1.01.0028.0075",
   ImHidden: false,
   botName: "larry_the_law",
   botID: -1,
@@ -5536,13 +5536,6 @@ var API = {
 	  }
       catch(err) { UTIL.logException("EVENT_QUEUE_REORDER: " + err.message); }
     },
-    EVENT_QUEUE_UPDATE: function(data) {
-      try { botDebug.debugMessage(true, "EVENT_QUEUE_UPDATE"); 
-	  botDebug.debugMessage(true, "TOTAL: " + $(".currentSong").text());
-	  //UTIL.logObject(data, "ADV_DATA");
-	  }
-      catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
-    },
     EVENT_UPDATE_GRABS: function(data) {
       try { API.chatLog("GRABBED BY: " + data.user.username);
 	  }
@@ -5620,6 +5613,13 @@ var API = {
     //    UTIL.logException("EVENT_NEW_CHAT: " + err.message);
     //  }
     //},
+    EVENT_QUEUE_UPDATE: function(data) {
+      try { botDebug.debugMessage(true, "EVENT_QUEUE_UPDATE"); 
+	  botDebug.debugMessage(true, "TOTAL: " + $(".currentSong").text());
+	  //UTIL.logObject(data, "ADV_DATA");
+	  }
+      catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
+    },
     EVENT_SONG_ADVANCE: function() {  //songadvance
       try {
       // UPDATE ON SONG UPDATE
