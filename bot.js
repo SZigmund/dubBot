@@ -10,9 +10,11 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028",
+  version: "Version  1.01.0029",
   ImHidden: false,
   botName: "larry_the_law",
+  roomID: "",
+  roomName: "",
   botID: -1,
   botStatus: false, 
   botMuted: false,
@@ -105,10 +107,25 @@ var dubBot = {
 	dubQueueResp: null
   },
 
+	updateWaitlist: function (waitlist) {
+		try {
+			var roomUser;
+			for(var pos = 0; pos < waitlist.length; pos++) {
+				roomUser = USERS.lookupUserID(waitlist[pos].id);
+				if (roomUser !== false) {
+					roomUser.lastKnownPosition = pos + 1;
+					roomUser.lastSeenInLine = Date.now();
+				}
+			}
+		}
+		catch(err) { UTIL.logException("updateWaitlist: " + err.message); }
+	},
   announceSongStats: function(waitlist) {
     try {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
 	  API.sendChat(dubBot.queue.songStatsMessage);
+	  AFK.dclookupCheckAll(waitlist);
+	  dubBot.updateWaitlist(waitlist);
     }
     catch(err) { UTIL.logException("announceSongStats: " + err.message); }
   },
@@ -125,6 +142,8 @@ var dubBot = {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
+	  var dubUserList = [];
+	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
       //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
@@ -167,7 +186,7 @@ String.prototype.splitBetween = function (a, b) {
     return arr;
 };
 
-//SECTION USERS: All User data
+//SECTION LOOKING: All User data
 var LOOKING = {
 	//stalker option to find a user in another room
 	A_LoadTheRoomList: function (roomlist) {
@@ -306,6 +325,27 @@ var USERS = {
 	  }
       catch(err) { UTIL.logException("getPermission: " + err.message); }
   },
+  userLeftRoom: function (roomUser) {
+		try {
+            API.chatLog(roomUser.username + " split");
+			// If user has not been in line for over 10 mins and they leave reset the DC
+			if ((roomUser.lastKnownPosition > 0) && (roomUser.lastSeenInLine !== null)) {
+				AFK.updateDC(roomUser);
+				roomUser.lastDC.leftroom = Date.now();
+				var miaTime = Date.now() - roomUser.lastSeenInLine;
+				if (miaTime > (10 * 60 * 1000)) AFK.resetDC(roomUser);
+			}
+			if (roomUser.lastKnownPosition > 0) {
+				AFK.updateDC(roomUser);
+				roomUser.lastDC.leftroom = Date.now();
+			}
+			else 
+				AFK.resetDC(roomUser);
+			roomUser.inRoom = false;
+		}
+		catch(err) { UTIL.logException("userLeftRoom: " + err.message); }
+  },
+
   getLastActivity: function (usrObjectID) {
       try {
 	    var roomUser = USERS.defineRoomUser(usrObjectID);
@@ -508,8 +548,10 @@ var USERS = {
       try {
         for (var i = 0; i < USERS.users.length; i++) {
           if ((USERS.users[i].inRoom === true) && (USERS.users[i].inRoomUpdated === false)) {
-            USERS.users[i].inRoom = false;
-            API.logInfo(USERS.users[i].username + " left the room");
+			USERS.userLeftRoom(USERS.users[i]);
+	        var dubUserList = [];
+			API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
+			SETTINGS.storeToStorage();
           }
         }
       }
@@ -577,7 +619,7 @@ var USERS = {
         roomUser.inRoom = true;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
         roomUser.userRole = API.getPermission(roomUser.id);
-        if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false)) {
+        if (userMehing && !roomUser.isMehing && (roomUser.username !== botVar.botName) && (botVar.ImHidden === false) && (SETTINGS.settings.announceMehs === true)) {
           API.sendChat(botChat.subChat(botChat.getChatMessage("whyyoumeh"), {name: roomUser.username, song: botVar.currentSong}));
         }
         roomUser.isMehing = userMehing;
@@ -609,6 +651,7 @@ var SETTINGS = {
         welcomeForeignerMsg: false,
         timeGuard: true,
         maximumSongLength: 480,
+		announceMehs: false,
         skipSound5Days: false,
         skipSound7Days: false,
         skipSoundStart: 7,
@@ -913,7 +956,7 @@ var botChat = {
    botChat.chatMessages.push(["nodatafound", "No previous data found."]);
    botChat.chatMessages.push(["retrievingdata", "Retrieving previously stored data."]);
    botChat.chatMessages.push(["datarestored", "Previously stored data successfully retrieved."]);
-   botChat.chatMessages.push(["greyuser", "Only bouncers and up can run a bot."]);
+   botChat.chatMessages.push(["greyuser", "Only mod and up can run a bot."]);
    botChat.chatMessages.push(["bouncer", "The bot can't move people when it's run as a bouncer."]);
    botChat.chatMessages.push(["online", " %%BOTNAME%% %%VERSION%% online!"]);
 
@@ -947,7 +990,7 @@ var botChat = {
    botChat.chatMessages.push(["notdisconnected", " @%%NAME%% did not disconnect during my time here."]);
    botChat.chatMessages.push(["noposition", " No last position known. The waitlist needs to update at least once to register a user's last position."]);
    botChat.chatMessages.push(["toolongago", " @%%NAME%%'s last disconnect (DC or leave) was too long ago: %%TIME%%."]);
-   botChat.chatMessages.push(["valid", " @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatMessages.push(["validdisconnect", " @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%."]);
    botChat.chatMessages.push(["meetingreturn", " @%%NAME%% how was your meeting?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
    botChat.chatMessages.push(["lunchreturn", " @%%NAME%% how was lunch?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
    botChat.chatMessages.push(["beerrunreturn", " @%%NAME%% What kind of :beer: did you buy?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
@@ -958,8 +1001,7 @@ var botChat = {
    botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
    botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
    botChat.chatMessages.push(["afkstatus", " @%%NAME%% has been afk for %%TIME%%."]);
-   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
-   botChat.chatMessages.push(["afkremoveXXX", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
+   botChat.chatMessages.push(["afkremove", " @%%NAME%% you have been removed for being afk for %%TIME%%. You were at position %%POSITION%%. Chat at least once every %%MAXIMUMAFK%% minutes if you want to play a song."]);
    botChat.chatMessages.push(["afkUserReset", "Thanks @%%NAME%% your afk status has been reset. "]);
 
    botChat.chatMessages.push(["caps", "@%%NAME%% unglue your capslock button please."]);
@@ -1023,12 +1065,12 @@ var botChat = {
    botChat.chatMessages.push(["selfcookie", "@%%NAME%% you're a bit greedy, aren't you? Giving cookies to yourself, bah. Share some with other people!"]);
    botChat.chatMessages.push(["cookie", "@%%NAMETO%%, @%%NAMEFROM%% %%COOKIE%%"]);
    botChat.chatMessages.push(["cycleguardtime", "[@%%NAME%%] The cycleguard is set to %%TIME%% minute(s)."]);
-   botChat.chatMessages.push(["dclookuprank", "[@%%NAME%%] Only bouncers and above can do a lookup for others."]);
-   botChat.chatMessages.push(["bootrank", "[@%%NAME%%] Only bouncers and above can boot other users."]);
+   botChat.chatMessages.push(["dclookuprank", "[@%%NAME%%] Only mods and above can do a lookup for others."]);
+   botChat.chatMessages.push(["bootrank", "[@%%NAME%%] Only mods and above can boot other users."]);
    botChat.chatMessages.push(["bootableDisabled", "[@%%NAME%%] line removal canceled. %%USERBYNAME%%"]);
    botChat.chatMessages.push(["bootableEnabled", "By request [@%%NAME%%] will get removed from line after next song. %%USERBYNAME%%"]);
    botChat.chatMessages.push(["emojilist", "Emoji list: %%LINK%%"]);
-   botChat.chatMessages.push(["notinwaitlist", "@%%NAME%% you are not on the waitlist."]);
+   botChat.chatMessages.push(["notinwaitlist", "@%%NAME%% you are not in the Room Queue."]);
    botChat.chatMessages.push(["doubleroll", "@%%NAME%% you already rolled. Sorry no double dipping."]);
    botChat.chatMessages.push(["rollresults", "@%%NAME%% you rolled a %%ROLL%%"]);
    botChat.chatMessages.push(["rollresultsgood", "Nice %%NAME%% you rolled a %%ROLL%%"]);
@@ -1893,7 +1935,8 @@ var TASTY = {
                       'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grabbed','yes','hellyes',
                       'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
-                      'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'];
+                      'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
+                      'holycrapLarryhasAshitLoadOfCommands','thatswhatimtalkinabout','waycool'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -1990,8 +2033,7 @@ var AFK = {
 						AFK.resetDC(roomUser);
 						API.moderateRemoveDJ(id);
 						roomUser.lastDC.resetReason = "Disconnect status was reset. Reason: You were removed from line due to afk.";
-						//API.sendChat(botChat.subChat(botChat.getChatMessage("afkremoveXXX"), {name: name, time: time, position: pos, maximumafk: AFK.settings.maximumAfk}));
-						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, maximumafk: AFK.settings.maximumAfk}));
+						API.sendChat(botChat.subChat(botChat.getChatMessage("afkremove"), {name: name, time: time, position: (i + 1), maximumafk: AFK.settings.maximumAfk}));
 						roomUser.afkWarningCount = 0;
 						SETTINGS.storeToStorage();
 					}
@@ -2029,6 +2071,174 @@ var AFK = {
     }
     catch(err) { UTIL.logException("afkRemovalNow: " + err.message); }
   },
+  setMeetingStatus: function (user, status) {
+	user.beerRun = false;
+	user.inMeeting = status;
+	user.atLunch = false;
+  },
+  setBeerRunStatus: function (user, status) {
+	user.beerRun = status;
+	user.inMeeting = false;
+	user.atLunch = false;
+  },
+  setLunchStatus: function (user, status) {
+	user.beerRun = false;
+	user.inMeeting = false;
+	user.atLunch = status;
+  },
+  updateDC: function (user) {
+	user.lastDC.time = Date.now();
+	user.lastDC.position = user.lastKnownPosition;
+	//user.lastDC.songCount = basicBot.room.roomstats.songCount;
+  },
+  
+  buildLunchRequest: function (username, byusername, cmd) {
+    try {
+	    this.username = username;
+	    this.requestUsername = byusername;
+	    this.cmd = cmd;
+	    return this;
+    }
+    catch(err) { UTIL.logException("buildLunchRequest: " + err.message); }
+  },
+  
+  takeLunch: function (waitlist, lunchRequest) {
+    try {
+        var user = USERS.lookupUserName(lunchRequest.username);
+        var currPos = API.getWaitListPosition(user.id, waitlist) + 1;
+        if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: lunchRequest.username}));
+        user.lastKnownPosition = currPos;
+        user.lastSeenInLine = Date.now();
+		var msg = "";
+	    if (lunchRequest.cmd == '.beerrun') {
+			AFK.setBeerRunStatus(user, true);
+			msg = botChat.subChat(botChat.getChatMessage("beerrunleave"), {name: lunchRequest.username, pos: currPos});
+		}
+		if (lunchRequest.cmd == '.lunch') {
+			AFK.setLunchStatus(user, true);
+			msg = botChat.subChat(botChat.getChatMessage("lunchleave"), {name: lunchRequest.username, pos: currPos});
+		}
+		if (lunchRequest.cmd == '.meeting') {
+			AFK.setMeetingStatus(user, true);
+			msg = botChat.subChat(botChat.getChatMessage("meetingleave"), {name: lunchRequest.username, pos: currPos});
+		}
+        AFK.updateDC(user);
+        setTimeout(function () { API.moderateRemoveDJ(user.id); }, 1000);
+        API.sendChat(msg + lunchRequest.requestUsername);
+		SETTINGS.storeToStorage();
+    }
+    catch(err) { UTIL.logException("takeLunch: " + err.message); }
+  },
+  resetOldDisconnects: function (dubUserList) {
+		try {
+			botDebug.debugMessage(false, "======================resetOldDisconnects======================");
+			for (var i = 0; i < USERS.users.length; i++) {
+				var roomUser = USERS.users[i];
+				var dcTime = roomUser.lastDC.time;
+				var leftroom = roomUser.lastDC.leftroom;
+				var dcPos = roomUser.lastDC.position;
+				var miaTime = 0;
+				var resetUser = false;
+				botDebug.debugMessage(false, "User: " + roomUser.username + " - " + roomUser.id);
+				// If left room > 10 mins ago:
+				if (leftroom !== null) {
+					miaTime = Date.now() - leftroom;
+					botDebug.debugMessage(false, "DC leftroomtime: " + miaTime);
+					if (miaTime > ((botVar.room.maximumDcOutOfRoom) * 60 * 1000)) {
+						resetUser = true;
+						roomUser.lastDC.resetReason = "Disconnect status was reset. Reason: You left the room for more than " + botVar.room.maximumDcOutOfRoom + " minutes.";
+					}
+					botDebug.debugMessage(false, "A-RESET: " + resetUser);
+				}
+				// DC Time without pos is invalid:
+				if ((dcTime !== null) && (dcPos < 1) && (resetUser === false)) {
+					resetUser = true;
+					botDebug.debugMessage(false, "B-RESET: " + resetUser);
+				}
+				// If have not been in line for > max DC mins + 30 reset:
+				if ((roomUser.lastSeenInLine !== null) && (dcPos > 0) && (resetUser === false)) {
+					miaTime = Date.now() - roomUser.lastSeenInLine;
+					botDebug.debugMessage(false, "Line miaTime: " + miaTime);
+					if (miaTime > ((botVar.room.maximumDc + 30) * 60 * 1000)) resetUser = true;
+					botDebug.debugMessage(false, "C-RESET: " + resetUser);
+				}
+				// If last disconnect > max DC mins + 30 reset:
+				if ((dcTime !== null) && (dcPos > 0) && (resetUser === false)) {
+					miaTime = Date.now() - dcTime;
+					botDebug.debugMessage(false, "DC miaTime: " + miaTime + " > " + ((botVar.room.maximumDc + 30) * 60 * 1000) );
+					if (miaTime > ((botVar.room.maximumDc + 30) * 60 * 1000)) resetUser = true;
+					botDebug.debugMessage(false, "D-RESET: " + resetUser);
+				}
+				botDebug.debugMessage(false, "RESET: " + resetUser);
+				if (resetUser === true) AFK.resetDC(roomUser);
+			}
+			botDebug.debugMessage(false, "======================resetOldDisconnects======================");
+			SETTINGS.storeToStorage();
+		}
+		catch(err) { UTIL.logException("resetOldDisconnects: " + err.message); }
+	},
+	dclookupCheckAll: function (waitlist) {
+	  try {
+		  for (var i = 0; i < waitlist.length; i++) {
+			if (typeof waitlist[i] !== 'undefined') {
+		      var roomUser = USERS.lookupUserID(waitlist[i].id);
+			  if (roomUser !== false) AFK.dclookup(waitlist, roomUser, false);
+			}
+		  }
+		}
+		catch(err) { UTIL.logException("dclookupCheckAll: " + err.message); }
+	},
+	dclookupWithMsg: function (waitlist, roomUser) {
+	  try { AFK.dclookup(waitlist, roomUser, true); }
+	  catch(err) { UTIL.logException("dclookupWithMsg: " + err.message); }
+	},
+	dclookup: function (waitlist, user, userRequest) {
+	  try {
+		if (userRequest === true) {  // Verify they are in the waitlist:
+			var djpos = API.getWaitListPosition(user.id, waitlist);
+			if (djpos < 0) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: user.username}));
+		}
+		if (user.lastDC.time === null) {
+			AFK.resetDC(user);
+			var noDisconnectReason = botChat.subChat(botChat.getChatMessage("notdisconnected"), {name: user.username});
+			if (user.lastDC.resetReason.length > 0) noDisconnectReason = user.lastDC.resetReason;
+			if (userRequest === true) user.lastDC.resetReason = "";
+			if (userRequest === true) API.sendChat(noDisconnectReason);
+			return;
+		}
+		var dc = user.lastDC.time;
+		var newPosition = user.lastDC.position;
+		if (newPosition < 1) {
+			AFK.resetDC(user);
+			if (userRequest === true) API.sendChat(botChat.getChatMessage("noposition"));
+			return;
+		}
+		var timeDc = Date.now() - dc;
+		var validDC = false;
+		if (botVar.room.maximumDc * 60 * 1000 > timeDc) validDC = true;
+		var time = UTIL.msToStr(timeDc);
+		if (!validDC) {
+			AFK.resetDC(user);
+			if (userRequest === true) API.sendChat(botChat.subChat(botChat.getChatMessage("toolongago", {name: user.username, time: time})));
+			return;
+		}
+
+		if (newPosition <= 0) newPosition = 1;
+		if ((newPosition <= 1) && ((user.beerRun === true) || (user.inMeeting === true) || (user.atLunch === true))) newPosition = 2;
+		var leaveMsgType = "validdisconnect";
+		if (user.beerRun === true) leaveMsgType = "beerrunreturn";
+		if (user.inMeeting === true) leaveMsgType = "meetingreturn";
+		if (user.atLunch === true) leaveMsgType = "lunchreturn";
+	    var msg = botChat.subChat(botChat.getChatMessage(leaveMsgType), {name: user.username, time: time, position: newPosition});
+		API.moderateMoveDJ(user.id, newPosition, waitlist);
+		AFK.resetDC(user);
+		USERS.setLastActivity(user, false);
+		user.lastKnownPosition = newPosition;
+		user.lastSeenInLine = Date.now();
+		API.sendChat(msg);
+      }
+      catch(err) { UTIL.logException("dclookup: " + err.message); }
+	},
 };
 
 // Will not currently work as Larry cannot move people in the line
@@ -2337,6 +2547,41 @@ var RANDOMCOMMENTS = {
     "A soldier who survived mustard gas and pepper spray is now a seasoned veteran!",
     "Irish Handcuffs:  Holding an alcoholic drink in each hand.",
     "If Apple made a car, would it have Windows?",
+    "Sometimes I need what only you can provide: your absence.",
+    "I feel so miserable without you, it's almost like having you here",
+    "Thank you for not annoying me more than you do.",
+    "If I throw a stick, will you go away?",
+    "Any similarity between you and a human is purely coincidental!",
+    "Anyone who told you to be yourself couldn't have given you worse advice.",
+    "A mind is a terrible thing to waste; I'm glad they didn't waste one on you.",
+    "I'd like to help you out; which way did you come in?",
+    "Oh my God, look at you. Anyone else hurt in the accident?",
+    "Did your parents ever ask you to run away from home?",
+    "How can I miss you if you won't go away?",
+    "You have a face like a Saint - A Saint Bernard.",
+    "I'll never forget the first time we met - although I'll keep trying.",
+    "I'm busy now. Can I ignore you some other time?",
+    "Do you still love nature, despite what it did to you?",
+    "If brains were dynamite you wouldn't have enough to blow your nose.",
+    "Well aren't you a waste of two billion years of evolution.",
+    "How did you get here? Did someone leave your cage open?",
+    "If I agreed with you we'd both be wrong.",
+    "I don't know what makes you so stupid, but it really works!",
+    "I don't think you are a fool. But then what's MY opinion against thousands of others?",
+    "I wonder what life would have been like if you had had enough oxygen at birth.",
+    "Your gene pool could use a little chlorine.",
+    "I don't have an attitude; I have a personality you can't handle.",
+    "Your kid may be an honors student, but you're still an idiot.",
+    "Are you renting the space in your head? It could be profitable.",
+    "Some people are only alive because it is illegal to shoot them.",
+    "If you can't be kind, at least have the decency to be vague.",
+    "I think someone has to be listening to you for it to be an actual conversation.",
+    "I don't care where you go, as long as you get lost.",
+    "This land is your land. This land is my land. So stay on your land.",
+    "If you explain so clearly that nobody can misunderstand, somebody will.",
+    "You have no idea how acutely depressing it is to realize we're from the same species.",
+    "If ignorance is bliss, you must be the happiest person alive.",
+    "Keep talking, someday you'll say something intelligent.",
     "An apple a day keeps anyone away, If you throw it hard enough",
     "Yesterday at the bank an old lady asked if i could help her check her balance... so i pushed her over",
     "To the guy who invented Zero: Thanks for nothing!",
@@ -2440,6 +2685,7 @@ var RANDOMCOMMENTS = {
     "Do you ever just wanna grab someone by the shoulder, look them deep in the eyes and whisper 'No one gives a shit!!'",
     "Psst... I hear Eddie Vedder likes men",
     "I'm sorry I keep calling you and hanging up.  I just got this new voice activated phone, so every time I holler dumbass it dials you....",
+	"Sex is like art. Most of it is pretty bad, and the good stuff is out of your price range.",
     "Before Walmart you had to buy a ticket to the fair to see a bearded woman.",
     "Hold on a minute.... I'm gonna need something stronger than tea to listen to this BS!!",
     "My greatest fear is one day I will die, and my wife will sell my guns for what I told her I paid for them.",
@@ -2937,6 +3183,7 @@ var API = {
       botVar.botName = API.getBotName();
 	  botVar.botID = API.getBotID();
 	  botVar.roomID = API.getRoomID();
+	  botVar.roomName = API.getRoomName();
       if (botVar.botName.length < 1) botVar.botName = "larry_the_law";
       botChat.loadChat();
       SETTINGS.retrieveFromStorage();
@@ -2952,12 +3199,16 @@ var API = {
 	  //Test events stuff:
 	  // This fires off WAY too often!!
 	  //Dubtrack.Events.bind("realtime:room_playlist-update", API.EVENT_SONG_ADV_TEST);
-	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT_TEST);
+	  Dubtrack.Events.bind("realtime:room_playlist-queue-reorder", API.EVENT_QUEUE_REORDER);
+	  //Dubtrack.Events.bind("realtime:room_playlist-queue-update", API.EVENT_QUEUE_UPDATE);
+	  Dubtrack.Events.bind("realtime:room_playlist-queue-update-grabs", API.EVENT_UPDATE_GRABS);
+	  Dubtrack.Events.bind("realtime:chat-message", API.EVENT_CHAT);
 	  //todoer Replace the old code: Dubtrack.Events.bind("realtime:user-join", API.EVENT_USER_JOIN_TEST);
 	  //Dubtrack.Events.bind("realtime:user-leave", API.EVENT_USER_LEAVE_TEST);
 
       //OnSongUpdate Events
       $('.currentSong').bind("DOMSubtreeModified", API.on.EVENT_SONG_ADVANCE);
+      $('.queue-total').bind("DOMSubtreeModified", API.on.EVENT_QUEUE_UPDATE);
       //$('.chat-main').bind("DOMSubtreeModified", API.on.EVENT_NEW_CHAT);
       $('.room-user-counter').bind("DOMSubtreeModified", API.on.EVENT_USER_JOIN);
       $('.dubup').bind("DOMSubtreeModified", API.on.EVENT_DUBUP);
@@ -3214,7 +3465,6 @@ var API = {
     }
     else 
         API.chatLog(message);
-    
   },
   
   getDubUpCount: function() {
@@ -3466,7 +3716,7 @@ var API = {
 	}
     catch(err) { UTIL.logException("defineMyQueue: " + err.message); }
 	},
-  getWaitList: function(cb) {
+  getWaitList: function(cb, data) {
     try {
 	  $.when(API.defineRoomQueue()).done(function(a1) {
         // the code here will be executed when all four ajax requests resolve.
@@ -3477,8 +3727,7 @@ var API = {
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
 	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
 		}
-		//dubBot.queue.dubQueue = waitlist;
-        cb(waitlist);
+        cb(waitlist, data);
 	  });
 	}
     catch(err) { UTIL.logException("getWaitList: " + err.message); }
@@ -3493,7 +3742,10 @@ var API = {
 	}
     catch(err) { UTIL.logException("defineRoomQueue: " + err.message); }
 	},
-	
+  getRoomName: function() {
+    try { return Dubtrack.room.model.get("name");	}
+    catch(err) { UTIL.logException("getRoomName: " + err.message); }
+  },
   getRoomID: function() {
 	//Tasty Tunes Room ID: 5600a564bfb6340300a2def2
 	//        RGT Room ID: 5602ed62e8632103004663c2
@@ -5330,23 +5582,40 @@ var API = {
   showPopup: function(title, message) {
     Dubtrack.helpers.displayError(title, message);
   },
-    EVENT_CHAT_TEST: function(data) {  //songadvance
+    EVENT_CHAT: function(data) {  //songadvance
       try { 
 	    // todoer delete after testing this stuff
 	    //var msg = data.message;
 		//var user = data.user.username;
 		//var userId = data.user._id;
         
-		//botDebug.debugMessage(true, "EVENT_CHAT_TEST[" + data.user.username + "-" + data.user._id + "]: " + data.message);
+		//botDebug.debugMessage(true, "EVENT_CHAT[" + data.user.username + "-" + data.user._id + "]: " + data.message);
 		var chat = botChat.formatChat(data.message, data.user.username, data.user._id);
         COMMANDS.checkCommands(chat);
 
 		//botChat.processChatItem(data.message, data.user.username, data.user._id);
 	    //UTIL.logObject(data, "CHAT_DATA");
 	  }
-      catch(err) { UTIL.logException("EVENT_CHAT_TEST: " + err.message); }
+      catch(err) { UTIL.logException("EVENT_CHAT: " + err.message); }
     },
-	EVENT_SONG_ADV_TEST: function(data) {  //songadvance
+    EVENT_QUEUE_REORDER: function(data) {
+      try { 
+	  //botDebug.debugMessage(true, "EVENT_QUEUE_REORDER"); 
+	  //UTIL.logObject(data, "ADV_DATA");
+	  }
+      catch(err) { UTIL.logException("EVENT_QUEUE_REORDER: " + err.message); }
+    },
+    EVENT_UPDATE_GRABS: function(data) {
+      try { 
+	    API.chatLog("GRABBED BY: " + data.user.username);
+		var roomUser = USERS.lookupUserName(data.user.username);
+		if (typeof roomUser === 'boolean') return;
+		USERS.setLastActivity(roomUser, false);
+	  }
+      catch(err) { UTIL.logException("EVENT_UPDATE_GRABS: " + err.message); }
+    },
+	
+    EVENT_SONG_ADV_TEST: function(data) {  //songadvance
       try { botDebug.debugMessage(true, "EVENT_SONG_ADV_TEST: " + API.getSongName()); 
 	  UTIL.logObject(data, "ADV_DATA");
 	  }
@@ -5417,6 +5686,10 @@ var API = {
     //    UTIL.logException("EVENT_NEW_CHAT: " + err.message);
     //  }
     //},
+    EVENT_QUEUE_UPDATE: function(data) {
+      try { API.getWaitList(AFK.dclookupCheckAll, null); }
+      catch(err) { UTIL.logException("EVENT_QUEUE_UPDATE: " + err.message); }
+    },
     EVENT_SONG_ADVANCE: function() {  //songadvance
       try {
       // UPDATE ON SONG UPDATE
@@ -5759,8 +6032,7 @@ var BOTCOMMANDS = {
             executable: function (minRank, chat) {
 			  try {
 			    //valid ranks: 'creator' 'co-owner' 'manager' 'mod' 'vip' 'resident-dj' 'dj' ( 'user' allows ALL dub users )
-                var id = chat.uid;
-                var perm = API.getPermission(id);
+                var perm = API.getPermission(chat.uid);
                 var minPerm = API.displayRoleToRoleNumber(minRank);
 			    return (perm >= minPerm);
 			  }
@@ -5828,7 +6100,8 @@ var BOTCOMMANDS = {
                           'ooga-chaka','snag','snagged','yoink','classy','ska','grunge','jazzhands','verycool','ginchy','catchy','grabbed','yes','hellyes',
                           'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
-                          'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie'],
+                          'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
+                          'holycrapLarryhasAshitLoadOfCommands','thatswhatimtalkinabout','waycool'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6663,6 +6936,64 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            announcemehsCommand: {
+                command: 'maxlength',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+					SETTINGS.settings.announceMehs = !SETTINGS.settings.announceMehs;
+					var settingMsg = "Announcing user mehs has been disabled";
+					if (SETTINGS.settings.announceMehs === true) settingMsg = "Announcing user mehs has been enabled";
+					API.sendChat(botChat.subChat(botChat.getChatMessage("maxlengthtime"), {name: chat.un, time: SETTINGS.settings.announceMehs}));
+                }
+            },
+            meetingCommand: {   //Added 03/28/2015 Zig
+                command: ['meeting', 'lunch', 'beerrun'],
+                rank: 'dj',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var msg = chat.message;
+                        var name;
+                        var byusername = " ";
+                        if (msg.length === cmd.length) name = chat.un;
+                        else {
+                            name = msg.substring(cmd.length + 2);
+                            if (!BOTCOMMANDS.commands.executable("mod", chat)) return API.sendChat(botChat.subChat(botChat.getChatMessage("bootrank"), {name: chat.un}));
+                            byusername = " [ executed by " + chat.un + " ]";
+                        }
+						var lunchRequest = new AFK.buildLunchRequest(name, byusername, cmd);
+						API.getWaitList(AFK.takeLunch, lunchRequest);
+                    }
+                    catch(err) { UTIL.logException("meetingCommand: " + err.message); }
+                }
+            },
+            backCommand: {
+                command: ['dclookup', 'dc', 'back'],
+                rank: 'dj',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+						if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+						if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						var msg = chat.message;
+						var name;
+						if (msg.length === cmd.length) name = chat.un;
+						else {
+							name = msg.substring(cmd.length + 2);
+							if (!BOTCOMMANDS.commands.executable("mod", chat)) return API.sendChat(botChat.subChat(botChat.getChatMessage("dclookuprank"), {name: chat.un}));
+						}
+						var roomUser = USERS.lookupUserName(name);
+						if (typeof roomUser === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+						API.getWaitList(AFK.dclookupWithMsg, roomUser);
+                    }
+                    catch(err) { UTIL.logException("backCommand: " + err.message); }
+                }
+            },
 
             /* basic
             activeCommand: {
@@ -6975,29 +7306,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            dclookupCommand: {
-                command: ['dclookup', 'dc', 'back'],
-                rank: 'dj',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        var name;
-                        if (msg.length === cmd.length) name = chat.un;
-                        else {
-                            name = msg.substring(cmd.length + 2);
-                            var perm = API.getPermission(chat.uid);
-                            if (perm < 2) return API.sendChat(botChat.subChat(botChat.getChatMessage("dclookuprank"), {name: chat.un}));
-                        }
-                        var user = USERS.lookupUserName(name);
-                        if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        var toChat = basicBot.userUtilities.dclookup(user.id);
-                        API.sendChat(toChat);
-                    }
-                }
-            },
 
             emojiCommand: {
                 command: 'emoji',
@@ -8581,52 +8889,6 @@ var BOTCOMMANDS = {
                                 $(".icon-chat").click();
                             }, 1000);
                         }, 1000, chat);
-                    }
-                }
-            },
-            meetingCommand: {   //Added 03/28/2015 Zig
-                command: ['meeting', 'lunch', 'beerrun'],
-                rank: 'dj',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var msg = chat.message;
-                        var name;
-                        var byusername = " ";
-                        if (msg.length === cmd.length) name = chat.un;
-                        else {
-                            name = msg.substring(cmd.length + 2);
-                            var perm = API.getPermission(chat.uid);
-                            if (perm < 2) return API.sendChat(botChat.subChat(botChat.getChatMessage("bootrank"), {name: chat.un}));
-                            byusername = " [ executed by " + chat.un + " ]";
-                        }
-                        var user = USERS.lookupUserName(name);
-                        var currPos = API.getWaitListPositionOld(user.id) + 1;
-                        if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: name}));
-                        user.lastKnownPosition = currPos;
-                        user.lastSeenInLine = Date.now();
-                        basicBot.userUtilities.updateDC(user);
-                        var msg;
-                        if (cmd == '.beerrun') {
-                            basicBot.userUtilities.setBeerRunStatus(user, true);
-                            msg = botChat.subChat(botChat.getChatMessage("beerrunleave"), {name: API.getDubUser(user).username, pos: currPos});
-                        }
-                        if (cmd == '.lunch') {
-                            basicBot.userUtilities.setLunchStatus(user, true);
-                            msg = botChat.subChat(botChat.getChatMessage("lunchleave"), {name: API.getDubUser(user).username, pos: currPos});
-                        }
-                        if (cmd == '.meeting') {
-                            basicBot.userUtilities.setMeetingStatus(user, true);
-                            msg = botChat.subChat(botChat.getChatMessage("meetingleave"), {name: API.getDubUser(user).username, pos: currPos});
-
-                        }
-                        setTimeout(function () { API.moderateRemoveDJ(user.id); }, 1000);
-                        API.sendChat(msg + byusername);
-                    }
-                    catch(err) {
-                        UTIL.logException("meetingCommand: " + err.message);
                     }
                 }
             },
