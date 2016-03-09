@@ -10,7 +10,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0028.0085",
+  version: "Version  1.01.0029.0069",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1473,18 +1473,7 @@ var EIGHTBALL = {
     "F*cking Right",
     "Signs point to F*cking Yes",
     "It is F*cking certain"
-    ],
-
-  eightBallSelect: function()  {  //Added 04/01/2015 Zig
-    try  {
-        var arrayCount = EIGHTBALL.EightBallArray.length;
-        var arrayID = Math.floor(Math.random() * arrayCount);
-        return EIGHTBALL.EightBallArray[arrayID];
-    }
-    catch(err) {
-      UTIL.logException("eightBallSelect: " + err.message);
-    }
-  }
+    ]
 };
 
 //SECTION UTIL: Core functionality:
@@ -1516,6 +1505,14 @@ var UTIL = {
 		  UTIL.logException("canSkip: " + err.message);
 		}
 	},
+    selectRandomFromArray: function(myArray)  {  //Added 02/19/2015 Zig
+	  try  {
+		var arrayCount = myArray.length;
+		var randomID = Math.floor(Math.random() * arrayCount);
+		return myArray[randomID];
+	  }
+	  catch(err) { UTIL.logException("selectRandomFromArray: " + err.message); }
+    },
     numberToIcon: function(intValue) {
         switch (intValue) {
             case 0: return ":zero:";
@@ -1928,7 +1925,7 @@ var TASTY = {
                       'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                       'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
                       'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
-                      'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
+                      'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin',':star:','star','rockstar',':metal:',
                       '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                       ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                       'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
@@ -1936,7 +1933,7 @@ var TASTY = {
                       'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
-                      'holycrapLarryhasAshitLoadOfCommands','thatswhatimtalkinabout','waycool'];
+                      'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -2475,16 +2472,6 @@ var RANDOMCOMMENTS = {
     randomCommentMax: 180,
     nextRandomComment: Date.now(),
   },
-  randomCommentSelect: function()  {  //Added 02/19/2015 Zig
-    try  {
-        var arrayCount = RANDOMCOMMENTS.randomCommentArray.length;
-        var randomID = Math.floor(Math.random() * arrayCount);
-        return RANDOMCOMMENTS.randomCommentArray[randomID];
-    }
-    catch(err) {
-      UTIL.logException("randomCommentSelect: " + err.message);
-    }
-  },
   randomCommentCheck: function() {  //Added 02/19/2015 Zig
       try  {
       //var testTime = new Date();
@@ -2495,14 +2482,14 @@ var RANDOMCOMMENTS = {
       //if (timeDiff > 0)
       //{
       //      RANDOMCOMMENTS.randomCommentSetTimer();
-      //      if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
+      //      if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(UTIL.selectRandomFromArray(RANDOMCOMMENTS.randomCommentArray));
       //}
 
       if (RANDOMCOMMENTS.settings.nextRandomComment <= Date.now())
       {
           RANDOMCOMMENTS.randomCommentSetTimer();
           if (botVar.ImHidden === true) return;
-          if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
+          if (RANDOMCOMMENTS.settings.randomComments === true) API.sendChat(UTIL.selectRandomFromArray(RANDOMCOMMENTS.randomCommentArray));
       }
     }  
     catch(err) {
@@ -2579,6 +2566,7 @@ var RANDOMCOMMENTS = {
     "I don't care where you go, as long as you get lost.",
     "This land is your land. This land is my land. So stay on your land.",
     "If you explain so clearly that nobody can misunderstand, somebody will.",
+	"I'm amazing in bed, even if im the only one in bed",
     "You have no idea how acutely depressing it is to realize we're from the same species.",
     "If ignorance is bliss, you must be the happiest person alive.",
     "Keep talking, someday you'll say something intelligent.",
@@ -2993,7 +2981,25 @@ var RANDOMCOMMENTS = {
     ]
 };
 //SECTION AI: All Larry AI functionality:
+
 var AI = {
+    randomByeArray: [ 
+      "Catch ya on the flipside %%USERNAME%%",
+      "Peace %%USERNAME%%!",
+      "See ya %%USERNAME%%!",
+      "See ya soon %%USERNAME%%",
+      "Hurry back %%USERNAME%%",
+	  "Keep it real %%USERNAME%%",
+	  "Keep it between the lines...and dirty side down %%USERNAME%%",
+	  "Fine, then go %%USERNAME%%!",
+	  "Cheers %%USERNAME%%",
+	  "May your mother's cousin never be assaulted by Attila the Hun at the supermarket %%USERNAME%%",
+      "Adidas %%USERNAME%%",
+      "Later %%USERNAME%%",
+      "See ya, wouldn't wanna be ya %%USERNAME%%",
+      "Until we meet again %%USERNAME%%. <<Tips imaginary hat>>",
+      "We'll hold the fort down for ya %%USERNAME%%"
+      ],
   larryAI: function(chat, username)  {  //Added 04/03/2015 Zig
     try  {
     var fuComment = "";
@@ -3024,7 +3030,7 @@ var AI = {
     botDebug.debugMessage(false, "Larry AI chatmsg: " + chatmsg);
 
     if (chatmsg.indexOf("USUCKLARRY") > -1) fuComment = "You're still sore about the other night %%FU%% :kiss:";
-    if (chatmsg.indexOf("DUCKULARRY") > -1) fuComment = AI.fuComment();
+    if (chatmsg.indexOf("DUCKULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
     if (chatmsg.indexOf("DUMBASSLARRY") > -1) fuComment = "I'd slap you, but shit stains. %%FU%%";
     if (chatmsg.indexOf("SHITHEADLARRY") > -1) fuComment = "I could eat a bowl of alphabet soup and shit out a smarter statement than that %%FU%%";
     if (chatmsg.indexOf("STUPIDASSLARRY") > -1) fuComment = "I could eat a bowl of alphabet soup and shit out a smarter statement than that %%FU%%";
@@ -3093,20 +3099,20 @@ var AI = {
     if (chatmsg.indexOf("HILARRY") > -1) fuComment = "Hi %%FU%%.";
     if (chatmsg.indexOf("HELLOLARRY") > -1) fuComment = "Hello %%FU%%.";
     //todo - many optoins here:  http://www.neilstuff.com/howru100.html
-    if (chatmsg.indexOf("HOWYADOINLARRY") > -1) fuComment = AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWYADOINGLARRY") > -1) fuComment = AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWYOUDOINLARRY") > -1) fuComment = AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWYOUDOINGLARRY") > -1) fuComment = AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWAREYOULARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWAREULARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWRULARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWSLARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWAREYOUDOINLARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWAREYOUDOINGLARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("HOWAREYOUTODAYLARRY") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("LARRYHOWAREYOU") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("LARRYHOWRYOU") > -1) fuComment =  AI.howAreYouComment();
-    if (chatmsg.indexOf("LARRYHOWRU") > -1) fuComment =  AI.howAreYouComment();
+    if (chatmsg.indexOf("HOWYADOINLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWYADOINGLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWYOUDOINLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWYOUDOINGLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWAREYOULARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWAREULARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWRULARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWSLARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWAREYOUDOINLARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWAREYOUDOINGLARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("HOWAREYOUTODAYLARRY") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("LARRYHOWAREYOU") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("LARRYHOWRYOU") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
+    if (chatmsg.indexOf("LARRYHOWRU") > -1) fuComment =  UTIL.selectRandomFromArray(CONST.howAreYouComments);
     
     if (chatmsg.indexOf("LARRYSAFUCK") > -1) fuComment = "Hey I have an idea: Why don't you go outside and play hide-and-go fuck yourself %%FU%%?!";
     if (chatmsg.indexOf("LARRYFUCKOFF") > -1) fuComment = "Hey I have an idea: Why don't you go outside and play hide-and-go fuck yourself %%FU%%?!";
@@ -3133,39 +3139,19 @@ var AI = {
     if (chatmsg.indexOf("LARRYSASHITHEAD") > -1) fuComment = "Takes one to know one %%FU%%!";
     if (chatmsg.indexOf("LOLLARRY") > -1) fuComment = "I know, %%FU%%, I crack my shit up too!! :laughing:";
     
-    if (chatmsg.indexOf("LARRYFU") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("LARRYFUCKU") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("FUCKLARRY") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("LARRYFUCKYOU") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("FULARRY") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("FUCKULARRY") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("FUCKYOULARRY") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("SCREWULARRY") > -1) fuComment = AI.fuComment();
-    if (chatmsg.indexOf("SCREWYOULARRY") > -1) fuComment = AI.fuComment();
+    if (chatmsg.indexOf("LARRYFU") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("LARRYFUCKU") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("FUCKLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("LARRYFUCKYOU") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("FULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("FUCKULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("FUCKYOULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("SCREWULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
+    if (chatmsg.indexOf("SCREWYOULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.fucomments);
     if (fuComment.length > 0) setTimeout(function () { API.sendChat(botChat.subChat(fuComment, {fu: username})); }, 100);
     }
     catch(err) {
       UTIL.logException("larryAI: " + err.message);
-    }
-  },
-  howAreYouComment: function()  {  //Added 04/03/2015 Zig
-    try  {
-      var arrayCount = CONST.howAreYouComments.length;
-      var arrayID = Math.floor(Math.random() * arrayCount);
-      return CONST.howAreYouComments[arrayID];
-    }
-    catch(err) {
-      UTIL.logException("howAreYouComment: " + err.message);
-    }
-  },
-  fuComment: function()  {  //Added 04/03/2015 Zig
-    try  {
-      var arrayCount = CONST.fucomments.length;
-      var arrayID = Math.floor(Math.random() * arrayCount);
-      return CONST.fucomments[arrayID];
-    }
-    catch(err) {
-      UTIL.logException("fuComment: " + err.message);
     }
   },
   
@@ -6093,7 +6079,7 @@ var BOTCOMMANDS = {
                           'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                           'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
                           'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
-                          'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin','star','rockstar',':metal:',
+                          'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin',':star:','star','rockstar',':metal:',
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
                           'nicefollow',':beer:',':beers:','niceplay','oldies','oldie','pj','slayer','kinky',':smoking:','jewharp','talkbox','oogachakaoogaooga','oogachaka',
@@ -6101,7 +6087,7 @@ var BOTCOMMANDS = {
                           'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
-                          'holycrapLarryhasAshitLoadOfCommands','thatswhatimtalkinabout','waycool'],
+                          'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6121,7 +6107,7 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         var msg = chat.message;
-                        var magicResponse = EIGHTBALL.eightBallSelect();
+                        var magicResponse = UTIL.selectRandomFromArray(EIGHTBALL.EightBallArray);
                         if (msg.length === cmd.length)  return API.sendChat(botChat.subChat(botChat.getChatMessage("eightballresponse2"), {name: chat.un, response: magicResponse }));
                         var myQuestion = msg.substring(cmd.length + 1);
                         //Since we don't delete comments yet repeating the question is pointless.
@@ -6375,9 +6361,7 @@ var BOTCOMMANDS = {
 						 TASTY.tastyVote(chat.un, cmd);
 						 setTimeout(function () { API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif"); }, 250);
                     }
-                    catch(err) {
-                        UTIL.logException("elevenCommand: " + err.message);
-                    }
+                    catch(err) { UTIL.logException("elevenCommand: " + err.message); }
                 }
             },
             resetstatsCommand: {  //Added 12/23/2015 Zig 
@@ -6405,6 +6389,21 @@ var BOTCOMMANDS = {
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     API.sendChat(botChat.subChat(botChat.getChatMessage("online"), {botname: botVar.botName, version: botVar.version}));
+                }
+            },
+            imoutCommand: {
+                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater',
+				          'allrightthen','adios','ciao','aurevoir','gottabolt'],
+                rank: 'user',
+                type: 'startsWith',
+                functionality: function (chat, cmd)  {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						API.moderateRemoveDJ(chat.un);
+						API.sendChat(botChat.subChat(UTIL.selectRandomFromArray(AI.randomByeArray), {username: chat.un}));
+                    }
+                    catch(err) { UTIL.logException("imoutCommand: " + err.message); }
                 }
             },
             zigCommand: {  //Added 02/14/2015 Zig 
@@ -6597,7 +6596,7 @@ var BOTCOMMANDS = {
                 try{
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    return API.sendChat(RANDOMCOMMENTS.randomCommentSelect());
+                    return API.sendChat(UTIL.selectRandomFromArray(RANDOMCOMMENTS.randomCommentArray));
                 }
                 catch(err) { UTIL.logException("speakCommand: " + err.message);  }
                 }
