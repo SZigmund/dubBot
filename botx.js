@@ -1,4 +1,9 @@
 // Written by: DocZ
+//               API.data.dubUsers.length
+//               USERS.users.length
+//               USERS.users[1].username + " - " + USERS.users[1].userRole + " - " + USERS.users[1].id;
+//Remove User 1: USERS.users.splice(1, 1);
+//               USERS.users[2].username + " - " + USERS.users[2].userRole + " - " + USERS.users[2].id;
 //grabCurrentSong
 //getSongLength
 //deleteCurrentSong
@@ -12,7 +17,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0029.0073",
+  version: "Version  1.01.0029.0074",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -518,7 +523,7 @@ var USERS = {
         this.lastSeenInLine = null;
     },
 
-    welcomeUser: function (roomUser, newUser) {
+    welcomeUser: function (roomUser, newUser, oldUsername) {
       try {
         var welcomeMessage = "";
         newUser ? welcomeMessage = botChat.subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
@@ -528,6 +533,10 @@ var USERS = {
         roomUser.jointime = Date.now();
         if (roomUser.username === botVar.botName) return;
         setTimeout(function () { API.sendChat(welcomeMessage); }, 1 * 1000);
+		if (oldUsername.length > 0) {
+		   var changedName = botChat.subChat(botChat.getChatMessage("changedName"), {name: roomUser.username, oldname: oldUsername})
+		   setTimeout(function () { API.sendChat(changedName); }, 1 * 1500);
+		}
         
       }
       catch(err) { UTIL.logException("welcomeUser: " + err.message); }
@@ -622,7 +631,7 @@ var USERS = {
         //USERS.users[i].username 
         //
         // clearInterval(USERS.loadUserInterval);
-        if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
+        if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser, "");
         roomUser.inRoom = true;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
         roomUser.userRole = API.getPermission(roomUser.id);
@@ -656,14 +665,19 @@ var USERS = {
 		var userID = dubUserList[i].userID;
         botDebug.debugMessage(false, "USER: " + username);
         var roomUser = USERS.defineRoomUser(userID);
+		var oldUsername = "";
         if (roomUser === false) {
           roomUser = new USERS.User(userID, username);
           USERS.users.push(roomUser);
           newUser = true;
         }
-        if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
+		else {
+		  if (roomUser.username !== username) oldUsername = roomUser.username;
+		  roomUser.username = username;
+		}
+        if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser, oldUsername);
         roomUser.inRoom = true;
-		roomUser.username = username;
+		
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
         roomUser.userRole = API.getPermission(roomUser.id);
         roomUser.inRoomUpdated = true;
@@ -1011,6 +1025,8 @@ var botChat = {
 
    botChat.chatMessages.push(["welcome", "Welcome to Tasty Tunes @%%NAME%%.  Check out our room rules here: http://tinyurl.com/TastyTunesRules"]);
    botChat.chatMessages.push(["welcomeback", "Welcome back, @%%NAME%%"]);
+   botChat.chatMessages.push(["changedName", "Hen, @%%NAME%% did you change your name from %%OLDNAME%%"]);
+
    botChat.chatMessages.push(["songknown", " :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:"]);
    botChat.chatMessages.push(["songknown2", " :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:"]);
    botChat.chatMessages.push(["timelimit", " @%%NAME%% your song is longer than %%MAXLENGTH%% minutes, you need permission to play longer songs."]);
