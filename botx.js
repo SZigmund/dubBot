@@ -8,9 +8,11 @@
 // - Record all Bans/Unbans
 // - Last Played
 
+  //todoer Remove all we can: document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0029.0069",
+  version: "Version  1.01.0029.0070",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -120,6 +122,19 @@ var dubBot = {
 		}
 		catch(err) { UTIL.logException("updateWaitlist: " + err.message); }
 	},
+  resetNewUsers: function(dubUserList, roomName) {
+    try {
+        for (var i = 0; i < USERS.users.length; i++) {
+            if (USERS.users[i].id === "new") {
+			  var dubUser = API.getDubUser(dubUserList, USERS.users[i].username);
+			  if (dubUser !== false) USERS.users[i].id = dubUser.userID;
+            }
+        }
+	  
+	//API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
+    }
+    catch(err) { UTIL.logException("resetNewUsers: " + err.message); }
+  },
   announceSongStats: function(waitlist) {
     try {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
@@ -351,12 +366,6 @@ var USERS = {
 	    var roomUser = USERS.defineRoomUser(usrObjectID);
         if (roomUser === false) return Date.now();
         return roomUser.lastActivity;
-
-		//todoer DELETE after testing
-        //if (typeof usrObjectID === "object") return usrObjectID.lastActivity;
-        //var roomUser = USERS.lookupUserName(usrObjectID);
-        //if (roomUser === false) roomUser = USERS.lookupUserID(usrObjectID);
-        //return roomUser.lastActivity;
 	  }
       catch(err) { UTIL.logException("getLastActivity: " + err.message); }
   },
@@ -424,13 +433,10 @@ var USERS = {
 
   lookupUserName: function (username) {
     try {
-      //botDebug.debugMessage(true, "username: [" + username + "]");
 	  var usermatch = username.trim().toLowerCase();
 	  usermatch = usermatch.replace(/@/g, '');
       for (var i = 0; i < USERS.users.length; i++) {
-	    //botDebug.debugMessage(true, "username(" + i + "): [" + USERS.users[i].username.trim().toLowerCase() + "]");
         if (USERS.users[i].username.trim().toLowerCase() == usermatch) return USERS.users[i];
-	    //botDebug.debugMessage(true, "No Match");
       }
       return false;
 	}
@@ -590,6 +596,7 @@ var USERS = {
 //        </div>
 //    </div>
 //USERS.loadUsersInRoom(true);
+//todoer DELETE AFTER TESTING:  I am not thinking about you... I am not thinking about you... I am NOT thinking about you!
   loadUsersInRoom: function (welcomeMsg) {  //ererererer
     try {
       //Username path:
@@ -624,11 +631,45 @@ var USERS = {
         }
         roomUser.isMehing = userMehing;
         roomUser.inRoomUpdated = true;
+		if (newUser === true) API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
       }
       USERS.removeMissingUsersFromRoom();
       botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
     }
     catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
+  }
+  initUsersInRoom: function (dubUserList, roomName) {  
+	USERS.loadUsersInRoomWork(dubUserList, false);
+  },
+  reloadUsersInRoom: function (dubUserList, roomName) {  
+	USERS.loadUsersInRoomWork(dubUserList, true);
+  },
+  loadUsersInRoomWork: function (dubUserList, welcomeMsg) {  //ererererer
+    try {
+      USERS.resetInRoomUpdated();
+      for (var i = 0; i < dubUserList.length; i++) {
+        var newUser = false;
+        var username = dubUserList[i].username;
+		var userID = dubUserList[i].userID;
+        botDebug.debugMessage(false, "USER: " + username);
+        var roomUser = USERS.defineRoomUser(userID);
+        if (roomUser === false) {
+          roomUser = new USERS.User(userID, username);
+          USERS.users.push(roomUser);
+          newUser = true;
+        }
+        if ((roomUser.inRoom === false) && (welcomeMsg === true) && (botVar.ImHidden === false)) USERS.welcomeUser(roomUser, newUser);
+        roomUser.inRoom = true;
+		roomUser.username = username;
+        botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
+        roomUser.userRole = API.getPermission(roomUser.id);
+        }
+        roomUser.inRoomUpdated = true;
+      }
+      USERS.removeMissingUsersFromRoom();
+      botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
+    }
+    catch(err) { UTIL.logException("loadUsersInRoomWork: " + err.message); }
   }
 };
 
@@ -1279,68 +1320,6 @@ var botChat = {
     botChat.commandChat.sound = "mention";
     return botChat.commandChat;
   },
-  // todoeroldchat - Obsolete:
-  //processChatItem: function(chatMessage, username, uid) {
-  //  try{
-  //    var chat = botChat.formatChat(chatMessage, username, uid);
-  //    COMMANDS.checkCommands(chat);
-  //    } catch (err) { UTIL.logException("processChatItem: " + err.message); }
-  //},
-  // todoeroldchat - Obsolete:
-  //getChatUserId: function(className) {
-  //  try{
-  //    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
-  //    //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-  //    var idx = className.indexOf("user-");
-  //    if (idx < 0) return "";
-  //    var userID = className.substring(idx + 5);
-  //    idx = userID.indexOf(" ");
-  //    if (idx > 0) userID = userID.substring(0, idx);
-  //    return userID;
-  //  } catch (err) { UTIL.logException("getChatUserId: " + err.message); }
-  //},
-  // todoeroldchat - Obsolete:
-  //getChatId: function(className) {
-  //  try{
-  //    // SAMPLE:
-  //    //document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
-  //    //"user-5600a9dbde199903001ae7be chat-id-5600a9dbde199903001ae7be-1448994390982"
-  //    var idx = className.indexOf("chat-id-");
-  //    if (idx < 0) return null;
-  //    return className.substring(idx + 8)
-  //  } catch (err) { UTIL.logException("getChatId: " + err.message); }
-  //},
-  // todoeroldchat - Obsolete:
-  //processChatItems: function(liItem) {
-  //  try{
-  //    if (typeof liItem === "undefined") return;                // ignore empty items
-  //    var chatId = botChat.getChatId(liItem.className);
-  //    var userId = botChat.getChatUserId(liItem.className);
-  //    if(chatId === null) return null;
-  //    botDebug.debugMessage(false, "CHAT - Item ID: " + chatId);
-  //    if (chatId.length < 10) return;                        // ignore chat without IDs
-  //    var itemHistory = botChat.findChatItem(chatId);
-  //    botDebug.debugMessage(false, "CHAT - Hist Item count: " + itemHistory.chatCount);
-  //    var chatItems = liItem.getElementsByTagName("p");
-  //    botDebug.debugMessage(false, "CHAT - Items count: " + chatItems.length);
-  //    if (chatItems.length <= itemHistory.chatCount) return;    // All chat items have been processed
-  //    var username = chatItems[0].getElementsByClassName("username")[0].innerHTML;
-  //    //<li class="user-560be6cbdce3260300e40770 current-chat-user chat-id-560be6cbdce3260300e40770-1450885488091">
-  //    botDebug.debugMessage(false, "CHAT - User: " + username);
-  //    if (userId.length > 0) USERS.updateUserID(userId, username);
-  //    var historyChatCount = itemHistory.chatCount;
-  //    itemHistory.chatCount = chatItems.length;
-  //    
-  //    //Process any unprocessed messages:
-  //    for (var i = chatItems.length -1; i >= historyChatCount; i--) {
-  //        var node = chatItems[i];
-  //        var chatMsg = (node.textContent===undefined) ? node.innerText : node.textContent;
-  //        chatMsg = chatMsg.replace(username, "");
-  //        botDebug.debugMessage(false, "CHAT - MSG: " + chatMsg);
-  //        botChat.processChatItem(chatMsg, username, userId);
-  //    }
-  //    } catch (err) { UTIL.logException("processChatItems: " + err.message); }
-  //  },
   chatMessages: []
 };
 
@@ -1989,12 +1968,13 @@ var AFK = {
     try {
       if (!botVar.botStatus || !AFK.settings.afkRemoval) return void (0);
       if (!AFK.afkRemovalNow()) return void (0);
+	  var newUsers = false;
 	  
 	  for (var i = 0; i < waitlist.length; i++) {
         if (typeof waitlist[i] !== 'undefined') {
             //botDebug.debugMessage(true, "AFK: DJ Defined");
             var id = waitlist[i].id;
-            //botDebug.debugMessage(true, "AFK: DJ Defined: " + id);
+			if (id === "new")  newUsers = true;
             var roomUser = USERS.lookupUserID(id);
             if (typeof roomUser !== 'boolean') {
 	            //botDebug.debugMessage(true, "AFK: User Defined");
@@ -2037,7 +2017,9 @@ var AFK = {
 				}
             }
         }
-    }
+      }
+	//If we found any "new" users, lets load the users id so next pass we'll catch them on the afk check:
+	if (newUsers === true)  API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
     }
     catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
@@ -2425,7 +2407,6 @@ var BOTDJ = {
 		catch(err) { UTIL.logException("playRandomSong: " + err.message); }
 	},
 	
-	//todoererererlind
 	checkHopDown: function (waitlist) {
 		try {
 			if (!BOTDJ.settings.autoHopUp) return;
@@ -3158,6 +3139,9 @@ var AI = {
 };
 //SECTION API: All API functionality:
 var API = {
+  data: {
+    dubUsers: [],
+  },
   main: {
     initbot: function() {
       if (window.APIisRunning) {
@@ -3175,7 +3159,8 @@ var API = {
       SETTINGS.retrieveFromStorage();
       SETTINGS.retrieveSettings();
       USERS.resetAllUsersOnStartup();
-      USERS.loadUsersInRoom(false);
+      //todoer DELETE AFTER TESTING: USERS.loadUsersInRoom(false);
+	  API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, USERS.initUsersInRoom);
       USERS.removeMIANonUsers();
 
       botVar.currentSong = API.getSongName();
@@ -3203,7 +3188,8 @@ var API = {
 
       RANDOMCOMMENTS.randomCommentSetTimer();
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
-      USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
+      //todoer DELETE AFTER TESTING: USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
+	  USERS.loadUserInterval = setInterval(function () { API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, USERS.reloadUsersInRoom);; }, 5 * 1000);
 
 	  BOTDJ.monitorWaitlistInterval = setInterval(function () { BOTDJ.monitorWaitlist() }, 20 * 1000);
 
@@ -3328,24 +3314,14 @@ var API = {
     catch(err) { UTIL.logException("wootThisSong: " + err.message); }
   },
 
-  getDubUserID: function (userid) {
+  getDubUser: function (dubUserList, username) {
     try {
-      //todoer COMPLETE
-      //return API.getUser(userid);
-    }
-    catch(err) { UTIL.logException("getDubUserID: " + err.message); }
-  },
-  getDubUser: function (user) {
-    try {
-        return API.getUser(user);
+        for(var i = 0; i < dubUserList.length; i++){
+            if(dubUserList[i].username === username) return dubUserList[i];
+		}
+		return false;
     }
     catch(err) { UTIL.logException("getDubUser: " + err.message); }
-  },
-  getUser: function (user) {
-    try {
-        return API.getDubUserID(user.id);
-    }
-    catch(err) { UTIL.logException("getUser: " + err.message); }
   },
   displayRoleToRoleNumber: function (displayRole) {
     try {
@@ -5508,17 +5484,7 @@ var API = {
     try { 
 	  currDJ = Dubtrack.room.player.activeSong.attributes.user;
 	  if (currDJ === null) return "";
-	  //if (currDJ === null) botDebug.debugMessage(true, "getDjName No DJ: " + calledFrom);
 	  return currDJ.attributes.username;
-	  //todoer DELETE after testing
-      //var userInfo = document.getElementsByClassName("infoContainerInner");
-      //botDebug.debugMessage(false, "userInfo count: " + userInfo.length);
-      //var spans = userInfo[0].getElementsByClassName("currentDJSong");
-      //var djName = spans[0].innerHTML;
-      //botDebug.debugMessage(false, "djName: " + djName);
-      //djName = djName.replace("is playing", "");
-      //botDebug.debugMessage(false, "djName: " + djName.trim());
-      //return djName.trim();
     }
     catch(err) { UTIL.logException("getDjName: " + err.message); }
   },
@@ -6229,6 +6195,8 @@ var BOTCOMMANDS = {
 						inactivity -= lastActive;
 						var time = UTIL.msToStr(inactivity);
 						API.sendChat(botChat.subChat(botChat.getChatMessage("afkstatus"), {name: name, time: time}));
+						//CONSOLE CHEAT: UTIL.msToStr(Date.now() - USERS.lookupUserName("Levis_Homer").lastActivity);
+						//CONSOLE CHEAT: UTIL.msToStr(Date.now() - USERS.lookupUserName("HarryBourne").lastActivity);
                     }
                 }
             },
@@ -6430,7 +6398,7 @@ var BOTCOMMANDS = {
 							  var avatarList8 = document.getElementById("avatar-list");
 							  botDebug.debugMessage(true, "avatarList count: " + avatarList8.length);
 						}
-						if (maxTime === "9") USERS.loadUsersInRoom(true);
+						//todoer DELETE AFTER TESTING: if (maxTime === "9") USERS.loadUsersInRoom(true);
 						if (maxTime === "A") USERS.removeMIANonUsers();
 						if (maxTime === "B") API.getWaitList(AFK.afkCheck);
 						if (maxTime === "C") API.moderateRemoveDJ("dexter_nix");
@@ -8826,7 +8794,7 @@ var BOTCOMMANDS = {
                             var name = chat.message.substring(cmd.length + 2);
                             var roomUser = USERS.lookupUserName(name);
                             if(typeof roomUser === 'boolean') return API.sendChat('Invalid user specified.');
-                            var lang = API.getDubUser(roomUser).language;
+                            var lang = API.getUserLanguage(roomUser);
                             botDebug.debugMessage(true, "lang: " + lang);
                             botDebug.debugMessage(true, "roomUser: " + roomUser.username);
                             botDebug.debugMessage(true, "roomUser: " + roomUser.id);
@@ -9025,7 +8993,7 @@ var BOTCOMMANDS = {
 //                        botDebug.debugMessage(true, "whois: " + whoisuser);
 //                        var user;
 //                        if (isNaN(whoisuser)) user = USERS.lookupUserName(whoisuser);
-//                        else                  user = API.getDubUser(whoisuser);
+//                        else                  user = API.getDubUser(dubUserList, whoisuser <Need to load dubUserList> );
 //                        if (typeof user !== 'undefined')  {
 //                            botDebug.debugMessage(true, "USER ID: " + user.id);
 //                            API.sendChat("USER: " + user.username + " " + user.id);
