@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0029.0070",
+  version: "Version  1.01.0029.0071",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -637,7 +637,7 @@ var USERS = {
       botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
     }
     catch(err) { UTIL.logException("loadUsersInRoom: " + err.message); }
-  }
+  },
   initUsersInRoom: function (dubUserList, roomName) {  
 	USERS.loadUsersInRoomWork(dubUserList, false);
   },
