@@ -663,7 +663,6 @@ var USERS = {
 		roomUser.username = username;
         botDebug.debugMessage(false, "USERS IN THE ROOM: " + roomUser.username);
         roomUser.userRole = API.getPermission(roomUser.id);
-        }
         roomUser.inRoomUpdated = true;
       }
       USERS.removeMissingUsersFromRoom();
