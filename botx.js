@@ -17,7 +17,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0029.0074",
+  version: "Version  1.01.0029.0075",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1025,7 +1025,7 @@ var botChat = {
 
    botChat.chatMessages.push(["welcome", "Welcome to Tasty Tunes @%%NAME%%.  Check out our room rules here: http://tinyurl.com/TastyTunesRules"]);
    botChat.chatMessages.push(["welcomeback", "Welcome back, @%%NAME%%"]);
-   botChat.chatMessages.push(["changedName", "Hen, @%%NAME%% did you change your name from %%OLDNAME%%"]);
+   botChat.chatMessages.push(["changedName", "Hey, @%%NAME%% did you change your name? I thought you used to be called %%OLDNAME%%"]);
 
    botChat.chatMessages.push(["songknown", " :repeat: This song has been played %%PLAYS%% time(s) in the last %%TIMETOTAL%%, last play was %%LASTTIME%% ago. :repeat:"]);
    botChat.chatMessages.push(["songknown2", " :repeat: @%%NAME%% - This song was just played %%LASTTIME%% ago. :repeat:"]);
