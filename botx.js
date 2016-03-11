@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0029.0071",
+  version: "Version  1.01.0029.0072",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -631,7 +631,10 @@ var USERS = {
         }
         roomUser.isMehing = userMehing;
         roomUser.inRoomUpdated = true;
-		if (newUser === true) API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
+		if (newUser === true) {
+			API.data.dubUsers = [];
+			API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
+		}
       }
       USERS.removeMissingUsersFromRoom();
       botDebug.debugMessage(false, "USERS.users Count: " + USERS.users.length);
@@ -2018,7 +2021,10 @@ var AFK = {
         }
       }
 	//If we found any "new" users, lets load the users id so next pass we'll catch them on the afk check:
-	if (newUsers === true)  API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
+	if (newUsers === true)  {
+		API.data.dubUsers = [];
+		API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, dubBot.resetNewUsers);
+	  }
     }
     catch(err) { UTIL.logException("afkCheck: " + err.message); }
   },
@@ -3159,6 +3165,7 @@ var API = {
       SETTINGS.retrieveSettings();
       USERS.resetAllUsersOnStartup();
       //todoer DELETE AFTER TESTING: USERS.loadUsersInRoom(false);
+	  API.data.dubUsers = [];
 	  API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, USERS.initUsersInRoom);
       USERS.removeMIANonUsers();
 
@@ -3188,6 +3195,7 @@ var API = {
       RANDOMCOMMENTS.randomCommentSetTimer();
       RANDOMCOMMENTS.randomInterval = setInterval(function () { RANDOMCOMMENTS.randomCommentCheck() }, 30 * 1000);
       //todoer DELETE AFTER TESTING: USERS.loadUserInterval = setInterval(function () { USERS.loadUsersInRoom(true); }, 5 * 1000);
+	  API.data.dubUsers = [];
 	  USERS.loadUserInterval = setInterval(function () { API.getUserlist(API.data.dubUsers, botVar.roomID, botVar.roomName, USERS.reloadUsersInRoom);; }, 5 * 1000);
 
 	  BOTDJ.monitorWaitlistInterval = setInterval(function () { BOTDJ.monitorWaitlist() }, 20 * 1000);
