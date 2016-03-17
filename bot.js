@@ -4,11 +4,6 @@
 //               USERS.users[1].username + " - " + USERS.users[1].userRole + " - " + USERS.users[1].id;
 //Remove User 1: USERS.users.splice(1, 1);
 //               USERS.users[2].username + " - " + USERS.users[2].userRole + " - " + USERS.users[2].id;
-//grabCurrentSong
-//getSongLength
-//deleteCurrentSong
-//[EXCEPTION]: defineRoomUser: Object doesn't support property or method 'trim'
-//[EXCEPTION]: EVENT_SONG_ADVANCE: Unable to get property 'songsPlayed' of undefined or null reference
 //TODO LIST:
 // - Record all Bans/Unbans
 // - Last Played
@@ -17,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0030",
+  version: "Version  1.01.0031",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1930,7 +1925,8 @@ var TASTY = {
                       'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
-                      'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:'];
+                      'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
+                      'thunder','stpaddy','stpaddys'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6079,7 +6075,8 @@ var BOTCOMMANDS = {
                           'hellyeah','27','420','toke','fatty','blunt','joint','samples','doobie','oneeyedwilly','bongo','bingo','bangkok','tastytits','=w=',':guitar:','cl','carbonleaf',
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
-                          'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:'],
+                          'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
+                          'thunder','stpaddy','stpaddys'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6114,7 +6111,7 @@ var BOTCOMMANDS = {
                 }
             },
             rollCommand: {   //Added 03/30/2015 Zig
-                command: ['roll','spin','throw','dice','rollem','toss','fling','pitch','shoot'],
+                command: ['roll','spin','hitme','throw','dice','rollem','toss','fling','pitch','shoot'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6548,7 +6545,8 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        API.sendChat("I know @whitewidow is singing along with this hypster track");
+                        //API.sendChat("I know @whitewidow is singing along with this hypster track");
+						API.sendChat("@whitewidow is so un-hipster she's basically normcore.");
                     }
                 }
             },
