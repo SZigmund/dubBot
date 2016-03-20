@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0071",
+  version: "Version  1.01.0031.0072",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -159,7 +159,7 @@ var dubBot = {
 		SETTINGS.settings.suppressSongStats = true;
 		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Banned song");
-		setTimeout(function () { API.sendChat(subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
+		setTimeout(function () { API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
 	  }
 	  var dubUserList = [];
 	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
@@ -2013,10 +2013,10 @@ var BAN = {
 		//dubBot.room.skippable = false;
 		//setTimeout(function () { dubBot.room.skippable = true }, 5000);
 		setTimeout(function () {
-			API.sendChat(subChat(botChat.getChatMessage("newblacklisted"), {name: djName, title: track.songName, mid: track.songMediaType + ':' + track.songMediaId}));
+			API.sendChat(botChat.subChat(botChat.getChatMessage("newblacklisted"), {name: djName, title: track.songName, mid: track.songMediaType + ':' + track.songMediaId}));
 		}, 1000);
 		setTimeout(function () { API.sendChat("@" + djName + ": your song has been skipped. Please read the rules before you play your next song.");  }, 1500);
-		setTimeout(function () { API.sendChat(subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
+		setTimeout(function () { API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
 	}
 	catch(err) { UTIL.logException("ERROR:banSongSkip: " + err.message); }
   },
