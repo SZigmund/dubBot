@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0069",
+  version: "Version  1.01.0031.0070",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -154,7 +154,7 @@ var dubBot = {
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
-	  else if BAN.songOnBanList(track) {
+	  else if (BAN.songOnBanList(track) === true) {
 		SETTINGS.settings.suppressSongStats = true;
 		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Banned song");
