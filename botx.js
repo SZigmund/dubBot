@@ -1,3 +1,4 @@
+
 // Written by: DocZ
 //               API.data.dubUsers.length
 //               USERS.users.length
@@ -12,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0070",
+  version: "Version  1.01.0031.0071",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -7062,7 +7063,7 @@ var BOTCOMMANDS = {
                 type: 'exact',
                 functionality: function (chat, cmd) {
                     try {
-                        if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
+                        //if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         BAN.banCurrentSong(chat.un);
