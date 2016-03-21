@@ -1,5 +1,4 @@
 // Written by: DocZ
-//getWaitList
 //               API.data.dubUsers.length
 //               USERS.users.length
 //Remove User 1: USERS.users.splice(1, 1);
@@ -13,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0081",
+  version: "Version  1.01.0031.0082",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2009,11 +2008,13 @@ var BAN = {
   //TO CALL: BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
   preBanQueueSong: function (positionKey) {
     try {
+		API.chatLog("preBanQueueSong: -------------------------------------------------------------------")
 		if (positionKey.length < 3)  return;
 		if (!isNaN(positionKey.substring(0, positionKey.length -2))) return;
-	    var position = positionKey.substring(0, positionKey.length - 2)
+		API.chatLog("preBanQueueSong: working....")
 	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
-	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2, 2)
+	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2, 2);
+		API.chatLog("preBanQueueSong: POS: " + BAN.songQueuePos + " KEY: " + BAN.songQueueKey)
 	    API.getWaitList(BAN.cbPreBanQueueSong);
     }
     catch(err) { UTIL.logException("preBanQueueSong: " + err.message); }
