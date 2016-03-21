@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0084",
+  version: "Version  1.01.0031.0085",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2013,7 +2013,7 @@ var BAN = {
 		if (isNaN(positionKey.substring(0, positionKey.length -2))) return;
 		API.chatLog("preBanQueueSong: working...." + positionKey);
 	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
-	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2, 2);
+	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2);
 		API.chatLog("preBanQueueSong: POS: " + BAN.songQueuePos + " KEY: " + BAN.songQueueKey)
 	    API.getWaitList(BAN.cbPreBanQueueSong);
     }
