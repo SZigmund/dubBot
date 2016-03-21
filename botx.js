@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0088",
+  version: "Version  1.01.0031.0089",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2050,7 +2050,7 @@ var BAN = {
 		var songMid = history.track.mid;
 		var idx = BAN.newBlacklistIDs.indexOf(history.track.mid);
 		if (idx < 0) {
-			BAN.banSong(track);
+			BAN.banSong(history.track);
 			API.sendChat(botChat.subChat(botChat.getChatMessage("newblacklisted"), {name: history.username, title: history.track.songName, mid: history.track.mid}));
 		}
 		else
