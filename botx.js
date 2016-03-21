@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0089",
+  version: "Version  1.01.0031.0090",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2038,6 +2038,7 @@ var BAN = {
   },
   banHistoricalSong: function (historyList) {
 	try {
+		botDebug.debugMessage(true, "SongToBan: " + BAN.songToBan); // todoerlind
 		if ((BAN.songToBan > historyList.length) || (BAN.songToBan < 1)) {
 			API.sendChat("Invalid historical song index value");
 			return;
@@ -2047,7 +2048,8 @@ var BAN = {
 			API.sendChat("Could not define history idx: " + BAN.songToBan);
 			return;
 		}
-		var songMid = history.track.mid;
+		botDebug.debugMessage(true, "NAME: " + history.track.name);  // todoerlind
+		botDebug.debugMessage(true, "MID: " + history.track.mid);  // todoerlind
 		var idx = BAN.newBlacklistIDs.indexOf(history.track.mid);
 		if (idx < 0) {
 			BAN.banSong(history.track);
@@ -3605,6 +3607,7 @@ var API = {
     try {
 	    var track = API.formatTrack(dubQueueItem._song);
 		var waitlistQueueItem = {id: dubQueueItem.userid, username: dubQueueItem._user.username, track: track};
+		botDebug.debugMessage(true, "SONG: " + track.name); // todoerlind
 		return waitlistQueueItem;
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
@@ -8346,7 +8349,6 @@ var BOTCOMMANDS = {
                             var history = songHistory[i];
                             songCount++;
                             //if (i === 0) UTIL.logObject(history, "SONG");
-                            var songMid = song.media.format + ':' + song.media.cid;
                             if (BAN.newBlacklistIDs.indexOf(history.track.mid) < 0) {
                                 BAN.banSong(history.track);
                                 banCount++;
