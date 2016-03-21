@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0091",
+  version: "Version  1.01.0031.0092",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1981,7 +1981,7 @@ var BAN = {
   },
   banSong: function(track) {
 	try {
-	    API.chatLog("Banned song: " + track.name);
+	    API.chatLog("Banned song: " + track.songName);
 		BAN.newBlacklist.push(track);
 		BAN.newBlacklistIDs.push(track.mid);
 		if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
@@ -2047,11 +2047,11 @@ var BAN = {
 			API.sendChat("Could not define history idx: " + BAN.songToBan);
 			return;
 		}
-		botDebug.debugMessage(true, "NAME: " + history.track.name);  // todoerlind
+		botDebug.debugMessage(true, "NAME: " + history.track.songName);  // todoerlind
 		botDebug.debugMessage(true, "MID: " + history.track.mid);  // todoerlind
 		var idx = BAN.newBlacklistIDs.indexOf(history.track.mid);
 		if (idx < 0) {
-			BAN.banSong(history.track);
+			//BAN.banSong(history.track);
 			API.sendChat(botChat.subChat(botChat.getChatMessage("newblacklisted"), {name: history.username, title: history.track.songName, mid: history.track.mid}));
 		}
 		else
@@ -3608,7 +3608,7 @@ var API = {
     try {
 	    var track = API.formatTrack(dubQueueItem._song, logging);
 		var waitlistQueueItem = {id: dubQueueItem.userid, username: dubQueueItem._user.username, track: track};
-		botDebug.debugMessage(true, "SONG: " + track.name); // todoerlind
+		botDebug.debugMessage(true, "SONG: " + track.songName); // todoerlind
 		return waitlistQueueItem;
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
@@ -3645,7 +3645,7 @@ var API = {
         // status, and jqXHR object for each of the four ajax calls respectively.
 		var dubHistoryList = a1;
 		BAN.historicalList = dubHistoryList;
-		botDebug.debugMessage(true, "History.len: " + dubHistoryList.length);
+		botDebug.debugMessage(true, "History.len: " + dubHistoryList.data.length);
         for (var i = 0; i < dubHistoryList.data.length; i++) {
 		  historylist.push(new API.waitListItem(dubHistoryList.data[i], true));
 		}
@@ -7158,9 +7158,9 @@ var BOTCOMMANDS = {
                         var dispMsgs = [];
                         for (var i = 0; i < BAN.newBlacklist.length; i++) {
                             var track = BAN.newBlacklist[i];
-                            var trackinfo = track.name.toUpperCase();
+                            var trackinfo = track.songName.toUpperCase();
                             if (trackinfo.indexOf(keyword) > -1) {
-                                var dispMsg = "[" + track.name + "] -> " + track.mid;
+                                var dispMsg = "[" + track.songName + "] -> " + track.mid;
                                 if (privatemsg){
                                     API.chatLog(dispMsg);
                                 }
@@ -7206,7 +7206,7 @@ var BOTCOMMANDS = {
                         if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
                         if (BAN.newBlacklist.length !== BAN.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
                         var track = BAN.newBlacklist[idxToRemove];
-                        var msgToSend = chat.un + " removed [" + track.name + "] from the banned song list.";
+                        var msgToSend = chat.un + " removed [" + track.songName + "] from the banned song list.";
                         BAN.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
                         BAN.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
                         if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
@@ -7234,7 +7234,7 @@ var BOTCOMMANDS = {
                         }
 						var historylist = [];
 						BAN.songToBan = parseInt(histIndex);
-                        var songHistory = API.getRoomHistory(historylist, BAN.songToBan, parseInt(histIndex), BAN.banHistoricalSong);
+                        var songHistory = API.getRoomHistory(historylist, 1, parseInt(histIndex), BAN.banHistoricalSong);
                     }
                     catch (err) { UTIL.logException("banlastsong: " + err.message); }
                 }
