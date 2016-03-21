@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0083",
+  version: "Version  1.01.0031.0084",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2011,7 +2011,7 @@ var BAN = {
 		API.chatLog("preBanQueueSong: -------------------------------------------------------------------")
 		if (positionKey.length < 3)  return;
 		if (isNaN(positionKey.substring(0, positionKey.length -2))) return;
-		API.chatLog("preBanQueueSong: working....")
+		API.chatLog("preBanQueueSong: working...." + positionKey);
 	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
 	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2, 2);
 		API.chatLog("preBanQueueSong: POS: " + BAN.songQueuePos + " KEY: " + BAN.songQueueKey)
@@ -6458,6 +6458,7 @@ var BOTCOMMANDS = {
 						if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
 						var msg = chat.message;
 						var pos = msg.substring(cmd.length + 1);
+						botDebug.debugMessage(true, "pos: " + pos + ", msg: " + msg);
 						if (pos.length < 3)  return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
 						if (isNaN(pos.substring(0, pos.length -2))) return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
 						BAN.preBanQueueSong(pos);
