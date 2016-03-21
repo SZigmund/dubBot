@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0074",
+  version: "Version  1.01.0031.0075",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -158,6 +158,7 @@ var dubBot = {
 	  else if (BAN.songOnBanList(track) === true) {
 		SETTINGS.settings.suppressSongStats = true;
 		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
+		botDebug.debugMessage(true, "BAN: skipBadSong");
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Banned song");
 		setTimeout(function () { API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
 	  }
@@ -972,9 +973,7 @@ var botChat = {
         ch = msg.charAt(i);
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch === ':' || ch === '^') containsLetters = true;
     }
-    if (msg === '') {
-        return true;
-    }
+    if (msg === '')  return true;
     if (!containsLetters && (msg.length === 1 || msg.length > 3)) return true;
     msg = msg.replace(/[ ,;.:\/=~+%^*\-\\"'&@#]/g, '');
     var capitals = 0;
@@ -1309,23 +1308,6 @@ var botChat = {
            UTIL.logException("subChat: " + err.message);
         }
     },
-  findChatItem: function(itemID) {
-    try{
-      //Only scan up to the last 10 items in history:
-      if (botVar.chatHistoryList.length > 10) {
-        botDebug.debugMessage(false, "BEFORE LEN: " + botVar.chatHistoryList.length);
-        botVar.chatHistoryList.splice(0, botVar.chatHistoryList.length - 10);
-        botDebug.debugMessage(false, " AFTER LEN: " + botVar.chatHistoryList.length);
-      }
-      for (var i = 0; i < botVar.chatHistoryList.length; i++) {
-          if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
-              return botVar.chatHistoryList[i];
-          }
-      }
-      botVar.chatHistoryList.push(new botVar.chatHistory(itemID, 0));
-      return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
-      } catch (err) { UTIL.logException("findChatItem: " + err.message); }
-  },
   formatChat: function(chatMessage, username, uid) {
     botChat.commandChat.cid = "";
     botChat.commandChat.message = chatMessage;
@@ -1977,9 +1959,11 @@ var BAN = {
   blacklistLoaded: false,
   songOnBanList: function (track) {
     try {
+		botDebug.debugMessage(true, "BAN: songOnBanList");
 		if (!SETTINGS.settings.blacklistEnabled) return false;
 		var mid = track.songMediaType + ':' + track.songMediaId;
 		if (BAN.newBlacklistIDs.indexOf(mid) < 0) return false;
+		botDebug.debugMessage(true, "BAN: song banned");
 		var banMsg = botChat.subChat(botChat.getChatMessage("isblacklisted"), {name: botVar.currentDJ, song: track.songName});
 		setTimeout(function () { API.sendChat(banMsg); }, 1000);
 		return true;
@@ -3530,20 +3514,14 @@ var API = {
     try {
 	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
 	  //parseInt(Dubtrack.room.player.activeSong.attributes.songInfo.songLength) / 1000;
-	  if (songinfo === null) {
-		  this.songLength = 0;
-		  this.songName = "";
-		  this.songMediaType = "";
-		  this.songMediaId = "";
-		  this.playlistSongId = "";
-		  return this;
-	  }
-	  this.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
-	  this.songName = songinfo.name;
-	  this.songMediaType = songinfo.type;
-	  this.songMediaId = songinfo.fkid;
-	  this.playlistSongId = songinfo._id;
-	  return this;
+	  var track = {songLength: 0, songName: "", songMediaType: "", songMediaId: "", playlistSongId: ""};
+	  if (songinfo === null) return track;
+	  track.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
+	  track.songName = songinfo.name;
+	  track.songMediaType = songinfo.type;
+	  track.songMediaId = songinfo.fkid;
+	  track.playlistSongId = songinfo._id;
+	  return track;
     }
 	catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
   },
