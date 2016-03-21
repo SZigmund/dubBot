@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0072",
+  version: "Version  1.01.0031.0073",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1991,13 +1991,14 @@ var BAN = {
 	    var track = API.getCurrentSong();
 		BAN.banSong(track);
 		BAN.banSongSkip(track, username);
+		//todoerlind store songs to storage
 	}
 	catch(err) { UTIL.logException("ERROR:banCurrentSong: " + err.message); }
   },
   banSong: function(track) {
 	try {
 		BAN.newBlacklist.push(track);
-		BAN.newBlacklistIDs.push(track.mid);
+		BAN.newBlacklistIDs.push(track.songMediaType + ':' + track.songMediaId);
 		if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
 		if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
 	}
