@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0080",
+  version: "Version  1.01.0031.0081",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -7084,6 +7084,84 @@ var BOTCOMMANDS = {
                     catch (err) { UTIL.logException("oob: " + err.message); }
                 }
             },
+            banlistCommand: {   //Added: 06/10/2015 List all banned songs
+                command: ['banlist','banlistprivate'],
+                rank: 'co-owner',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var keyword = "";
+                        var privatemsg = false;
+                        if (chat.uid === botVar.botID) privatemsg = true;
+                        if (cmd.toUpperCase() === "BANLISTPRIVATE") privatemsg = true;
+                        var msg = chat.message;
+                        var matchCnt = 0;
+                        if (msg.length > cmd.length) keyword = msg.substring(cmd.length + 1).toUpperCase();
+                        botDebug.debugMessage(true, "Keyword: " + keyword);
+                        var dispMsgs = [];
+                        for (var i = 0; i < BAN.newBlacklist.length; i++) {
+                            var track = BAN.newBlacklist[i];
+                            var trackinfo = track.title.toUpperCase() + track.author.toUpperCase();
+                            if (trackinfo.indexOf(keyword) > -1) {
+                                var dispMsg = "[" + track.author + " - " + track.title + "] -> " + track.mid;
+                                if (privatemsg){
+                                    API.chatLog(dispMsg);
+                                }
+                                else {
+                                    matchCnt++;
+                                    if (matchCnt <= 10) dispMsgs.push(dispMsg);
+                                }
+                            }
+                        }
+                        if (!privatemsg) {
+                            var msgtoSend = "Found " + matchCnt + " matches.";
+                            if (matchCnt > 10) msgtoSend +=  "(only display first 10)"
+                            API.sendChat(msgtoSend);
+                            if (matchCnt > 0) setTimeout(function () { API.sendChat(dispMsgs[0]); }, 1 * 500);
+                            if (matchCnt > 1) setTimeout(function () { API.sendChat(dispMsgs[1]); }, 2 * 500);
+                            if (matchCnt > 2) setTimeout(function () { API.sendChat(dispMsgs[2]); }, 3 * 500);
+                            if (matchCnt > 3) setTimeout(function () { API.sendChat(dispMsgs[3]); }, 4 * 500);
+                            if (matchCnt > 4) setTimeout(function () { API.sendChat(dispMsgs[4]); }, 5 * 500);
+                            if (matchCnt > 5) setTimeout(function () { API.sendChat(dispMsgs[5]); }, 6 * 500);
+                            if (matchCnt > 6) setTimeout(function () { API.sendChat(dispMsgs[6]); }, 7 * 500);
+                            if (matchCnt > 7) setTimeout(function () { API.sendChat(dispMsgs[7]); }, 8 * 500);
+                            if (matchCnt > 8) setTimeout(function () { API.sendChat(dispMsgs[8]); }, 9 * 500);
+                            if (matchCnt > 9) setTimeout(function () { API.sendChat(dispMsgs[9]); }, 10 * 500);
+                        }
+                    }
+                    catch (err) { UTIL.logException("banlist: " + err.message); }
+                }
+            },
+            banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
+                command: 'banremove',
+                rank: 'co-owner',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        
+                        var msg = chat.message;
+                        if (msg.length === cmd.length) return API.sendChat("Missing mid to remove...");
+                        var midToRemove = msg.substring(cmd.length + 1);
+                        botDebug.debugMessage(true, "Keyword: " + midToRemove);
+                        var idxToRemove = BAN.newBlacklistIDs.indexOf(midToRemove);
+                        if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
+                        if (BAN.newBlacklist.length !== BAN.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
+                        var track = BAN.newBlacklist[idxToRemove];
+                        var msgToSend = chat.un + " removed [" + track.author + " - " + track.title + "] from the banned song list.";
+                        BAN.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
+                        BAN.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
+                        if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
+                        if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
+                        API.sendChat(msgToSend);
+                        API.logInfo(msgToSend);
+                    }
+                    catch (err) { UTIL.logException("banremove: " + err.message); }
+                }
+            },
 
             /* basic
             activeCommand: {
@@ -7114,6 +7192,43 @@ var BOTCOMMANDS = {
                 }
             },
 
+            unbanCommand: {
+                command: 'unban',
+                rank: 'mod',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        $(".icon-population").click();
+                        $(".icon-ban").click();
+                        setTimeout(function (chat) {
+                            var msg = chat.message;
+                            if (msg.length === cmd.length) return API.sendChat();
+                            var name = msg.substring(cmd.length + 2);
+                            var bannedUsers = API.getBannedUsers();
+                            var found = false;
+                            var bannedUser = null;
+                            for (var i = 0; i < bannedUsers.length; i++) {
+                                var user = bannedUsers[i];
+                                if (user.username === name) {
+                                    bannedUser = user;
+                                    found = true;
+                                }
+                            }
+                            if (!found) {
+                                $(".icon-chat").click();
+                                return API.sendChat(botChat.subChat(botChat.getChatMessage("notbanned"), {name: chat.un}));
+                            }
+                            API.moderateUnbanUser(bannedUser.id);
+                            //botDebug.debugMessage(true, "Unbanned " + name);
+                            setTimeout(function () {
+                                $(".icon-chat").click();
+                            }, 1000);
+                        }, 1000, chat);
+                    }
+                }
+            },
             addCommand: {
                 command: 'add',
                 rank: 'manager',
@@ -8128,34 +8243,6 @@ var BOTCOMMANDS = {
                     catch (err) { UTIL.logException("banlistimport: " + err.message); }
                 }
             },
-            banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
-                command: 'banremove',
-                rank: 'co-owner',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        
-                        var msg = chat.message;
-                        if (msg.length === cmd.length) return API.sendChat("Missing mid to remove...");
-                        var midToRemove = msg.substring(cmd.length + 1);
-                        botDebug.debugMessage(true, "Keyword: " + midToRemove);
-                        var idxToRemove = BAN.newBlacklistIDs.indexOf(midToRemove);
-                        if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
-                        if (BAN.newBlacklist.length !== BAN.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
-                        var track = BAN.newBlacklist[idxToRemove];
-                        var msgToSend = chat.un + " removed [" + track.author + " - " + track.title + "] from the banned song list.";
-                        BAN.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
-                        BAN.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
-                        if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
-                        if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
-                        API.sendChat(msgToSend);
-                        API.logInfo(msgToSend);
-                    }
-                    catch (err) { UTIL.logException("banremove: " + err.message); }
-                }
-            },
             banremoveallsongsCommand: { //Added: 06/10/2015 Remove all banned / blacklisted songs
                 command: 'banremoveallsongs',
                 rank: 'co-owner',
@@ -8350,56 +8437,6 @@ var BOTCOMMANDS = {
                         API.sendChat("I've got " + BAN.newBlacklist.length + " songs on the ban list " + chat.un + ".");
                     }
                     catch (err) { UTIL.logException("banlistcount: " + err.message); }
-                }
-            },
-            banlistCommand: {   //Added: 06/10/2015 List all banned songs
-                command: ['banlist','banlistpublic'],
-                rank: 'co-owner',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var keyword = "";
-                        var privatemsg = false;
-                        if (chat.uid === botVar.botID) privatemsg = true;
-                        if (cmd.toUpperCase() === "BANLISTPUBLIC") privatemsg = false;
-                        var msg = chat.message;
-                        var matchCnt = 0;
-                        if (msg.length > cmd.length) keyword = msg.substring(cmd.length + 1).toUpperCase();
-                        botDebug.debugMessage(true, "Keyword: " + keyword);
-                        var dispMsgs = [];
-                        for (var i = 0; i < BAN.newBlacklist.length; i++) {
-                            var track = BAN.newBlacklist[i];
-                            var trackinfo = track.title.toUpperCase() + track.author.toUpperCase();
-                            if (trackinfo.indexOf(keyword) > -1) {
-                                var dispMsg = "[" + track.author + " - " + track.title + "] -> " + track.mid;
-                                if (privatemsg){
-                                    API.chatLog(dispMsg);
-                                }
-                                else {
-                                    matchCnt++;
-                                    if (matchCnt <= 10) dispMsgs.push(dispMsg);
-                                }
-                            }
-                        }
-                        if (!privatemsg) {
-                            var msgtoSend = "Found " + matchCnt + " matches.";
-                            if (matchCnt > 10) msgtoSend +=  "(only display first 10)"
-                            API.sendChat(msgtoSend);
-                            if (matchCnt > 0) setTimeout(function () { API.sendChat(dispMsgs[0]); }, 1 * 500);
-                            if (matchCnt > 1) setTimeout(function () { API.sendChat(dispMsgs[1]); }, 2 * 500);
-                            if (matchCnt > 2) setTimeout(function () { API.sendChat(dispMsgs[2]); }, 3 * 500);
-                            if (matchCnt > 3) setTimeout(function () { API.sendChat(dispMsgs[3]); }, 4 * 500);
-                            if (matchCnt > 4) setTimeout(function () { API.sendChat(dispMsgs[4]); }, 5 * 500);
-                            if (matchCnt > 5) setTimeout(function () { API.sendChat(dispMsgs[5]); }, 6 * 500);
-                            if (matchCnt > 6) setTimeout(function () { API.sendChat(dispMsgs[6]); }, 7 * 500);
-                            if (matchCnt > 7) setTimeout(function () { API.sendChat(dispMsgs[7]); }, 8 * 500);
-                            if (matchCnt > 8) setTimeout(function () { API.sendChat(dispMsgs[8]); }, 9 * 500);
-                            if (matchCnt > 9) setTimeout(function () { API.sendChat(dispMsgs[9]); }, 10 * 500);
-                        }
-                    }
-                    catch (err) { UTIL.logException("banlist: " + err.message); }
                 }
             },
             botmutedCommand: {
@@ -8597,44 +8634,6 @@ var BOTCOMMANDS = {
                             SETTINGS.settings.motdEnabled = !SETTINGS.settings.motdEnabled;
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("motd")}));
                         }
-                    }
-                }
-            },
-
-            unbanCommand: {
-                command: 'unban',
-                rank: 'mod',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        $(".icon-population").click();
-                        $(".icon-ban").click();
-                        setTimeout(function (chat) {
-                            var msg = chat.message;
-                            if (msg.length === cmd.length) return API.sendChat();
-                            var name = msg.substring(cmd.length + 2);
-                            var bannedUsers = API.getBannedUsers();
-                            var found = false;
-                            var bannedUser = null;
-                            for (var i = 0; i < bannedUsers.length; i++) {
-                                var user = bannedUsers[i];
-                                if (user.username === name) {
-                                    bannedUser = user;
-                                    found = true;
-                                }
-                            }
-                            if (!found) {
-                                $(".icon-chat").click();
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("notbanned"), {name: chat.un}));
-                            }
-                            API.moderateUnbanUser(bannedUser.id);
-                            //botDebug.debugMessage(true, "Unbanned " + name);
-                            setTimeout(function () {
-                                $(".icon-chat").click();
-                            }, 1000);
-                        }, 1000, chat);
                     }
                 }
             },
