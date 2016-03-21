@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0085",
+  version: "Version  1.01.0031.0086",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2008,26 +2008,29 @@ var BAN = {
   //TO CALL: BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
   preBanQueueSong: function (positionKey) {
     try {
-		API.chatLog("preBanQueueSong: -------------------------------------------------------------------")
+		botDebug.debugMessage(true, "preBanQueueSong: -------------------------------------------------------------------");
 		if (positionKey.length < 3)  return;
 		if (isNaN(positionKey.substring(0, positionKey.length -2))) return;
-		API.chatLog("preBanQueueSong: working...." + positionKey);
+		botDebug.debugMessage(true, "preBanQueueSong: working...." + positionKey);
 	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
 	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2);
-		API.chatLog("preBanQueueSong: POS: " + BAN.songQueuePos + " KEY: " + BAN.songQueueKey)
+		botDebug.debugMessage(true, "preBanQueueSong: POS: " + BAN.songQueuePos + " KEY: " + BAN.songQueueKey);
 	    API.getWaitList(BAN.cbPreBanQueueSong);
     }
     catch(err) { UTIL.logException("preBanQueueSong: " + err.message); }
   },
   cbPreBanQueueSong: function (waitlist) {  
 	try {
-	   if (BAN.songQueuePos < 0) return;
-	   if ((BAN.songQueuePos + 1) > waitlist.length) return;
-	   //validate the 1st 2 characters of the song match the give from the command:
-	   if (waitlist.track.songName.substring(0,2).toUpperCase() !== BAN.songQueueKey.toUpperCase()) return;
-	   API.chatLog("Ban song: " + waitlist[BAN.songQueuePos-1].name);
-	   BAN.banSong(waitlist[BAN.songQueuePos-1].track);
-	   API.sendChat("Will do boss.");
+		botDebug.debugMessage(true, "cbPreBanQueueSong: -------------------------------------------------------------------");
+	    if (BAN.songQueuePos < 0) return;
+		botDebug.debugMessage(true, "cbPreBanQueueSong: Step 1");
+	    if ((BAN.songQueuePos + 1) > waitlist.length) return;
+		botDebug.debugMessage(true, "cbPreBanQueueSong: Step 2");
+	    //validate the 1st 2 characters of the song match the give from the command:
+	    if (waitlist[BAN.songQueuePos-1].track.songName.substring(0,2).toUpperCase() !== BAN.songQueueKey.toUpperCase()) return;
+	    botDebug.debugMessage(true, "Ban song: " + waitlist[BAN.songQueuePos-1].name);
+	    BAN.banSong(waitlist[BAN.songQueuePos-1].track);
+	    API.sendChat("Will do boss.");
 	}
     catch(err) { UTIL.logException("cbPreBanQueueSong: " + err.message); }
   }
