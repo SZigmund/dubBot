@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0090",
+  version: "Version  1.01.0031.0091",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1957,15 +1957,14 @@ var BAN = {
   newBlacklistIDs: [],
   songQueuePos: -1,
   songQueueKey: "",
+  historicalList: [],
   songToBan: -1,
   blacklistLoaded: false,
   songOnBanList: function (track) {
     try {
-		botDebug.debugMessage(true, "BAN: songOnBanList");
 		if (!SETTINGS.settings.blacklistEnabled) return false;
 		var mid = track.mid;
 		if (BAN.newBlacklistIDs.indexOf(mid) < 0) return false;
-		botDebug.debugMessage(true, "BAN: song banned");
 		var banMsg = botChat.subChat(botChat.getChatMessage("isblacklisted"), {name: botVar.currentDJ, song: track.songName});
 		setTimeout(function () { API.sendChat(banMsg); }, 1000);
 		return true;
@@ -3567,14 +3566,16 @@ var API = {
   getCurrentSong: function() {
     try {
 	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
-	  return API.formatTrack(songinfo);
+	  return API.formatTrack(songinfo, false);
     }
 	catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
   },
-  formatTrack: function(dubSonginfo) {
+  formatTrack: function(dubSonginfo, logging) {
 	try {
 	  var track = {songLength: 0, songName: "", songMediaType: "", songMediaId: "", dubSongID: "", mid: ""};
+	  if (dubSonginfo === null && logging === true) botDebug.debugMessage(true, "formatTrack = undefined");
 	  if (dubSonginfo === null) return track;
+	  if (logging === true) botDebug.debugMessage(true, "formatTrack = " + dubSonginfo.name + " - " + dubSonginfo.fkid);
 	  track.songLength = parseInt(dubSonginfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
 	  track.songName = dubSonginfo.name;
 	  track.songMediaType = dubSonginfo.type;
@@ -3603,9 +3604,9 @@ var API = {
     catch(err) { UTIL.logException("getBotName: " + err.message); }
   },
 
- waitListItem: function (dubQueueItem) {
+ waitListItem: function (dubQueueItem, logging) {
     try {
-	    var track = API.formatTrack(dubQueueItem._song);
+	    var track = API.formatTrack(dubQueueItem._song, logging);
 		var waitlistQueueItem = {id: dubQueueItem.userid, username: dubQueueItem._user.username, track: track};
 		botDebug.debugMessage(true, "SONG: " + track.name); // todoerlind
 		return waitlistQueueItem;
@@ -3614,7 +3615,7 @@ var API = {
   },
  playListItem: function (dubPlaylistItem) {
     try {
-	    var track = API.formatTrack(dubPlaylistItem._song);
+	    var track = API.formatTrack(dubPlaylistItem._song, false);
 		var listItem = {track: track};
 		return listItem;
 	}
@@ -3643,8 +3644,10 @@ var API = {
         // a1 is a list of length 3 containing the response text,
         // status, and jqXHR object for each of the four ajax calls respectively.
 		var dubHistoryList = a1;
+		BAN.historicalList = dubHistoryList;
+		botDebug.debugMessage(true, "History.len: " + dubHistoryList.length);
         for (var i = 0; i < dubHistoryList.data.length; i++) {
-		  historylist.push(new API.waitListItem(dubHistoryList.data[i]));
+		  historylist.push(new API.waitListItem(dubHistoryList.data[i], true));
 		}
 		pageno++;
 		if (historylist.length < minItems && dubHistoryList.length > 0)
@@ -3810,7 +3813,7 @@ var API = {
 		dubBot.queue.dubQueueResp = a1;
 	    var waitlist = [];
         for (var i = 0; i < dubBot.queue.dubQueueResp.data.length; i++) {
-	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i]));
+	      waitlist.push(new API.waitListItem(dubBot.queue.dubQueueResp.data[i], false));
 		}
         cb(waitlist, data);
 	  });
