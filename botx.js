@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0076",
+  version: "Version  1.01.0031.0077",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -3585,9 +3585,7 @@ var API = {
  playListItem: function (dubPlaylistItem) {
     try {
 	    var track = API.formatTrack(dubPlaylistItem._song);
-		var listItem = {id: dubQueueItem.userid,
-		                username: dubQueueItem._user.username,
-		                track: track};
+		var listItem = {track: track};
 		return listItem;
 	}
     catch(err) { UTIL.logException("playListItem: " + err.message); }
