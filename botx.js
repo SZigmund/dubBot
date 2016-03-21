@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0079",
+  version: "Version  1.01.0031.0080",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2010,7 +2010,7 @@ var BAN = {
   preBanQueueSong: function (positionKey) {
     try {
 		if (positionKey.length < 3)  return;
-		if (!isNaN(positionKey.substring(0, pos.length -2))) return;
+		if (!isNaN(positionKey.substring(0, positionKey.length -2))) return;
 	    var position = positionKey.substring(0, positionKey.length - 2)
 	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
 	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2, 2)
@@ -2024,8 +2024,8 @@ var BAN = {
 	   if ((BAN.songQueuePos + 1) > waitlist.length) return;
 	   //validate the 1st 2 characters of the song match the give from the command:
 	   if (waitlist.track.songName.substring(0,2).toUpperCase() !== BAN.songQueueKey.toUpperCase()) return;
-	   API.chatLog("Ban song: " + waitlist[pos-1].name);
-	   BAN.banSong(waitlist[pos-1].track);
+	   API.chatLog("Ban song: " + waitlist[BAN.songQueuePos-1].name);
+	   BAN.banSong(waitlist[BAN.songQueuePos-1].track);
 	   API.sendChat("Will do boss.");
 	}
     catch(err) { UTIL.logException("cbPreBanQueueSong: " + err.message); }
