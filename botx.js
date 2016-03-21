@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0077",
+  version: "Version  1.01.0031.0079",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -769,16 +769,16 @@ var SETTINGS = {
             if (localStorage.getItem("BLACKLIST") !== null) {
               var myBLList = localStorage["BLACKLIST"];
               var myBLIDs = localStorage["BLACKLISTIDS"];
-              API.logInfo(JSON.parse(localStorage["BLACKLIST"]));
-              API.logInfo(JSON.parse(localStorage["BLACKLISTIDS"]));
-              API.logInfo("LEN (" + myBLList.length + ") " + myBLList);
-              API.logInfo("LEN (" + myBLIDs.length + ") " + myBLIDs);
+              //API.logInfo(JSON.parse(localStorage["BLACKLIST"]));
+              //API.logInfo(JSON.parse(localStorage["BLACKLISTIDS"]));
+              //API.logInfo("LEN (" + myBLList.length + ") " + myBLList);
+              //API.logInfo("LEN (" + myBLIDs.length + ") " + myBLIDs);
 
               BAN.newBlacklist = JSON.parse(localStorage["BLACKLIST"]);
               BAN.newBlacklistIDs = JSON.parse(localStorage["BLACKLISTIDS"]);
               
-              botDebug.debugMessage(true, "BL LOAD:   BL Count: " + BAN.newBlacklist.length);
-              botDebug.debugMessage(true, "BL LOAD: BLID Count: " + BAN.newBlacklistIDs.length);
+              //botDebug.debugMessage(true, "BL LOAD:   BL Count: " + BAN.newBlacklist.length);
+              //botDebug.debugMessage(true, "BL LOAD: BLID Count: " + BAN.newBlacklistIDs.length);
             }
             BAN.blacklistLoaded = true;
             //botDebug.debugMessage(true, "BL LOADED: TRUE");
@@ -2024,8 +2024,9 @@ var BAN = {
 	   if ((BAN.songQueuePos + 1) > waitlist.length) return;
 	   //validate the 1st 2 characters of the song match the give from the command:
 	   if (waitlist.track.songName.substring(0,2).toUpperCase() !== BAN.songQueueKey.toUpperCase()) return;
-	   API.logInfo("Ban song: " + waitlist[pos-1].name);
+	   API.chatLog("Ban song: " + waitlist[pos-1].name);
 	   BAN.banSong(waitlist[pos-1].track);
+	   API.sendChat("Will do boss.");
 	}
     catch(err) { UTIL.logException("cbPreBanQueueSong: " + err.message); }
   }
@@ -6457,7 +6458,7 @@ var BOTCOMMANDS = {
 						var msg = chat.message;
 						var pos = msg.substring(cmd.length + 1);
 						if (pos.length < 3)  return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
-						if (!isNaN(pos.substring(0, pos.length -2))) return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
+						if (isNaN(pos.substring(0, pos.length -2))) return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
 						BAN.preBanQueueSong(pos);
                     }
                     catch(err) { UTIL.logException("imoutCommand: " + err.message); }
