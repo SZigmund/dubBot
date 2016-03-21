@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0073",
+  version: "Version  1.01.0031.0074",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1980,7 +1980,7 @@ var BAN = {
 		if (!SETTINGS.settings.blacklistEnabled) return false;
 		var mid = track.songMediaType + ':' + track.songMediaId;
 		if (BAN.newBlacklistIDs.indexOf(mid) < 0) return false;
-		var banMsg = subChat(botChat.getChatMessage("isblacklisted"), {name: botVar.currentDJ, song: track.songName});
+		var banMsg = botChat.subChat(botChat.getChatMessage("isblacklisted"), {name: botVar.currentDJ, song: track.songName});
 		setTimeout(function () { API.sendChat(banMsg); }, 1000);
 		return true;
     }
