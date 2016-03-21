@@ -1,5 +1,5 @@
-
 // Written by: DocZ
+//getWaitList
 //               API.data.dubUsers.length
 //               USERS.users.length
 //Remove User 1: USERS.users.splice(1, 1);
@@ -13,7 +13,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0075",
+  version: "Version  1.01.0031.0076",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -100,7 +100,7 @@ var dubBot = {
 	dubQueueB: null,
 	songStatsMessage: "",
 	deleteSongName: null,
-	deleteSongFkid: null,
+	deleteSongMediaId: null,
 	dubPlaylist: null,
 	dubRoomlist: [],
 	dubQueueResp: null
@@ -150,7 +150,7 @@ var dubBot = {
       botVar.currentDJ   = API.getDjName("A");
 	  if (botVar.lastSkippedSong === botVar.currentSong) return;
       if (SETTINGS.settings.maximumSongLength < 180) SETTINGS.settings.maximumSongLength = 480;  //(Default to 8 mins if < 3 mins)
-      if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+      if (track.songLength >= SETTINGS.settings.maximumSongLength) {
 	    botVar.lastSkippedSong = botVar.currentSong;
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
@@ -1147,6 +1147,7 @@ var botChat = {
    botChat.chatMessages.push(["lockskippos", "[@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
    botChat.chatMessages.push(["lockguardtime", "[@%%NAME%%] The lockguard is set to %%TIME%% minute(s)."]);
    botChat.chatMessages.push(["maxlengthtime", "[@%%NAME%%] The maximum song duration is set to %%TIME%% seconds."]);
+   botChat.chatMessages.push(["invalidvalue", "[@%%NAME%%] Invalid value for this command."]);
    botChat.chatMessages.push(["motdset", "MotD set to:  %%MSG%%"]);
    botChat.chatMessages.push(["motdintervalset", "MotD interval set to %%INTERVAL%%."]);
    botChat.chatMessages.push(["addbotwaitlist", "@%%NAME%% don't try to add me to the waitlist, please."]);
@@ -1952,10 +1953,11 @@ var botDebug = {
 };
 
 //SECTION BAN: All Ban list functionality:
-//todoerlind
 var BAN = {
   newBlacklist: [],
   newBlacklistIDs: [],
+  songQueuePos: -1,
+  songQueueKey: "",
   blacklistLoaded: false,
   songOnBanList: function (track) {
     try {
@@ -1975,7 +1977,6 @@ var BAN = {
 	    var track = API.getCurrentSong();
 		BAN.banSong(track);
 		BAN.banSongSkip(track, username);
-		//todoerlind store songs to storage
 	}
 	catch(err) { UTIL.logException("ERROR:banCurrentSong: " + err.message); }
   },
@@ -2005,6 +2006,29 @@ var BAN = {
 	}
 	catch(err) { UTIL.logException("ERROR:banSongSkip: " + err.message); }
   },
+  //TO CALL: BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
+  preBanQueueSong: function (positionKey) {
+    try {
+		if (positionKey.length < 3)  return;
+		if (!isNaN(positionKey.substring(0, pos.length -2))) return;
+	    var position = positionKey.substring(0, positionKey.length - 2)
+	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
+	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2, 2)
+	    API.getWaitList(BAN.cbPreBanQueueSong);
+    }
+    catch(err) { UTIL.logException("preBanQueueSong: " + err.message); }
+  },
+  cbPreBanQueueSong: function (waitlist) {  
+	try {
+	   if (BAN.songQueuePos < 0) return;
+	   if ((BAN.songQueuePos + 1) > waitlist.length) return;
+	   //validate the 1st 2 characters of the song match the give from the command:
+	   if (waitlist.track.songName.substring(0,2).toUpperCase() !== BAN.songQueueKey.toUpperCase()) return;
+	   API.logInfo("Ban song: " + waitlist[pos-1].name);
+	   BAN.banSong(waitlist[pos-1].track);
+	}
+    catch(err) { UTIL.logException("cbPreBanQueueSong: " + err.message); }
+  }
 };
 			//SECTION AFK: All AFK functionality:
 var AFK = {
@@ -2452,15 +2476,15 @@ var BOTDJ = {
 		  var songIdx = 0;
 		  songIdx = Math.floor(Math.random() * playlist.length);
 		  //Skip songs that exceed the max song len:
-		  while ((playlist[songIdx].songlength / 1000) > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
-          //botDebug.debugMessage(true, "LEN: " + playlist[songIdx].songlength + " - " + SETTINGS.settings.maximumSongLength);
+		  while ((playlist[songIdx].track.songLength / 1000) > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
+          //botDebug.debugMessage(true, "LEN: " + playlist[songIdx].track.songLength + " - " + SETTINGS.settings.maximumSongLength);
 
-		  var songType = playlist[songIdx].songType;
-		  var fkid = playlist[songIdx].fkid;
-		  //botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
+		  var songType = playlist[songIdx].track.songMediaType;
+		  var mediaId = playlist[songIdx].track.songMediaId;
+		  //botDebug.debugMessage(true, "songId: " + mediaId + " songType: " + songType);
 		  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist
 		  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomQueue.replace("{id}", Dubtrack.room.model.id);
-		  Dubtrack.helpers.sendRequest(i, { "songId": fkid, "songType": songType}, "POST");
+		  Dubtrack.helpers.sendRequest(i, { "songId": mediaId, "songType": songType}, "POST");
 		}
 		catch(err) { UTIL.logException("playRandomSong: " + err.message); }
 	},
@@ -3513,17 +3537,22 @@ var API = {
   getCurrentSong: function() {
     try {
 	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
-	  //parseInt(Dubtrack.room.player.activeSong.attributes.songInfo.songLength) / 1000;
-	  var track = {songLength: 0, songName: "", songMediaType: "", songMediaId: "", playlistSongId: ""};
-	  if (songinfo === null) return track;
-	  track.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
-	  track.songName = songinfo.name;
-	  track.songMediaType = songinfo.type;
-	  track.songMediaId = songinfo.fkid;
-	  track.playlistSongId = songinfo._id;
-	  return track;
+	  return API.formatTrack(songinfo);
     }
 	catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
+  },
+  formatTrack: function(dubSonginfo) {
+	try {
+	  var track = {songLength: 0, songName: "", songMediaType: "", songMediaId: "", dubSongID: ""};
+	  if (dubSonginfo === null) return track;
+	  track.songLength = parseInt(dubSonginfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
+	  track.songName = dubSonginfo.name;
+	  track.songMediaType = dubSonginfo.type;
+	  track.songMediaId = dubSonginfo.fkid;
+	  track.dubSongID = dubSonginfo._id;
+	  return track;
+    }
+	catch(err) { UTIL.logException("formatTrack: " + err.message); }
   },
   getDubDownCount: function() {
     try        { return parseInt($(".dubdown").text()); }
@@ -3545,34 +3574,21 @@ var API = {
 
  waitListItem: function (dubQueueItem) {
     try {
-        this.id = dubQueueItem.userid;
-        this.username = dubQueueItem._user.username;
-        this.songlength = dubQueueItem.songLength;
-        this.songid = dubQueueItem.songid;
-		this.songname = dubQueueItem._song.name;
-        //botDebug.debugMessage(true, "-------------------------------------------------------------");
-        //botDebug.debugMessage(true, "UID1: " + dubQueueItem.userid);
-        //botDebug.debugMessage(true, "UID2: " + dubQueueItem._user.username);
-        //botDebug.debugMessage(true, "UID3: " + dubQueueItem.songLength);
-        //botDebug.debugMessage(true, "UID4: " + dubQueueItem.songid);
-		//botDebug.debugMessage(true, "UID5: " + dubQueueItem._song.name);
-		return this;
+	    var track = API.formatTrack(dubQueueItem._song);
+		var waitlistQueueItem = {id: dubQueueItem.userid,
+		                         username: dubQueueItem._user.username,
+		                         track: track};
+		return waitlistQueueItem;
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
  playListItem: function (dubPlaylistItem) {
     try {
-        this.playlistSongID = dubPlaylistItem._id;
-        this.fkid = dubPlaylistItem._song.fkid;
-        this.songlength = dubPlaylistItem._song.songLength;
-        this.songid = dubPlaylistItem.songid;
-		this.songname = dubPlaylistItem._song.name;
-		this.songType =  dubPlaylistItem._song.type;
-        //botDebug.debugMessage(true, "-------------------------------------------------------------");
-        //botDebug.debugMessage(true, "UID1: " + dubPlaylistItem.songLength);
-        //botDebug.debugMessage(true, "UID2: " + dubPlaylistItem.songid);
-		//botDebug.debugMessage(true, "UID3: " + dubPlaylistItem._song.name);
-		return this;
+	    var track = API.formatTrack(dubPlaylistItem._song);
+		var listItem = {id: dubQueueItem.userid,
+		                username: dubQueueItem._user.username,
+		                track: track};
+		return listItem;
 	}
     catch(err) { UTIL.logException("playListItem: " + err.message); }
   },
@@ -3728,6 +3744,7 @@ var API = {
 	},
   defineMyQueue: function() {
     try {
+	//https://api.dubtrack.fm/user/session/room/5600a564bfb6340300a2def2/queue 
 	  //"https://api.dubtrack.fm/user/session/room/:id/queue"
 	  var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
 	  return $.ajax({ url: theUrl, type: "GET" });
@@ -5474,9 +5491,9 @@ var API = {
 	  if (typeof songInfo !== "object") return;
 
   	  dubBot.queue.deleteSongName =  songInfo.songName;
-	  dubBot.queue.deleteSongFkid = songInfo.songMediaId;
+	  dubBot.queue.deleteSongMediaId = songInfo.songMediaId;
 
-	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
+	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongMediaId);
 	  //https://api.dubtrack.fm/playlist/56c5da9da552130101e9c1de/songs/56c63ed66f1dfadf03a5bedb
 	  var playlist = [];
 	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
@@ -5506,12 +5523,12 @@ var API = {
   },
   deleteCurrentSongApi: function(playlist, playlistID) {
     try {
-	    //botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid + " PLLEN: " + playlist.length);
+	    //botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongMediaId + " PLLEN: " + playlist.length);
         for (var i = 0; i < playlist.length; i++) {
-		  //botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].fkid);
-	      if (playlist[i].fkid === dubBot.queue.deleteSongFkid) {
+		  //botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].track.songMediaId);
+	      if (playlist[i].track.songMediaId === dubBot.queue.deleteSongMediaId) {
 		    //botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
-		    var songId = playlist[i].playlistSongID;
+		    var songId = playlist[i].track.dubSongID;
 			//botDebug.debugMessage(true, "Delete song: " + songId);
 		    //https://api.dubtrack.fm/playlist/56c5da98f4508b5a00ef9645/songs/56c63eb5cb0ed0a4037f8f99
 		    var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "/" + songId;
@@ -5531,7 +5548,7 @@ var API = {
 	  if (typeof songInfo !== "object") return;
 
 	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", UTIL.getActivePlaylistID());
-	  Dubtrack.helpers.sendRequest(i, { "songid": songInfo.playlistSongId}, "POST");
+	  Dubtrack.helpers.sendRequest(i, { "songid": songInfo.dubSongID}, "POST");
 	  API.sendChat(botChat.subChat(botChat.getChatMessage("grabbedsong"), {botname: botVar.botName, songname: songInfo.songName}));
 	}
     catch(err) { UTIL.logException("grabCurrentSong: " + err.message); }
@@ -6431,6 +6448,24 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("imoutCommand: " + err.message); }
                 }
             },
+            pbCommand: {  //Added 02/14/2015 Zig 
+                command: 'pb',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+					try {
+						if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+						if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						var msg = chat.message;
+						var pos = msg.substring(cmd.length + 1);
+						if (pos.length < 3)  return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
+						if (!isNaN(pos.substring(0, pos.length -2))) return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
+						BAN.preBanQueueSong(pos);
+                    }
+                    catch(err) { UTIL.logException("imoutCommand: " + err.message); }
+                }
+            },
+			
             zigCommand: {  //Added 02/14/2015 Zig 
                 command: ['zig','botmaint'],
                 rank: 'manager',
