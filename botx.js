@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0093",
+  version: "Version  1.01.0031.0094",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -151,10 +151,13 @@ var dubBot = {
       if (SETTINGS.settings.maximumSongLength < 180) SETTINGS.settings.maximumSongLength = 480;  //(Default to 8 mins if < 3 mins)
       if (track.songLength >= SETTINGS.settings.maximumSongLength) {
 	    botVar.lastSkippedSong = botVar.currentSong;
+		SETTINGS.settings.suppressSongStats = true;
+		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
 	  else if (BAN.songOnBanList(track) === true) {
+	    botVar.lastSkippedSong = botVar.currentSong;
 		SETTINGS.settings.suppressSongStats = true;
 		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Banned song");
@@ -3348,7 +3351,8 @@ var API = {
 		////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
 		//564933a1d4dcab140021cdeb - dexter_nix
 		//560be6cbdce3260300e40770 - Levis_Homer
-      var idx = 0;
+      if (queuePos > waitlist.length) queuePos = waitlist.length;  // If requested position is too high, just move to the end of the line.
+	  var idx = 0;
 	  var newlist = [];
 	  for(var i = 0; i < waitlist.length; i++){
 	    if ((i + 1) === queuePos) {
