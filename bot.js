@@ -1,18 +1,18 @@
 // Written by: DocZ
 //               API.data.dubUsers.length
 //               USERS.users.length
-//               USERS.users[1].username + " - " + USERS.users[1].userRole + " - " + USERS.users[1].id;
 //Remove User 1: USERS.users.splice(1, 1);
+//               USERS.users[1].username + " - " + USERS.users[1].userRole + " - " + USERS.users[1].id;
 //               USERS.users[2].username + " - " + USERS.users[2].userRole + " - " + USERS.users[2].id;
 //TODO LIST:
 // - Record all Bans/Unbans
 // - Last Played
 
-  //todoer Remove all we can: document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
+//todoer Remove all we can: document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031",
+  version: "Version  1.01.0032",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -80,7 +80,6 @@ var dubBot = {
     skippable: true,
     usercommand: true,
     allcommand: true,
-    blacklistInterval: null,
     queueing: 0,
     queueable: true,
     currentDJID: null,
@@ -93,9 +92,6 @@ var dubBot = {
         id: [],
         position: []
     },
-    newBlacklist: [],
-    newBlacklistIDs: [],
-    blacklistLoaded: false,
   },
   queue: {
 	dubQueue: null,
@@ -103,7 +99,7 @@ var dubBot = {
 	dubQueueB: null,
 	songStatsMessage: "",
 	deleteSongName: null,
-	deleteSongFkid: null,
+	deleteSongMediaId: null,
 	dubPlaylist: null,
 	dubRoomlist: [],
 	dubQueueResp: null
@@ -138,7 +134,7 @@ var dubBot = {
   announceSongStats: function(waitlist) {
     try {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
-	  API.sendChat(dubBot.queue.songStatsMessage);
+	  if (SETTINGS.settings.suppressSongStats === false) API.sendChat(dubBot.queue.songStatsMessage);
 	  AFK.dclookupCheckAll(waitlist);
 	  dubBot.updateWaitlist(waitlist);
     }
@@ -148,25 +144,35 @@ var dubBot = {
     try {
       API.getWaitList(dubBot.announceSongStats);
 	  botVar.room.currentMehCount = 0;
-      botVar.currentSong = API.getSongName();
+	  var track = API.getCurrentSong();
+      botVar.currentSong = track.songName;
       botVar.currentDJ   = API.getDjName("A");
 	  if (botVar.lastSkippedSong === botVar.currentSong) return;
       if (SETTINGS.settings.maximumSongLength < 180) SETTINGS.settings.maximumSongLength = 480;  //(Default to 8 mins if < 3 mins)
-      if (API.getSongLength() >= SETTINGS.settings.maximumSongLength) {
+      if (track.songLength >= SETTINGS.settings.maximumSongLength) {
 	    botVar.lastSkippedSong = botVar.currentSong;
+		SETTINGS.settings.suppressSongStats = true;
+		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
         API.sendChat(botChat.subChat(botChat.getChatMessage("timelimit"), {name: botVar.currentDJ, maxlength: (SETTINGS.settings.maximumSongLength / 60)}));
         dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song too long");
       }
+	  else if (BAN.songOnBanList(track) === true) {
+	    botVar.lastSkippedSong = botVar.currentSong;
+		SETTINGS.settings.suppressSongStats = true;
+		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
+		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Banned song");
+		setTimeout(function () { API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
+	  }
 	  var dubUserList = [];
 	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
       //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
 	  //}
-      //todoer check blacklist
     }
       catch(err) { UTIL.logException("validateCurrentSong: " + err.message); }
   },
+
 
   skipBadSong: function (userName, skippedBy, reason) {
     try {
@@ -764,18 +770,18 @@ var SETTINGS = {
             if (localStorage.getItem("BLACKLIST") !== null) {
               var myBLList = localStorage["BLACKLIST"];
               var myBLIDs = localStorage["BLACKLISTIDS"];
-              API.logInfo(JSON.parse(localStorage["BLACKLIST"]));
-              API.logInfo(JSON.parse(localStorage["BLACKLISTIDS"]));
-              API.logInfo("LEN (" + myBLList.length + ") " + myBLList);
-              API.logInfo("LEN (" + myBLIDs.length + ") " + myBLIDs);
+              //API.logInfo(JSON.parse(localStorage["BLACKLIST"]));
+              //API.logInfo(JSON.parse(localStorage["BLACKLISTIDS"]));
+              //API.logInfo("LEN (" + myBLList.length + ") " + myBLList);
+              //API.logInfo("LEN (" + myBLIDs.length + ") " + myBLIDs);
 
-              dubBot.room.newBlacklist = JSON.parse(localStorage["BLACKLIST"]);
-              dubBot.room.newBlacklistIDs = JSON.parse(localStorage["BLACKLISTIDS"]);
+              BAN.newBlacklist = JSON.parse(localStorage["BLACKLIST"]);
+              BAN.newBlacklistIDs = JSON.parse(localStorage["BLACKLISTIDS"]);
               
-              botDebug.debugMessage(true, "BL LOAD:   BL Count: " + dubBot.room.newBlacklist.length);
-              botDebug.debugMessage(true, "BL LOAD: BLID Count: " + dubBot.room.newBlacklistIDs.length);
+              //botDebug.debugMessage(true, "BL LOAD:   BL Count: " + BAN.newBlacklist.length);
+              //botDebug.debugMessage(true, "BL LOAD: BLID Count: " + BAN.newBlacklistIDs.length);
             }
-            dubBot.room.blacklistLoaded = true;
+            BAN.blacklistLoaded = true;
             //botDebug.debugMessage(true, "BL LOADED: TRUE");
             var elapsed = Date.now() - JSON.parse(info).time;
             dubBot.room.historyList = room.historyList;
@@ -788,7 +794,7 @@ var SETTINGS = {
                 dubBot.room.autoskip = room.autoskip;
                 dubBot.room.roomstats = room.roomstats;
                 dubBot.room.queue = room.queue;
-                //dubBot.room.newBlacklist = room.newBlacklist;
+                //BAN.newBlacklist = room.newBlacklist;
                 API.logInfo(botChat.getChatMessage("datarestored"));
             }
         }
@@ -968,9 +974,7 @@ var botChat = {
         ch = msg.charAt(i);
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch === ':' || ch === '^') containsLetters = true;
     }
-    if (msg === '') {
-        return true;
-    }
+    if (msg === '')  return true;
     if (!containsLetters && (msg.length === 1 || msg.length > 3)) return true;
     msg = msg.replace(/[ ,;.:\/=~+%^*\-\\"'&@#]/g, '');
     var capitals = 0;
@@ -1082,7 +1086,7 @@ var botChat = {
    botChat.chatMessages.push(["repeatSongs", "Skip History"]);
    botChat.chatMessages.push(["repeatSongLimit", "Skip History limit"]);
    botChat.chatMessages.push(["autoskip", "autoskip"]);
-   botChat.chatMessages.push(["newblacklisted", "[@%%NAME%%] Adding song to ban list: [ %%AUTHOR%% - %%TITLE%% - %%MID%% ]"]);
+   botChat.chatMessages.push(["newblacklisted", "[@%%NAME%%] Adding song to ban list: [ %%TITLE%% - %%MID%% ]"]);
    botChat.chatMessages.push(["blinfo", "[@%%NAME%%] Song info - author: %%AUTHOR%%, title: %%TITLE%%, mid: %%SONGID%%"]);
    botChat.chatMessages.push(["blacklist", "blacklist"]);
    botChat.chatMessages.push(["cycleguard", "cycleguard"]);
@@ -1144,6 +1148,7 @@ var botChat = {
    botChat.chatMessages.push(["lockskippos", "[@%%NAME%%] Lockskip will now move the dj to position %%POSITION%%."]);
    botChat.chatMessages.push(["lockguardtime", "[@%%NAME%%] The lockguard is set to %%TIME%% minute(s)."]);
    botChat.chatMessages.push(["maxlengthtime", "[@%%NAME%%] The maximum song duration is set to %%TIME%% seconds."]);
+   botChat.chatMessages.push(["invalidvalue", "[@%%NAME%%] Invalid value for this command."]);
    botChat.chatMessages.push(["motdset", "MotD set to:  %%MSG%%"]);
    botChat.chatMessages.push(["motdintervalset", "MotD interval set to %%INTERVAL%%."]);
    botChat.chatMessages.push(["addbotwaitlist", "@%%NAME%% don't try to add me to the waitlist, please."]);
@@ -1305,23 +1310,6 @@ var botChat = {
            UTIL.logException("subChat: " + err.message);
         }
     },
-  findChatItem: function(itemID) {
-    try{
-      //Only scan up to the last 10 items in history:
-      if (botVar.chatHistoryList.length > 10) {
-        botDebug.debugMessage(false, "BEFORE LEN: " + botVar.chatHistoryList.length);
-        botVar.chatHistoryList.splice(0, botVar.chatHistoryList.length - 10);
-        botDebug.debugMessage(false, " AFTER LEN: " + botVar.chatHistoryList.length);
-      }
-      for (var i = 0; i < botVar.chatHistoryList.length; i++) {
-          if (botVar.chatHistoryList[i].chatId.trim() === itemID.trim()) {
-              return botVar.chatHistoryList[i];
-          }
-      }
-      botVar.chatHistoryList.push(new botVar.chatHistory(itemID, 0));
-      return botVar.chatHistoryList[(botVar.chatHistoryList.length)-1];
-      } catch (err) { UTIL.logException("findChatItem: " + err.message); }
-  },
   formatChat: function(chatMessage, username, uid) {
     botChat.commandChat.cid = "";
     botChat.commandChat.message = chatMessage;
@@ -1476,7 +1464,7 @@ var UTIL = {
 			//var dj = API.getDJ();
 			//if (!basicBot.roomUtilities.isStaff(dj)) return true;
 			//var timeRemaining = API.getTimeRemaining();
-			//var newMedia = API.getMedia();
+			//var newMedia = API.getCurrentSong();
 			////botDebug.debugMessage(true, "timeRemaining: " + timeRemaining);
 			////botDebug.debugMessage(true, "newMedia.duration: " + newMedia.duration);
 			////basicBot.roomUtilities.logInfo("DUR1[" + newMedia.duration + "] REMAIN[" + timeRemaining + "] DIFF[" + (newMedia.duration - timeRemaining) + "]");
@@ -1926,7 +1914,7 @@ var TASTY = {
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                      'thunder','stpaddy','stpaddys'];
+                      'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -1965,7 +1953,115 @@ var botDebug = {
   }
 };
 
-//SECTION AFK: All AFK functionality:
+//SECTION BAN: All Ban list functionality:
+var BAN = {
+  newBlacklist: [],
+  newBlacklistIDs: [],
+  songQueuePos: -1,
+  songQueueKey: "",
+  songToBan: -1,
+  blacklistLoaded: false,
+  songOnBanList: function (track) {
+    try {
+		if (!SETTINGS.settings.blacklistEnabled) return false;
+		var mid = track.mid;
+		if (BAN.newBlacklistIDs.indexOf(mid) < 0) return false;
+		var banMsg = botChat.subChat(botChat.getChatMessage("isblacklisted"), {name: botVar.currentDJ, song: track.songName});
+		setTimeout(function () { API.sendChat(banMsg); }, 1000);
+		return true;
+    }
+      catch(err) { UTIL.logException("songOnBanList: " + err.message); }
+  },
+  banCurrentSong: function(username) {
+	try {
+	    var track = API.getCurrentSong();
+		BAN.banSong(track);
+		BAN.banSongSkip(track, username);
+	}
+	catch(err) { UTIL.logException("ERROR:banCurrentSong: " + err.message); }
+  },
+  banSong: function(track) {
+	try {
+	    API.chatLog("Banned song: " + track.songName);
+		BAN.newBlacklist.push(track);
+		BAN.newBlacklistIDs.push(track.mid);
+		if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
+		if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
+	}
+	catch(err) { UTIL.logException("ERROR:banSong: " + err.message); }
+  },
+  //todoer media / track update the fields below:::
+  banSongSkip: function(track, username) {
+	try {
+		var djName = botVar.currentDJ;
+		SETTINGS.settings.suppressSongStats = true;
+		setTimeout(function () { SETTINGS.settings.suppressSongStats = false }, 5000);
+		dubBot.skipBadSong(botVar.currentDJ, username, "OOB");
+		//dubBot.room.skippable = false;
+		//setTimeout(function () { dubBot.room.skippable = true }, 5000);
+		setTimeout(function () {
+			API.sendChat(botChat.subChat(botChat.getChatMessage("newblacklisted"), {name: djName, title: track.songName, mid: track.mid}));
+		}, 1000);
+		setTimeout(function () { API.sendChat("@" + djName + ": your song has been skipped. Please read the rules before you play your next song.");  }, 1500);
+		setTimeout(function () { API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
+	}
+	catch(err) { UTIL.logException("ERROR:banSongSkip: " + err.message); }
+  },
+  //TO CALL: BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
+  preBanQueueSong: function (positionKey) {
+    try {
+		//botDebug.debugMessage(true, "preBanQueueSong: -------------------------------------------------------------------");
+		if (positionKey.length < 3)  return;
+		if (isNaN(positionKey.substring(0, positionKey.length -2))) return;
+		//botDebug.debugMessage(true, "preBanQueueSong: working...." + positionKey);
+	    BAN.songQueuePos = positionKey.substring(0, positionKey.length - 2);
+	    BAN.songQueueKey = positionKey.substring(positionKey.length - 2);
+		//botDebug.debugMessage(true, "preBanQueueSong: POS: " + BAN.songQueuePos + " KEY: " + BAN.songQueueKey);
+	    API.getWaitList(BAN.cbPreBanQueueSong);
+    }
+    catch(err) { UTIL.logException("preBanQueueSong: " + err.message); }
+  },
+  cbPreBanQueueSong: function (waitlist) {  
+	try {
+		//botDebug.debugMessage(true, "cbPreBanQueueSong: -------------------------------------------------------------------");
+	    if (BAN.songQueuePos < 0) return;
+		//botDebug.debugMessage(true, "cbPreBanQueueSong: Step 1");
+	    if (BAN.songQueuePos > waitlist.length) return;
+		//botDebug.debugMessage(true, "cbPreBanQueueSong: Step 2");
+	    //validate the 1st 2 characters of the song match the give from the command:
+	    if (waitlist[BAN.songQueuePos-1].track.songName.substring(0,2).toUpperCase() !== BAN.songQueueKey.toUpperCase()) return;
+	    //botDebug.debugMessage(true, "Ban song: " + waitlist[BAN.songQueuePos-1].name);
+	    BAN.banSong(waitlist[BAN.songQueuePos-1].track);
+	    API.sendChat("Will do boss.");
+	}
+    catch(err) { UTIL.logException("cbPreBanQueueSong: " + err.message); }
+  },
+  banHistoricalSong: function (historyList) {
+	try {
+		if ((BAN.songToBan > historyList.length) || (BAN.songToBan < 1)) {
+			API.sendChat("Invalid historical song index value");
+			return;
+		}
+		var history = historyList[BAN.songToBan - 1];
+		if (typeof history === 'undefined') {
+			API.sendChat("Could not define history idx: " + BAN.songToBan);
+			return;
+		}
+		botDebug.debugMessage(true, "NAME: " + history.track.songName);  // todoerlind
+		botDebug.debugMessage(true, "MID: " + history.track.mid);  // todoerlind
+		var idx = BAN.newBlacklistIDs.indexOf(history.track.mid);
+		if (idx < 0) {
+			//BAN.banSong(history.track);
+			API.sendChat(botChat.subChat(botChat.getChatMessage("newblacklisted"), {name: history.username, title: history.track.songName, mid: history.track.mid}));
+		}
+		else
+			API.sendChat("This song has already been banned: " + history.track.songName + " - " + history.track.mid);
+	}
+    catch(err) { UTIL.logException("banHistoricalSong: " + err.message); }
+  }
+
+};
+			//SECTION AFK: All AFK functionality:
 var AFK = {
   afkInterval: null,
   settings: {
@@ -2090,10 +2186,8 @@ var AFK = {
   
   buildLunchRequest: function (username, byusername, cmd) {
     try {
-	    this.username = username;
-	    this.requestUsername = byusername;
-	    this.cmd = cmd;
-	    return this;
+	    var lunchRequest = {username: username, requestUsername: byusername, cmd: cmd};
+	    return lunchRequest;
     }
     catch(err) { UTIL.logException("buildLunchRequest: " + err.message); }
   },
@@ -2411,15 +2505,15 @@ var BOTDJ = {
 		  var songIdx = 0;
 		  songIdx = Math.floor(Math.random() * playlist.length);
 		  //Skip songs that exceed the max song len:
-		  while ((playlist[songIdx].songlength / 1000) > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
-          //botDebug.debugMessage(true, "LEN: " + playlist[songIdx].songlength + " - " + SETTINGS.settings.maximumSongLength);
+		  while ((playlist[songIdx].track.songLength / 1000) > SETTINGS.settings.maximumSongLength) { songIdx = Math.floor(Math.random() * playlist.length); }
+          //botDebug.debugMessage(true, "LEN: " + playlist[songIdx].track.songLength + " - " + SETTINGS.settings.maximumSongLength);
 
-		  var songType = playlist[songIdx].songType;
-		  var fkid = playlist[songIdx].fkid;
-		  //botDebug.debugMessage(true, "songId: " + fkid + " songType: " + songType);
+		  var songType = playlist[songIdx].track.songMediaType;
+		  var mediaId = playlist[songIdx].track.songMediaId;
+		  //botDebug.debugMessage(true, "songId: " + mediaId + " songType: " + songType);
 		  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist
 		  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomQueue.replace("{id}", Dubtrack.room.model.id);
-		  Dubtrack.helpers.sendRequest(i, { "songId": fkid, "songType": songType}, "POST");
+		  Dubtrack.helpers.sendRequest(i, { "songId": mediaId, "songType": songType}, "POST");
 		}
 		catch(err) { UTIL.logException("playRandomSong: " + err.message); }
 	},
@@ -3257,7 +3351,8 @@ var API = {
 		////1>2 564933a1d4dcab140021cdeb&order%5B%5D=560be6cbdce3260300e40770
 		//564933a1d4dcab140021cdeb - dexter_nix
 		//560be6cbdce3260300e40770 - Levis_Homer
-      var idx = 0;
+      if (queuePos > waitlist.length) queuePos = waitlist.length;  // If requested position is too high, just move to the end of the line.
+	  var idx = 0;
 	  var newlist = [];
 	  for(var i = 0; i < waitlist.length; i++){
 	    if ((i + 1) === queuePos) {
@@ -3465,7 +3560,6 @@ var API = {
     try        { return API.getCurrentSong().songLength; }
     catch(err) { UTIL.logException("getSongLength: " + err.message); }
   },
-  //todoer DELETE after testing:
   //getSongLength: function() {
   //  try        { return parseInt($(".min").text()); }
   //  catch(err) { UTIL.logException("getSongLength: " + err.message); }
@@ -3473,23 +3567,23 @@ var API = {
   getCurrentSong: function() {
     try {
 	  var songinfo = Dubtrack.room.player.activeSong.attributes.songInfo;
-	  //parseInt(Dubtrack.room.player.activeSong.attributes.songInfo.songLength) / 1000;
-	  if (songinfo === null) {
-		  this.songLength = 0;
-		  this.songName = "";
-		  this.songMediaType = "";
-		  this.songMediaId = "";
-		  this.playlistSongId = "";
-		  return this;
-	  }
-	  this.songLength = parseInt(songinfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
-	  this.songName = songinfo.name;
-	  this.songMediaType = songinfo.type;
-	  this.songMediaId = songinfo.fkid;
-	  this.playlistSongId = songinfo._id;
-	  return this;
+	  return API.formatTrack(songinfo);
     }
 	catch(err) { UTIL.logException("getCurrentSong: " + err.message); }
+  },
+  formatTrack: function(dubSonginfo) {
+	try {
+	  var track = {songLength: 0, songName: "", songMediaType: "", songMediaId: "", dubSongID: "", mid: ""};
+	  if (dubSonginfo === null) return track;
+	  track.songLength = parseInt(dubSonginfo.songLength) / 1000;   // API returns MS we convert to seconds for our use.
+	  track.songName = dubSonginfo.name;
+	  track.songMediaType = dubSonginfo.type;
+	  track.songMediaId = dubSonginfo.fkid;
+	  track.dubSongID = dubSonginfo._id;
+	  track.mid = dubSonginfo.type + ':' + dubSonginfo.fkid;
+	  return track;
+    }
+	catch(err) { UTIL.logException("formatTrack: " + err.message); }
   },
   getDubDownCount: function() {
     try        { return parseInt($(".dubdown").text()); }
@@ -3511,60 +3605,65 @@ var API = {
 
  waitListItem: function (dubQueueItem) {
     try {
-        this.id = dubQueueItem.userid;
-        this.username = dubQueueItem._user.username;
-        this.songlength = dubQueueItem.songLength;
-        this.songid = dubQueueItem.songid;
-		this.songname = dubQueueItem._song.name;
-        //botDebug.debugMessage(true, "-------------------------------------------------------------");
-        //botDebug.debugMessage(true, "UID1: " + dubQueueItem.userid);
-        //botDebug.debugMessage(true, "UID2: " + dubQueueItem._user.username);
-        //botDebug.debugMessage(true, "UID3: " + dubQueueItem.songLength);
-        //botDebug.debugMessage(true, "UID4: " + dubQueueItem.songid);
-		//botDebug.debugMessage(true, "UID5: " + dubQueueItem._song.name);
-		return this;
+	    var track = API.formatTrack(dubQueueItem._song);
+		var waitlistQueueItem = {id: dubQueueItem.userid, username: dubQueueItem._user.username, track: track};
+		return waitlistQueueItem;
 	}
     catch(err) { UTIL.logException("waitListItem: " + err.message); }
   },
  playListItem: function (dubPlaylistItem) {
     try {
-        this.playlistSongID = dubPlaylistItem._id;
-        this.fkid = dubPlaylistItem._song.fkid;
-        this.songlength = dubPlaylistItem._song.songLength;
-        this.songid = dubPlaylistItem.songid;
-		this.songname = dubPlaylistItem._song.name;
-		this.songType =  dubPlaylistItem._song.type;
-        //botDebug.debugMessage(true, "-------------------------------------------------------------");
-        //botDebug.debugMessage(true, "UID1: " + dubPlaylistItem.songLength);
-        //botDebug.debugMessage(true, "UID2: " + dubPlaylistItem.songid);
-		//botDebug.debugMessage(true, "UID3: " + dubPlaylistItem._song.name);
-		return this;
+	    var track = API.formatTrack(dubPlaylistItem._song);
+		var listItem = {track: track};
+		return listItem;
 	}
     catch(err) { UTIL.logException("playListItem: " + err.message); }
   },
  roomListItem: function (dubRoom) {
     try {
-        this.roomID = dubRoom._id;
-		this.roomname = dubRoom.name;
-		this.activeUsers =  dubRoom.activeUsers;
-		this.users =  [];
-		this.staff =  [];
-		return this;
+        var listItem = {roomID: dubRoom._id, roomname: dubRoom.name, activeUsers:  dubRoom.activeUsers, users: [], staff: []};
+		return listItem;
 	}
     catch(err) { UTIL.logException("roomListItem: " + err.message); }
   },
  userListItem: function (dubUser, roomName) {
     try {
-        this.userID = dubUser.userid;
-		this.roomname = roomName;
-		this.username =  dubUser._user.username;
-		this.role = "";
-	    if (dubUser.roleid === null) return this;
-	    if (typeof dubUser.roleid === "object") this.role = dubUser.roleid.type;
-		return this;
+        var roomUser = {userID: dubUser.userid, roomname: roomName, username: dubUser._user.username, role: ""};
+	    if (dubUser.roleid === null) return roomUser;
+	    if (typeof dubUser.roleid === "object") roomUser.role = dubUser.roleid.type;
+		return roomUser;
 	}
     catch(err) { UTIL.logException("userListItem: " + err.message); }
   },
+  getRoomHistory: function(historylist, pageno, minItems, cb) {
+	try {
+	  $.when(API.defineRoomHistory(pageno)).done(function(a1) {
+        // the code here will be executed when all four ajax requests resolve.
+        // a1 is a list of length 3 containing the response text,
+        // status, and jqXHR object for each of the four ajax calls respectively.
+		var dubHistoryList = a1;
+        for (var i = 0; i < dubHistoryList.data.length; i++) {
+		  historylist.push(new API.waitListItem(dubHistoryList.data[i]));
+		}
+		pageno++;
+		if (historylist.length < minItems && dubHistoryList.length > 0)
+			API.getRoomHistory(historylist, pageno, minItems, cb);
+		else
+			cb(historylist);
+	  });
+	}
+    catch(err) { UTIL.logException("getRoomHistory: " + err.message); }
+  },
+  defineRoomHistory: function(pageno) {
+    try {
+	  //Tasty: https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist/history?page=1
+	  var urlsongs = Dubtrack.config.apiUrl + Dubtrack.config.urls.roomHistory.replace(":id", botVar.roomID) + "?name=" + "&page=" + pageno
+	  return $.ajax({ url: urlsongs, type: "GET" });
+	}
+    catch(err) { UTIL.logException("defineRoomHistory: " + err.message); }
+	},
+  
+  
   getPlaylist: function(playlist, playlistID, pageno, filterOn, cb) {
   //getPlaylist(playlist, playlistID, 1, null, BOTDJ.playRandomSong);
     try {
@@ -3694,6 +3793,7 @@ var API = {
 	},
   defineMyQueue: function() {
     try {
+	//https://api.dubtrack.fm/user/session/room/5600a564bfb6340300a2def2/queue 
 	  //"https://api.dubtrack.fm/user/session/room/:id/queue"
 	  var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.userQueue.replace(":id", botVar.roomID);
 	  return $.ajax({ url: theUrl, type: "GET" });
@@ -5440,9 +5540,9 @@ var API = {
 	  if (typeof songInfo !== "object") return;
 
   	  dubBot.queue.deleteSongName =  songInfo.songName;
-	  dubBot.queue.deleteSongFkid = songInfo.songMediaId;
+	  dubBot.queue.deleteSongMediaId = songInfo.songMediaId;
 
-	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid);
+	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongMediaId);
 	  //https://api.dubtrack.fm/playlist/56c5da9da552130101e9c1de/songs/56c63ed66f1dfadf03a5bedb
 	  var playlist = [];
 	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
@@ -5472,12 +5572,12 @@ var API = {
   },
   deleteCurrentSongApi: function(playlist, playlistID) {
     try {
-	    //botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongFkid + " PLLEN: " + playlist.length);
+	    //botDebug.debugMessage(true, "API CB - Playlist: " + playlistID + " SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongMediaId + " PLLEN: " + playlist.length);
         for (var i = 0; i < playlist.length; i++) {
-		  //botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].fkid);
-	      if (playlist[i].fkid === dubBot.queue.deleteSongFkid) {
+		  //botDebug.debugMessage(true, "Match SONGID?: " + playlist[i].track.songMediaId);
+	      if (playlist[i].track.songMediaId === dubBot.queue.deleteSongMediaId) {
 		    //botDebug.debugMessage(true, "Delete song: " + dubBot.queue.deleteSongName);
-		    var songId = playlist[i].playlistSongID;
+		    var songId = playlist[i].track.dubSongID;
 			//botDebug.debugMessage(true, "Delete song: " + songId);
 		    //https://api.dubtrack.fm/playlist/56c5da98f4508b5a00ef9645/songs/56c63eb5cb0ed0a4037f8f99
 		    var theUrl = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", playlistID) + "/" + songId;
@@ -5497,7 +5597,7 @@ var API = {
 	  if (typeof songInfo !== "object") return;
 
 	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", UTIL.getActivePlaylistID());
-	  Dubtrack.helpers.sendRequest(i, { "songid": songInfo.playlistSongId}, "POST");
+	  Dubtrack.helpers.sendRequest(i, { "songid": songInfo.dubSongID}, "POST");
 	  API.sendChat(botChat.subChat(botChat.getChatMessage("grabbedsong"), {botname: botVar.botName, songname: songInfo.songName}));
 	}
     catch(err) { UTIL.logException("grabCurrentSong: " + err.message); }
@@ -6076,7 +6176,7 @@ var BOTCOMMANDS = {
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                          'thunder','stpaddy','stpaddys'],
+                          'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6397,6 +6497,24 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("imoutCommand: " + err.message); }
                 }
             },
+            pbCommand: {  //Added 02/14/2015 Zig 
+                command: 'pb',
+                rank: 'manager',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+					try {
+						if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+						if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						var msg = chat.message;
+						var pos = msg.substring(cmd.length + 1);
+						if (pos.length < 3)  return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
+						if (isNaN(pos.substring(0, pos.length -2))) return API.sendChat(botChat.subChat(botChat.getChatMessage("invalidvalue"), {name: chat.un}));
+						BAN.preBanQueueSong(pos);
+                    }
+                    catch(err) { UTIL.logException("imoutCommand: " + err.message); }
+                }
+            },
+			
             zigCommand: {  //Added 02/14/2015 Zig 
                 command: ['zig','botmaint'],
                 rank: 'manager',
@@ -6655,7 +6773,7 @@ var BOTCOMMANDS = {
                     AFK.resetDC(user);  // so when they rejoin they'll not get bugged
                     API.moderateRemoveDJ(user);
                     //if (API.getDJ().id === user.id) {
-                    //    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Remove command");
+                    //    API.logInfo("Skip song: " + API.getCurrentSong().title + " by: " + chat.un + " Reason: Remove command");
                     //    API.moderateForceSkip();
                     //    setTimeout(function () {
                     //        API.moderateRemoveDJ(user.id);
@@ -6743,7 +6861,7 @@ var BOTCOMMANDS = {
                 }
             },
             lowrollptsCommand: {   //Added 07/03/2015 Zig
-                command: 'lowrollpts',
+                command: ['lowrollpts','leastrolls'],
                 rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
@@ -6771,7 +6889,7 @@ var BOTCOMMANDS = {
                 }
             },
             rollptsCommand: {   //Added 07/03/2015 Zig
-                command: 'rollpts',
+                command: ['rollpts','mostrolls'],
                 rank: 'resident-dj',
                 type: 'exact',
                 functionality: function (chat, cmd) {
@@ -6853,7 +6971,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     if (!UTIL.canSkip()) return API.sendChat("Skip too soon...");
-					//API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Skip command");
+					//API.logInfo("Skip song: " + API.getCurrentSong().title + " by: " + chat.un + " Reason: Skip command");
 					API.moderateForceSkip();
 					//dubBot.room.skippable = false;
 					//setTimeout(function () { dubBot.room.skippable = true }, 5 * 1000);
@@ -6985,6 +7103,148 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("backCommand: " + err.message); }
                 }
             },
+            toggleblCommand: {
+                command: 'togglebl',
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var temp = SETTINGS.settings.blacklistEnabled;
+                        SETTINGS.settings.blacklistEnabled = !temp;
+                        if (SETTINGS.settings.blacklistEnabled) {
+                          return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("blacklist")}));
+                        }
+                        else return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("blacklist")}));
+                    }
+                }
+            },
+            oobCommand: {
+                command: ['oob','bansong','songban','blacklist','bl'],
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        //if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        BAN.banCurrentSong(chat.un);
+                    }
+                    catch (err) { UTIL.logException("oob: " + err.message); }
+                }
+            },
+            banlistcountCommand: {   //Added: 06/12/2015 List all banned songs
+                command: 'banlistcount',
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("I've got " + BAN.newBlacklist.length + " songs on the ban list " + chat.un + ".");
+                    }
+                    catch (err) { UTIL.logException("banlistcount: " + err.message); }
+                }
+            },
+            banlistCommand: {   //Added: 06/10/2015 List all banned songs
+                command: ['banlist','banlistprivate'],
+                rank: 'co-owner',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        var keyword = "";
+                        var privatemsg = false;
+                        if (chat.uid === botVar.botID) privatemsg = true;
+                        if (cmd.toUpperCase() === "BANLISTPRIVATE") privatemsg = true;
+                        var msg = chat.message;
+                        var matchCnt = 0;
+                        if (msg.length > cmd.length) keyword = msg.substring(cmd.length + 1).toUpperCase();
+                        var dispMsgs = [];
+                        for (var i = 0; i < BAN.newBlacklist.length; i++) {
+                            var track = BAN.newBlacklist[i];
+                            var trackinfo = track.songName.toUpperCase();
+                            if (trackinfo.indexOf(keyword) > -1) {
+                                var dispMsg = "[" + track.songName + "] -> " + track.mid;
+                                if (privatemsg){
+                                    API.chatLog(dispMsg);
+                                }
+                                else {
+                                    matchCnt++;
+                                    if (matchCnt <= 10) dispMsgs.push(dispMsg);
+                                }
+                            }
+                        }
+                        if (!privatemsg) {
+                            var msgtoSend = "Found " + matchCnt + " matches.";
+                            if (matchCnt > 10) msgtoSend +=  "(only display first 10)"
+                            API.sendChat(msgtoSend);
+                            if (matchCnt > 0) setTimeout(function () { API.sendChat(dispMsgs[0]); }, 1 * 500);
+                            if (matchCnt > 1) setTimeout(function () { API.sendChat(dispMsgs[1]); }, 2 * 500);
+                            if (matchCnt > 2) setTimeout(function () { API.sendChat(dispMsgs[2]); }, 3 * 500);
+                            if (matchCnt > 3) setTimeout(function () { API.sendChat(dispMsgs[3]); }, 4 * 500);
+                            if (matchCnt > 4) setTimeout(function () { API.sendChat(dispMsgs[4]); }, 5 * 500);
+                            if (matchCnt > 5) setTimeout(function () { API.sendChat(dispMsgs[5]); }, 6 * 500);
+                            if (matchCnt > 6) setTimeout(function () { API.sendChat(dispMsgs[6]); }, 7 * 500);
+                            if (matchCnt > 7) setTimeout(function () { API.sendChat(dispMsgs[7]); }, 8 * 500);
+                            if (matchCnt > 8) setTimeout(function () { API.sendChat(dispMsgs[8]); }, 9 * 500);
+                            if (matchCnt > 9) setTimeout(function () { API.sendChat(dispMsgs[9]); }, 10 * 500);
+                        }
+                    }
+                    catch (err) { UTIL.logException("banlist: " + err.message); }
+                }
+            },
+            banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
+                command: 'banremove',
+                rank: 'co-owner',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        
+                        var msg = chat.message;
+                        if (msg.length === cmd.length) return API.sendChat("Missing mid to remove...");
+                        var midToRemove = msg.substring(cmd.length + 1);
+                        var idxToRemove = BAN.newBlacklistIDs.indexOf(midToRemove);
+                        if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
+                        if (BAN.newBlacklist.length !== BAN.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
+                        var track = BAN.newBlacklist[idxToRemove];
+                        var msgToSend = chat.un + " removed [" + track.songName + "] from the banned song list.";
+                        BAN.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
+                        BAN.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
+                        if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
+                        if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
+                        API.sendChat(msgToSend);
+                        API.logInfo(msgToSend);
+                    }
+                    catch (err) { UTIL.logException("banremove: " + err.message); }
+                }
+            },
+            banlastsongCommand: { //Added: 06/11/2015 Add all songs in current room history to the ban song list
+                command: 'banlastsong',
+                rank: 'mod',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if ((!BOTCOMMANDS.commands.executable(this.rank, chat)) && chat.uid !== botVar.botID) return void (0);
+                        var histIndex = "1"; //Default to 1st song on the list, or the last song played
+                        var msg = chat.message;
+                        if (msg.length > cmd.length) histIndex = msg.substring(cmd.length + 1);
+                        if (isNaN(histIndex)) {
+                            API.sendChat("Invalid historical song index number");
+                            return;
+                        }
+						var historylist = [];
+						BAN.songToBan = parseInt(histIndex);
+                        var songHistory = API.getRoomHistory(historylist, 1, parseInt(histIndex), BAN.banHistoricalSong);
+                    }
+                    catch (err) { UTIL.logException("banlastsong: " + err.message); }
+                }
+            },
 
             /* basic
             activeCommand: {
@@ -7015,6 +7275,43 @@ var BOTCOMMANDS = {
                 }
             },
 
+            unbanCommand: {
+                command: 'unban',
+                rank: 'mod',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        $(".icon-population").click();
+                        $(".icon-ban").click();
+                        setTimeout(function (chat) {
+                            var msg = chat.message;
+                            if (msg.length === cmd.length) return API.sendChat();
+                            var name = msg.substring(cmd.length + 2);
+                            var bannedUsers = API.getBannedUsers();
+                            var found = false;
+                            var bannedUser = null;
+                            for (var i = 0; i < bannedUsers.length; i++) {
+                                var user = bannedUsers[i];
+                                if (user.username === name) {
+                                    bannedUser = user;
+                                    found = true;
+                                }
+                            }
+                            if (!found) {
+                                $(".icon-chat").click();
+                                return API.sendChat(botChat.subChat(botChat.getChatMessage("notbanned"), {name: chat.un}));
+                            }
+                            API.moderateUnbanUser(bannedUser.id);
+                            //botDebug.debugMessage(true, "Unbanned " + name);
+                            setTimeout(function () {
+                                $(".icon-chat").click();
+                            }, 1000);
+                        }, 1000, chat);
+                    }
+                }
+            },
             addCommand: {
                 command: 'add',
                 rank: 'manager',
@@ -7226,11 +7523,11 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        var author = API.getMedia().author;
-                        var title = API.getMedia().title;
+                        var author = API.getCurrentSong().author;
+                        var title = API.getCurrentSong().title;
                         var name = chat.un;
-                        var format = API.getMedia().format;
-                        var cid = API.getMedia().cid;
+                        var format = API.getCurrentSong().format;
+                        var cid = API.getCurrentSong().cid;
                         var songid = format + ":" + cid;
                         API.sendChat(botChat.subChat(botChat.getChatMessage("blinfo"), {name: name, author: author, title: title, songid: songid}));
                     }
@@ -7565,7 +7862,7 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        var media = API.getMedia();
+                        var media = API.getCurrentSong();
                         var from = chat.un;
                         var user = USERS.lookupUserID(chat.uid);
                         var perm = API.getPermission(chat.uid);
@@ -7637,7 +7934,7 @@ var BOTCOMMANDS = {
                                 API.sendChat(botChat.subChat(botChat.getChatMessage("usedlockskip"), {name: chat.un}));
                                 basicBot.roomUtilities.booth.lockBooth();
                                 setTimeout(function (id) {
-                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
+                                    API.logInfo("Skip song: " + API.getCurrentSong().title + " by: " + chat.un + " Reason: Lockskip command");
                                     API.moderateForceSkip();
                                     dubBot.room.skippable = false;
                                     setTimeout(function () {
@@ -7667,7 +7964,7 @@ var BOTCOMMANDS = {
                                 API.sendChat(botChat.subChat(botChat.getChatMessage("usedlockskip"), {name: chat.un}));
                                 basicBot.roomUtilities.booth.lockBooth();
                                 setTimeout(function (id) {
-                                    API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Lockskip command");
+                                    API.logInfo("Skip song: " + API.getCurrentSong().title + " by: " + chat.un + " Reason: Lockskip command");
                                     API.moderateForceSkip();
                                     dubBot.room.skippable = false;
                                     API.sendChat(msgSend);
@@ -8002,7 +8299,7 @@ var BOTCOMMANDS = {
                         try {
                             var dj = API.getDJ();
                             var msgSend = '@' + dj.username + ': this song has been blocked in the US. please find another version.';
-                            API.logInfo("Skip song: " + API.getMedia().title + " by: " + chat.un + " Reason: Blocked");
+                            API.logInfo("Skip song: " + API.getCurrentSong().title + " by: " + chat.un + " Reason: Blocked");
                             API.moderateForceSkip();
                             dubBot.room.skippable = false;
                             setTimeout(function () {
@@ -8029,34 +8326,6 @@ var BOTCOMMANDS = {
                     catch (err) { UTIL.logException("banlistimport: " + err.message); }
                 }
             },
-            banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
-                command: 'banremove',
-                rank: 'co-owner',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        
-                        var msg = chat.message;
-                        if (msg.length === cmd.length) return API.sendChat("Missing mid to remove...");
-                        var midToRemove = msg.substring(cmd.length + 1);
-                        botDebug.debugMessage(true, "Keyword: " + midToRemove);
-                        var idxToRemove = dubBot.room.newBlacklistIDs.indexOf(midToRemove);
-                        if (idxToRemove < 0) return API.sendChat("Could not locate mid: " + midToRemove);
-                        if (dubBot.room.newBlacklist.length !== dubBot.room.newBlacklistIDs.length) return API.sendChat("Could not remove song ban, corrupt song list info.");
-                        var track = dubBot.room.newBlacklist[idxToRemove];
-                        var msgToSend = chat.un + " removed [" + track.author + " - " + track.title + "] from the banned song list.";
-                        dubBot.room.newBlacklist.splice(idxToRemove, 1);  // Remove 1 item from list
-                        dubBot.room.newBlacklistIDs.splice(idxToRemove, 1);  // Remove 1 item from list
-                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(dubBot.room.newBlacklist);
-                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(dubBot.room.newBlacklistIDs);
-                        API.sendChat(msgToSend);
-                        API.logInfo(msgToSend);
-                    }
-                    catch (err) { UTIL.logException("banremove: " + err.message); }
-                }
-            },
             banremoveallsongsCommand: { //Added: 06/10/2015 Remove all banned / blacklisted songs
                 command: 'banremoveallsongs',
                 rank: 'co-owner',
@@ -8065,11 +8334,11 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        if (dubBot.room.newBlacklist.length !== dubBot.room.newBlacklistIDs.length) API.sendChat("Could not remove song ban, corrupt song list info.");
-                        dubBot.room.newBlacklist.splice(0, dubBot.room.newBlacklist.length);  // Remove all items from list
-                        dubBot.room.newBlacklistIDs.splice(0, dubBot.room.newBlacklistIDs.length);  // Remove all items from list
-                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(dubBot.room.newBlacklist);
-                        if (dubBot.room.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(dubBot.room.newBlacklistIDs);
+                        if (BAN.newBlacklist.length !== BAN.newBlacklistIDs.length) API.sendChat("Could not remove song ban, corrupt song list info.");
+                        BAN.newBlacklist.splice(0, BAN.newBlacklist.length);  // Remove all items from list
+                        BAN.newBlacklistIDs.splice(0, BAN.newBlacklistIDs.length);  // Remove all items from list
+                        if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
+                        if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
                     }
                     catch (err) { UTIL.logException("banremoveallsongs: " + err.message); }
                 }
@@ -8086,66 +8355,17 @@ var BOTCOMMANDS = {
                         if ((!BOTCOMMANDS.commands.executable(this.rank, chat)) && chat.uid !== botVar.botID) return void (0);
                         var songHistory = API.getHistory();
                         for (var i = 0; i < songHistory.length; i++) {
-                            var song = songHistory[i];
+                            var history = songHistory[i];
                             songCount++;
-                            //if (i === 0) UTIL.logObject(song, "SONG");
-                            var songMid = song.media.format + ':' + song.media.cid;
-                            if (dubBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
-                            //var media = API.getMedia();
-                                var track = {
-                                    author: song.media.author,
-                                    title: song.media.title,
-                                    mid: songMid
-                                };
-                                basicBot.roomUtilities.banSong(track);
+                            //if (i === 0) UTIL.logObject(history, "SONG");
+                            if (BAN.newBlacklistIDs.indexOf(history.track.mid) < 0) {
+                                BAN.banSong(history.track);
                                 banCount++;
                             }
                         }
                         API.logInfo("Banned " + banCount + " out of " + songCount + " songs");
                     }
                     catch (err) { UTIL.logException("banallhistorysongs: " + err.message); }
-                }
-            },
-            banlastsongCommand: { //Added: 06/11/2015 Add all songs in current room history to the ban song list
-                command: 'banlastsong',
-                rank: 'mod',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                    //<a class="ytp-title-link yt-uix-sessionlink" tabindex="13" target="_blank" data-sessionlink="feature=player-title" href="https://www.youtube.com/watch?v=4pjCcIh9O5c">Mase-Feel So Good</a>
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if ((!BOTCOMMANDS.commands.executable(this.rank, chat)) && chat.uid !== botVar.botID) return void (0);
-                        var histIndex = "2"; //Default to 2nd song on the list, or the last song played
-                        var msg = chat.message;
-                        if (msg.length > cmd.length) histIndex = msg.substring(cmd.length + 1);
-                        if (isNaN(histIndex)) {
-                            API.sendChat("Invalid historical song index number");
-                            return;
-                        }
-                        var songHistory = API.getHistory();
-                        if ((parseInt(histIndex) > songHistory.length) || (parseInt(histIndex) < 1)) {
-                            API.sendChat("Invalid historical song index value");
-                            return;
-                        }
-                        var song = songHistory[parseInt(histIndex) - 1];
-                        if (typeof song === 'undefined') {
-                            API.sendChat("Could not define song idx: " + histIndex);
-                            return;
-                        }
-                        var songMid = song.media.format + ':' + song.media.cid;
-                        if (dubBot.room.newBlacklistIDs.indexOf(songMid) < 0) {
-                            var track = {
-                                author: song.media.author,
-                                title: song.media.title,
-                                mid: songMid
-                            };
-                            basicBot.roomUtilities.banSong(track);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("newblacklisted"), {name: song.user.username, author: song.media.author, title: song.media.title, mid: song.media.format + ':' + song.media.cid}));
-                        }
-                        else
-                            API.sendChat("This song has already been banned: " + song.media.author + " - " + song.media.title + " - " + song.media.format + ':' + song.media.cid);
-                    }
-                    catch (err) { UTIL.logException("banlastsong: " + err.message); }
                 }
             },
             banlistidjsonCommand: {   //Added: 06/11/2015 List all banned songs
@@ -8156,7 +8376,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.logInfo(JSON.stringify(dubBot.room.newBlacklistIDs));
+                        API.logInfo(JSON.stringify(BAN.newBlacklistIDs));
                     }
                     catch (err) { UTIL.logException("banlistidjson: " + err.message); }
                 }
@@ -8169,7 +8389,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.logInfo(JSON.stringify(dubBot.room.newBlacklist));
+                        API.logInfo(JSON.stringify(BAN.newBlacklist));
                     }
                     catch (err) { UTIL.logException("banlistjson: " + err.message); }
                 }
@@ -8238,83 +8458,6 @@ var BOTCOMMANDS = {
                         basicBot.roomUtilities.logNewBlacklistedSongs();
                     }
                     catch (err) { UTIL.logException("banlistconsole: " + err.message); }
-                }
-            },
-            banlistcountCommand: {   //Added: 06/12/2015 List all banned songs
-                command: 'banlistcount',
-                rank: 'mod',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat("I've got " + dubBot.room.newBlacklist.length + " songs on the ban list " + chat.un + ".");
-                    }
-                    catch (err) { UTIL.logException("banlistcount: " + err.message); }
-                }
-            },
-            banlistCommand: {   //Added: 06/10/2015 List all banned songs
-                command: ['banlist','banlistpublic'],
-                rank: 'co-owner',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        var keyword = "";
-                        var privatemsg = false;
-                        if (chat.uid === botVar.botID) privatemsg = true;
-                        if (cmd.toUpperCase() === "BANLISTPUBLIC") privatemsg = false;
-                        var msg = chat.message;
-                        var matchCnt = 0;
-                        if (msg.length > cmd.length) keyword = msg.substring(cmd.length + 1).toUpperCase();
-                        botDebug.debugMessage(true, "Keyword: " + keyword);
-                        var dispMsgs = [];
-                        for (var i = 0; i < dubBot.room.newBlacklist.length; i++) {
-                            var track = dubBot.room.newBlacklist[i];
-                            var trackinfo = track.title.toUpperCase() + track.author.toUpperCase();
-                            if (trackinfo.indexOf(keyword) > -1) {
-                                var dispMsg = "[" + track.author + " - " + track.title + "] -> " + track.mid;
-                                if (privatemsg){
-                                    API.chatLog(dispMsg);
-                                }
-                                else {
-                                    matchCnt++;
-                                    if (matchCnt <= 10) dispMsgs.push(dispMsg);
-                                }
-                            }
-                        }
-                        if (!privatemsg) {
-                            var msgtoSend = "Found " + matchCnt + " matches.";
-                            if (matchCnt > 10) msgtoSend +=  "(only display first 10)"
-                            API.sendChat(msgtoSend);
-                            if (matchCnt > 0) setTimeout(function () { API.sendChat(dispMsgs[0]); }, 1 * 500);
-                            if (matchCnt > 1) setTimeout(function () { API.sendChat(dispMsgs[1]); }, 2 * 500);
-                            if (matchCnt > 2) setTimeout(function () { API.sendChat(dispMsgs[2]); }, 3 * 500);
-                            if (matchCnt > 3) setTimeout(function () { API.sendChat(dispMsgs[3]); }, 4 * 500);
-                            if (matchCnt > 4) setTimeout(function () { API.sendChat(dispMsgs[4]); }, 5 * 500);
-                            if (matchCnt > 5) setTimeout(function () { API.sendChat(dispMsgs[5]); }, 6 * 500);
-                            if (matchCnt > 6) setTimeout(function () { API.sendChat(dispMsgs[6]); }, 7 * 500);
-                            if (matchCnt > 7) setTimeout(function () { API.sendChat(dispMsgs[7]); }, 8 * 500);
-                            if (matchCnt > 8) setTimeout(function () { API.sendChat(dispMsgs[8]); }, 9 * 500);
-                            if (matchCnt > 9) setTimeout(function () { API.sendChat(dispMsgs[9]); }, 10 * 500);
-                        }
-                    }
-                    catch (err) { UTIL.logException("banlist: " + err.message); }
-                }
-            },
-            oobCommand: {
-                command: ['oob','bansong','songban','blacklist','bl'],
-                rank: 'mod',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (!basicBot.roomUtilities.canSkip()) return API.sendChat("Skip too soon...");
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        basicBot.roomUtilities.banCurrentSong(chat.un);
-                    }
-                    catch (err) { UTIL.logException("oob: " + err.message); }
                 }
             },
             botmutedCommand: {
@@ -8496,24 +8639,6 @@ var BOTCOMMANDS = {
                 }
             },
 
-            toggleblCommand: {
-                command: 'togglebl',
-                rank: 'mod',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var temp = SETTINGS.settings.blacklistEnabled;
-                        SETTINGS.settings.blacklistEnabled = !temp;
-                        if (SETTINGS.settings.blacklistEnabled) {
-                          return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("blacklist")}));
-                        }
-                        else return API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("blacklist")}));
-                    }
-                }
-            },
-                        
             togglemotdCommand: {
                 command: 'togglemotd',
                 rank: 'mod',
@@ -8530,44 +8655,6 @@ var BOTCOMMANDS = {
                             SETTINGS.settings.motdEnabled = !SETTINGS.settings.motdEnabled;
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("motd")}));
                         }
-                    }
-                }
-            },
-
-            unbanCommand: {
-                command: 'unban',
-                rank: 'mod',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        $(".icon-population").click();
-                        $(".icon-ban").click();
-                        setTimeout(function (chat) {
-                            var msg = chat.message;
-                            if (msg.length === cmd.length) return API.sendChat();
-                            var name = msg.substring(cmd.length + 2);
-                            var bannedUsers = API.getBannedUsers();
-                            var found = false;
-                            var bannedUser = null;
-                            for (var i = 0; i < bannedUsers.length; i++) {
-                                var user = bannedUsers[i];
-                                if (user.username === name) {
-                                    bannedUser = user;
-                                    found = true;
-                                }
-                            }
-                            if (!found) {
-                                $(".icon-chat").click();
-                                return API.sendChat(botChat.subChat(botChat.getChatMessage("notbanned"), {name: chat.un}));
-                            }
-                            API.moderateUnbanUser(bannedUser.id);
-                            //botDebug.debugMessage(true, "Unbanned " + name);
-                            setTimeout(function () {
-                                $(".icon-chat").click();
-                            }, 1000);
-                        }, 1000, chat);
                     }
                 }
             },
