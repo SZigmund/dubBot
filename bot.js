@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0032",
+  version: "Version  1.01.0033",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1914,7 +1914,7 @@ var TASTY = {
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                      'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:'];
+                      'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:','forthewin','ftw'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6176,7 +6176,7 @@ var BOTCOMMANDS = {
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                          'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:'],
+                          'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:','forthewin','ftw'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -7060,7 +7060,7 @@ var BOTCOMMANDS = {
             },
             meetingCommand: {   //Added 03/28/2015 Zig
                 command: ['meeting', 'lunch', 'beerrun'],
-                rank: 'dj',
+                rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
