@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0033",
+  version: "Version  1.01.0034",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -5980,7 +5980,7 @@ var CONST = {
             fucomments: [
                 "I don't like the name %%FU%%, only fagots and sailors are called that name, from now on you're Gomer Pyle",
                 "I wasn't born with enough middle fingers to let you know how I feel about you %%FU%%",
-                "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you.",
+                "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you %%FU%%.",
                 "Did your parents have any children that lived %%FU%%?",
                 "OK, but I'll be on the top %%FU%%.",
                 "%%FU%%, I fart in your general direction! Your mother was a hamster and your father smelt of elderberries!",
@@ -6692,6 +6692,21 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         API.sendChat("You know your play sucks when the chat goes quiet");
+                    }
+                    catch(err) {
+                        UTIL.logException("ughcommand: " + err.message);
+                    }
+                }
+            },
+            cheerCommand: {
+                command: 'cheer',
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("And the crowd goes wild");
                     }
                     catch(err) {
                         UTIL.logException("ughcommand: " + err.message);
