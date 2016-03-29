@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0035",
+  version: "Version  1.01.0036",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -165,7 +165,6 @@ var dubBot = {
 	  }
 	  var dubUserList = [];
 	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
-	  botisbotdj getdj
 	  if (UTIL.botIsCurrentDJ()) API.wootThisSong();
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
