@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0034",
+  version: "Version  1.01.0035",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -165,6 +165,8 @@ var dubBot = {
 	  }
 	  var dubUserList = [];
 	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
+	  botisbotdj getdj
+	  if (UTIL.botIsCurrentDJ()) API.wootThisSong();
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
       //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
@@ -1914,7 +1916,7 @@ var TASTY = {
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                      'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:','forthewin','ftw'];
+                      'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6176,7 +6178,7 @@ var BOTCOMMANDS = {
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                          'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:','forthewin','ftw'],
+                          'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
