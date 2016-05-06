@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0036.0069",
+  version: "Version  1.01.0036.0070",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2415,7 +2415,7 @@ var ROULETTE = {
 
   joinRoulette: function (waitlist, chat) {
     try {
-	  var currPos = API.getWaitListPosition(chat.uid, waitlist);
+      var currPos = API.getWaitListPosition(chat.uid, waitlist) + 1;
 	  if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: chat.un}));
       API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un, pos: currPos}));
       ROULETTE.settings.participants.push(chat.uid);
