@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0031.0094",
+  version: "Version  1.01.0036.0069",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -165,6 +165,7 @@ var dubBot = {
 	  }
 	  var dubUserList = [];
 	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
+	  if (UTIL.botIsCurrentDJ()) API.wootThisSong();
 	  //else if (API.currentSongBlocked()) {
       //  API.sendChat(botChat.subChat(botChat.getChatMessage("songblocked"), {name: botVar.currentDJ}));
       //  dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song blocked in this country");
@@ -1137,7 +1138,7 @@ var botChat = {
    botChat.chatMessages.push(["eta", "@%%NAME%% you will reach the booth in approximately %%TIME%%."]);
    botChat.chatMessages.push(["facebook", "Like us on facebook: %%LINK%%"]);
    botChat.chatMessages.push(["starterhelp", "This image will get you started on plug: %%LINK%%"]);
-   botChat.chatMessages.push(["roulettejoin", "%%NAME%% joined the roulette! (.leave if you regret it.)"]);
+   botChat.chatMessages.push(["roulettejoin", "%%NAME%% joined the roulette (%%POS%%)! (.leave if you regret it.)"]);
    botChat.chatMessages.push(["jointime", "[@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
    botChat.chatMessages.push(["kickrank", "[@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
    botChat.chatMessages.push(["kick", "[@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
@@ -1914,7 +1915,8 @@ var TASTY = {
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                      'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:'];
+                      'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
+                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -2411,6 +2413,15 @@ var ROULETTE = {
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
+  joinRoulette: function (waitlist, chat) {
+    try {
+	  var currPos = API.getWaitListPosition(chat.uid, waitlist);
+	  if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: chat.un}));
+      API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un, pos: currPos}));
+      ROULETTE.settings.participants.push(chat.uid);
+    }
+    catch(err) { UTIL.logException("joinRoulette: " + err.message); }
+  },
   selectRouletteWinner: function (waitlist) {
     try {
 	  //564933a1d4dcab140021cdeb - dexter_nix
@@ -5980,7 +5991,7 @@ var CONST = {
             fucomments: [
                 "I don't like the name %%FU%%, only fagots and sailors are called that name, from now on you're Gomer Pyle",
                 "I wasn't born with enough middle fingers to let you know how I feel about you %%FU%%",
-                "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you.",
+                "Roses are red, violets are blue, I have 5 fingers, the 3rd ones for you %%FU%%.",
                 "Did your parents have any children that lived %%FU%%?",
                 "OK, but I'll be on the top %%FU%%.",
                 "%%FU%%, I fart in your general direction! Your mother was a hamster and your father smelt of elderberries!",
@@ -6176,7 +6187,8 @@ var BOTCOMMANDS = {
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                          'thunder','stpaddy','stpaddys','vegemite','clap','sob',':clap:'],
+                          'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
+                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6211,7 +6223,7 @@ var BOTCOMMANDS = {
                 }
             },
             rollCommand: {   //Added 03/30/2015 Zig
-                command: ['roll','spin','hitme','throw','dice','rollem','toss','fling','pitch','shoot'],
+                command: ['roll','spin','hitme','throw','dice','rollem','toss','fling','pitch','shoot','showmethemoney','letsdothisthing'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6483,7 +6495,7 @@ var BOTCOMMANDS = {
                 }
             },
             imoutCommand: {
-                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater',
+                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater','gottarun',
 				          'allrightthen','adios','ciao','aurevoir','gottabolt'],
                 rank: 'user',
                 type: 'startsWith',
@@ -6692,6 +6704,21 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                         API.sendChat("You know your play sucks when the chat goes quiet");
+                    }
+                    catch(err) {
+                        UTIL.logException("ughcommand: " + err.message);
+                    }
+                }
+            },
+            cheerCommand: {
+                command: 'cheer',
+                rank: 'mod',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.sendChat("And the crowd goes wild");
                     }
                     catch(err) {
                         UTIL.logException("ughcommand: " + err.message);
@@ -6957,8 +6984,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         if (ROULETTE.settings.rouletteStatus && ROULETTE.settings.participants.indexOf(chat.uid) < 0) {
-                            ROULETTE.settings.participants.push(chat.uid);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
+	    					API.getWaitList(ROULETTE.joinRoulette, chat);
                         }
                     }
                 }
@@ -7005,7 +7031,7 @@ var BOTCOMMANDS = {
                }
              },
              hopupCommand: {
-                 command: 'hopup',
+                 command: ['hopup', 'stepup','joinme'],
                  rank: 'mod',
                  type: 'exact',
                  functionality: function (chat, cmd) {
@@ -7016,7 +7042,7 @@ var BOTCOMMANDS = {
                  }
              },
              hopdownCommand: {
-                 command: 'hopdown',
+                 command: ['hopdown','stepdown'],
                  rank: 'mod',
                  type: 'exact',
                  functionality: function (chat, cmd) {
@@ -7060,7 +7086,7 @@ var BOTCOMMANDS = {
             },
             meetingCommand: {   //Added 03/28/2015 Zig
                 command: ['meeting', 'lunch', 'beerrun'],
-                rank: 'dj',
+                rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     try {
