@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0036",
+  version: "Version  1.01.0037",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1138,7 +1138,7 @@ var botChat = {
    botChat.chatMessages.push(["eta", "@%%NAME%% you will reach the booth in approximately %%TIME%%."]);
    botChat.chatMessages.push(["facebook", "Like us on facebook: %%LINK%%"]);
    botChat.chatMessages.push(["starterhelp", "This image will get you started on plug: %%LINK%%"]);
-   botChat.chatMessages.push(["roulettejoin", "%%NAME%% joined the roulette! (.leave if you regret it.)"]);
+   botChat.chatMessages.push(["roulettejoin", "%%NAME%% joined the roulette (%%POS%%)! (.leave if you regret it.)"]);
    botChat.chatMessages.push(["jointime", "[@%%NAMEFROM%%] @%%USERNAME%% has been in the room for %%TIME%%."]);
    botChat.chatMessages.push(["kickrank", "[@%%NAME%%] you can't kick users with an equal or higher rank than you!"]);
    botChat.chatMessages.push(["kick", "[@%%NAME%%], @%%USERNAME%% you are being kicked from the community for %%TIME%% minutes."]);
@@ -1915,7 +1915,8 @@ var TASTY = {
                       'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                      'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw'];
+                      'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
+                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -2412,6 +2413,15 @@ var ROULETTE = {
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
+  joinRoulette: function (waitlist, chat) {
+    try {
+      var currPos = API.getWaitListPosition(chat.uid, waitlist) + 1;
+	  if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: chat.un}));
+      API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un, pos: currPos}));
+      ROULETTE.settings.participants.push(chat.uid);
+    }
+    catch(err) { UTIL.logException("joinRoulette: " + err.message); }
+  },
   selectRouletteWinner: function (waitlist) {
     try {
 	  //564933a1d4dcab140021cdeb - dexter_nix
@@ -6177,7 +6187,8 @@ var BOTCOMMANDS = {
                           'festive','srv','motorhead','motörhead','pre2fer','pre-2fer','future2fer','phoenix','clhour','accordion','schwing','schawing','cool cover','coolcover',
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
-                          'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw'],
+                          'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
+                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6212,7 +6223,7 @@ var BOTCOMMANDS = {
                 }
             },
             rollCommand: {   //Added 03/30/2015 Zig
-                command: ['roll','spin','hitme','throw','dice','rollem','toss','fling','pitch','shoot'],
+                command: ['roll','spin','hitme','throw','dice','rollem','toss','fling','pitch','shoot','showmethemoney','letsdothisthing'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6484,7 +6495,7 @@ var BOTCOMMANDS = {
                 }
             },
             imoutCommand: {
-                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater',
+                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater','gottarun',
 				          'allrightthen','adios','ciao','aurevoir','gottabolt'],
                 rank: 'user',
                 type: 'startsWith',
@@ -6973,8 +6984,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         if (ROULETTE.settings.rouletteStatus && ROULETTE.settings.participants.indexOf(chat.uid) < 0) {
-                            ROULETTE.settings.participants.push(chat.uid);
-                            API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un}));
+	    					API.getWaitList(ROULETTE.joinRoulette, chat);
                         }
                     }
                 }
@@ -7021,7 +7031,7 @@ var BOTCOMMANDS = {
                }
              },
              hopupCommand: {
-                 command: 'hopup',
+                 command: ['hopup', 'stepup','joinme'],
                  rank: 'mod',
                  type: 'exact',
                  functionality: function (chat, cmd) {
@@ -7032,7 +7042,7 @@ var BOTCOMMANDS = {
                  }
              },
              hopdownCommand: {
-                 command: 'hopdown',
+                 command: ['hopdown','stepdown'],
                  rank: 'mod',
                  type: 'exact',
                  functionality: function (chat, cmd) {
