@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0037",
+  version: "Version  1.01.0038",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -2739,6 +2739,7 @@ var RANDOMCOMMENTS = {
     "Random Fact: If you take all the molecules in a teaspoon of water and lined them up end to end in a single file line, they would stretch ~30 billion miles.",
     "Random Fact: In Australia, there was a war called the emu war. The emus won.",
     "Women, can't live with them....pass the beer nuts!",
+    "I'm not always sarcastic, sometimes I'm asleep.",
     "The object of golf is to play the least amount of golf.",
     "The sinking of the Titanic must have been a miracle to the lobsters in the kitchen.",
     "Instead of all the prequel and sequel movies coming out, they should start making 'equels' - films shot in the same time period as the original film, but from an entirely different perspective.",
@@ -3226,9 +3227,9 @@ var AI = {
     if (chatmsg.indexOf("IMISSLARRY") > -1) fuComment = "I miss you too %%FU%%!";
     if (chatmsg.indexOf("HITSLARRY") > -1) fuComment = "Hits %%FU%% upside the head!";
     if (chatmsg.indexOf("SMACKSLARRY") > -1) fuComment = "Smacks %%FU%% upside the head!";
-    if (chatmsg.indexOf("THANKSLARRY") > -1) fuComment = "You're welcome %%FU%%.";
-    if (chatmsg.indexOf("THXLARRY") > -1) fuComment = "You're welcome %%FU%%.";
-    if (chatmsg.indexOf("THANKYOULARRY") > -1) fuComment = "You're welcome %%FU%%.";
+    if (chatmsg.indexOf("THANKSLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.thankYouComments);
+    if (chatmsg.indexOf("THXLARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.thankYouComments);
+    if (chatmsg.indexOf("THANKYOULARRY") > -1) fuComment = UTIL.selectRandomFromArray(CONST.thankYouComments);
     if (chatmsg.indexOf("LARRYSABADASS") > -1) fuComment = "You know it %%FU%%.";
     if (chatmsg.indexOf("LARRYSTHESHIT") > -1) fuComment = "You know it %%FU%%.";
     if (chatmsg.indexOf("LARRYSTHEBOMB") > -1) fuComment = "You know it %%FU%%.";
@@ -5840,7 +5841,36 @@ var CONST = {
   RGT_ROOM: "5602ed62e8632103004663c2",
   TASTY_ROOM: "5600a564bfb6340300a2def2",
   commandLiteral: ".",
-            howAreYouComments: [
+  thankYouComments: [
+                "You're welcome %%FU%%.",
+                "Take a number %%FU%%.",
+                "You're welcome %%FU%%, now go away!",
+				"You're quite welcome %%FU%%. Unless that 'Thank You' was sarcastic, in which case, I hate you, you pompous prick!",
+				"You're quite welcome %%FU%%. It was the least I could do.  I always do the least I could do.",
+                "Yes %%FU%%, I did you a great favor, and you should be thankful.",
+                "No worries %%FU%%.",
+                "Don't mention it %%FU%%.",
+                "De nada %%FU%%.",
+                "It was nothing %%FU%%.",
+                "Yes %%FU%%, I know I'm wonderful.",
+                "No problem %%FU%%.",
+                "Cheers %%FU%%.",
+                "You bet %%FU%%.",
+				"%%FU%%, I try, but being kind is such an inconvenience for me.",
+                "Think nothing of it %%FU%%.",
+                "Pleasure is all mine %%FU%%.",
+                "I detect a bit of sarcasm there %%FU%%, but thanks nonetheless.",
+                "I am here to serve %%FU%%.",
+                "No %%FU%%, thank you.",
+                "Thank you %%FU%%.",
+                "For last night %%FU%%?",
+                "Anytime %%FU%%?",
+                "You're most welcome %%FU%%!",
+                "Would you expect any less of me %%FU%%?",
+                "Yes %%FU%%, I am a kind bot.",
+                "I know, I must admit %%FU%%, I'm pretty fabulous."
+            ],
+  howAreYouComments: [
                 "Shitty, and yourself %%FU%%?",
                 "Like a bag of badgers that just got freshly beaten %%FU%%.",
                 "I don't know yet get back to me %%FU%%.",
