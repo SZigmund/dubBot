@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0037.0069",
+  version: "Version  1.01.0038.0069",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1916,7 +1916,7 @@ var TASTY = {
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes'];
+                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -2210,7 +2210,7 @@ var AFK = {
 			AFK.setLunchStatus(user, true);
 			msg = botChat.subChat(botChat.getChatMessage("lunchleave"), {name: lunchRequest.username, pos: currPos});
 		}
-		if (lunchRequest.cmd == '.meeting') {
+		if ((lunchRequest.cmd == '.meeting') || (lunchRequest.cmd == '.stupidmeeting') || (lunchRequest.cmd == '.crappymeeting')) {
 			AFK.setMeetingStatus(user, true);
 			msg = botChat.subChat(botChat.getChatMessage("meetingleave"), {name: lunchRequest.username, pos: currPos});
 		}
@@ -2629,7 +2629,6 @@ var RANDOMCOMMENTS = {
     "I told him we already got one",
     "Religion is like a penis, it's fine to have one and be proud of it, but when you take it out and start waving it in my face, that's where we have a problem.",
     "You don't think she'd yada yada sex?....I've yada yada'd sex.",
-    "@Bacon_Cheeseburger time for another PBR!",
     "You can't make somebody love you.  You can only stalk them and hope for the best",
     "I stayed up all night to see where the sun went, then it dawned on me.",
     "I went to a chiropractor yesterday for the first time.... he cracked me up!",
@@ -6218,7 +6217,7 @@ var BOTCOMMANDS = {
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes'],
+                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6526,7 +6525,7 @@ var BOTCOMMANDS = {
             },
             imoutCommand: {
                 command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater','gottarun',
-				          'allrightthen','adios','ciao','aurevoir','gottabolt'],
+				          'allrightthen','adios','ciao','aurevoir','gottabolt','buh-bye','buhbye'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd)  {
@@ -7115,7 +7114,7 @@ var BOTCOMMANDS = {
                 }
             },
             meetingCommand: {   //Added 03/28/2015 Zig
-                command: ['meeting', 'lunch', 'beerrun'],
+                command: ['meeting', 'lunch', 'beerrun','stupidmeeting','crappymeeting'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -7299,6 +7298,19 @@ var BOTCOMMANDS = {
                         var songHistory = API.getRoomHistory(historylist, 1, parseInt(histIndex), BAN.banHistoricalSong);
                     }
                     catch (err) { UTIL.logException("banlastsong: " + err.message); }
+                }
+            },
+            userlistjsonCommand: {   //Added: 08/25/2015 List all users to json
+                command: 'userlistjson',
+                rank: 'co-owner',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                        API.logInfo(JSON.stringify(USERS.users));
+                    }
+                    catch (err) { UTIL.logException("userlistjson: " + err.message); }
                 }
             },
 
@@ -8448,19 +8460,6 @@ var BOTCOMMANDS = {
                         API.logInfo(JSON.stringify(BAN.newBlacklist));
                     }
                     catch (err) { UTIL.logException("banlistjson: " + err.message); }
-                }
-            },
-            userlistjsonCommand: {   //Added: 08/25/2015 List all users to json
-                command: 'userlistjson',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.logInfo(JSON.stringify(USERS.users));
-                    }
-                    catch (err) { UTIL.logException("userlistjson: " + err.message); }
                 }
             },
             userliststatsCommand: {   //Added: 08/28/2015
