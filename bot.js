@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0039",
+  version: "Version  1.01.0040",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -57,8 +57,6 @@ var botVar = {
         songCount: 0,
         chatmessagescnt: 0
     },
-    repeatSongs: true,
-    repeatSongTime: 180,
     maximumDc: 90,
     maximumDcOutOfRoom: 10,
     commandCooldown: 30
@@ -72,6 +70,14 @@ var botVar = {
 
 //SECTION ROOM: All room settings:
 var dubBot = {
+	songinfo: {
+		songName: "",
+		songIndex: -1,
+		firstPlayed: null,
+		playCount: 0,
+		lastPlayed: null,
+		songStatsMsg: ""
+	},
   room: {
     debug: true,
     afkList: [],
@@ -131,18 +137,20 @@ var dubBot = {
     }
     catch(err) { UTIL.logException("resetNewUsers: " + err.message); }
   },
-  announceSongStats: function(waitlist) {
+  announceSongStats: function(waitlist, prevDJ) {
     try {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
 	  if (SETTINGS.settings.suppressSongStats === false) API.sendChat(dubBot.queue.songStatsMessage);
+	  if (prevDJ.bootable) API.moderateRemoveDJ(prevDJ.username);
+	  prevDJ.bootable = false;
 	  AFK.dclookupCheckAll(waitlist);
 	  dubBot.updateWaitlist(waitlist);
     }
     catch(err) { UTIL.logException("announceSongStats: " + err.message); }
   },
-  validateCurrentSong: function () {
+  validateCurrentSong: function (prevDJ) {
     try {
-      API.getWaitList(dubBot.announceSongStats);
+      API.getWaitList(dubBot.announceSongStats, prevDJ);
 	  botVar.room.currentMehCount = 0;
 	  var track = API.getCurrentSong();
       botVar.currentSong = track.songName;
@@ -163,6 +171,9 @@ var dubBot = {
 		dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Banned song");
 		setTimeout(function () { API.sendChat(botChat.subChat(botChat.getChatMessage("roomrules"), {link: SETTINGS.settings.rulesLink})); }, 2000);
 	  }
+	  else {
+   	    dubBot.checkRepeatSong(track);
+	  }
 	  var dubUserList = [];
 	  API.getUserlist(dubUserList, botVar.roomID, botVar.roomName, AFK.resetOldDisconnects);
 	  if (UTIL.botIsCurrentDJ()) API.wootThisSong();
@@ -173,7 +184,64 @@ var dubBot = {
     }
       catch(err) { UTIL.logException("validateCurrentSong: " + err.message); }
   },
-
+  // TODOER COMPLETE AND IMPLEMENT:
+  checkRepeatSong: function (track) {
+    try {
+	//Use getSongInfo or getCurrentSong: ??
+	//	if (dubBot.getSongInfo(obj.media)) {
+	//		var lastPlayedMs = (Date.now() - dubBot.songinfo.lastPlayed);
+	//		var repeatLimit = (SETTINGS.settings.repeatSongTime * 60 * 1000);
+	//		if (SETTINGS.settings.repeatSongs && (lastPlayedMs < repeatLimit) && (lastPlayedMs > 5000))
+	//		{
+	//			API.sendChat(botChat.subChat(botChat.chatMessages("songknown2"), {name: obj.dj.username, lasttime: UTIL.msToStr(lastPlayedMs)}));
+	//			dubBot.skipBadSong(botVar.currentDJ, botVar.botName, "Song in history");
+	//		}
+	//		else
+	//		{
+	//			dubBot.room.historyList[dubBot.songinfo.songIndex].push(+new Date());
+	//		}
+	//		return;
+	//	}
+	//	dubBot.room.historyList.push([obj.media.cid, +new Date()]);
+	//	botDebug.debugMessage("dubBot.room.historyList.length: " + dubBot.room.historyList.length);
+	    return;
+    }
+      catch(err) { UTIL.logException("checkRepeatSong: " + err.message); }
+  },
+	getSongInfo: function(media) {
+		try  {
+			//botDebug.debugMessage("======================getSongInfo======================");
+			
+			dubBot.songinfo.songName = media.title;
+			for (var idx = 0; idx < dubBot.room.historyList.length; idx++) {
+				if (dubBot.room.historyList[idx][0] === media.cid) {
+					dubBot.songinfo.songIndex = idx;
+					dubBot.songinfo.firstPlayed = dubBot.room.historyList[idx][1];
+					dubBot.songinfo.playCount = dubBot.room.historyList[idx].length - 1;
+					dubBot.songinfo.lastPlayed = dubBot.room.historyList[idx][dubBot.songinfo.playCount];
+					if (dubBot.songinfo.playCount === 1)
+					   msg = botChat.chatMessages("lastplayed1");
+					else
+					   msg = botChat.chatMessages("lastplayed2");
+					dubBot.songinfo.songStatsMsg = subChat(msg, {songname:    dubBot.songinfo.songName , 
+										   firstPlayed: UTIL.msToStr(Date.now() - dubBot.songinfo.firstPlayed) ,
+										   playCount:   dubBot.songinfo.playCount,
+										   lastPlayed:  UTIL.msToStr(Date.now() - dubBot.songinfo.lastPlayed) });
+					// todoer Add these stats to songs:
+					// wootCount: 0,
+					// grabCount: 0,
+					// mehCount: 0,
+					// tastyCount: 0,
+					return true;
+				}
+			}
+			// set values for new songs:
+			dubBot.songinfo.songStatsMsg = botChat.chatMessages("lastplayed0");
+			dubBot.songinfo.songIndex = idx;
+			return false;
+		}
+		catch(err) { UTIL.logException("getSongInfo: " + err.message); }
+	},
 
   skipBadSong: function (userName, skippedBy, reason) {
     try {
@@ -736,6 +804,8 @@ var SETTINGS = {
         welcome: true,
         opLink: null,
         rulesLink: "http://tinyurl.com/TastyTunesRules",
+        repeatSongs: true,
+        repeatSongTime: 180,
         themeLink: null,
         fbLink: "https://www.facebook.com/groups/226222424234128/",
         youtubeLink: null,
@@ -1916,7 +1986,8 @@ var TASTY = {
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover'];
+                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
+                      'holycrapthisisareallylongsong','onehitwonder'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -5797,7 +5868,7 @@ var API = {
       var roomUser = USERS.lookupUserName(previousDJ);
       TASTY.setRolled(roomUser, false);
 
-      setTimeout(function () { dubBot.validateCurrentSong() }, 1500);
+      setTimeout(function () { dubBot.validateCurrentSong(roomUser) }, 1500);
       
       //If "loading..." do nothing
       if (previousSong == "loading...") return;
@@ -6217,7 +6288,8 @@ var BOTCOMMANDS = {
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover'],
+                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
+                          'holycrapthisisareallylongsong','onehitwonder'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -7314,6 +7386,36 @@ var BOTCOMMANDS = {
                 }
             },
 
+            bootCommand: {
+                command: 'boot',
+                rank: 'dj',
+                type: 'startsWith',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    var msg = chat.message;
+                    var name;
+                    var byusername = " ";
+                    if (msg.length === cmd.length) name = chat.un;
+                    else {
+                        name = msg.substring(cmd.length + 2);
+                        var perm = API.getPermission(chat.uid);
+                        if (perm < 2) return API.sendChat(botChat.subChat(botChat.getChatMessage("bootrank"), {name: chat.un}));
+                        byusername = " [ executed by " + chat.un + " ]";
+                    }
+                    var user = USERS.lookupUserName(name);
+                    if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                    if (user.bootable) {
+                        user.bootable = false;
+                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableDisabled"), {name: name, userbyname: byusername}));
+                    }
+                    else {
+                        user.bootable = true;
+                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableEnabled"), {name: name, userbyname: byusername}));
+                    }
+                }
+            },
+
             /* basic
             activeCommand: {
                 command: 'active',
@@ -7448,12 +7550,12 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
-                        if (botVar.room.repeatSongs) {
-                            botVar.room.repeatSongs = !botVar.room.repeatSongs;
+                        if (SETTINGS.settings.repeatSongs) {
+                            SETTINGS.settings.repeatSongs = !SETTINGS.settings.repeatSongs;
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleoff"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
                         else {
-                            botVar.room.repeatSongs = !botVar.room.repeatSongs;
+                            SETTINGS.settings.repeatSongs = !SETTINGS.settings.repeatSongs;
                             API.sendChat(botChat.subChat(botChat.getChatMessage("toggleon"), {name: chat.un, 'function': botChat.getChatMessage("repeatSongs")}));
                         }
                     }
@@ -7806,36 +7908,6 @@ var BOTCOMMANDS = {
                     else {
                         var link = "http://i.imgur.com/SBAso1N.jpg";
                         API.sendChat(botChat.subChat(botChat.getChatMessage("starterhelp"), {link: link}));
-                    }
-                }
-            },
-
-            bootCommand: {
-                command: 'boot',
-                rank: 'dj',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    var msg = chat.message;
-                    var name;
-                    var byusername = " ";
-                    if (msg.length === cmd.length) name = chat.un;
-                    else {
-                        name = msg.substring(cmd.length + 2);
-                        var perm = API.getPermission(chat.uid);
-                        if (perm < 2) return API.sendChat(botChat.subChat(botChat.getChatMessage("bootrank"), {name: chat.un}));
-                        byusername = " [ executed by " + chat.un + " ]";
-                    }
-                    var user = USERS.lookupUserName(name);
-                    if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                    if (user.bootable) {
-                        user.bootable = false;
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableDisabled"), {name: name, userbyname: byusername}));
-                    }
-                    else {
-                        user.bootable = true;
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableEnabled"), {name: name, userbyname: byusername}));
                     }
                 }
             },
@@ -8580,7 +8652,7 @@ var BOTCOMMANDS = {
                         msg += botChat.getChatMessage("afklimit") + ': ' + AFK.settings.maximumAfk + '. ';
 
                         msg += botChat.getChatMessage("repeatSongs") + ': ';
-                        if (botVar.room.repeatSongs) msg += 'ON';
+                        if (SETTINGS.settings.repeatSongs) msg += 'ON';
                         else msg += 'OFF';
                         msg += '. ';
                         msg += botChat.getChatMessage("repeatSongLimit") + ': ' + SETTINGS.settings.repeatSongTime + '. ';
@@ -9033,7 +9105,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                        API.sendChat(basicBot.songinfo.songStatsMsg);
+                        API.sendChat(dubBot.songinfo.songStatsMsg);
                     }
                     catch(err) {
                         UTIL.logException("lastplayed: " + err.message);
