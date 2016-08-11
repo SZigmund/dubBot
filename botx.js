@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0040.1069",
+  version: "Version  1.01.0040.1169",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -533,6 +533,25 @@ var USERS = {
             USERS.usersImport = [];
             $.get(CONST.userlistLink, function (json) {
                 if (json !== null && typeof json !== "undefined") {
+			        botDebug.debugMessage(true, "Importing the user list!!");
+                    UTIL.logObject(json, "USR");
+                    for (var idx in json) {
+                        var newUser = json[idx];
+                        //USERS.usersImport.push(new USERS.User(user.id, user.username));
+                        USERS.usersImport.push(newUser);
+                    }
+                }
+            });
+			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
+        }
+        catch(err) { UTIL.logException("importBlackList: " + err.message); }
+    },
+    importUserListXX: function() { // userlistimport << command
+        try {
+            USERS.usersImport = [];
+            $.get(CONST.userXXXlistLink, function (json) {
+                if (json !== null && typeof json !== "undefined") {
+			        botDebug.debugMessage(true, "Importing the user list!!");
                     UTIL.logObject(json, "USR");
                     for (var idx in json) {
                         var newUser = json[idx];
@@ -5906,6 +5925,7 @@ var CONST = {
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
   blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
   userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
+  userXXXlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
   blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
@@ -6722,6 +6742,31 @@ var BOTCOMMANDS = {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
                         USERS.importUserList();
+                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
+                        var DocZ = USERS.lookupUserNameImport("Doc_Z");
+                        if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                        var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
+                                                                     songs: DocZ.votes.songsPlayed,
+                                                                     woot: DocZ.votes.woot, 
+                                                                     grabs: DocZ.votes.curate, 
+                                                                     mehs: DocZ.votes.meh, 
+                                                                     tasty: DocZ.votes.tastyRcv});
+                        TASTY.resetDailyRolledStats(DocZ);
+                        msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
+                        API.logInfo(msg);
+                    }
+                    catch (err) { UTIL.logException("userlistimport: " + err.message); }
+                }
+            },
+            userlistimportxxCommand: {   //Added: 08/23/2015 Import User list from last saved in Github
+                command: 'userlistimportxx',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
+                        USERS.importUserListXX();
                         API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
                         if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
