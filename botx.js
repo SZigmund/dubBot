@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0040.1269",
+  version: "Version  1.01.0040.1369",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -506,6 +506,20 @@ var USERS = {
       }
   },
 
+  lookupUserNameImport: function (name) {
+    try {
+	  var usermatch = username.trim().toLowerCase();
+	  usermatch = usermatch.replace(/@/g, '');
+      for (var i = 0; i < USERS.usersImport.length; i++) {
+        if (USERS.usersImport[i].username.trim().toLowerCase() == usermatch) return USERS.usersImport[i];
+      }
+      return false;
+	}
+    catch(err) {
+		UTIL.logException("lookupUserName: " + err.message); 
+		return false;
+	  }
+  },
   lookupUserName: function (username) {
     try {
 	  var usermatch = username.trim().toLowerCase();
@@ -533,7 +547,12 @@ var USERS = {
             USERS.usersImport = [];
 			botDebug.debugMessage(true, "Attempting to import the user list!!");
 			botDebug.debugMessage(true, "UserListLink: " + CONST.userlistLink);
+			//USERS.users = JSON.parse(localStorage.getItem("dubBotUsers"));
             $.get(CONST.userlistLink, function (json) {
+			    botDebug.debugMessage(true, "TESTING 1,2,3....");
+			    if (json === null) botDebug.debugMessage(true, "(json === null)");
+			    if (typeof json === "undefined") botDebug.debugMessage(true, "(typeof json === undefined)");
+			    if (json !== null) botDebug.debugMessage(true, "JSON LEN: " + json.length);
                 if (json !== null && typeof json !== "undefined") {
 			        botDebug.debugMessage(true, "Importing the user list...");
                     UTIL.logObject(json, "USR");
