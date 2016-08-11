@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0040.1369",
+  version: "Version  1.01.0040.1469",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -5947,7 +5947,10 @@ var CONST = {
 
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
   blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
-  userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
+  //userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
+  userlistLink: "https://raw.githubusercontent.com/SZigmund/dubBot/master/lang/dubUsers.json",  
+  //https://rawgit.com/SZigmund/dubBot/master/lang/dubUsers.json
+  //
   userXXXlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
   blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
