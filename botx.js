@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0040.1169",
+  version: "Version  1.01.0040.1269",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -531,9 +531,11 @@ var USERS = {
     importUserList: function() { // userlistimport << command
         try {
             USERS.usersImport = [];
+			botDebug.debugMessage(true, "Attempting to import the user list!!");
+			botDebug.debugMessage(true, "UserListLink: " + CONST.userlistLink);
             $.get(CONST.userlistLink, function (json) {
                 if (json !== null && typeof json !== "undefined") {
-			        botDebug.debugMessage(true, "Importing the user list!!");
+			        botDebug.debugMessage(true, "Importing the user list...");
                     UTIL.logObject(json, "USR");
                     for (var idx in json) {
                         var newUser = json[idx];
@@ -549,6 +551,8 @@ var USERS = {
     importUserListXX: function() { // userlistimport << command
         try {
             USERS.usersImport = [];
+			botDebug.debugMessage(true, "Attempting to import the user list!!");
+			botDebug.debugMessage(true, "UserListLink: " + CONST.userXXXlistLink);
             $.get(CONST.userXXXlistLink, function (json) {
                 if (json !== null && typeof json !== "undefined") {
 			        botDebug.debugMessage(true, "Importing the user list!!");
@@ -6726,9 +6730,12 @@ var BOTCOMMANDS = {
                             API.logInfo("I've got " + USERS.users.length + " users in the old list.")
                         }, 1 * 1000);
                         //todoer
-                        if (USERS.users.length >= 1) botDebug.debugMessage(true, "USER0: " + USERS.users[0].username + "::" + USERS.users[0].id);
-                        if (USERS.users.length >= 2) botDebug.debugMessage(true, "USER1: " + USERS.users[1].username + "::" + USERS.users[1].id);
-                        if (USERS.users.length >= 3) botDebug.debugMessage(true, "USER2: " + USERS.users[2].username + "::" + USERS.users[2].id);
+                        if (USERS.users.length >= 1) botDebug.debugMessage(true, "OLD_USER0: " + USERS.users[0].username + "::" + USERS.users[0].id);
+                        if (USERS.users.length >= 2) botDebug.debugMessage(true, "OLD_USER1: " + USERS.users[1].username + "::" + USERS.users[1].id);
+                        if (USERS.users.length >= 3) botDebug.debugMessage(true, "OLD_USER2: " + USERS.users[2].username + "::" + USERS.users[2].id);
+                        if (USERS.usersImport.length >= 1) botDebug.debugMessage(true, "NEW_USER0: " + USERS.usersImport[0].username + "::" + USERS.usersImport[0].id);
+                        if (USERS.usersImport.length >= 2) botDebug.debugMessage(true, "NEW_USER1: " + USERS.usersImport[1].username + "::" + USERS.usersImport[1].id);
+                        if (USERS.usersImport.length >= 3) botDebug.debugMessage(true, "NEW_USER2: " + USERS.usersImport[2].username + "::" + USERS.usersImport[2].id);
                     }
                     catch (err) { UTIL.logException("userlistcount: " + err.message); }
                 }
@@ -6741,6 +6748,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
+                        API.logInfo("Loading the new list.");
                         USERS.importUserList();
                         API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
