@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0040.0069",
+  version: "Version  1.01.0040.1069",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -7394,35 +7394,6 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     var msg = chat.message;
-                    var name;
-                    var byusername = " ";
-                    if (msg.length === cmd.length) name = chat.un;
-                    else {
-                        name = msg.substring(cmd.length + 2);
-                        var perm = API.getPermission(chat.uid);
-                        if (perm < 2) return API.sendChat(botChat.subChat(botChat.getChatMessage("bootrank"), {name: chat.un}));
-                        byusername = " [ executed by " + chat.un + " ]";
-                    }
-                    var user = USERS.lookupUserName(name);
-                    if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                    if (user.bootable) {
-                        user.bootable = false;
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableDisabled"), {name: name, userbyname: byusername}));
-                    }
-                    else {
-                        user.bootable = true;
-                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableEnabled"), {name: name, userbyname: byusername}));
-                    }
-                }
-            },
-            loadallusersCommand: {
-                command: 'loadallusers',
-                rank: 'co-owner',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    var USERLIST = user.
                     var name;
                     var byusername = " ";
                     if (msg.length === cmd.length) name = chat.un;
