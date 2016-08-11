@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0039.0069",
+  version: "Version  1.01.0040.0069",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -142,6 +142,7 @@ var dubBot = {
 	  if (waitlist.length > 0) dubBot.queue.songStatsMessage += " [Next DJ: " + waitlist[0].username + "]";
 	  if (SETTINGS.settings.suppressSongStats === false) API.sendChat(dubBot.queue.songStatsMessage);
 	  if (prevDJ.bootable) API.moderateRemoveDJ(prevDJ.username);
+	  prevDJ.bootable = false;
 	  AFK.dclookupCheckAll(waitlist);
 	  dubBot.updateWaitlist(waitlist);
     }
@@ -5904,7 +5905,7 @@ var CONST = {
 
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
   blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
-  userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
+  userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
   blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
@@ -7393,6 +7394,35 @@ var BOTCOMMANDS = {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     var msg = chat.message;
+                    var name;
+                    var byusername = " ";
+                    if (msg.length === cmd.length) name = chat.un;
+                    else {
+                        name = msg.substring(cmd.length + 2);
+                        var perm = API.getPermission(chat.uid);
+                        if (perm < 2) return API.sendChat(botChat.subChat(botChat.getChatMessage("bootrank"), {name: chat.un}));
+                        byusername = " [ executed by " + chat.un + " ]";
+                    }
+                    var user = USERS.lookupUserName(name);
+                    if (typeof user === 'boolean') return API.sendChat(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
+                    if (user.bootable) {
+                        user.bootable = false;
+                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableDisabled"), {name: name, userbyname: byusername}));
+                    }
+                    else {
+                        user.bootable = true;
+                        API.sendChat(botChat.subChat(botChat.getChatMessage("bootableEnabled"), {name: name, userbyname: byusername}));
+                    }
+                }
+            },
+            loadallusersCommand: {
+                command: 'loadallusers',
+                rank: 'co-owner',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    var USERLIST = user.
                     var name;
                     var byusername = " ";
                     if (msg.length === cmd.length) name = chat.un;
