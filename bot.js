@@ -6768,6 +6768,18 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            biyowCommand: {  //hipsterCommand
+                command: 'biyow',
+                rank: 'manager',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        API.sendChat("@whitewidow loves the bass line.");
+                    }
+                }
+            },
             hypsterCommand: {  //hipsterCommand
                 command: 'hypster',
                 rank: 'manager',
@@ -6777,7 +6789,7 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         //API.sendChat("I know @whitewidow is singing along with this hypster track");
-						API.sendChat("@whitewidow is so un-hipster she's basically normcore.");
+                        API.sendChat("@whitewidow is so un-hipster she's basically normcore.");                    
                     }
                 }
             },
