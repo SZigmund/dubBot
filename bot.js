@@ -2559,8 +2559,7 @@ var BOTDJ = {
 		try {
 			if (UTIL.botInWaitList(waitlist)) API.getMyQueue(BOTDJ.checkMyQueueCount);
 			AFK.afkCheck(waitlist);
-			BOTDJ.
-			(waitlist);
+			BOTDJ.checkHopUp(waitlist);
 			if (BOTDJ.forcedToDJ === false) BOTDJ.checkHopDown(waitlist);
 		}
 		catch(err) { UTIL.logException("monitorWaitlistCB: " + err.message); }
