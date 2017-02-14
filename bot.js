@@ -2559,7 +2559,8 @@ var BOTDJ = {
 		try {
 			if (UTIL.botInWaitList(waitlist)) API.getMyQueue(BOTDJ.checkMyQueueCount);
 			AFK.afkCheck(waitlist);
-			BOTDJ.checkHopUp(waitlist);
+			BOTDJ.
+			(waitlist);
 			if (BOTDJ.forcedToDJ === false) BOTDJ.checkHopDown(waitlist);
 		}
 		catch(err) { UTIL.logException("monitorWaitlistCB: " + err.message); }
@@ -2628,7 +2629,7 @@ var BOTDJ = {
 			if (BOTDJ.settings.hoppingDownNow) return;
 			if (!BOTDJ.settings.autoHopUp) return;
 			if (UTIL.botInWaitList(waitlist)) return;
-			if (UTIL.bouncerDjing(waitlist, "mod")) return;
+			if (UTIL.bouncerDjing(waitlist, "manager")) return;
 			//botDebug.debugMessage(true, "TIME TO HOP UP!!!!!");
 			API.botHopUp(waitlist);
 			API.getMyQueue(BOTDJ.checkMyQueueCount);
