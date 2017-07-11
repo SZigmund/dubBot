@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0040",
+  version: "Version  1.01.0041",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1987,7 +1987,14 @@ var TASTY = {
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
                       'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
-                      'holycrapthisisareallylongsong','onehitwonder','wax','squeallikeapig'];
+                      'holycrapthisisareallylongsong','onehitwonder',,'riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
+                      'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
+                      'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
+                      'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
+                      'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
+                      'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
+                      'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
+                      'wax','yousuredohaveapurdymouth'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6289,7 +6296,14 @@ var BOTCOMMANDS = {
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
                           'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
-                          'holycrapthisisareallylongsong','onehitwonder','wax','squeallikeapig'],
+                          'holycrapthisisareallylongsong','onehitwonder',,'riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
+                          'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
+                          'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
+                          'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
+                          'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
+                          'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
+                          'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
+                          'wax','yousuredohaveapurdymouth'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
