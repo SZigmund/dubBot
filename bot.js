@@ -1987,7 +1987,7 @@ var TASTY = {
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
                       'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
-                      'holycrapthisisareallylongsong','onehitwonder','wax'];
+                      'holycrapthisisareallylongsong','onehitwonder','wax','squeallikeapig'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6289,7 +6289,7 @@ var BOTCOMMANDS = {
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
                           'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
-                          'holycrapthisisareallylongsong','onehitwonder','wax'],
+                          'holycrapthisisareallylongsong','onehitwonder','wax','squeallikeapig'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
