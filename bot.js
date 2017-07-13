@@ -12,7 +12,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0041",
+  version: "Version  1.01.0042",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -6580,6 +6580,19 @@ var BOTCOMMANDS = {
 						 setTimeout(function () { API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif"); }, 250);
                     }
                     catch(err) { UTIL.logException("elevenCommand: " + err.message); }
+                }
+            },
+            fourthirtyCommand: {
+                command: ['fourthirty','430'],
+                rank: 'vip',
+                type: 'startsWith',
+                functionality: function (chat, cmd)  {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						 setTimeout(function () { API.sendChat("https://media.giphy.com/media/11QJgcchgwskq4/giphy.gif"); }, 250);
+                    }
+                    catch(err) { UTIL.logException("fourthirtyCommand: " + err.message); }
                 }
             },
             resetstatsCommand: {  //Added 12/23/2015 Zig 
