@@ -506,21 +506,6 @@ var USERS = {
       }
   },
 
-  lookupUserNameImport: function (username) {
-    try {
-	  var usermatch = username.trim().toLowerCase();
-	  usermatch = usermatch.replace(/@/g, '');
-      for (var i = 0; i < USERS.usersImport.length; i++) {
-        if (USERS.usersImport[i].username.trim().toLowerCase() == usermatch) return USERS.usersImport[i];
-      }
-      return false;
-	}
-    catch(err) {
-		UTIL.logException("lookupUserNameImport: " + err.message); 
-		return false;
-	  }
-  },
-
   lookupUserName: function (username) {
     try {
 	  var usermatch = username.trim().toLowerCase();
@@ -543,44 +528,11 @@ var USERS = {
         }
         return false;
     },
-
-	// TO USE: (From Console)
-	//USERS.jsonUsers = "<<json_data>>"
-	//USERS.importUserListZIG();
-	//USERS.jsonUsers = USERS.lookupUserNameImport("Doc_Z");
-    //if (USERS.jsonUsers === false) API.logInfo("invalid user");
-    //API.logInfo(botChat.subChat(botChat.getChatMessage("mystats"), {name: USERS.jsonUsers.username, songs: USERS.jsonUsers.votes.songsPlayed, woot: USERS.jsonUsers.votes.woot, grabs: USERS.jsonUsers.votes.curate, mehs: USERS.jsonUsers.votes.meh, tasty: USERS.jsonUsers.votes.tastyRcv}));
-    importUserListZIG: function() {
-        try {
-            USERS.usersImport = [];
-			botDebug.debugMessage(true, "Attempting to import the user list!!");
-			if (USERS.jsonUsers !== null && typeof USERS.jsonUsers !== "undefined") {
-				botDebug.debugMessage(true, "Importing the user list...");
-				UTIL.logObject(USERS.jsonUsers, "USR");
-				for (var idx in USERS.jsonUsers) {
-					var newUser = USERS.jsonUsers[idx];
-					//USERS.usersImport.push(new USERS.User(user.id, user.username));
-					USERS.usersImport.push(newUser);
-				}
-			}
-			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
-        }
-        catch(err) { UTIL.logException("importUserListZIG: " + err.message); }
-    },
-
     importUserList: function() { // userlistimport << command
         try {
             USERS.usersImport = [];
-			botDebug.debugMessage(true, "Attempting to import the user list!!");
-			botDebug.debugMessage(true, "UserListLink: " + CONST.userlistLink);
-			//USERS.users = JSON.parse(localStorage.getItem("dubBotUsers"));
             $.get(CONST.userlistLink, function (json) {
-			    botDebug.debugMessage(true, "TESTING 1,2,3....");
-			    if (json === null) botDebug.debugMessage(true, "(json === null)");
-			    if (typeof json === "undefined") botDebug.debugMessage(true, "(typeof json === undefined)");
-			    if (json !== null) botDebug.debugMessage(true, "JSON LEN: " + json.length);
                 if (json !== null && typeof json !== "undefined") {
-			        botDebug.debugMessage(true, "Importing the user list...");
                     UTIL.logObject(json, "USR");
                     for (var idx in json) {
                         var newUser = json[idx];
@@ -591,29 +543,8 @@ var USERS = {
             });
 			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
         }
-        catch(err) { UTIL.logException("importUserList: " + err.message); }
+        catch(err) { UTIL.logException("importBlackList: " + err.message); }
     },
-    importUserListXX: function() { // userlistimport << command
-        try {
-            USERS.usersImport = [];
-			botDebug.debugMessage(true, "Attempting to import the user list!!");
-			botDebug.debugMessage(true, "UserListLink: " + CONST.userXXXlistLink);
-            $.get(CONST.userXXXlistLink, function (json) {
-                if (json !== null && typeof json !== "undefined") {
-			        botDebug.debugMessage(true, "Importing the user list!!");
-                    UTIL.logObject(json, "USR");
-                    for (var idx in json) {
-                        var newUser = json[idx];
-                        //USERS.usersImport.push(new USERS.User(user.id, user.username));
-                        USERS.usersImport.push(newUser);
-                    }
-                }
-            });
-			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
-        }
-        catch(err) { UTIL.logException("importUserListXX: " + err.message); }
-    },
-
     User: function (userID, username) {
         this.id = userID;
         this.username = username;
@@ -1770,17 +1701,13 @@ var UTIL = {
   getActivePlaylistID: function() {
     try {
 	  if (botVar.roomID === CONST.RGT_ROOM) ACTIVE_PLAYLIST: return "56c37f267892317f01426e01";
-	  if (botVar.roomID === CONST.TASTY_ROOM) ACTIVE_PLAYLIST: return "5968ff3b0c479f0100e223c7";
+	  if (botVar.roomID === CONST.TASTY_ROOM) ACTIVE_PLAYLIST: return "5600aa902d5038030094bb66";
       }
     catch(err) { UTIL.logException("getActivePlaylistID: " + err.message); }
   },
-  getPlaylistCount: function() {
-	if (botVar.roomID === CONST.RGT_ROOM)   return 9;
-    if (botVar.roomID === CONST.TASTY_ROOM) return CONST.PlaylistCount;
-  },
   getPlaylistID: function(playlist) {
     try {
-	  if (playlist === CONST.PLAYLIST_GRABS) return UTIL.getActivePlaylistID();
+	  if (playlist === CONST.PLAYLIST_ACTIVE) return UTIL.getActivePlaylistID();
 	  if (botVar.roomID === CONST.RGT_ROOM) {
 		  if (playlist === CONST.PLAYLIST_CLASSIC) return "56c626fd4b741c0203f81e08";
 		  if (playlist === CONST.PLAYLIST_COVERS) return "560c1b20d4561b03007cca7a";
@@ -1802,33 +1729,6 @@ var UTIL = {
 		  if (playlist === CONST.PLAYLIST_70s) return "56c5fa7d18444e5e0075687a";
 		  if (playlist === CONST.PLAYLIST_10s) return "56c5fa8cbddd676401208321";
 		  if (playlist === CONST.PLAYLIST_00s) return "56c5fa89fc1b549a01bd37e9";
-		  if (playlist === CONST.PLAYLIST_PREV_GRABS) return "5600aa902d5038030094bb66";
-  		  if (playlist === CONST.PLAYLIST_120MIN_86_87) return "5966580e518b110100a699c0";
-  		  if (playlist === CONST.PLAYLIST_120MIN_88) return "59665a08cde294010015abb3";
-  		  if (playlist === CONST.PLAYLIST_120MIN_89) return "59665a22985ed70100a2c6fb";
-  		  if (playlist === CONST.PLAYLIST_120MIN_90) return "59665a326f70ce0100a2d69f";
-  		  if (playlist === CONST.PLAYLIST_120MIN_91) return "59665abd86ac3e0100136c2f";
-  		  if (playlist === CONST.PLAYLIST_120MIN_92) return "59665ac1a215fa010071c7a2";
-  		  if (playlist === CONST.PLAYLIST_120MIN_93) return "59665ac6b9ef040100f4a720";
-  		  if (playlist === CONST.PLAYLIST_120MIN_94) return "59665aca3e1a9301005fff93";
-  		  if (playlist === CONST.PLAYLIST_120MIN_95) return "59665ad0556bfa010046cd9d";
-  		  if (playlist === CONST.PLAYLIST_120MIN_96) return "59665ad442bd9801001e9dd1";
-  		  if (playlist === CONST.PLAYLIST_120MIN_97) return "59665adacde294010015abc9";
-  		  if (playlist === CONST.PLAYLIST_120MIN_98) return "59665ae0518b110100a69a88";
-  		  if (playlist === CONST.PLAYLIST_120MIN_99) return "59662a7aef0adc0100acb4e0";
-  		  if (playlist === CONST.PLAYLIST_120MIN_00) return "59665b6d86ac3e0100136c53";
-  		  if (playlist === CONST.PLAYLIST_120MIN_01) return "59665b713d536e0100d3fc1e";
-  		  if (playlist === CONST.PLAYLIST_120MIN_02) return "59665b755d0fcf0100e15124";
-  		  if (playlist === CONST.PLAYLIST_120MIN_03) return "59665b783d536e0100d3fc1f";
-  		  if (playlist === CONST.PLAYLIST_120MIN_04) return "59665b7c3e1a9301005fffae";
-  		  if (playlist === CONST.PLAYLIST_120MIN_05) return "59665b80cde294010015abe1";
-  		  if (playlist === CONST.PLAYLIST_120MIN_06) return "59665b83b420b50100c6efb3";
-  		  if (playlist === CONST.PLAYLIST_120MIN_07) return "59665b88b9ef040100f4a73c";
-  		  if (playlist === CONST.PLAYLIST_120MIN_08) return "59665b8f3d536e0100d3fc22";
-  		  if (playlist === CONST.PLAYLIST_120MIN_09) return "59665b93518b110100a69aa8";
-  		  if (playlist === CONST.PLAYLIST_120MIN_10) return "59665b975d0fcf0100e1512b";
-  		  if (playlist === CONST.PLAYLIST_120MIN_11) return "59665b9a6f70ce0100a2d6df";
-  		  if (playlist === CONST.PLAYLIST_120MIN_12_13) return "59665ba03d536e0100d3fc25";
       }
 	}
     catch(err) { UTIL.logException("getPlaylistID: " + err.message); }
@@ -2068,7 +1968,7 @@ var TASTY = {
                       'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
                       'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                       'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
-                      'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','ear candy','ear-candy','earcandy',
+                      'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                       'epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
                       'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
                       'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
@@ -2087,7 +1987,7 @@ var TASTY = {
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
                       'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
-                      'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
+                      'holycrapthisisareallylongsong','onehitwonder',,'riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
                       'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
                       'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
                       'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
@@ -2187,23 +2087,7 @@ var BAN = {
 	}
 	catch(err) { UTIL.logException("ERROR:banSongSkip: " + err.message); }
   },
-  //USAGE:        BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
-  //OR Use command: .pb 9FR
-  //This works in the version we are running now.
-  // USAGE: XFER STORAGE SETTINGS FROM ONE PC TO ANOTHER:
-  // GET Storage settings:
-  // Execute from Console:
-  // JSON.stringify(USERS.users);
-  // JSON.stringify(BAN.newBlacklist);
-  // JSON.stringify(BAN.newBlacklistIDs);
-  //
-  // Replace all but 1st and last \" with \"
-  //
-  // USAGE: SET Storage settings:
-  //
-  // USERS.users = JSON.parse(<<DATA>>);
-  // BAN.newBlacklist = JSON.parse(<<DATA>>);
-  // BAN.newBlacklistIDs = JSON.parse(<<DATA>>);
+  //TO CALL: BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
   preBanQueueSong: function (positionKey) {
     try {
 		//botDebug.debugMessage(true, "preBanQueueSong: -------------------------------------------------------------------");
@@ -2217,9 +2101,6 @@ var BAN = {
     }
     catch(err) { UTIL.logException("preBanQueueSong: " + err.message); }
   },
-  //Ban song to call:   BAN.preBanQueueSong("3FE"); // (Where 3 is queue pos and FE is 1st 2 char of song for verification)
-  //  OR Use command:   .pb 9FR
-  //This works in the version we are running now.
   cbPreBanQueueSong: function (waitlist) {  
 	try {
 		//botDebug.debugMessage(true, "cbPreBanQueueSong: -------------------------------------------------------------------");
@@ -2699,16 +2580,8 @@ var BOTDJ = {
 	},
 	queueRandomSong: function () {
 		try {
-		  // SELECT Random Playlist:  120min PLAYLIST_120
-		  var playListCount = UTIL.getPlaylistCount();
-		  
-		  if (botVar.roomID === CONST.RGT_ROOM) 
-			var playlistID = UTIL.getPlaylistID(Math.floor(Math.random() * playListCount) + 1);
-          else
-		  {
-		    // Right now Live is excluding lists 1-10 and only using 11-36
-			var playlistID = UTIL.getPlaylistID(Math.floor(Math.random() * (playListCount - 10)) + 1 + 10);
-          }
+		  // SELECT Random Playlist:
+		  var playlistID = UTIL.getPlaylistID(Math.floor(Math.random() * 9) + 1);
 		  //botDebug.debugMessage(true, "PLAYLIST ID: " + playlistID);
 		  var playlist = [];
 		  API.getPlaylist(playlist, playlistID, 1, "", BOTDJ.playRandomSong);
@@ -4035,8 +3908,7 @@ var API = {
 
   defineRoomQueue: function() {
     try {
-	  //https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
-	  //5600a564bfb6340300a2def2
+	  //https://api.dubtrack.fm/room/5602ed62e8632103004663c2/playlist/details
 	  return $.ajax({
             url: "https://api.dubtrack.fm/room/" + botVar.roomID + "/playlist/details",
             type: "GET" });
@@ -4072,17 +3944,6 @@ var API = {
 	}
     catch(err) { UTIL.logException("getRoomID: " + err.message); }
   },
-
-  //Add Song to 00's list:   SongAdd or AddSong or GrabSong
-  //https://api.dubtrack.fm/playlist
-  // BOT USAGE: API.grabYTSong("E2Z1VZAqtpo", UTIL.getPlaylistID(CONST.PLAYLIST_00s));
-  // ZIG PLAYLIST "1" = 5880d9ea6e243f5a00b5f784
-  // ZIG USAGE: var YOUTUBE_ID = "Q8JifjV7Fv4"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
-  // IMPORT YT TOPICS PLAYLIST: View the entire list - Inpect Element and Copy the dive option: "Copy element"
-  //
-  //BAN SONG: bansong: 
-  // BOT USAGE: var YOUTUBE_ID = "9H4noA41Hsk"; SONG_NAME = "Natalie's Rap"; var track = {songLength: 0, songName: "", songMediaType: "", songMediaId: "", dubSongID: "", mid: ""};  track.songName = SONG_NAME; track.songMediaType = 'youtube'; track.songMediaId = YOUTUBE_ID; track.mid = 'youtube:' + YOUTUBE_ID; BAN.banSong(track);
-
   grabYTSong: function(ytID, playlist) {
     try { 
       //https://api.dubtrack.fm/playlist/56c37f267892317f01426e01/songs
@@ -5772,88 +5633,28 @@ var API = {
 
 	  //botDebug.debugMessage(true, "SongName: " + dubBot.queue.deleteSongName + " fkid: " + dubBot.queue.deleteSongMediaId);
 	  //https://api.dubtrack.fm/playlist/56c5da9da552130101e9c1de/songs/56c63ed66f1dfadf03a5bedb
-      // Add one to getPlaylistCount so we delete any in the current grab playlist:
-	  for (var i = 1; i <= UTIL.getPlaylistCount() + 1; i++) 
-	  {
-		var playlist = [];
-		API.getPlaylist(playlist, UTIL.getPlaylistID(i), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-	  }
-
-//todoer delete after we've tested the code above:
-//	  var playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_90s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_80s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_10s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_00s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_PREV_GRABS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_86_87), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_88), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_89), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_90), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_91), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_92), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_93), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_94), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_95), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_96), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_97), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_98), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_99), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_00), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_01), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_02), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_03), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_04), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_05), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_06), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_07), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_08), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_09), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_10), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_11), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_120MIN_12_13), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
-//	  playlist = [];
-//	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_GRABS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  var playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_COVERS), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_90s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_80s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sRockEpic), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s80sFavs), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_70s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_10s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_00s), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_CLASSIC), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
+	  playlist = [];
+	  API.getPlaylist(playlist, UTIL.getPlaylistID(CONST.PLAYLIST_ACTIVE), 1, dubBot.queue.deleteSongName, API.deleteCurrentSongApi);
 	  API.moderateForceSkip();
 	  }
     catch(err) { UTIL.logException("deleteCurrentSong: " + err.message); }
@@ -6107,44 +5908,11 @@ var CONST = {
   PLAYLIST_10s: 7,
   PLAYLIST_00s: 8,
   PLAYLIST_CLASSIC: 9,
-  PLAYLIST_PREV_GRABS: 10,
-  PLAYLIST_120MIN_86_87: 11,
-  PLAYLIST_120MIN_88: 12,
-  PLAYLIST_120MIN_89: 13,
-  PLAYLIST_120MIN_90: 14,
-  PLAYLIST_120MIN_91: 15,
-  PLAYLIST_120MIN_92: 16,
-  PLAYLIST_120MIN_93: 17,
-  PLAYLIST_120MIN_94: 18,
-  PLAYLIST_120MIN_95: 19,
-  PLAYLIST_120MIN_96: 20,
-  PLAYLIST_120MIN_97: 21,
-  PLAYLIST_120MIN_98: 22,
-  PLAYLIST_120MIN_99: 23,
-  PLAYLIST_120MIN_00: 24,
-  PLAYLIST_120MIN_01: 25,
-  PLAYLIST_120MIN_02: 26,
-  PLAYLIST_120MIN_03: 27,
-  PLAYLIST_120MIN_04: 28,
-  PLAYLIST_120MIN_05: 29,
-  PLAYLIST_120MIN_06: 30,
-  PLAYLIST_120MIN_07: 31,
-  PLAYLIST_120MIN_08: 32,
-  PLAYLIST_120MIN_09: 33,
-  PLAYLIST_120MIN_10: 34,
-  PLAYLIST_120MIN_11: 35,
-  PLAYLIST_120MIN_12_13: 36,
-  PLAYLIST_GRABS: 37,
-
-  PlaylistCount: 36,			   //Not including current Grab List
+  PLAYLIST_ACTIVE: 10,
 
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
   blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
-  //userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
-  userlistLink: "https://raw.githubusercontent.com/SZigmund/dubBot/master/lang/dubUsers.json",  
-  //https://rawgit.com/SZigmund/dubBot/master/lang/dubUsers.json
-  //
-  userXXXlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
+  userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
   blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
@@ -6509,7 +6277,7 @@ var BOTCOMMANDS = {
                           'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
                           'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                           'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
-                          'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','ear candy','ear-candy','earcandy',
+                          'da shit','da-bomb','da-shit','dashiznit','dabomb','dashit','da shiznit','da-shiznit','dope','ear candy','ear-candy','earcandy',
                           'epic','fan-fucking-tastic','fantabulous','far out','far-out','farout','fly','fresh','funsies','gangstar','gangster',
                           'gansta','solidgold','golden','gr8','hardcore','hellacious','hoopla','hype','ill','itsallgood','its all good','jiggy','jinky','jiggity',
                           'jolly good','jolly-good','jollygood','k3w1','kickass','kick-ass','kick ass','kick in the pants','kickinthepants','kicks','kix','legendary',
@@ -6528,7 +6296,7 @@ var BOTCOMMANDS = {
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
                           'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
-                          'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
+                          'holycrapthisisareallylongsong','onehitwonder',,'riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
                           'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
                           'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
                           'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
@@ -6547,7 +6315,7 @@ var BOTCOMMANDS = {
             },
 
             eightballCommand: {   //Added 04/01/2015 Zig
-                command: ['magic8ball','8ball', 'eightball', 'larry'],
+                command: ['8ball', 'eightball', 'larry'],
                 rank: 'dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6827,7 +6595,6 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("fourthirtyCommand: " + err.message); }
                 }
             },
-			// https://giphy.com/gifs/friday-byefelicia-icecube-11QJgcchgwskq4?utm_source=media-link&utm_medium=landing&utm_campaign=Media%20Links&utm_term=https://www.dubtrack.fm/join/tasty-tunes
             resetstatsCommand: {  //Added 12/23/2015 Zig 
                 command: 'resetstats',
                 rank: 'manager',
@@ -6966,12 +6733,9 @@ var BOTCOMMANDS = {
                             API.logInfo("I've got " + USERS.users.length + " users in the old list.")
                         }, 1 * 1000);
                         //todoer
-                        if (USERS.users.length >= 1) botDebug.debugMessage(true, "OLD_USER0: " + USERS.users[0].username + "::" + USERS.users[0].id);
-                        if (USERS.users.length >= 2) botDebug.debugMessage(true, "OLD_USER1: " + USERS.users[1].username + "::" + USERS.users[1].id);
-                        if (USERS.users.length >= 3) botDebug.debugMessage(true, "OLD_USER2: " + USERS.users[2].username + "::" + USERS.users[2].id);
-                        if (USERS.usersImport.length >= 1) botDebug.debugMessage(true, "NEW_USER0: " + USERS.usersImport[0].username + "::" + USERS.usersImport[0].id);
-                        if (USERS.usersImport.length >= 2) botDebug.debugMessage(true, "NEW_USER1: " + USERS.usersImport[1].username + "::" + USERS.usersImport[1].id);
-                        if (USERS.usersImport.length >= 3) botDebug.debugMessage(true, "NEW_USER2: " + USERS.usersImport[2].username + "::" + USERS.usersImport[2].id);
+                        if (USERS.users.length >= 1) botDebug.debugMessage(true, "USER0: " + USERS.users[0].username + "::" + USERS.users[0].id);
+                        if (USERS.users.length >= 2) botDebug.debugMessage(true, "USER1: " + USERS.users[1].username + "::" + USERS.users[1].id);
+                        if (USERS.users.length >= 3) botDebug.debugMessage(true, "USER2: " + USERS.users[2].username + "::" + USERS.users[2].id);
                     }
                     catch (err) { UTIL.logException("userlistcount: " + err.message); }
                 }
@@ -6984,33 +6748,7 @@ var BOTCOMMANDS = {
                     try {
                         if (this.type === 'exact' && chat.message.length !== cmd.length) return;
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        API.logInfo("Loading the new list.");
                         USERS.importUserList();
-                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
-                        var DocZ = USERS.lookupUserNameImport("Doc_Z");
-                        if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
-                                                                     songs: DocZ.votes.songsPlayed,
-                                                                     woot: DocZ.votes.woot, 
-                                                                     grabs: DocZ.votes.curate, 
-                                                                     mehs: DocZ.votes.meh, 
-                                                                     tasty: DocZ.votes.tastyRcv});
-                        TASTY.resetDailyRolledStats(DocZ);
-                        msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
-                        API.logInfo(msg);
-                    }
-                    catch (err) { UTIL.logException("userlistimport: " + err.message); }
-                }
-            },
-            userlistimportxxCommand: {   //Added: 08/23/2015 Import User list from last saved in Github
-                command: 'userlistimportxx',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        USERS.importUserListXX();
                         API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
                         if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
@@ -7066,18 +6804,6 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         API.sendChat("@whitewidow loves the bass line.");
-                    }
-                }
-            },
-            430: {  //hipsterCommand
-                command: '430',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.sendChat("Bye, Felicia.");
                     }
                 }
             },
@@ -7469,7 +7195,7 @@ var BOTCOMMANDS = {
              },
             maxlengthCommand: {
                 command: 'maxlength',
-                rank: 'co-owner',
+                rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -7587,7 +7313,6 @@ var BOTCOMMANDS = {
                     catch (err) { UTIL.logException("banlistcount: " + err.message); }
                 }
             },
-			// USAGE:  (THIS SHould work but can't figure out why....  COMMANDS.botChatcommand("/.banlistprivate OMF");
             banlistCommand: {   //Added: 06/10/2015 List all banned songs
                 command: ['banlist','banlistprivate'],
                 rank: 'co-owner',
@@ -7637,10 +7362,6 @@ var BOTCOMMANDS = {
                     catch (err) { UTIL.logException("banlist: " + err.message); }
                 }
             },
-			//Unbansong: 
-			// USAGE: BAN.newBlacklistIDs.indexOf("youtube:BGWygShsMNo");
-			// If that returns a value update here vv
-			//			         var idxToRemove = 201; BAN.newBlacklist.splice(idxToRemove, 1);  BAN.newBlacklistIDs.splice(idxToRemove, 1);  if (BAN.blacklistLoaded) localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist); if (BAN.blacklistLoaded) localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
             banremoveCommand: {  //Added: 06/10/2015 Remove a song from the ban list by the cid key
                 command: 'banremove',
                 rank: 'co-owner',
