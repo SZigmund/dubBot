@@ -2094,7 +2094,7 @@ var TASTY = {
                       'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
                       'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
                       'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
-                      'wax','yousuredohaveapurdymouth','punchableface','docsgoingtothisshowtonight'];
+                      'wax','yousuredohaveapurdymouth','retro','punchableface','docsgoingtothisshowtonight'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6535,7 +6535,7 @@ var BOTCOMMANDS = {
                           'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
                           'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
                           'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
-                          'wax','yousuredohaveapurdymouth','punchableface','docsgoingtothisshowtonight'],
+                          'wax','yousuredohaveapurdymouth','retro','punchableface','docsgoingtothisshowtonight'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
