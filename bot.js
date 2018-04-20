@@ -2095,7 +2095,7 @@ var TASTY = {
                       'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
                       'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
                       'wax','yousuredohaveapurdymouth','retro','punchableface','docsgoingtothisshowtonight','heaven','moaroar',
-                      'osfleftovers','osf','beard','dowop','productivitykiller','heyman'];
+                      'osfleftovers','osf','beard','dowop','productivitykiller','heyman','osf420','420osf','twss'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -6537,7 +6537,7 @@ var BOTCOMMANDS = {
                           'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
                           'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
                           'wax','yousuredohaveapurdymouth','retro','punchableface','docsgoingtothisshowtonight','heaven','moaroar',
-                          'osfleftovers','osf','beard','dowop','productivitykiller','heyman'],
+                          'osfleftovers','osf','beard','dowop','productivitykiller','heyman','osf420','420osf','twss'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
