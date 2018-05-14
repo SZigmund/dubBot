@@ -7096,6 +7096,18 @@ var BOTCOMMANDS = {
                     }
                 }
             },
+            awsnapCommand: {
+                command: 'awsnap',
+                rank: 'dj',
+                type: 'exact',
+                functionality: function (chat, cmd) {
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        API.sendChat("Something went wrong while displaying this webpage.");
+                    }
+                }
+            },
             roomCommand: {
                 command: 'room',
                 rank: 'mod',
