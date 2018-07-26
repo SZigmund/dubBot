@@ -2086,7 +2086,7 @@ var TASTY = {
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
+                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','greatcover','tastycover','awesomecover','sweet2fer',
                       'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
                       'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
                       'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
@@ -6528,7 +6528,7 @@ var BOTCOMMANDS = {
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
+                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','greatcover','tastycover','awesomecover','sweet2fer',
                           'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
                           'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
                           'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
@@ -6814,6 +6814,20 @@ var BOTCOMMANDS = {
 						 setTimeout(function () { API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif"); }, 250);
                     }
                     catch(err) { UTIL.logException("elevenCommand: " + err.message); }
+                }
+            },
+            dmbCommand: {   //Added 07/26/2018 Zig
+                command: 'dmb',
+                rank: 'resident-dj',
+                type: 'startsWith',
+                functionality: function (chat, cmd)  {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						 TASTY.tastyVote(chat.un, cmd);
+						 setTimeout(function () { API.sendChat("https://media.tenor.com/images/952fe3b2e8cae6a8cb39aba07e5e1beb/tenor.gif"); }, 250);
+                    }
+                    catch(err) { UTIL.logException("dmbCommand: " + err.message); }
                 }
             },
             fourthirtyCommand: {
