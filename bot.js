@@ -2055,7 +2055,7 @@ var TASTY = {
                       'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
                       'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                       'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
-                      'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
+                      'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','murica','2fer','boom','bitches','oar','hipster',
                       'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','hooters',
                       'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
                       'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
@@ -6497,7 +6497,7 @@ var BOTCOMMANDS = {
                           'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
                           'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                           'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
-                          'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','mumford','murica','2fer','boom','bitches','oar','hipster',
+                          'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','murica','2fer','boom','bitches','oar','hipster',
                           'hip','soul','soulful','cover','yummy','ohyeah','twist','shout','trippy','hot','country','stellar','smoove','pantydropper','baby','mmm','hooters',
                           'tmbg','rhythm','kool','kewl','killer','biatch','woodblock','morecowbell','lesbian','lesbians','niceconnect','connect','kazoo','win','webejammin',
                           'bellyrub','groove','gold','golden','twofer','phat','punkrock','punkrocker','merp','derp','herp-a-derp','narf','amazing','doabarrellroll','plusone',
@@ -6814,6 +6814,20 @@ var BOTCOMMANDS = {
 						 setTimeout(function () { API.sendChat("http://media.tumblr.com/10430abfede9cebe9776f7de26e302e4/tumblr_inline_mjzgvrh7Uv1qz4rgp.gif"); }, 250);
                     }
                     catch(err) { UTIL.logException("elevenCommand: " + err.message); }
+                }
+            },
+            mumfordCommand: {
+                command: 'mumford',
+                rank: 'resident-dj',
+                type: 'startsWith',
+                functionality: function (chat, cmd)  {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						 TASTY.tastyVote(chat.un, cmd);
+						 setTimeout(function () { API.sendChat("https://media.giphy.com/media/kabkVP3FiZrSE/giphy.gif"); }, 250);
+                    }
+                    catch(err) { UTIL.logException("mumfordCommand: " + err.message); }
                 }
             },
             dmbCommand: {   //Added 07/26/2018 Zig
