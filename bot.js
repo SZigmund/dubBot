@@ -6593,7 +6593,7 @@ var BOTCOMMANDS = {
                         TASTY.setRolled(chat.un, true);
                         var resultsMsg = "";
                         var wooting = true;
-                        if (rollResults > (dicesides * 0.5)) {
+                        if (rollResults > Math.ceil(dicesides * 0.5)) {
                             //Pick a random word for the tasty command
                             setTimeout(function () { TASTY.tastyVote(botVar.botName, TASTY.bopCommand("")); }, 250);
                             setTimeout(function () { API.wootThisSong(); }, 500);
