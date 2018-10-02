@@ -2051,7 +2051,7 @@ var TASTY = {
                       'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
                       'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
                       'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
-                      'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
+                      'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygf','docsgirlfriend','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
                       'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
                       'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                       'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
@@ -2094,7 +2094,7 @@ var TASTY = {
                       'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
                       'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
                       'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
-                      'wax','yousuredohaveapurdymouth','retro','punchableface','docsgoingtothisshowtonight','heaven','moaroar',
+                      'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
                       'osfleftovers','osf','beard','dowop','productivitykiller','heyman','osf420','420osf','twss'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
@@ -6493,7 +6493,7 @@ var BOTCOMMANDS = {
                           'lustrous','rhythmic','crackerjack','laudable','peachy','praiseworthy','rare','super-duper','unreal','chill','savvy','smart','ingenious','genious',
                           'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
                           'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
-                          'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
+                          'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygf','docsgirlfriend','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
                           'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
                           'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                           'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
@@ -6536,7 +6536,7 @@ var BOTCOMMANDS = {
                           'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
                           'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
                           'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
-                          'wax','yousuredohaveapurdymouth','retro','punchableface','docsgoingtothisshowtonight','heaven','moaroar',
+                          'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
                           'osfleftovers','osf','beard','dowop','productivitykiller','heyman','osf420','420osf','twss'],
                 rank: 'manager',
                 type: 'startsWith',
