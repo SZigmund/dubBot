@@ -4,15 +4,33 @@
 //Remove User 1: USERS.users.splice(1, 1);
 //               USERS.users[1].username + " - " + USERS.users[1].userRole + " - " + USERS.users[1].id;
 //               USERS.users[2].username + " - " + USERS.users[2].userRole + " - " + USERS.users[2].id;
+//<section id="main-room" class="dubtrack-section display-chat-settings" style="display: block;">
 //TODO LIST:
+// GONG:	https://youtu.be/6D-SqQV_T04
+//			https://youtu.be/oSqoyk9FenQ
+//			https://youtu.be/kZ70uUp9eWo
+//			https://youtu.be/i5RKkVZZbz8 Eh
+//			https://youtu.be/hGd2w3XcRJI
+//			https://youtu.be/DTTtld-gkVw
+//			https://youtu.be/CtVwqmHDN58
+//			https://youtu.be/2vh_8vWdOPQ
+//			https://youtu.be/z-xKOijTYeI
+//			https://youtu.be/rdFw_AuzH58
+
+// - One > 8 Min song per day for VIP and above.
 // - Record all Bans/Unbans
-// - Last Played
+// - Generate random beer names: http://www.strangebrew.ca/beername.php?Mode=Generate
+// - Last Played Date
+// - Wild Card Wednesdays: Opposite CTS - Ladies Night: Female singers/writers/drummers etc - Classic - CTS - Covers
+//			Oldies, 70's, 80's, 90's, Long Songs - Theme word (Time, Food, Spring/Winter,etc)
+//			Modern day songs - Imports - Musicals - Country & Western - Acoustic - or Driving songs
+// - DJ - On-deck notifications .ondeck - Respond: On-Deck notifications have been enabled/disabled
 
 //todoer Remove all we can: document.getElementsByClassName("chat-main")[0].getElementsByTagName("li")[1].className
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0044",
+  version: "Version  1.01.0045",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -276,7 +294,12 @@ String.prototype.splitBetween = function (a, b) {
     return arr;
 };
 
-//SECTION LOOKING: All User data
+//SECTION LOOKING: All User data  (Stalker code)
+//USAGE: Stalker code
+//		LOOKING.A_LoadTheRoomList();
+//		LOOKING.B_LoadTheRoomStaff();
+//		LOOKING.C_ListRooms("tast");
+// ROOM STAFF FOR TASTY TUNES: https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/users/staff
 var LOOKING = {
 	//stalker option to find a user in another room
 	A_LoadTheRoomList: function (roomlist) {
@@ -405,6 +428,7 @@ var LOOKING = {
 //SECTION USERS: All User data
 var USERS = {
   usersImport: [],
+  jsonUsers: null,
   users: [],
   loadUserInterval: null,
   getPermission: function (usrObjectID) {
@@ -531,7 +555,7 @@ var USERS = {
       return false;
 	}
     catch(err) {
-		UTIL.logException("lookupUserName: " + err.message); 
+		UTIL.logException("lookupUserName: [" + i.toString() + "] " + err.message); 
 		return false;
 	  }
   },
@@ -613,7 +637,6 @@ var USERS = {
         }
         catch(err) { UTIL.logException("importUserListXX: " + err.message); }
     },
-
     User: function (userID, username) {
         this.id = userID;
         this.username = username;
@@ -634,6 +657,7 @@ var USERS = {
         this.rolled = false;
         this.lastEta = null;
         this.bootable = false;
+        this.bioBreak = false;
         this.beerRun = false;
         this.inMeeting = false;
         this.atLunch = false;
@@ -1189,12 +1213,16 @@ var botChat = {
    botChat.chatMessages.push(["noposition", " No last position known. The waitlist needs to update at least once to register a user's last position."]);
    botChat.chatMessages.push(["toolongago", " @%%NAME%%'s last disconnect (DC or leave) was too long ago: %%TIME%%."]);
    botChat.chatMessages.push(["validdisconnect", " @%%NAME%% disconnected %%TIME%% ago and should be at position %%POSITION%%."]);
+
    botChat.chatMessages.push(["meetingreturn", " @%%NAME%% how was your meeting?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
    botChat.chatMessages.push(["lunchreturn", " @%%NAME%% how was lunch?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
    botChat.chatMessages.push(["beerrunreturn", " @%%NAME%% What kind of :beer: did you buy?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+   botChat.chatMessages.push(["bioreturn", " @%%NAME%% How did things go?  You left %%TIME%% ago and should be at position %%POSITION%%."]);
+
    botChat.chatMessages.push(["meetingleave", " @%%NAME%% enjoy your meeting. :sleeping: (Position: %%POS%%)"]);
    botChat.chatMessages.push(["lunchleave", " @%%NAME%% enjoy your lunch. :pizza: Hurry back. (Position: %%POS%%)"]);
    botChat.chatMessages.push(["beerrunleave", " @%%NAME%% Going to get some :beer:. (Position: %%POS%%)"]);
+   botChat.chatMessages.push(["bioleave", " @%%NAME%% enjoy your :poop: break. Hurry back. (Position: %%POS%%)"]);
 
    botChat.chatMessages.push(["warning1", " @%%NAME%% you have been afk for %%TIME%%, please respond within 2 minutes or you will be removed."]);
    botChat.chatMessages.push(["warning2", " @%%NAME%% you will be removed due to AFK soon if you don't respond."]);
@@ -1646,6 +1674,7 @@ var UTIL = {
             case 8: return ":eight:";
             case 9: return ":nine:";
             case 10: return ":keycap_ten:";
+			default: return intValue.toString();
         }
         return intValue;
     },
@@ -2064,7 +2093,7 @@ var TASTY = {
                       'swass','tender','thrill','tight','tits','tizight','todiefor','to die for','trill','tuff','vicious','whizz-bang','wick',
                       'wow','omg','A-1','ace','aces','aight','allthatandabagofchips','all that and a bag of chips','alrighty','alvo','amped',
                       'A-Ok','ass-kicking','awesome-possum','awesome possum','awesomepossum','awesomesauce','awesome sauce','awesome-sauce',
-                      'awsum','bad-ass','badassical','badonkadonk','bananas','bang','bangupjob','bang up job','beast','beastly','bees-knees',
+                      'awsum','bad-ass','badassical','badonkadonk','bananas','bangupjob','bang up job','beast','beastly','bees-knees',
                       'bees knees','beesknees','bodacious','bomb','bomb-ass','bomb diggidy','bomb-diggidy','bombdiggidy','bonkers','bonzer',
                       'boomtown','bostin','brill','bumping','capitol','cats ass','cats-ass','catsass','chilling','choice','clutch',
                       'coo','coolage','cool beans','cool-beans','coolbeans','coolness','cramazing','cray-cray','crazy','crisp','crucial','da bomb',
@@ -2086,22 +2115,41 @@ var TASTY = {
                       'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                       'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                       'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','greatcover','tastycover','awesomecover','sweet2fer',
-                      'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
-                      'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
-                      'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
-                      'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
-                      'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
-                      'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
-                      'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
-                      'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
-                      'osfleftovers','osf','beard','dowop','productivitykiller','heyman','osf420','420osf','twss'];
+                      'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
+					  'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
+					  'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
+					  'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
+					  'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
+					  'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
+					  'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
+					  'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
+					  'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
+					  'osfleftovers','osf','beard','dowop','productivitykiller','heyman','420osf','osf420','twss'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
                 return false;
             }
-            // Else return a random Tasty command for Larry to use on his tasty points:
+			var d = new Date();
+			var n = d.getMonth();
+			var mydate = new Date();
+			var nn = mydate.getDate();
+			var mm = mydate.getMonth();
+			// If 4/20:   Month is zero based:
+			UTIL.logException("bopCommand: " + nn + ":" + mm);
+			if ((nn === 20) && (mm === 3)) {
+				var idx = Math.floor(Math.random() * 8)
+				if (idx === 0) return commandList[commandList.indexOf('420')];
+				if (idx === 1) return commandList[commandList.indexOf('toke')];
+				if (idx === 2) return commandList[commandList.indexOf('fatty')];
+				if (idx === 3) return commandList[commandList.indexOf('blunt')];
+				if (idx === 4) return commandList[commandList.indexOf('joint')];
+				if (idx === 5) return commandList[commandList.indexOf('doobie')];
+				if (idx === 6) return commandList[commandList.indexOf('smoking')];
+				if (idx === 7) return commandList[commandList.indexOf('dank')];
+			}
+			
+            //& Else return a random Tasty command for Larry to use on his tasty points:
             var idx = Math.floor(Math.random() * commandList.length);
             return commandList[idx];
         }
@@ -2188,7 +2236,7 @@ var BAN = {
 	}
 	catch(err) { UTIL.logException("ERROR:banSongSkip: " + err.message); }
   },
-  //USAGE:        BAN.preBanQueueSong("9FR"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
+  //USAGE:        BAN.preBanQueueSong("9FE"); // (Where 9 is queue pos and FE is 1st 2 char of song for verification)
   //OR Use command: .pb 9FR
   //This works in the version we are running now.
   // USAGE: XFER STORAGE SETTINGS FROM ONE PC TO ANOTHER:
@@ -2198,13 +2246,17 @@ var BAN = {
   // JSON.stringify(BAN.newBlacklist);
   // JSON.stringify(BAN.newBlacklistIDs);
   //
-  // Replace all but 1st and last \" with \"
+  // Replace all but 1st and last " with \"
   //
   // USAGE: SET Storage settings:
   //
   // USERS.users = JSON.parse(<<DATA>>);
   // BAN.newBlacklist = JSON.parse(<<DATA>>);
   // BAN.newBlacklistIDs = JSON.parse(<<DATA>>);
+  // SETTINGS.storeToStorage();
+  // localStorage["BLACKLIST"] = JSON.stringify(BAN.newBlacklist);
+  // localStorage["BLACKLISTIDS"] = JSON.stringify(BAN.newBlacklistIDs);
+  // 
   preBanQueueSong: function (positionKey) {
     try {
 		//botDebug.debugMessage(true, "preBanQueueSong: -------------------------------------------------------------------");
@@ -2343,6 +2395,7 @@ var AFK = {
     user.lastKnownPosition = -1;
     user.lastSeenInLine = null;
     user.lastDC.songCount = 0;
+    user.bioBreak = false;
     user.beerRun = false;
     user.inMeeting = false;
     user.atLunch = false;
@@ -2364,16 +2417,25 @@ var AFK = {
     catch(err) { UTIL.logException("afkRemovalNow: " + err.message); }
   },
   setMeetingStatus: function (user, status) {
+	user.bioBreak = false;
 	user.beerRun = false;
 	user.inMeeting = status;
 	user.atLunch = false;
   },
+  setBioBreakStatus: function (user, status) {
+	user.bioBreak = status;
+	user.beerRun = false;
+	user.inMeeting = false;
+	user.atLunch = false;
+  },
   setBeerRunStatus: function (user, status) {
+	user.bioBreak = false;
 	user.beerRun = status;
 	user.inMeeting = false;
 	user.atLunch = false;
   },
   setLunchStatus: function (user, status) {
+	user.bioBreak = false;
 	user.beerRun = false;
 	user.inMeeting = false;
 	user.atLunch = status;
@@ -2411,6 +2473,10 @@ var AFK = {
 		if ((lunchRequest.cmd == '.meeting') || (lunchRequest.cmd == '.stupidmeeting') || (lunchRequest.cmd == '.crappymeeting')) {
 			AFK.setMeetingStatus(user, true);
 			msg = botChat.subChat(botChat.getChatMessage("meetingleave"), {name: lunchRequest.username, pos: currPos});
+		}
+		if ((lunchRequest.cmd == '.walkthedog') || (lunchRequest.cmd == '.biobreak')) {
+			AFK.setBioBreakStatus(user, true);
+			msg = botChat.subChat(botChat.getChatMessage("bioleave"), {name: lunchRequest.username, pos: currPos});
 		}
         AFK.updateDC(user);
         setTimeout(function () { API.moderateRemoveDJ(user.id); }, 1000);
@@ -2514,8 +2580,9 @@ var AFK = {
 		}
 
 		if (newPosition <= 0) newPosition = 1;
-		if ((newPosition <= 1) && ((user.beerRun === true) || (user.inMeeting === true) || (user.atLunch === true))) newPosition = 2;
+		if ((newPosition <= 1) && ((user.bioBreak === true) || (user.beerRun === true) || (user.inMeeting === true) || (user.atLunch === true))) newPosition = 2;
 		var leaveMsgType = "validdisconnect";
+		if (user.bioBreak === true) leaveMsgType = "bioreturn";
 		if (user.beerRun === true) leaveMsgType = "beerrunreturn";
 		if (user.inMeeting === true) leaveMsgType = "meetingreturn";
 		if (user.atLunch === true) leaveMsgType = "lunchreturn";
@@ -2611,12 +2678,12 @@ var ROULETTE = {
     catch(err) { UTIL.logException("randomRouletteSetTimer: " + err.message); }
   },
 
-  joinRoulette: function (waitlist, chat) {
+  joinRoulette: function (waitlist, rouUser) {
     try {
-      var currPos = API.getWaitListPosition(chat.uid, waitlist) + 1;
-	  if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: chat.un}));
-      API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: chat.un, pos: currPos}));
-      ROULETTE.settings.participants.push(chat.uid);
+      var currPos = API.getWaitListPosition(rouUser.userid, waitlist) + 1;
+	  if (currPos < 1) return API.sendChat(botChat.subChat(botChat.getChatMessage("notinwaitlist"), {name: rouUser.username}));
+      API.sendChat(botChat.subChat(botChat.getChatMessage("roulettejoin"), {name: rouUser.username, pos: currPos}));
+      ROULETTE.settings.participants.push(rouUser.userid);
     }
     catch(err) { UTIL.logException("joinRoulette: " + err.message); }
   },
@@ -2652,6 +2719,10 @@ var ROULETTE = {
         API.moderateMoveDJ(user.id, pos, waitlist);
     }
     catch(err) { UTIL.logException("selectRouletteWinner: " + err.message); }
+  },
+  rouletteUser: function (username, userid) {
+    this.username = username;
+    this.userid = userid;
   },
   endRoulette: function () {
     try {
@@ -2944,6 +3015,9 @@ var RANDOMCOMMENTS = {
     "Random Fact: If you take all the molecules in a teaspoon of water and lined them up end to end in a single file line, they would stretch ~30 billion miles.",
     "Random Fact: In Australia, there was a war called the emu war. The emus won.",
     "Women, can't live with them....pass the beer nuts!",
+	"Before sex, you help each other get naked, after sex you only dress yourself. Moral of the story: in life no one helps you once you're fucked.",
+	"No good deed goes unpunished.",
+	"People ask me why, as an atheist, I still say: OH MY GOD. It makes perfect sense: We say 'Oh my God' when something is UNBELIEVABLE.",
     "I'm not always sarcastic, sometimes I'm asleep.",
     "The object of golf is to play the least amount of golf.",
     "The sinking of the Titanic must have been a miracle to the lobsters in the kitchen.",
@@ -4074,11 +4148,19 @@ var API = {
     catch(err) { UTIL.logException("getRoomID: " + err.message); }
   },
 
+  //LIST ROOM QUEUE: https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/playlist/details
+  //LIST ALL MY PLAYLISTS: https://api.dubtrack.fm/playlist
+  //LIST PAGE ONE OF PLAYLIST: https://api.dubtrack.fm/playlist/5602fc48813abe030055edbe/songs?name=&page=1
+  // https://api.dubtrack.fm/playlist/5602dbae813abe030055daba/songs?name=&page=1
+  // START OF CODE FOR DELETE FROM MY QUEUE: WHERE 
+  //DOC: $.ajax({ url: "https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/user/542465ce43f5a10200c07f11/all", type: "DELETE" });
+  //DEEZ: $.ajax({ url: "https://api.dubtrack.fm/room/5600a564bfb6340300a2def2/queue/user/55f8382244809b0300f886c9/all", type: "DELETE" });
+  
   //Add Song to 00's list:   SongAdd or AddSong or GrabSong
   //https://api.dubtrack.fm/playlist
   // BOT USAGE: API.grabYTSong("E2Z1VZAqtpo", UTIL.getPlaylistID(CONST.PLAYLIST_00s));
   // ZIG PLAYLIST "1" = 5880d9ea6e243f5a00b5f784
-  // ZIG USAGE: var YOUTUBE_ID = "Q8JifjV7Fv4"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
+  // ZIG USAGE: var YOUTUBE_ID = "QuFo96ltweE"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
   // IMPORT YT TOPICS PLAYLIST: View the entire list - Inpect Element and Copy the dive option: "Copy element"
   //
   //BAN SONG: bansong: 
@@ -6138,7 +6220,7 @@ var CONST = {
   PLAYLIST_GRABS: 37,
 
   PlaylistCount: 36,			   //Not including current Grab List
-
+  
   chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
   blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
   //userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
@@ -6494,7 +6576,7 @@ var BOTCOMMANDS = {
                           'sweet','delicious','lucious','bonbon','fetch','fetching','appealing','delightful','absorbing','alluring','cute','electrifying',
                           'awesome','bitchin','fly','pleasant','relaxing','mellow','nostalgia','punk','like','fries','cake','drum','guitar','bass','tune','pop',
                           'apple','fantastic','spiffy','yes','fabulous','happy','smooth','classic','mygf','docsgirlfriend','mygirlfriend','skank','jiggy','funk','funky','jazz','jazzy','dance','elvis',
-                          'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','bang','blues','heart','feels','dope','makeitrain','wumbo',
+                          'hawt','extreme','dude','babes','fun','reggae','party','drums','trumpet','mosh','blues','heart','feels','dope','makeitrain','wumbo',
                           'firstclass','firstrate','topnotch','aweinspiring','superduper','dabomb','dashit','badass','bomb','popcorn','awesomesauce','awesomeness','sick',
                           'sexy','brilliant','steampunk','bagpipes','piccolo','whee','vibe','banjo','harmony','harmonica','flute','dancing','dancin','ducky','approval','winning','okay',
                           'hunkydory','peach','divine','radiant','sublime','refined','foxy','allskate','rush','boston','murica','2fer','boom','bitches','oar','hipster',
@@ -6528,16 +6610,16 @@ var BOTCOMMANDS = {
                           'boppin','bopping','jammin','jamming','tuba','powerballad','jukebox','word','classicrock','throwback','soultrain','train','<3','bowie',
                           'holycraplarryhasashitloadofcommands','thatswhatimtalkinabout','waycool',':thumbsup:',':fire:',':+1:','cheers','drink','irish','celtic',
                           'thunder','stpaddy','stpaddys','vegemite','clap','sob','sonofabitch',':clap:','forthewin','ftw',':cake:','badabing',':boom:','electric',
-                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','greatcover','tastycover','awesomecover','sweet2fer',
+                          'mullet','eclectic','aaahhmmazing','crowdfavorite','celebrate','goodtimes','dmb','greatcover','tastycover','awesomecover','sweet2fer',
                           'holycrapthisisareallylongsong','onehitwonder','riot','cherry','poppin','zootsuit','moustache','stache','dank','whackyinflatableflailingarmtubeman',
-                          'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
-                          'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
-                          'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
-                          'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
-                          'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
-                          'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
-                          'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
-                          'osfleftovers','osf','beard','dowop','productivitykiller','heyman','osf420','420osf','twss'],
+						  'aintnothingbutachickenwing','bestest','blast','coolfulness','coolish','dark','devious','disgusting','fat','fav','fave','fierce','flabbergasted',
+						  'fleek','fletch','flossy','gink','glish','goosh','grouse','hoopy','hopping','horrorshow','illmatic','immense','key','kick','live','lyte','moff',
+						  'nectar','noice','okie dokie','okiedokie','onfire','on fire','out to lunch','outtolunch','pimp','pimping','pimptacular','pissa','popping','premo',
+						  'radballs','ridiculous','rollicking','sharp','shibby','shiny','snoochie boochies','snoochieboochies','straight','stupid fresh','stupidfresh',
+						  'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
+						  'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
+						  'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
+                          'osfleftovers','osf','beard','dowop','productivitykiller','heyman','420osf','osf420','twss'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6589,7 +6671,8 @@ var BOTCOMMANDS = {
                             if (!isNaN(dice)) dicesides = dice;
                             if (dicesides < 4) dicesides = 4;
                         }
-                        var rollResults = Math.floor(Math.random() * dicesides) + 1;
+                        if (dicesides > 30000) dicesides = 6;
+						var rollResults = Math.floor(Math.random() * dicesides) + 1;
                         TASTY.setRolled(chat.un, true);
                         var resultsMsg = "";
                         var wooting = true;
@@ -6815,8 +6898,10 @@ var BOTCOMMANDS = {
                     }
                     catch(err) { UTIL.logException("elevenCommand: " + err.message); }
                 }
+
             },
-            mumfordCommand: {
+            // Goofy Dog playing piano gif:  https://media.giphy.com/media/ELUZ0bkF8j4ru/giphy.gif
+			mumfordCommand: {
                 command: 'mumford',
                 rank: 'resident-dj',
                 type: 'startsWith',
@@ -6830,7 +6915,7 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("mumfordCommand: " + err.message); }
                 }
             },
-            dmbCommand: {   //Added 07/26/2018 Zig
+            dmbCommand: {
                 command: 'dmb',
                 rank: 'resident-dj',
                 type: 'startsWith',
@@ -7099,18 +7184,6 @@ var BOTCOMMANDS = {
                     }
                 }
             },
-            430: {  //hipsterCommand
-                command: '430',
-                rank: 'manager',
-                type: 'startsWith',
-                functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        API.sendChat("Bye, Felicia.");
-                    }
-                }
-            },
             hypsterCommand: {  //hipsterCommand
                 command: 'hypster',
                 rank: 'manager',
@@ -7120,11 +7193,11 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         //API.sendChat("I know @whitewidow is singing along with this hypster track");
-                        API.sendChat("@whitewidow is so un-hipster she's basically normcore.");                    
+						API.sendChat("@whitewidow is so un-hipster she's basically normcore.");
                     }
                 }
             },
-            awsnapCommand: {
+            awsnapCommand: {  //awsnapCommand
                 command: 'awsnap',
                 rank: 'dj',
                 type: 'exact',
@@ -7416,7 +7489,7 @@ var BOTCOMMANDS = {
                 }
             },
             leaveCommand: {
-                command: 'leave',
+				command: ['leave', 'out'],
                 rank: 'user',
                 type: 'exact',
                 functionality: function (chat, cmd) {
@@ -7432,7 +7505,7 @@ var BOTCOMMANDS = {
                 }
             },
             joinCommand: {
-                command: 'join',
+				command: ['join', 'in'],
                 rank: 'user',
                 type: 'exact',
                 functionality: function (chat, cmd) {
@@ -7440,7 +7513,8 @@ var BOTCOMMANDS = {
                     if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
                     else {
                         if (ROULETTE.settings.rouletteStatus && ROULETTE.settings.participants.indexOf(chat.uid) < 0) {
-	    					API.getWaitList(ROULETTE.joinRoulette, chat);
+	    					var rouUser = new ROULETTE.rouletteUser(chat.un, chat.uid);
+							API.getWaitList(ROULETTE.joinRoulette, rouUser);
                         }
                     }
                 }
@@ -7498,7 +7572,7 @@ var BOTCOMMANDS = {
                  }
              },
              hopdownCommand: {
-                 command: ['hopdown','stepdown'],
+                 command: ['hopdown','stepdown','getlost'],
                  rank: 'mod',
                  type: 'exact',
                  functionality: function (chat, cmd) {
@@ -7541,7 +7615,7 @@ var BOTCOMMANDS = {
                 }
             },
             meetingCommand: {   //Added 03/28/2015 Zig
-                command: ['meeting', 'lunch', 'beerrun','stupidmeeting','crappymeeting'],
+                command: ['meeting', 'lunch', 'beerrun','stupidmeeting','crappymeeting','walkthedog','biobreak'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
