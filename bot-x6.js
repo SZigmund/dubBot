@@ -6670,7 +6670,7 @@ var BOTCOMMANDS = {
                             if (!isNaN(dice)) dicesides = dice;
                             if (dicesides < 4) dicesides = 4;
                         }
-                        if (dicesides > 30000) dicesides = 6; str
+                        if (dicesides > 30000) dicesides = 6;
 						var rollResults = Math.floor(Math.random() * dicesides) + 1;
                         TASTY.setRolled(chat.un, true);
                         var resultsMsg = "";
