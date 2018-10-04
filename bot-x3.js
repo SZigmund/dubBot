@@ -2136,7 +2136,8 @@ var TASTY = {
 			var nn = mydate.getDate()
 			var mm = mydate.getMonth()
 			// If 4/20:
-			if ((nn === 4) && (mm === 10)) {
+			UTIL.logException("bopCommand: " + nn + ":" + mm);
+			if ((nn === '04') && (mm === '10')) {
 				var idx = Math.floor(Math.random() * 8)
 				if (idx === 0) return commandList[commandList.indexOf('420')];
 				if (idx === 1) return commandList[commandList.indexOf('toke')];
