@@ -3016,7 +3016,7 @@ var RANDOMCOMMENTS = {
     "Women, can't live with them....pass the beer nuts!",
 	"Before sex, you help each other get naked, after sex you only dress yourself. Moral of the story: in life no one helps you once you're fucked.",
 	"No good deed goes unpunished.",
-	"People ask me why, as an atheist, I still say: OH MY GOD. It makes perfect sense: We say "Oh my God" when something is UNBELIEVABLE.",
+	"People ask me why, as an atheist, I still say: OH MY GOD. It makes perfect sense: We say 'Oh my God' when something is UNBELIEVABLE.",
     "I'm not always sarcastic, sometimes I'm asleep.",
     "The object of golf is to play the least amount of golf.",
     "The sinking of the Titanic must have been a miracle to the lobsters in the kitchen.",
