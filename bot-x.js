@@ -2138,14 +2138,14 @@ var TASTY = {
 			// If 4/20:
 			if ((nn === 20) && (mm === 3)) {
 				var idx = Math.floor(Math.random() * 8)
-				if (idx === 0) return return commandList[commandList.indexOf('420')];
-				if (idx === 1) return return commandList[commandList.indexOf('toke')];
-				if (idx === 2) return return commandList[commandList.indexOf('fatty')];
-				if (idx === 3) return return commandList[commandList.indexOf('blunt')];
-				if (idx === 4) return return commandList[commandList.indexOf('joint')];
-				if (idx === 5) return return commandList[commandList.indexOf('doobie')];
-				if (idx === 6) return return commandList[commandList.indexOf('smoking')];
-				if (idx === 7) return return commandList[commandList.indexOf('dank')];
+				if (idx === 0) return commandList[commandList.indexOf('420')];
+				if (idx === 1) return commandList[commandList.indexOf('toke')];
+				if (idx === 2) return commandList[commandList.indexOf('fatty')];
+				if (idx === 3) return commandList[commandList.indexOf('blunt')];
+				if (idx === 4) return commandList[commandList.indexOf('joint')];
+				if (idx === 5) return commandList[commandList.indexOf('doobie')];
+				if (idx === 6) return commandList[commandList.indexOf('smoking')];
+				if (idx === 7) return commandList[commandList.indexOf('dank')];
 			}
 			
             //& Else return a random Tasty command for Larry to use on his tasty points:
