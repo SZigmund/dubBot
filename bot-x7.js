@@ -555,7 +555,7 @@ var USERS = {
       return false;
 	}
     catch(err) {
-		UTIL.logException("lookupUserName: " + err.message); 
+		UTIL.logException("lookupUserName: [" + i.toString() + "] " + err.message); 
 		return false;
 	  }
   },
