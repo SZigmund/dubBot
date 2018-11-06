@@ -7602,7 +7602,7 @@ var BOTCOMMANDS = {
                 }
             },
             announcemehsCommand: {
-                command: 'maxlength',
+                command: 'announcemehs',
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -7611,7 +7611,7 @@ var BOTCOMMANDS = {
 					SETTINGS.settings.announceMehs = !SETTINGS.settings.announceMehs;
 					var settingMsg = "Announcing user mehs has been disabled";
 					if (SETTINGS.settings.announceMehs === true) settingMsg = "Announcing user mehs has been enabled";
-					API.sendChat(botChat.subChat(botChat.getChatMessage("maxlengthtime"), {name: chat.un, time: SETTINGS.settings.announceMehs}));
+					API.sendChat(settingMsg);
                 }
             },
             meetingCommand: {   //Added 03/28/2015 Zig
