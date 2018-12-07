@@ -834,7 +834,7 @@ var SETTINGS = {
         autoWootBot: false,
         botRoomUrl: "",
         language: "english",
-        chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
+        chatLink: "https://cdn.jsdelivr.net/gh/SZigmund/dubBot/lang/en.json",
         bouncerPlus: true,
         blacklistEnabled: true,
         gifEnabled: true,
@@ -1347,7 +1347,7 @@ var botChat = {
   loadChatA: function (cb) {
         if (!cb) cb = function () {
         };
-        $.get("https://rawgit.com/SZigmund/dubBot/master/lang/langIndex.json", function (json) {
+        $.get("https://cdn.jsdelivr.net/gh/SZigmund/dubBot/lang/langIndex.json", function (json) {
             var link = CONST.chatMessagesLink;
             if (json !== null && typeof json !== "undefined") {
                 langIndex = json;
@@ -6139,14 +6139,14 @@ var CONST = {
 
   PlaylistCount: 36,			   //Not including current Grab List
 
-  chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
-  blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
-  //userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
+  chatMessagesLink: "https://cdn.jsdelivr.net/gh/SZigmund/dubBot/lang/en.json",
+  blacklistLink: "https://cdn.jsdelivr.net/gh/SZigmund/basicBot/Blacklist/list.json",
+  //userlistLink: "https://cdn.jsdelivr.net/gh/SZigmund/basicBot/Blacklist/dubUsers.json",
   userlistLink: "https://raw.githubusercontent.com/SZigmund/dubBot/master/lang/dubUsers.json",  
-  //https://rawgit.com/SZigmund/dubBot/master/lang/dubUsers.json
+  //https://cdn.jsdelivr.net/gh/SZigmund/dubBot/lang/dubUsers.json
   //
-  userXXXlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
-  blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
+  userXXXlistLink: "https://cdn.jsdelivr.net/gh/SZigmund/basicBot/Blacklist/users.json",
+  blacklistIdLink: "https://cdn.jsdelivr.net/gh/SZigmund/basicBot/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
   TASTY_ROOM: "5600a564bfb6340300a2def2",
