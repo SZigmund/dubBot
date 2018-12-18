@@ -16,7 +16,13 @@
 //			https://youtu.be/2vh_8vWdOPQ
 //			https://youtu.be/z-xKOijTYeI
 //			https://youtu.be/rdFw_AuzH58
-
+//
+//Version  1.01.0045:
+//Added biobreak & walkthedog
+//roll X (now rounds down for odd rolls)
+//420 on 04/20 .tasty commands
+//Fix multiple-user Roulette join issue
+//
 // - One > 8 Min song per day for VIP and above.
 // - Record all Bans/Unbans
 // - Generate random beer names: http://www.strangebrew.ca/beername.php?Mode=Generate
@@ -617,26 +623,6 @@ var USERS = {
         }
         catch(err) { UTIL.logException("importUserList: " + err.message); }
     },
-    importUserListXX: function() { // userlistimport << command
-        try {
-            USERS.usersImport = [];
-			botDebug.debugMessage(true, "Attempting to import the user list!!");
-			botDebug.debugMessage(true, "UserListLink: " + CONST.userXXXlistLink);
-            $.get(CONST.userXXXlistLink, function (json) {
-                if (json !== null && typeof json !== "undefined") {
-			        botDebug.debugMessage(true, "Importing the user list!!");
-                    UTIL.logObject(json, "USR");
-                    for (var idx in json) {
-                        var newUser = json[idx];
-                        //USERS.usersImport.push(new USERS.User(user.id, user.username));
-                        USERS.usersImport.push(newUser);
-                    }
-                }
-            });
-			botDebug.debugMessage(true, "LIST COUNT: " + USERS.usersImport.length);
-        }
-        catch(err) { UTIL.logException("importUserListXX: " + err.message); }
-    },
     User: function (userID, username) {
         this.id = userID;
         this.username = username;
@@ -858,7 +844,6 @@ var SETTINGS = {
         autoWootBot: false,
         botRoomUrl: "",
         language: "english",
-        chatLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
         bouncerPlus: true,
         blacklistEnabled: true,
         gifEnabled: true,
@@ -1372,43 +1357,7 @@ var botChat = {
     }  
     return "undefined message";
   },
-  loadChatA: function (cb) {
-        if (!cb) cb = function () {
-        };
-        $.get("https://rawgit.com/SZigmund/dubBot/master/lang/langIndex.json", function (json) {
-            var link = CONST.chatMessagesLink;
-            if (json !== null && typeof json !== "undefined") {
-                langIndex = json;
-                link = langIndex[SETTINGS.settings.language.toLowerCase()];
-                $.get(link, function (json) {
-                    if (json !== null && typeof json !== "undefined") {
-                        if (typeof json === "string") json = JSON.parse(json);
-                        botChat.chatMessages = json;
-                        cb();
-                    }
-                });
-            }
-            else {
-                $.get(CONST.chatMessagesLink, function (json) {
-                    if (json !== null && typeof json !== "undefined") {
-                        if (typeof json === "string") json = JSON.parse(json);
-                        botChat.chatMessages = json;
-                        cb();
-                    }
-                });
-            }
-        });
-    },
 
-  loadChatX: function (chat, obj) {
-    $.get(CONST.chatMessagesLink, function (json) {
-        if (json !== null && typeof json !== "undefined") {
-            if (typeof json === "string") json = JSON.parse(json);
-            botChat.chatMessages = json;
-            cb();
-        }
-    });
-  },
     chatFilter: function (chat) {
         var msg = chat.message;
         var perm = API.getPermission(chat.uid);
@@ -2124,7 +2073,7 @@ var TASTY = {
 					  'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
 					  'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
 					  'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
-					  'osfleftovers','osf','beard','dowop','productivitykiller','heyman','420osf','osf420','twss'];
+					  'osfleftovers','osf','beard','dowop','productivitykiller','heyman','420osf','osf420','twss','outfuckingstanding'];
             // If a command if passed in validate it and return true if it is a Tasty command:
             if (cmd.length > 0) {
                 if (commandList.indexOf(cmd) < 0) return true;
@@ -2136,7 +2085,7 @@ var TASTY = {
 			var nn = mydate.getDate();
 			var mm = mydate.getMonth();
 			// If 4/20:   Month is zero based:
-			UTIL.logException("bopCommand: " + nn + ":" + mm);
+			// UTIL.logException("bopCommand: " + nn + ":" + mm);
 			if ((nn === 20) && (mm === 3)) {
 				var idx = Math.floor(Math.random() * 8)
 				if (idx === 0) return commandList[commandList.indexOf('420')];
@@ -4160,7 +4109,7 @@ var API = {
   //https://api.dubtrack.fm/playlist
   // BOT USAGE: API.grabYTSong("E2Z1VZAqtpo", UTIL.getPlaylistID(CONST.PLAYLIST_00s));
   // ZIG PLAYLIST "1" = 5880d9ea6e243f5a00b5f784
-  // ZIG USAGE: var YOUTUBE_ID = "QuFo96ltweE"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
+  // ZIG USAGE: var YOUTUBE_ID = "3TOeYahzI7s"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
   // IMPORT YT TOPICS PLAYLIST: View the entire list - Inpect Element and Copy the dive option: "Copy element"
   //
   //BAN SONG: bansong: 
@@ -6220,15 +6169,10 @@ var CONST = {
   PLAYLIST_GRABS: 37,
 
   PlaylistCount: 36,			   //Not including current Grab List
-  
-  chatMessagesLink: "https://rawgit.com/SZigmund/dubBot/master/lang/en.json",
-  blacklistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/list.json",
-  //userlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/dubUsers.json",
-  userlistLink: "https://raw.githubusercontent.com/SZigmund/dubBot/master/lang/dubUsers.json",  
-  //https://rawgit.com/SZigmund/dubBot/master/lang/dubUsers.json
+  userlistLink: "https://cdn.jsdelivr.net/gh/SZigmund/dubBot/lang/dubUsers.json",
+  // userlistLink: "https://raw.githubusercontent.com/SZigmund/dubBot/master/lang/dubUsers.json",  
+  // userlistLink: "https://rawgit.com/SZigmund/dubBot/master/lang/dubUsers.json",
   //
-  userXXXlistLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/users.json",
-  blacklistIdLink: "https://rawgit.com/SZigmund/basicBot/master/Blacklist/ids.json",
   cmdLink: "http://bit.ly/1DbtUV7",
   RGT_ROOM: "5602ed62e8632103004663c2",
   TASTY_ROOM: "5600a564bfb6340300a2def2",
@@ -6619,7 +6563,7 @@ var BOTCOMMANDS = {
 						  'styling','sugar honey ice tea','sugarhoneyicetea','swatching','sweetchious','sweetnectar','sweetsauce','swick','swoll','throwed','tickety-boo',
 						  'ticketyboo','trick','wahey','wizard','wickedpissa','wicked pissa','psychedelic','stupiddumbshitgoddamnmotherfucker','squeallikeapig',
 						  'wax','yousuredohaveapurdymouth','retro','punchableface','punchablefaces','punchablefacefest','docsgoingtothisshowtonight','heaven','moaroar',
-                          'osfleftovers','osf','beard','dowop','productivitykiller','heyman','420osf','osf420','twss'],
+                          'osfleftovers','osf','beard','dowop','productivitykiller','heyman','420osf','osf420','twss','outfuckingstanding'],
                 rank: 'manager',
                 type: 'startsWith',
                 functionality: function (chat, cmd) {
@@ -6915,6 +6859,7 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("mumfordCommand: " + err.message); }
                 }
             },
+			//https://media.giphy.com/media/3cLYEjIaxidkQ/giphy.gif
             dmbCommand: {
                 command: 'dmb',
                 rank: 'resident-dj',
@@ -7101,31 +7046,6 @@ var BOTCOMMANDS = {
                         if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
                         API.logInfo("Loading the new list.");
                         USERS.importUserList();
-                        API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
-                        var DocZ = USERS.lookupUserNameImport("Doc_Z");
-                        if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
-                        var msg = botChat.subChat(botChat.getChatMessage("mystats"), {name: DocZ.username, 
-                                                                     songs: DocZ.votes.songsPlayed,
-                                                                     woot: DocZ.votes.woot, 
-                                                                     grabs: DocZ.votes.curate, 
-                                                                     mehs: DocZ.votes.meh, 
-                                                                     tasty: DocZ.votes.tastyRcv});
-                        TASTY.resetDailyRolledStats(DocZ);
-                        msg += " Roll Stats: " + TASTY.getRolledStats(DocZ);
-                        API.logInfo(msg);
-                    }
-                    catch (err) { UTIL.logException("userlistimport: " + err.message); }
-                }
-            },
-            userlistimportxxCommand: {   //Added: 08/23/2015 Import User list from last saved in Github
-                command: 'userlistimportxx',
-                rank: 'manager',
-                type: 'exact',
-                functionality: function (chat, cmd) {
-                    try {
-                        if (this.type === 'exact' && chat.message.length !== cmd.length) return;
-                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return;
-                        USERS.importUserListXX();
                         API.logInfo("I've got " + USERS.usersImport.length + " users in the new list.");
                         var DocZ = USERS.lookupUserNameImport("Doc_Z");
                         if (DocZ === false) return API.logInfo(botChat.subChat(botChat.getChatMessage("invaliduserspecified"), {name: chat.un}));
