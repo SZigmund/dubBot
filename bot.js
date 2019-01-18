@@ -17,7 +17,7 @@
 //			https://youtu.be/z-xKOijTYeI
 //			https://youtu.be/rdFw_AuzH58
 //
-//Version  1.01.0045:
+//Version  1.01.0046:
 //Added biobreak & walkthedog
 //roll X (now rounds down for odd rolls)
 //420 on 04/20 .tasty commands
@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0045",
+  version: "Version  1.01.0046 01/18/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -6872,6 +6872,20 @@ var BOTCOMMANDS = {
 						 setTimeout(function () { API.sendChat("https://media.tenor.com/images/952fe3b2e8cae6a8cb39aba07e5e1beb/tenor.gif"); }, 250);
                     }
                     catch(err) { UTIL.logException("dmbCommand: " + err.message); }
+                }
+            },
+            beiberCommand: {
+                command: ['beiber','shittyband'],
+                rank: 'resident-dj',
+                type: 'startsWith',
+                functionality: function (chat, cmd)  {
+                    try {
+                        if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                        if (!BOTCOMMANDS.commands.executable(this.rank, chat)) return void (0);
+						 TASTY.tastyVote(chat.un, cmd);
+						 setTimeout(function () { API.sendChat("https://i.imgur.com/fgU7KCL.gif"); }, 250);
+                    }
+                    catch(err) { UTIL.logException("beiberCommand: " + err.message); }
                 }
             },
             fourthirtyCommand: {
