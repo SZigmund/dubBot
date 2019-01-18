@@ -17,7 +17,7 @@
 //			https://youtu.be/z-xKOijTYeI
 //			https://youtu.be/rdFw_AuzH58
 //
-//Version  1.01.0046:
+//Version  1.01.0047:
 //Added biobreak & walkthedog
 //roll X (now rounds down for odd rolls)
 //420 on 04/20 .tasty commands
@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0046 01/18/2019",
+  version: "Version  1.01.0047 01/18/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -6875,7 +6875,7 @@ var BOTCOMMANDS = {
                 }
             },
             beiberCommand: {
-                command: ['beiber','shittyband'],
+                command: ['bieber','beiber','shittyband'],
                 rank: 'resident-dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd)  {
