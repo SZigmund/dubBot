@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0047 01/18/2019",
+  version: "Version  1.01.0048 02/14/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -676,7 +676,7 @@ var USERS = {
       try {
         var welcomeMessage = "";
         newUser ? welcomeMessage = botChat.subChat(botChat.getChatMessage("welcome"), {name: roomUser.username})
-                : welcomeMessage = botChat.subChat(botChat.getChatMessage("welcomeback"), {name: roomUser.username});
+                : welcomeMessage = botChat.subChat(UTIL.selectRandomFromArray(AI.randomHelloArray), {username: roomUser.username});
         //if ((!staffMember) && (!welcomeback)) welcomeMessage += newUserWhoisInfo;
         roomUser.lastActivity = Date.now();
         roomUser.jointime = Date.now();
@@ -2054,6 +2054,7 @@ var TASTY = {
                       'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                       'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
                       'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
+                      '5fer','6fer','7fer','8fer','9fer','10fer','11fer','12fer',
                       'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin',':star:','star','rockstar',':metal:',
                       '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                       ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
@@ -3331,6 +3332,69 @@ var AI = {
       "See ya, wouldn't wanna be ya %%USERNAME%%",
       "Until we meet again %%USERNAME%%. <<Tips imaginary hat>>",
       "We'll hold the fort down for ya %%USERNAME%%"
+      ],
+    randomHelloArray: [ 
+      "Hello %%USERNAME%%",
+      "Good morning %%USERNAME%%",
+      "Good afternoon %%USERNAME%%",
+      "Good evening %%USERNAME%%",
+      "Hi %%USERNAME%%",
+      "Morning %%USERNAME%%",
+      "How are things %%USERNAME%%?",
+      "What’s new %%USERNAME%%?",
+      "It’s good to see you %%USERNAME%%",
+      "G’day %%USERNAME%%",
+      "Howdy %%USERNAME%%",
+      "Hey %%USERNAME%%",
+      "What’s up %%USERNAME%%?",
+      "How’s it going %%USERNAME%%?",
+      "What’s happenin’ %%USERNAME%%?",
+      "Yo %%USERNAME%%!",
+      "Good day %%USERNAME%%",
+      "Sup %%USERNAME%%?",
+      "Hey there %%USERNAME%%",
+      "Hello, sunshine - %%USERNAME%%",
+      "Howdy, partner - %%USERNAME%%",
+      "Hey, howdy, hi %%USERNAME%%",
+      "What’s kickin’, little chicken - %%USERNAME%%",
+      "Howdy-doody %%USERNAME%%",
+      "Ahoy, matey - %%USERNAME%%",
+      "Hiya %%USERNAME%%",
+      "Top of the mornin’ to ya %%USERNAME%%",
+      "What’s crackin’ %%USERNAME%%?",
+      "GOOOOOD MORNING, VIETNAM - %%USERNAME%%",
+      "‘Sup, homeslice? - %%USERNAME%%",
+      "This call may be recorded for training purposes - %%USERNAME%%",
+      "Howdy, howdy ,howdy %%USERNAME%%",
+      "Hello, my name is Inigo Montoya - %%USERNAME%%",
+      "Whaddup %%USERNAME%%?",
+      "Greetings and salutations %%USERNAME%%",
+      "‘Ello, mate - %%USERNAME%%",
+      "Heeey, baaaaaby - %%USERNAME%%",
+      "Hi, honeybunch - %%USERNAME%%",
+      "How you doin' %%USERNAME%%?",
+      "I like your face %%USERNAME%%",
+      "What's cookin', good lookin' - %%USERNAME%%",
+      "Why, hello there %%USERNAME%%",
+      "Hey, boo %%USERNAME%%",
+      "Aloha %%USERNAME%%",
+      "Hola %%USERNAME%%",
+      "Que pasa %%USERNAME%%",
+      "Bonjour %%USERNAME%%",
+      "Hallo %%USERNAME%%",
+      "Ciao %%USERNAME%%",
+      "Konnichiwa %%USERNAME%%",
+      "What's the Craic %%USERNAME%%?",
+      "How hops it %%USERNAME%%?",
+      "Ahoy %%USERNAME%%",
+      "We've been waiting for you %%USERNAME%%",
+      "Salutations %%USERNAME%%",
+      "Namaste %%USERNAME%%",
+      "How diddly do %%USERNAME%%",
+      "Hi didly ho neighborino - %%USERNAME%%",
+      "Howdy ho neighbor - %%USERNAME%%",
+      "Well look at you %%USERNAME%%",
+      "Oh, Hey %%USERNAME%% we were just talking about you",
       ],
   larryAI: function(chat, username)  {  //Added 04/03/2015 Zig
     try  {
@@ -6544,6 +6608,7 @@ var BOTCOMMANDS = {
                           'off the chain','off the hook','out of sight','peachy keen','peachy-keen','offdahook','offthechain','offthehook','outofsight',
                           'peachykeen','perf','phatness','phenom','prime-time','primo','rad','radical','rage','rancid','random','nice cover','nicecover','raw',
                           'redonkulus','righteous','rocking','rock-solid','rollin','3fer','4fer','threefer','fourfer','nice2fer','amazeballs','craycray',
+                          '5fer','6fer','7fer','8fer','9fer','10fer','11fer','12fer',
                           'whizzbang','a1','aok','asskicking','bombass','fanfuckingtastic','primetime','rocksolid','instrumental','rockin',':star:','star','rockstar',':metal:',
                           '10s','00s','90s','80s','70s','60s','50s','40s','30s','20s','insane','clever',':heart:',':heart_decoration:',':heart_eyes:',':heart_eyes_cat:',':heartbeat:',
                           ':heartpulse:',':hearts:',':yellow_heart:',':green_heart:',':two_hearts:',':revolving_hearts:',':sparkling_heart:',':blue_heart:','giddyup','rockabilly',
@@ -6874,8 +6939,9 @@ var BOTCOMMANDS = {
                     catch(err) { UTIL.logException("dmbCommand: " + err.message); }
                 }
             },
-            beiberCommand: {
-                command: ['bieber','beiber','shittyband'],
+			//https://i.imgur.com/fgU7KCL.gif OR http://i.imgur.com/eBGUmzW.jpg
+			beiberCommand: {
+                command: ['beiber','bieber','shittyband'],
                 rank: 'resident-dj',
                 type: 'startsWith',
                 functionality: function (chat, cmd)  {
@@ -6930,8 +6996,9 @@ var BOTCOMMANDS = {
                 }
             },
             imoutCommand: {
-                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater','peaceout','smellyoulater','gottarun',
-				          'allrightthen','adios','ciao','aurevoir','gottabolt','buh-bye','buhbye'],
+                command: ['imout','laterall','cya','bye','chow','goodbye','c-ya','farewell','later','solong','catchyoulater','catchyalater',
+				          'allrightthen','adios','ciao','aurevoir','gottabolt','buh-bye','buhbye','andonthatnote','iquit','onthatnote',
+				          'peaceout','smellyoulater','gottarun','beer30','beerthirty','untiltomorrow','seeyamonday'],
                 rank: 'user',
                 type: 'startsWith',
                 functionality: function (chat, cmd)  {
