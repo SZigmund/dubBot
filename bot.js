@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0048 02/14/2019",
+  version: "Version  1.01.0048 02/19/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -3318,15 +3318,16 @@ var RANDOMCOMMENTS = {
 var AI = {
     randomByeArray: [ 
       "Catch ya on the flipside %%USERNAME%%",
+      "Stay fresh cheese bag",
       "Peace %%USERNAME%%!",
       "See ya %%USERNAME%%!",
       "See ya soon %%USERNAME%%",
       "Hurry back %%USERNAME%%",
-	  "Keep it real %%USERNAME%%",
-	  "Keep it between the lines...and dirty side down %%USERNAME%%",
-	  "Fine, then go %%USERNAME%%!",
-	  "Cheers %%USERNAME%%",
-	  "May your mother's cousin never be assaulted by Attila the Hun at the supermarket %%USERNAME%%",
+      "Keep it real %%USERNAME%%",
+      "Keep it between the lines...and dirty side down %%USERNAME%%",
+      "Fine, then go %%USERNAME%%!",
+      "Cheers %%USERNAME%%",
+      "May your mother's cousin never be assaulted by Attila the Hun at the supermarket %%USERNAME%%",
       "Adidas %%USERNAME%%",
       "Later %%USERNAME%%",
       "See ya, wouldn't wanna be ya %%USERNAME%%",
