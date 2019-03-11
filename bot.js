@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0049 03/11/2019",
+  version: "Version  1.01.0050 03/11/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1630,7 +1630,7 @@ var UTIL = {
     formatPercentage: function(a, b, decPos) {
         if (a === 0) return "0%";
         if (b === 0) return "100%";
-        return (((a / b).toFixed(2)) * 100).toFixed(decPos) + "%";
+        return (((a / b).toFixed(2 + decPos)) * 100).toFixed(decPos) + "%";
     },
     getDOY: function() {
       var now = new Date();
