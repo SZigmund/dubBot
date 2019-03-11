@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0050 03/11/2019",
+  version: "Version  1.01.0051 03/11/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1954,10 +1954,14 @@ var TASTY = {
 	},
     getRolledStats: function (roomUser) {
         try {
+		   var PlusMinus = 0;
            var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
            rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal, 0) + "]";
            rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
-           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal, 2) + "]";
+           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal, 2) + "(";
+		   PlusMinus = ((roomUser.rollStats.lifeWoot * 2) - roomUser.rollStats.lifeTotal).toFixed(0);
+		   if (PlusMinus > 0) rollStats += "+";
+		   rollStats += PlusMinus.toFixed(0) + ")]";
            return rollStats;
         }
         catch(err) {
