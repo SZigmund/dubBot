@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0048 02/19/2019",
+  version: "Version  1.01.0049 03/11/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -1627,10 +1627,10 @@ var UTIL = {
         }
         return intValue;
     },
-    formatPercentage: function(a, b) {
+    formatPercentage: function(a, b, decPos) {
         if (a === 0) return "0%";
         if (b === 0) return "100%";
-        return (((a / b).toFixed(2)) * 100).toFixed(0) + "%";
+        return (((a / b).toFixed(2)) * 100).toFixed(decPos) + "%";
     },
     getDOY: function() {
       var now = new Date();
@@ -1899,7 +1899,7 @@ var TASTY = {
 					topStats.username = USERS.users[addUserIdx].username;
 					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
 					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
-					topStats.rollPct = UTIL.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
+					topStats.rollPct = UTIL.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal, 2);
 					leaderBoard.push(topStats);
 					userIDs.push(USERS.users[addUserIdx].id);
 				}
@@ -1943,7 +1943,7 @@ var TASTY = {
 					topStats.username = USERS.users[addUserIdx].username;
 					topStats.rollCount = USERS.users[addUserIdx].rollStats.lifeTotal;
 					topStats.winCount = USERS.users[addUserIdx].rollStats.lifeWoot;
-					topStats.rollPct = UTIL.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal);
+					topStats.rollPct = UTIL.formatPercentage(USERS.users[addUserIdx].rollStats.lifeWoot, USERS.users[addUserIdx].rollStats.lifeTotal, 2);
 					leaderBoard.push(topStats);
 					userIDs.push(USERS.users[addUserIdx].id);
 				}
@@ -1955,9 +1955,9 @@ var TASTY = {
     getRolledStats: function (roomUser) {
         try {
            var rollStats = " [Today: " + roomUser.rollStats.dayWoot + "/" + roomUser.rollStats.dayTotal;
-           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal) + "]";
+           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.dayWoot, roomUser.rollStats.dayTotal, 0) + "]";
            rollStats += " [Lifetime: " + roomUser.rollStats.lifeWoot + "/" + roomUser.rollStats.lifeTotal;
-           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal) + "]";
+           rollStats +=  " " + UTIL.formatPercentage(roomUser.rollStats.lifeWoot, roomUser.rollStats.lifeTotal, 2) + "]";
            return rollStats;
         }
         catch(err) {
@@ -3323,11 +3323,11 @@ var AI = {
       "See ya %%USERNAME%%!",
       "See ya soon %%USERNAME%%",
       "Hurry back %%USERNAME%%",
-      "Keep it real %%USERNAME%%",
-      "Keep it between the lines...and dirty side down %%USERNAME%%",
-      "Fine, then go %%USERNAME%%!",
-      "Cheers %%USERNAME%%",
-      "May your mother's cousin never be assaulted by Attila the Hun at the supermarket %%USERNAME%%",
+	  "Keep it real %%USERNAME%%",
+	  "Keep it between the lines...and dirty side down %%USERNAME%%",
+	  "Fine, then go %%USERNAME%%!",
+	  "Cheers %%USERNAME%%",
+	  "May your mother's cousin never be assaulted by Attila the Hun at the supermarket %%USERNAME%%",
       "Adidas %%USERNAME%%",
       "Later %%USERNAME%%",
       "See ya, wouldn't wanna be ya %%USERNAME%%",
@@ -3335,67 +3335,67 @@ var AI = {
       "We'll hold the fort down for ya %%USERNAME%%"
       ],
     randomHelloArray: [ 
-      "Hello %%USERNAME%%",
-      "Good morning %%USERNAME%%",
-      "Good afternoon %%USERNAME%%",
-      "Good evening %%USERNAME%%",
-      "Hi %%USERNAME%%",
-      "Morning %%USERNAME%%",
-      "How are things %%USERNAME%%?",
-      "What’s new %%USERNAME%%?",
-      "It’s good to see you %%USERNAME%%",
-      "G’day %%USERNAME%%",
-      "Howdy %%USERNAME%%",
-      "Hey %%USERNAME%%",
-      "What’s up %%USERNAME%%?",
-      "How’s it going %%USERNAME%%?",
-      "What’s happenin’ %%USERNAME%%?",
-      "Yo %%USERNAME%%!",
-      "Good day %%USERNAME%%",
-      "Sup %%USERNAME%%?",
-      "Hey there %%USERNAME%%",
-      "Hello, sunshine - %%USERNAME%%",
-      "Howdy, partner - %%USERNAME%%",
-      "Hey, howdy, hi %%USERNAME%%",
-      "What’s kickin’, little chicken - %%USERNAME%%",
-      "Howdy-doody %%USERNAME%%",
-      "Ahoy, matey - %%USERNAME%%",
-      "Hiya %%USERNAME%%",
-      "Top of the mornin’ to ya %%USERNAME%%",
-      "What’s crackin’ %%USERNAME%%?",
-      "GOOOOOD MORNING, VIETNAM - %%USERNAME%%",
-      "‘Sup, homeslice? - %%USERNAME%%",
-      "This call may be recorded for training purposes - %%USERNAME%%",
-      "Howdy, howdy ,howdy %%USERNAME%%",
-      "Hello, my name is Inigo Montoya - %%USERNAME%%",
-      "Whaddup %%USERNAME%%?",
-      "Greetings and salutations %%USERNAME%%",
-      "‘Ello, mate - %%USERNAME%%",
-      "Heeey, baaaaaby - %%USERNAME%%",
-      "Hi, honeybunch - %%USERNAME%%",
-      "How you doin' %%USERNAME%%?",
-      "I like your face %%USERNAME%%",
-      "What's cookin', good lookin' - %%USERNAME%%",
-      "Why, hello there %%USERNAME%%",
-      "Hey, boo %%USERNAME%%",
-      "Aloha %%USERNAME%%",
-      "Hola %%USERNAME%%",
-      "Que pasa %%USERNAME%%",
-      "Bonjour %%USERNAME%%",
-      "Hallo %%USERNAME%%",
-      "Ciao %%USERNAME%%",
-      "Konnichiwa %%USERNAME%%",
-      "What's the Craic %%USERNAME%%?",
-      "How hops it %%USERNAME%%?",
-      "Ahoy %%USERNAME%%",
-      "We've been waiting for you %%USERNAME%%",
-      "Salutations %%USERNAME%%",
-      "Namaste %%USERNAME%%",
-      "How diddly do %%USERNAME%%",
-      "Hi didly ho neighborino - %%USERNAME%%",
-      "Howdy ho neighbor - %%USERNAME%%",
-      "Well look at you %%USERNAME%%",
-      "Oh, Hey %%USERNAME%% we were just talking about you",
+      "Hello @%%USERNAME%%",
+      "Good morning @%%USERNAME%%",
+      "Good afternoon @%%USERNAME%%",
+      "Good evening @%%USERNAME%%",
+      "Hi @%%USERNAME%%",
+      "Morning @%%USERNAME%%",
+      "How are things @%%USERNAME%%?",
+      "What’s new @%%USERNAME%%?",
+      "It’s good to see you @%%USERNAME%%",
+      "G’day @%%USERNAME%%",
+      "Howdy @%%USERNAME%%",
+      "Hey @%%USERNAME%%",
+      "What’s up @%%USERNAME%%?",
+      "How’s it going @%%USERNAME%%?",
+      "What’s happenin’ @%%USERNAME%%?",
+      "Yo @%%USERNAME%%!",
+      "Good day @%%USERNAME%%",
+      "Sup @%%USERNAME%%?",
+      "Hey there @%%USERNAME%%",
+      "Hello, sunshine - @%%USERNAME%%",
+      "Howdy, partner - @%%USERNAME%%",
+      "Hey, howdy, hi @%%USERNAME%%",
+      "What’s kickin’, little chicken - @%%USERNAME%%",
+      "Howdy-doody @%%USERNAME%%",
+      "Ahoy, matey - @%%USERNAME%%",
+      "Hiya @%%USERNAME%%",
+      "Top of the mornin’ to ya @%%USERNAME%%",
+      "What’s crackin’ @%%USERNAME%%?",
+      "GOOOOOD MORNING, VIETNAM - @%%USERNAME%%",
+      "‘Sup, homeslice? - @%%USERNAME%%",
+      "This call may be recorded for training purposes - @%%USERNAME%%",
+      "Howdy, howdy ,howdy @%%USERNAME%%",
+      "Hello, my name is Inigo Montoya - @%%USERNAME%%",
+      "Whaddup @%%USERNAME%%?",
+      "Greetings and salutations @%%USERNAME%%",
+      "‘Ello, mate - @%%USERNAME%%",
+      "Heeey, baaaaaby - @%%USERNAME%%",
+      "Hi, honeybunch - @%%USERNAME%%",
+      "How you doin' @%%USERNAME%%?",
+      "I like your face @%%USERNAME%%",
+      "What's cookin', good lookin' - @%%USERNAME%%",
+      "Why, hello there @%%USERNAME%%",
+      "Hey, boo @%%USERNAME%%",
+      "Aloha @%%USERNAME%%",
+      "Hola @%%USERNAME%%",
+      "Que pasa @%%USERNAME%%",
+      "Bonjour @%%USERNAME%%",
+      "Hallo @%%USERNAME%%",
+      "Ciao @%%USERNAME%%",
+      "Konnichiwa @%%USERNAME%%",
+      "What's the Craic @%%USERNAME%%?",
+      "How hops it @%%USERNAME%%?",
+      "Ahoy @%%USERNAME%%",
+      "We've been waiting for you @%%USERNAME%%",
+      "Salutations @%%USERNAME%%",
+      "Namaste @%%USERNAME%%",
+      "How diddly do @%%USERNAME%%",
+      "Hi didly ho neighborino - @%%USERNAME%%",
+      "Howdy ho neighbor - @%%USERNAME%%",
+      "Well look at you @%%USERNAME%%",
+      "Oh, Hey @%%USERNAME%% we were just talking about you",
       ],
   larryAI: function(chat, username)  {  //Added 04/03/2015 Zig
     try  {
@@ -4174,7 +4174,7 @@ var API = {
   //https://api.dubtrack.fm/playlist
   // BOT USAGE: API.grabYTSong("E2Z1VZAqtpo", UTIL.getPlaylistID(CONST.PLAYLIST_00s));
   // ZIG PLAYLIST "1" = 5880d9ea6e243f5a00b5f784
-  // ZIG USAGE: var YOUTUBE_ID = "3TOeYahzI7s"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
+  // ZIG USAGE: var YOUTUBE_ID = "GZ8gZC2J4HU"; var PLAYLIST_ID = "5880d9ea6e243f5a00b5f784";	  var i = Dubtrack.config.apiUrl + Dubtrack.config.urls.playlistSong.replace(":id", PLAYLIST_ID);	  Dubtrack.helpers.sendRequest(i, { "fkid": YOUTUBE_ID, "type": "youtube"}, "POST");
   // IMPORT YT TOPICS PLAYLIST: View the entire list - Inpect Element and Copy the dive option: "Copy element"
   //
   //BAN SONG: bansong: 
