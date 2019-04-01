@@ -36,7 +36,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0053 04/01/2019",
+  version: "Version  1.01.0054 04/01/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
@@ -7599,7 +7599,7 @@ var BOTCOMMANDS = {
                     else {
                         var msg = chat.message;
                         var maxTime = msg.substring(cmd.length + 1);
-                        if (!isNaN(maxTime)) SETTINGS.settings.maximumSongLength = maxTime;
+                        if (!isNaN(maxTime) && maxTime.length > 2) SETTINGS.settings.maximumSongLength = maxTime;
                         return API.sendChat(botChat.subChat(botChat.getChatMessage("maxlengthtime"), {name: chat.un, time: SETTINGS.settings.maximumSongLength}));
                     }
                 }
