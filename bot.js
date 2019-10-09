@@ -17,7 +17,6 @@
 //			https://youtu.be/z-xKOijTYeI
 //			https://youtu.be/rdFw_AuzH58
 //
-//Version  1.01.0048:
 //Added biobreak & walkthedog
 //roll X (now rounds down for odd rolls)
 //420 on 04/20 .tasty commands
@@ -36,7 +35,7 @@
 
 //SECTION Var: All global variables:
 var botVar = {
-  version: "Version  1.01.0054 04/01/2019",
+  version: "Version  1.01.0055 10/09/2019",
   ImHidden: false,
   botName: "larry_the_law",
   roomID: "",
